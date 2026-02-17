@@ -19,6 +19,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `test-review.md`: coverage gaps, test quality, edge cases, failure modes
   - `performance-review.md`: database access, memory, caching, complexity
 
+- **AI Kill Switch & Containment Architecture** (`guide/security-hardening.md` §3.5)
+  - Three-level kill switch mapped to Claude Code mechanisms (scoped revocation → velocity governor → global hard stop)
+  - Ready-to-use `velocity-governor.sh` hook example (rate-limiter for runaway agents)
+  - Regulatory context: EU AI Act (Aug 2025), CoSAI AI Incident Response Framework V1.0, governance-containment gap stats
+  - Sources: Fortune Dec 2025, CDOTrends Jan 2026, OASIS/CoSAI Nov 2025
+- **AI-specific incident cross-reference** (`guide/devops-sre.md`)
+  - Added pointer from "When NOT to Use Claude" to security-hardening.md for AI incidents (prompt injection, MCP compromise, agent exfiltration)
+
+- **Git Worktree command suite** (`examples/commands/`)
+  - `git-worktree.md`: Overhauled — symlink `node_modules` by default, background verification, `--fast`/`--isolated` flags, companion command links
+  - `git-worktree-status.md`: New — check background verification tasks (type check, tests, build)
+  - `git-worktree-remove.md`: New — safe removal with branch cleanup, merge verification, DB teardown
+  - `git-worktree-clean.md`: New — batch cleanup of stale/merged worktrees
+
+### Updated
+
+- **Claude Code Releases**: Updated tracking v2.1.42 → v2.1.44
+  - v2.1.44: Auth refresh error fix
+  - v2.1.43: AWS auth refresh timeout (3min), structured-outputs beta header fix on Vertex/Bedrock, non-agent markdown warnings fix
+- **`reference.yaml`**: Added 12 new entries (review-plan, rules templates, git-worktree suite, security kill switch), updated resource evaluations count 67 → 74
+
 ## [3.27.3] - 2026-02-16
 
 ### Updated

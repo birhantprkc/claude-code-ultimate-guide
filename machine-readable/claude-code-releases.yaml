@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.42"
-updated: "2026-02-16"
+latest: "2.1.44"
+updated: "2026-02-17"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,20 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-February 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.44"
+    date: "2026-02-17"
+    highlights:
+      - "Fixed auth refresh errors"
+    breaking: []
+
+  - version: "2.1.43"
+    date: "2026-02-17"
+    highlights:
+      - "Fixed AWS auth refresh hanging indefinitely (3-minute timeout added)"
+      - "Fixed structured-outputs beta header sent unconditionally on Vertex/Bedrock"
+      - "Fixed spurious warnings for non-agent markdown files in `.claude/agents/`"
+    breaking: []
 
   - version: "2.1.42"
     date: "2026-02-14"

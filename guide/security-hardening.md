@@ -623,6 +623,56 @@ fi
 
 > **Full docs**: [AI Traceability Guide](./ai-traceability.md#51-entire-cli), [Third-Party Tools](./third-party-tools.md)
 
+### 3.5 AI Kill Switch & Containment Architecture
+
+> **Context**: Agentic coding tools operate at the developer's privilege level — anything you can do, the agent can do ([Fortune, Dec 2025](https://fortune.com/2025/12/15/ai-coding-tools-security-exploit-software/)). No model provider has fully solved prompt injection. Plan your containment accordingly.
+
+**Three-level kill switch mapped to Claude Code:**
+
+| Level | Concept | Claude Code Mechanism | When to Use |
+|-------|---------|----------------------|-------------|
+| **1. Scoped Revocation** | Disable specific capabilities | [`dangerous-actions-blocker.sh`](../examples/hooks/bash/dangerous-actions-blocker.sh) hook, `permissions.deny` in settings | Suspicious behavior, restrict scope |
+| **2. Velocity Governor** | Rate-limit or threshold triggers | Custom hook tracking command frequency, `--allowedTools` flag to restrict tool set | Agent acting erratically, too many changes |
+| **3. Global Hard Stop** | Kill everything immediately | `Ctrl+C` / `Esc`, `claude config set --disable`, uninstall | Confirmed compromise, emergency |
+
+**Practical example — Level 2 velocity governor hook:**
+
+```bash
+#!/bin/bash
+# .claude/hooks/velocity-governor.sh
+# Event: PreToolUse
+# Blocks if >20 Bash commands in 5 minutes (adjust thresholds)
+
+COUNTER_FILE="/tmp/claude-cmd-counter-$$"
+WINDOW=300  # 5 minutes
+THRESHOLD=20
+
+# Count recent invocations
+NOW=$(date +%s)
+echo "$NOW" >> "$COUNTER_FILE"
+
+# Clean entries older than window
+if [[ -f "$COUNTER_FILE" ]]; then
+  CUTOFF=$((NOW - WINDOW))
+  awk -v cutoff="$CUTOFF" '$1 >= cutoff' "$COUNTER_FILE" > "${COUNTER_FILE}.tmp"
+  mv "${COUNTER_FILE}.tmp" "$COUNTER_FILE"
+  COUNT=$(wc -l < "$COUNTER_FILE")
+
+  if (( COUNT > THRESHOLD )); then
+    echo '{"decision": "block", "reason": "Rate limit: >'"$THRESHOLD"' commands in '"$((WINDOW/60))"'min. Possible runaway agent."}'
+    exit 0
+  fi
+fi
+
+exit 0
+```
+
+**Regulatory context:**
+
+- **EU AI Act** (Aug 2025): Kill switches mandatory for high-risk AI systems. Non-compliance = fines up to 7% global turnover. If your org deploys Claude Code in regulated workflows, document your containment architecture.
+- **CoSAI AI Incident Response Framework V1.0** (Nov 2025): First framework addressing AI-specific incidents (data poisoning, prompt injection, model theft). Reference for teams building incident response procedures. ([OASIS](https://www.oasis-open.org/2025/11/18/coalition-for-secure-ai-releases-two-actionable-frameworks-for-ai-model-signing-and-incident-response/))
+- **Governance-containment gap**: Industry data shows ~59% of orgs monitor AI agents, but only ~38% have actual kill-switch capability ([CDOTrends, Jan 2026](https://www.cdotrends.com/story/4854/your-fsi-ai-needs-kill-switch-should-terrify-you)). Monitoring without intervention = awareness without safety.
+
 ---
 
 ## Appendix: Quick Reference

@@ -15,7 +15,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | Folder | Description | Count |
 |--------|-------------|-------|
 | [`agents/`](./agents/) | Custom AI personas for specialized tasks | 6 |
-| [`commands/`](./commands/) | Slash commands (workflow automation) | 23 |
+| [`commands/`](./commands/) | Slash commands (workflow automation) | 26 |
 | [`hooks/`](./hooks/) | Event-driven security & automation scripts | 31 |
 | [`skills/`](./skills/) | Reusable knowledge modules — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux) | 13 |
 | [`claude-md/`](./claude-md/) | CLAUDE.md configuration profiles | 5 |
@@ -82,7 +82,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | [guide-recap/](./skills/guide-recap/) | Transform CHANGELOG entries into social content (LinkedIn, Twitter/X, Slack) |
 | [release-notes-generator/](./skills/release-notes-generator/) | Generate release notes in 3 formats from git commits |
 
-### Commands (23)
+### Commands (26)
 
 | File | Trigger | Purpose |
 |------|---------|---------|
@@ -93,6 +93,9 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | [sonarqube.md](./commands/sonarqube.md) | `/sonarqube` | Analyze SonarCloud quality issues for PRs |
 | [generate-tests.md](./commands/generate-tests.md) | `/generate-tests` | Test generation |
 | [git-worktree.md](./commands/git-worktree.md) | `/git-worktree` | Isolated git worktree setup |
+| [git-worktree-status.md](./commands/git-worktree-status.md) | `/git-worktree-status` | Check worktree background verification tasks |
+| [git-worktree-remove.md](./commands/git-worktree-remove.md) | `/git-worktree-remove` | Safe worktree removal with merge checks |
+| [git-worktree-clean.md](./commands/git-worktree-clean.md) | `/git-worktree-clean` | Batch cleanup of stale worktrees |
 | [diagnose.md](./commands/diagnose.md) | `/diagnose` | Interactive troubleshooting assistant (FR/EN) |
 | [validate-changes.md](./commands/validate-changes.md) | `/validate-changes` | LLM-as-a-Judge pre-commit validation |
 | [catchup.md](./commands/catchup.md) | `/catchup` | Restore context after /clear |

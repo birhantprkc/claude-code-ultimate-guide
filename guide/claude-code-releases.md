@@ -10,7 +10,7 @@ tags: [reference, release]
 > **Full details**: [github.com/anthropics/claude-code/CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 > **Machine-readable**: [claude-code-releases.yaml](../machine-readable/claude-code-releases.yaml)
 
-**Latest**: v2.1.42 | **Updated**: 2026-02-16
+**Latest**: v2.1.44 | **Updated**: 2026-02-17
 
 ---
 
@@ -24,6 +24,16 @@ tags: [reference, release]
 ---
 
 ## 2.1.x Series (January-February 2026)
+
+### v2.1.44 (2026-02-17)
+
+- Fixed: Auth refresh errors
+
+### v2.1.43 (2026-02-17)
+
+- Fixed: AWS auth refresh hanging indefinitely (added 3-minute timeout)
+- Fixed: Structured-outputs beta header being sent unconditionally on Vertex/Bedrock
+- Fixed: Spurious warnings for non-agent markdown files in `.claude/agents/` directory
 
 ### v2.1.42 (2026-02-14)
 

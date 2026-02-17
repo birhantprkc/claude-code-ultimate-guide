@@ -4,7 +4,7 @@
 # Purpose: Condensed index for LLMs to quickly answer user questions about Claude Code
 
 version: "3.27.3"
-updated: "2026-02-09"
+updated: "2026-02-17"
 
 # ════════════════════════════════════════════════════════════════
 # DEEP DIVE - Line numbers in guide/ultimate-guide.md
@@ -26,6 +26,14 @@ deep_dive:
   review_pr_advanced: "examples/commands/review-pr.md:81"
   review_anti_hallucination: "examples/agents/code-reviewer.md:75"
   review_auto_fix_loop: "guide/workflows/iterative-refinement.md:347"
+  # Review Plan Command (Garry Tan-inspired, Feb 2026)
+  review_plan_command: "examples/commands/review-plan.md"
+  # Rules Templates (auto-loaded .claude/rules/)
+  rules_templates_directory: "examples/rules/"
+  rules_architecture_review: "examples/rules/architecture-review.md"
+  rules_code_quality_review: "examples/rules/code-quality-review.md"
+  rules_test_review: "examples/rules/test-review.md"
+  rules_performance_review: "examples/rules/performance-review.md"
   # Known Issues & Critical Bugs (verified community reports)
   known_issues: "guide/known-issues.md"
   known_issues_github_bug: "guide/known-issues.md:16"  # GitHub auto-creation bug
@@ -429,7 +437,7 @@ deep_dive:
   gsd_note: "Overlap with existing patterns (Ralph Loop, Gas Town, BMAD)"
   # Resource Evaluations (added 2026-01-26, updated 2026-02-07)
   resource_evaluations_directory: "docs/resource-evaluations/"
-  resource_evaluations_count: 67
+  resource_evaluations_count: 74
   resource_evaluations_methodology: "docs/resource-evaluations/README.md"
   resource_evaluations_watchlist: "docs/resource-evaluations/watch-list.md"
   resource_evaluations_appendix: "guide/ultimate-guide.md:15034"
@@ -543,6 +551,11 @@ deep_dive:
   contribution_metrics_date: "2026-01-29"
   contribution_metrics_availability: "Public beta - Team and Enterprise plans"
   contribution_metrics_stats: "+67% PRs merged/engineer/day, 70-90% AI-assisted code (Anthropic internal)"
+  # Git Worktree Commands (Feb 2026)
+  git_worktree_command: "examples/commands/git-worktree.md"
+  git_worktree_status_command: "examples/commands/git-worktree-status.md"
+  git_worktree_remove_command: "examples/commands/git-worktree-remove.md"
+  git_worktree_clean_command: "examples/commands/git-worktree-clean.md"
   git_worktrees_multi_instance: 10634
   advanced_worktree_tooling: 10748
   worktree_tooling_self_assessment: 10762
@@ -769,6 +782,7 @@ deep_dive:
   security_supply_chain_stats: "guide/security-hardening.md:127"  # Snyk ToxicSkills: 36.82% of 3,984 skills
   security_mcp_scan_tool: "guide/security-hardening.md:96"  # mcp-scan in Safe List
   security_malicious_extensions: "guide/security-hardening.md:242"  # .claude/ attack surface (§1.5)
+  security_kill_switch: "guide/security-hardening.md:626"  # AI Kill Switch & Containment Architecture (§3.5)
   security_claude_folder_audit: "guide/security-hardening.md:270"  # 5-minute .claude/ audit checklist
   security_toxicskills_evaluation: "docs/resource-evaluations/snyk-toxicskills-evaluation.md"
   security_check_command: "examples/commands/security-check.md"  # Quick config check vs known threats

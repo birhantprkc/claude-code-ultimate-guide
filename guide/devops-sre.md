@@ -314,6 +314,7 @@ Understanding limitations prevents frustration and unsafe reliance.
 - **Highly confidential incidents**: Data breach investigation (legal implications)
 - **Simple, obvious fixes**: If you know the answer, just do it
 - **Compliance-restricted environments**: Check if AI tools are allowed
+- **AI-specific security incidents**: Prompt injection detected, MCP compromised, agent exfiltrating data → See [Security Hardening — Response](./security-hardening.md#part-3-response-when-things-go-wrong) for dedicated procedures (kill switch architecture, containment levels, incident timelines)
 
 ### When Claude Excels
 
