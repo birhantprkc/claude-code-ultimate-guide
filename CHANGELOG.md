@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [3.27.4] - 2026-02-17
 
 ### Added
 
@@ -39,6 +39,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - v2.1.44: Auth refresh error fix
   - v2.1.43: AWS auth refresh timeout (3min), structured-outputs beta header fix on Vertex/Bedrock, non-agent markdown warnings fix
 - **`reference.yaml`**: Added 12 new entries (review-plan, rules templates, git-worktree suite, security kill switch), updated resource evaluations count 67 → 74
+- **Template count**: 113 → 116 (review-plan command, git-worktree-status/remove/clean commands, rules templates) — updated across README, CLAUDE.md, reference badges
+- **Commands count**: 23 → 26 (git-worktree-status, git-worktree-remove, git-worktree-clean)
 
 ## [3.27.3] - 2026-02-16
 

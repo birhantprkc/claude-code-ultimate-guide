@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.27.3
+**Version**: 3.27.4
 
 ---
 
@@ -4292,7 +4292,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.27.3 Version Control & Backup
+### 3.27.4 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -12951,7 +12951,7 @@ Changes committed and pushed? → Use git revert
 
 **What are worktrees?**
 
-Git worktrees create multiple working directories from the same repository, each checked out to a different branch.
+Git worktrees (available since Git 2.5.0, July 2015) create multiple working directories from the same repository, each checked out to a different branch.
 
 **Traditional workflow problem:**
 
@@ -12998,20 +12998,36 @@ claude                    # Continue feature work
 - Disk space is limited (each worktree = full working directory)
 - Team is unfamiliar with worktrees (adds complexity)
 
-**Quick setup with Claude:**
+**Worktree lifecycle commands:**
+
+The full worktree lifecycle is covered by 4 companion commands:
+
+| Command | Purpose |
+|---------|---------|
+| `/git-worktree` | Create worktree with branch validation, symlinked deps, background checks |
+| `/git-worktree-status` | Check background verification tasks (type check, tests, build) |
+| `/git-worktree-remove` | Safely remove single worktree with merge checks and DB cleanup |
+| `/git-worktree-clean` | Batch cleanup of stale worktrees with disk usage report |
 
 ```bash
-# Use the /git-worktree command (see examples/commands/git-worktree.md)
-You: "/git-worktree feature/new-api"
+# Create with auto-prefix and symlinked node_modules
+You: "/git-worktree auth"
+# → Creates feat/auth branch, symlinks node_modules, runs checks in background
 
-Claude:
-# Checks for .worktrees/ or worktrees/ directory
-# Verifies .gitignore has worktree directory excluded
-# Creates worktree: git worktree add .worktrees/feature/new-api -b feature/new-api
-# Installs dependencies (npm/yarn/pnpm auto-detected)
-# Runs baseline tests
-# Reports: "Worktree ready at /path/to/.worktrees/feature/new-api"
+# Check background verification status
+You: "/git-worktree-status"
+# → Type check: PASS, Tests: PASS (142 tests)
+
+# Remove after merge
+You: "/git-worktree-remove feat/auth"
+# → Removes worktree + branch (local + remote) + DB cleanup reminder
+
+# Batch cleanup of all merged worktrees
+You: "/git-worktree-clean --dry-run"
+# → Preview: 3 merged (4.2 MB), 1 unmerged (kept)
 ```
+
+> **💡 Tip — Symlink node_modules**: The `/git-worktree` command symlinks `node_modules` from the main worktree by default, saving ~30s per worktree creation and significant disk space. Use `--isolated` when you need fresh dependencies (e.g., testing upgrades).
 
 **Worktree management:**
 
@@ -13153,7 +13169,11 @@ git worktree remove --force .worktrees/old-feature
 
 **Resources:**
 - [Git Worktree Documentation](https://git-scm.com/docs/git-worktree)
-- Example command: [`examples/commands/git-worktree.md`](../examples/commands/git-worktree.md)
+- Worktree lifecycle commands:
+  - [`examples/commands/git-worktree.md`](../examples/commands/git-worktree.md) — Create
+  - [`examples/commands/git-worktree-status.md`](../examples/commands/git-worktree-status.md) — Status
+  - [`examples/commands/git-worktree-remove.md`](../examples/commands/git-worktree-remove.md) — Remove
+  - [`examples/commands/git-worktree-clean.md`](../examples/commands/git-worktree-clean.md) — Clean
 
 ### Database Branch Isolation with Worktrees
 
@@ -19577,4 +19597,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.27.3
+**Last updated**: January 2026 | **Version**: 3.27.4
