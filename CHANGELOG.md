@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Resource evaluation**: SKILLMIND/Boris Cherny workflow practices (score 2/5)
+  - LinkedIn post by @stasbel (64K followers) sharing SKILL.md file attributed to Boris Cherny (Claude Code creator)
+  - 6 workflow orchestration practices + 6 task management items + 3 core principles
+  - Key concept: `tasks/lessons.md` self-improvement loop (Claude captures corrections as rules, reviewed each session)
+  - Score 2/5: majority of content already covered in guide; novel delta = lessons.md naming convention vs PROGRESS.md
+  - Evaluation file: `docs/resource-evaluations/2026-02-19-stasbel-skillmind-boris-cherny-workflow.md`
+
+- **Resource evaluation**: Augment Context Engine MCP (score 3/5)
+  - Cloud-hosted semantic code search MCP (launched Feb 6, 2026); indexes up to 500K files across repos/wikis
+  - Self-published benchmark: 80% quality improvement on 300 Elasticsearch PRs (Claude Opus 4.5, not 4.6 as stated on product page)
+  - Relevant as cloud alternative to grepai: managed, multi-repo, no local setup, but paid ($20+/month) and cloud-hosted
+  - Evaluation file: `docs/resource-evaluations/2026-02-19-augment-context-engine-mcp.md`
+
+- **Resource evaluation**: LinkedIn "Context Engineering" post (score 2/5)
+  - Promotional LinkedIn post on "prompt engineering is dead, context engineering is king" — marginal relevance
+  - Evaluation file: `docs/resource-evaluations/2026-02-19-linkedin-context-engineering-augment.md`
+
+- **Resource evaluation**: LinkedIn activity-7428930570451083264 (inaccessible)
+  - Could not fetch — LinkedIn authentication required
+  - Evaluation file: `docs/resource-evaluations/2026-02-19-linkedin-activity-7428930570451083264.md`
+
+### Changed
+
+- `guide/ultimate-guide.md`: Added `tasks/lessons.md` variant to Fresh Context Pattern (Ralph Loop) section
+  - Lightweight alternative for interactive sessions: Claude updates lessons.md with behavioral rules after each user correction
+  - Reviewed at session start for compounding improvement effect
+  - Clarifies distinction from PROGRESS.md (task state) vs lessons.md (behavioral rules)
+- `CLAUDE.md`: Added Whitepaper Generation section (PDF + EPUB commands, stack documentation)
+
 ### Documentation
 
 - **Claude Code Releases**: Updated tracking to v2.1.47 (from v2.1.45)

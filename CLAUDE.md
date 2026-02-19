@@ -70,6 +70,43 @@ claudedocs/               # Claude working documents (gitignored)
 echo "3.7.0" > VERSION && ./scripts/sync-version.sh
 ```
 
+### Whitepaper Generation (PDF + EPUB)
+
+```bash
+# --- PDF (default format: whitepaper-typst → Typst → PDF) ---
+
+# Single file
+cd whitepapers/fr && quarto render 00-introduction-serie.qmd
+
+# All FR whitepapers
+cd whitepapers/fr && quarto render *.qmd
+
+# All EN whitepapers
+cd whitepapers/en && quarto render *.qmd
+
+# Preview with hot-reload
+cd whitepapers/fr && quarto preview 00-introduction-serie.qmd
+
+# Batch with error summary (loop)
+cd whitepapers/fr && for f in *.qmd; do echo "→ $f" && quarto render "$f" 2>&1 | grep -E "(Output created|ERROR)"; done
+
+# --- EPUB (format: epub → Pandoc → EPUB3) ---
+
+# Single file
+cd whitepapers/fr && quarto render 00-introduction-serie.qmd --to epub
+
+# All EPUBs (FR + EN) → epub-output/{fr,en}/
+cd whitepapers && ./render-epub.sh all
+cd whitepapers && ./render-epub.sh fr   # French only
+cd whitepapers && ./render-epub.sh en   # English only
+```
+
+**PDF stack** : Quarto → Typst 0.13 → PDF. Template : `whitepapers/_extensions/whitepaper/`. Palette Bold Guy (warm beige + orange brûlé).
+
+**EPUB stack** : Quarto → Pandoc → EPUB3. CSS : `whitepapers/epub-styles.css`. Cover : `_extensions/whitepaper/assets/claude-code-ai-logo.jpg`.
+
+**Skill disponible** : `/pdf-generator` pour aide contextuelle (template YAML, stack, dépannage).
+
 ### Before Committing
 ```bash
 # Verify versions are synchronized

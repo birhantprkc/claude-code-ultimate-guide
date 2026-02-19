@@ -1595,6 +1595,18 @@ while :; do cat TASK.md PROGRESS.md | claude -p ; done
 - `PROGRESS.md` — Learnings, completed tasks, blockers
 - Git commits — Each iteration commits atomically
 
+**Variant: tasks/lessons.md**
+
+A lightweight alternative for interactive sessions (no loop required): after each user correction, Claude updates `tasks/lessons.md` with the rule to avoid the same mistake. Reviewed at the start of each new session.
+
+```
+tasks/
+├── todo.md      # Current plan (checkable items)
+└── lessons.md   # Rules accumulated from corrections
+```
+
+The difference from PROGRESS.md: `lessons.md` captures *behavioral rules* ("always diff before marking done", "never mock without asking") rather than task state. It compounds over time — the mistake rate drops as the ruleset grows.
+
 | Traditional | Fresh Context |
 |-------------|---------------|
 | Accumulate in chat history | Reset per task |

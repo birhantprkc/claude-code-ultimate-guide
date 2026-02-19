@@ -9,7 +9,7 @@
   <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Feb_18,_2026_·_v3.27.6-brightgreen?style=for-the-badge" alt="Last Update"/></a>
   <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-274_questions-orange?style=for-the-badge" alt="Quiz"/></a>
   <a href="./examples/"><img src="https://img.shields.io/badge/Templates-116-green?style=for-the-badge" alt="Templates"/></a>
-  <a href="./guide/security-hardening.md"><img src="https://img.shields.io/badge/🛡️_Threat_DB-18_CVEs_·_341_malicious_skills-red?style=for-the-badge" alt="Threat Database"/></a>
+  <a href="./guide/security-hardening.md"><img src="https://img.shields.io/badge/🛡️_Threat_DB-19_CVEs_·_655_malicious_skills-red?style=for-the-badge" alt="Threat Database"/></a>
 </p>
 
 <p align="center">
@@ -140,7 +140,7 @@ graph LR
     root --> quiz[🧠 quiz/<br/>274 questions]
     root --> tools[🔧 tools/<br/>utils]
     root --> machine[🤖 machine-readable/<br/>AI index]
-    root --> docs[📚 docs/<br/>67 evaluations]
+    root --> docs[📚 docs/<br/>78 evaluations]
 
     style root fill:#d35400,stroke:#e67e22,stroke-width:3px,color:#fff
     style guide fill:#2980b9,stroke:#3498db,stroke-width:2px,color:#fff
@@ -186,7 +186,7 @@ graph LR
 │  ├─ reference.yaml      Structured index (~2K tokens)
 │  └─ llms.txt            Standard LLM context file
 │
-└─ 📚 docs/               67 Resource Evaluations
+└─ 📚 docs/               78 Resource Evaluations
    └─ resource-evaluations/  5-point scoring, source attribution
 ```
 
@@ -283,7 +283,7 @@ Educational templates with explanations:
 
 ---
 
-### 🔍 67 Resource Evaluations
+### 🔍 78 Resource Evaluations
 
 **Outcome**: Trust our recommendations are evidence-based.
 
@@ -695,7 +695,7 @@ cd quiz && npm install && npm start
 </details>
 
 <details>
-<summary><strong>Resource Evaluations</strong> (67 assessments)</summary>
+<summary><strong>Resource Evaluations</strong> (78 assessments)</summary>
 
 Systematic evaluation of external resources (tools, methodologies, articles) before integration into the guide.
 
