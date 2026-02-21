@@ -860,3 +860,207 @@ questions:
       file: "guide/workflows/agent-teams.md"
       section: "Cost Trade-offs"
       anchor: "#cost-trade-offs"
+
+  - id: "09-037"
+    difficulty: "intermediate"
+    profiles: ["intermediate", "senior", "power"]
+    question: "You need to rename a function across 50 files. Which model and effort level is most appropriate?"
+    options:
+      a: "Opus, effort: max — renaming at scale requires deep reasoning"
+      b: "Sonnet, effort: high — large scope requires careful analysis"
+      c: "Haiku, effort: low — mechanical find-replace, no design decisions"
+      d: "Sonnet, effort: medium — safe default for any multi-file operation"
+    correct: "c"
+    explanation: |
+      **Haiku + low effort** is correct for mechanical tasks like renaming across files.
+
+      The key question: does this task require reasoning, design decisions, or judgment?
+      - Rename = find-replace. Pattern is known, approach is decided.
+      - No edge cases requiring analysis.
+      - Haiku is 60x cheaper than Opus on input tokens.
+
+      Using Opus here wastes tokens on reasoning that doesn't add value.
+      Save Opus for tasks where its depth changes the outcome.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Model Selection & Thinking Guide"
+      anchor: "#25-model-selection--thinking-guide"
+
+  - id: "09-038"
+    difficulty: "intermediate"
+    profiles: ["intermediate", "senior", "power"]
+    question: "What does `model: haiku` in an agent's YAML frontmatter do?"
+    options:
+      a: "Sets the agent's communication style to be more concise"
+      b: "Forces the agent to use Haiku for all its sub-agent spawning"
+      c: "Configures the agent to run on the Haiku model instead of the session default"
+      d: "Enables cost-saving mode that reduces tool calls"
+    correct: "c"
+    explanation: |
+      `model: haiku` in agent frontmatter sets the **model used for that specific agent**,
+      overriding the session default.
+
+      This is how you implement the planner/implementer pattern:
+      ```yaml
+      # planner.md
+      model: opus    # Deep reasoning for strategy
+
+      # implementer.md
+      model: haiku   # Cost-effective for mechanical execution
+      ```
+
+      Each agent runs independently with its configured model.
+      The session model (your default Sonnet) is unaffected.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Model per Agent Patterns"
+      anchor: "#model-per-agent-patterns"
+
+  - id: "09-039"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What does the `effort` parameter actually control in Opus 4.6?"
+    options:
+      a: "Only the thinking token budget (how many tokens for extended reasoning)"
+      b: "The overall computational budget: thinking, tool calls, text verbosity, and analysis depth"
+      c: "The maximum number of tool calls per response"
+      d: "A quality gate that filters low-confidence outputs"
+    correct: "b"
+    explanation: |
+      `effort` controls the **overall computational budget** — not just thinking.
+
+      At `effort: low`:
+      - Fewer tool calls (combines operations when possible)
+      - No explanatory preamble before actions
+      - Concise responses
+
+      At `effort: high`:
+      - More tool calls with detailed explanations
+      - Describes plan before executing
+      - Comprehensive analysis and summaries
+
+      This means `effort` affects behavior even when thinking is disabled (Alt+T off).
+      It's a holistic efficiency dial, not a thinking toggle.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Effort Levels"
+      anchor: "#effort-levels"
+
+  - id: "09-040"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What is the observable impact of `effort: low` on tool usage?"
+    options:
+      a: "Claude refuses to use any tools and responds from memory only"
+      b: "Claude combines tool operations to minimize calls and skips explanatory preamble"
+      c: "Claude limits itself to 3 tool calls maximum per response"
+      d: "Claude uses only Read tools, no Write or Edit tools"
+    correct: "b"
+    explanation: |
+      At `effort: low`, Claude optimizes for efficiency:
+
+      **Tool usage**: Combines operations that would normally be separate calls.
+      Instead of Read → Analyze → Read → Analyze, it might do a single targeted Read.
+
+      **No preamble**: Skips "I'll now read the file to understand..." introductions.
+      Actions happen directly, without narration.
+
+      **Result**: Faster, cheaper execution for tasks that don't need transparency.
+      Best for sub-agents in automated pipelines, classification tasks, lookups.
+
+      Example task suited for `low`: `"Rename getUserById to findUserById across src/"`
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Effort Levels"
+      anchor: "#effort-levels"
+
+  - id: "09-041"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "In the planner/implementer agent pattern, which model should each role use?"
+    options:
+      a: "Planner: Sonnet, Implementer: Haiku"
+      b: "Planner: Opus, Implementer: Sonnet"
+      c: "Planner: Opus, Implementer: Haiku"
+      d: "Both: Sonnet (consistency matters more than cost)"
+    correct: "c"
+    explanation: |
+      **Planner: Opus** — Strategy requires deep reasoning.
+      Planning errors compound through all implementation steps.
+      A wrong architecture decision caught at planning cost = minutes to fix.
+      The same error found post-implementation = days.
+
+      **Implementer: Haiku** — Mechanical execution.
+      The approach is already decided by the planner.
+      No design decisions = no need for deep reasoning.
+      Haiku is 60x cheaper than Opus on input tokens.
+
+      **When Haiku isn't enough**: If the implementation requires judgment calls,
+      the implementer should stop and report rather than decide — or you use Sonnet instead.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Model per Agent Patterns"
+      anchor: "#model-per-agent-patterns"
+
+  - id: "09-042"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is Adaptive Thinking in Opus 4.6, and how does it differ from Opus 4.5's thinking?"
+    options:
+      a: "Adaptive Thinking lets the model choose which language to respond in based on complexity"
+      b: "The model dynamically allocates reasoning depth based on query complexity, replacing the fixed budget_tokens parameter"
+      c: "Thinking is now split across multiple API calls for longer reasoning chains"
+      d: "Adaptive Thinking is always-on at maximum depth, same as Opus 4.5 v2.0.67+"
+    correct: "b"
+    explanation: |
+      **Opus 4.6 Adaptive Thinking** replaces the fixed `budget_tokens` approach.
+
+      | Version | Thinking Control |
+      |---------|-----------------|
+      | Opus 4.5 (pre-v2.0.67) | Keyword-triggered, fixed budgets (4K/10K/32K) |
+      | Opus 4.5 (v2.0.67+) | Always-on at max budget, toggled with Alt+T |
+      | **Opus 4.6** | Dynamic depth via `effort` parameter |
+
+      With Adaptive Thinking, the model decides HOW MUCH reasoning a query needs:
+      - Simple lookup → minimal reasoning depth
+      - Multi-system architecture analysis → maximum depth
+
+      `budget_tokens` is **deprecated** on Opus 4.6 and returns an error if used.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Effort Levels"
+      anchor: "#effort-levels"
+
+  - id: "09-043"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "When should you use `effort: max`, and what happens if you use it on Sonnet?"
+    options:
+      a: "Use for any complex task; Sonnet silently downgrades to `effort: high`"
+      b: "Use for cross-system reasoning on Opus 4.6 only; returns an API error on other models"
+      c: "Use when you want maximum thinking tokens; works on all models but costs more"
+      d: "Use for batch operations; Sonnet uses it to parallelize tool calls"
+    correct: "b"
+    explanation: |
+      **`effort: max` is Opus 4.6 exclusive.**
+
+      Use it for tasks requiring:
+      - Cross-system race condition analysis
+      - Multi-service dependency tracing
+      - Decisions that are expensive or impossible to reverse
+      - Adversarial security reasoning across a full codebase
+
+      Example:
+      ```
+      "Analyze the microservices event pipeline for race conditions across
+       order-service, inventory-service, and notification-service"
+      ```
+
+      **On any other model** (Sonnet, Haiku, Opus 4.5): API returns an error.
+      It is not silently downgraded. You must explicitly use a different effort level.
+
+      `effort: high` is the default and works across models that support the parameter.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "2.5 Effort Levels"
+      anchor: "#effort-levels"

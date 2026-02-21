@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.28.0] - 2026-02-21
+
+### Added
+
+- **Section 2.5 — Model Selection & Thinking Guide** : section canonique consolidée dans `guide/ultimate-guide.md`
+  - Table de décision 4 colonnes (Tâche / Modèle / Effort / Coût estimé par tâche)
+  - Effort levels avec exemples concrets de prompts calibrés (low/medium/high/max)
+  - Patterns model-per-agent : planner (Opus), implementer (Haiku), architecture-reviewer (Opus)
+  - Tableau "When Thinking Helps vs. Wastes Tokens"
+  - Cross-refs vers OpusPlan, Rev the Engine, Cost Awareness
+- **3 nouveaux agent templates** (`examples/agents/`)
+  - `planner.md` — Opus, read-only, stratégie avant implémentation
+  - `implementer.md` — Haiku, exécution mécanique, note d'escalade vers Sonnet si logique métier
+  - `architecture-reviewer.md` — Opus, review critique read-only, protocole de vérification avant assertion
+- **7 nouvelles questions quiz** (09-037 → 09-043) dans `quiz/questions/09-advanced-patterns.yaml`
+  - Couvre : choix modèle par tâche, frontmatter `model:`, paramètre `effort`, Adaptive Thinking Opus 4.6
+
+### Changed
+
+- **3 tables redondantes remplacées** par cross-refs vers Section 2.5 :
+  - Tactical Model Selection Matrix (Section 4)
+  - Cost-Effective Model Selection (Section 12)
+  - Model Selection Matrix (Section 9.13)
+- **Effort levels enrichis** (Section 9 Adaptive Thinking) : exemples de prompts concrets ajoutés + cross-ref vers 2.5
+- **Sections 2.6→2.10 renommées** pour faire de la place à la nouvelle 2.5 (ex-Mental Model 2.5 → 2.6, etc.)
+- **Cheatsheet** : table condensée Quick Model Selection ajoutée (3 lignes + cross-ref)
+- **`examples/README.md`** : agents count 6 → 9, 3 nouvelles lignes dans le tableau
+- **`machine-readable/reference.yaml`** : stale line numbers corrigés, 4 nouvelles entrées
+
 ## [3.27.9] - 2026-02-21
 
 ### Documentation

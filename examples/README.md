@@ -14,7 +14,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 
 | Folder | Description | Count |
 |--------|-------------|-------|
-| [`agents/`](./agents/) | Custom AI personas for specialized tasks | 6 |
+| [`agents/`](./agents/) | Custom AI personas for specialized tasks | 9 |
 | [`commands/`](./commands/) | Slash commands (workflow automation) | 26 |
 | [`hooks/`](./hooks/) | Event-driven security & automation scripts | 31 |
 | [`skills/`](./skills/) | Reusable knowledge modules — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux) | 13 |
@@ -53,7 +53,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 
 ## Templates Index
 
-### Agents (6)
+### Agents (9)
 
 | File | Purpose | Model |
 |------|---------|-------|
@@ -63,6 +63,9 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | [refactoring-specialist.md](./agents/refactoring-specialist.md) | Clean code refactoring | Sonnet |
 | [output-evaluator.md](./agents/output-evaluator.md) | LLM-as-a-Judge quality gate | Haiku |
 | [devops-sre.md](./agents/devops-sre.md) | Infrastructure troubleshooting with FIRE framework | Sonnet |
+| [planner.md](./agents/planner.md) | Strategic planning — read-only, before implementation | Opus |
+| [implementer.md](./agents/implementer.md) | Mechanical execution — bounded scope | Haiku |
+| [architecture-reviewer.md](./agents/architecture-reviewer.md) | Architecture & design review — read-only | Opus |
 
 ### Skills (13) — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux)
 

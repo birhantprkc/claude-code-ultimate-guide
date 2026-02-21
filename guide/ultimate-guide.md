@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.27.9
+**Version**: 3.28.0
 
 ---
 
@@ -122,9 +122,12 @@ Context full → /compact or /clear
   - [2.2 Context Management](#22-context-management)
   - [2.3 Plan Mode](#23-plan-mode)
   - [2.4 Rewind](#24-rewind)
-  - [2.5 Mental Model](#25-mental-model)
-  - [2.6 Data Flow & Privacy](#26-data-flow--privacy)
-  - [2.7 Under the Hood](#27-under-the-hood)
+  - [2.5 Model Selection & Thinking Guide](#25-model-selection--thinking-guide)
+  - [2.6 Mental Model](#26-mental-model)
+  - [2.7 Structured Prompting with XML Tags](#27-structured-prompting-with-xml-tags)
+  - [2.8 Semantic Anchors](#28-semantic-anchors)
+  - [2.9 Data Flow & Privacy](#29-data-flow--privacy)
+  - [2.10 Under the Hood](#210-under-the-hood)
 - [3. Memory & Settings](#3-memory--settings)
   - [3.1 Memory Files (CLAUDE.md)](#31-memory-files-claudemd)
   - [3.2 The .claude/ Folder Structure](#32-the-claude-folder-structure)
@@ -1293,7 +1296,7 @@ VERIFY: Login persists after browser refresh
 - **Skills**: Reusable workflows (`/review`, `/deploy`) for consistent execution
 - **Hooks**: Automated guardrails (lint, security, formatting) — zero manual effort
 
-Start with CLAUDE.md in Week 1. See [§2.5 Mental Model](#from-chatbot-to-context-system) for the full framework.
+Start with CLAUDE.md in Week 1. See [§2.6 Mental Model](#from-chatbot-to-context-system) for the full framework.
 
 ### Quick Self-Check
 
@@ -1311,7 +1314,7 @@ Before your next session, verify:
 
 # 2. Core Concepts
 
-_Quick jump:_ [The Interaction Loop](#21-the-interaction-loop) · [Context Management](#22-context-management) · [Plan Mode](#23-plan-mode) · [Rewind](#24-rewind) · [Mental Model](#25-mental-model) · [Data Flow & Privacy](#26-data-flow--privacy)
+_Quick jump:_ [The Interaction Loop](#21-the-interaction-loop) · [Context Management](#22-context-management) · [Plan Mode](#23-plan-mode) · [Rewind](#24-rewind) · [Model Selection](#25-model-selection--thinking-guide) · [Mental Model](#26-mental-model) · [Data Flow & Privacy](#29-data-flow--privacy)
 
 ---
 
@@ -2628,7 +2631,116 @@ For systematic experimentation, use the checkpoint pattern to create safe restor
 - Lightweight for quick experiments
 - Works across multiple files
 
-## 2.5 Mental Model
+## 2.5 Model Selection & Thinking Guide
+
+Choosing the right model for each task is the fastest ROI improvement most Claude Code users can make. One decision per task — no overthinking.
+
+_Quick jump:_ [Decision Table](#decision-table) · [Effort Levels](#effort-levels) · [Model per Agent](#model-per-agent-patterns) · [When Thinking Helps](#when-thinking-helps-vs-wastes-tokens)
+
+> **Cross-references**: [OpusPlan Mode](#opusplan-mode) · [Rev the Engine](#rev-the-engine) · [Cost Awareness](#cost-awareness--optimization)
+
+---
+
+### Decision Table
+
+| Task | Model | Effort | Est. cost/task |
+|------|-------|--------|----------------|
+| Rename, format, boilerplate | Haiku | low | ~$0.02 |
+| Generate unit tests | Haiku | low | ~$0.03 |
+| CI/CD PR review (volume) | Haiku | low | ~$0.02 |
+| Feature dev, standard debug | Sonnet | medium | ~$0.23 |
+| Module refactoring | Sonnet | high | ~$0.75 |
+| System architecture | Opus | high | ~$1.25 |
+| Critical security audit | Opus | max | ~$2+ |
+| Multi-agent orchestration | Sonnet + Haiku | mixed | variable |
+
+> **Note on costs**: Estimates based on API pricing (Haiku $0.25/$1.25 per MTok, Sonnet $3/$15, Opus $15/$75). Pro/Max subscribers pay a flat rate — prioritize quality over cost. Opus activates thinking by default. Toggle: `Alt+T`. See [Section 2.2](#cost-awareness--optimization) for full pricing breakdown.
+
+---
+
+### Effort Levels
+
+The `effort` parameter (Opus 4.6 API) controls the model's **overall computational budget** — not just thinking tokens, but tool calls, verbosity, and analysis depth. Low effort = fewer tool calls, no preamble. High effort = more explanations, detailed analysis.
+
+**Calibrated gradient — one real prompt per level:**
+
+- **`low`** — Mechanical, no design decisions needed
+  > `"Rename getUserById to findUserById across src/"` — Find-replace scope, zero reasoning required.
+
+- **`medium`** — Clear pattern, defined scope, one concern
+  > `"Convert fetchUser() in api/users.ts from callbacks to async/await"` — Pattern is known, scope bounded.
+
+- **`high`** — Design decisions, edge cases, multiple concerns
+  > `"Redesign error handling in the payment module: add retry logic, partial failure recovery, and idempotency guarantees"` — Architectural choices, not just pattern application.
+
+- **`max`** _(Opus 4.6 only — returns error on other models)_ — Cross-system reasoning, irreversible decisions
+  > `"Analyze the microservices event pipeline for race conditions across order-service, inventory-service, and notification-service"` — Multi-service hypothesis testing, adversarial thinking.
+
+---
+
+### Model per Agent Patterns
+
+Assign models to agents based on **role**, not importance:
+
+**Planner** (`examples/agents/planner.md`) — Strategy, read-only exploration
+
+```yaml
+---
+name: planner
+description: Strategic planning agent — read-only. Use before implementation.
+model: opus
+tools: Read, Grep, Glob
+---
+```
+
+**Implementer** (`examples/agents/implementer.md`) — Mechanical execution, bounded scope
+
+```yaml
+---
+name: implementer
+description: Mechanical execution agent. Scope must be defined explicitly in the task.
+model: haiku
+tools: Write, Edit, Bash, Read, Grep, Glob
+---
+```
+
+> **Note**: Haiku is for mechanical tasks only. If the implementation requires design decisions or complex business logic, use Sonnet — state this in the task prompt.
+
+**Architecture Reviewer** (`examples/agents/architecture-reviewer.md`) — Critical design review
+
+```yaml
+---
+name: architecture-reviewer
+description: Architecture and design review — read-only. Never modifies code.
+model: opus
+tools: Read, Grep, Glob
+---
+```
+
+> **Pro tip**: Add a model reminder to your CLAUDE.md:
+> ```
+> # Model reminder
+> Default: Sonnet. Haiku for mechanical tasks. Opus for architecture and security audits.
+> ```
+
+---
+
+### When Thinking Helps vs. Wastes Tokens
+
+| Scenario | Thinking | Reason |
+|----------|----------|--------|
+| Rename 50 files | OFF | Zero reasoning — pure mechanics |
+| Bug spanning 3+ services | ON (high) | Multi-layer hypothesis testing |
+| Boilerplate / test generation | OFF | Repetitive pattern, no decisions |
+| Architecture migration | ON (max) | Irreversible decisions |
+| Direct factual questions | OFF (low) | Immediate answer sufficient |
+| Security code review | ON (high) | Adversarial reasoning needed |
+
+Toggle: `Alt+T` (current session) · `/config` (permanent)
+
+---
+
+## 2.6 Mental Model
 
 Understanding how Claude Code "thinks" makes you more effective.
 
@@ -2670,7 +2782,7 @@ Understanding how Claude Code "thinks" makes you more effective.
 3. **Your Intent**: Claude needs clear instructions
 4. **Hidden Files**: Claude respects .gitignore by default
 
-> **⚠️ Pattern Amplification**: Claude mirrors the patterns it finds. In well-structured codebases, it produces consistent, idiomatic code. In messy codebases without clear abstractions, it perpetuates the mess. If your code lacks good patterns, provide them explicitly in CLAUDE.md or use semantic anchors (Section 2.7).
+> **⚠️ Pattern Amplification**: Claude mirrors the patterns it finds. In well-structured codebases, it produces consistent, idiomatic code. In messy codebases without clear abstractions, it perpetuates the mess. If your code lacks good patterns, provide them explicitly in CLAUDE.md or use semantic anchors (Section 2.8).
 
 ### You Are the Main Thread
 
@@ -2756,7 +2868,7 @@ Login is broken
 
 The more context you provide, the better Claude can help.
 
-## 2.6 Structured Prompting with XML Tags
+## 2.7 Structured Prompting with XML Tags
 
 XML-structured prompts provide **semantic organization** for complex requests, helping Claude distinguish between different aspects of your task for clearer understanding and better results.
 
@@ -3209,7 +3321,7 @@ cat claudedocs/templates/code-review.xml | \
 
 > **Source**: [DeepTo Claude Code Guide - XML-Structured Prompts](https://cc.deeptoai.com/docs/en/best-practices/claude-code-comprehensive-guide)
 
-### 2.6.1 Prompting as Provocation
+### 2.7.1 Prompting as Provocation
 
 The Claude Code team internally treats prompts as **challenges to a peer**, not instructions to an assistant. This subtle shift produces higher-quality outputs because it forces Claude to prove its reasoning rather than simply comply.
 
@@ -3243,7 +3355,7 @@ This forces a substantive second attempt with accumulated context rather than in
 
 > **Source**: [10 Tips from Inside the Claude Code Team](https://paddo.dev/blog/claude-code-team-tips/) (Boris Cherny thread, Feb 2026)
 
-## 2.7 Semantic Anchors
+## 2.8 Semantic Anchors
 
 LLMs are statistical pattern matchers trained on massive text corpora. Using **precise technical vocabulary** helps Claude activate the right patterns in its training data, leading to higher-quality outputs.
 
@@ -3284,7 +3396,7 @@ Follow these patterns:
 
 ### Combining with XML Tags
 
-Semantic anchors work powerfully with XML-structured prompts (Section 2.6):
+Semantic anchors work powerfully with XML-structured prompts (Section 2.7):
 
 ```xml
 <instruction>
@@ -3336,7 +3448,7 @@ Semantic anchors work powerfully with XML-structured prompts (Section 2.6):
 
 > **Source**: Concept by Alexandre Soyer. Original catalog: [github.com/LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) (Apache-2.0)
 
-## 2.8 Data Flow & Privacy
+## 2.9 Data Flow & Privacy
 
 > **Important**: Everything you share with Claude Code is sent to Anthropic servers. Understanding this data flow is critical for protecting sensitive information.
 
@@ -3392,7 +3504,7 @@ When you use Claude Code, the following data leaves your machine:
 
 > **Full guide**: For complete privacy documentation including known risks, community incidents, and enterprise considerations, see [Data Privacy & Retention Guide](./data-privacy.md).
 
-## 2.9 Under the Hood
+## 2.10 Under the Hood
 
 > **Reading time**: 5 minutes
 > **Goal**: Understand the core architecture that powers Claude Code
@@ -4354,7 +4466,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.27.9 Version Control & Backup
+### 3.28.0 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -5809,15 +5921,7 @@ Scope-focused agents for comprehensive PR review:
 
 ### Tactical Model Selection Matrix
 
-| Task | Model | Justification |
-|------|-------|---------------|
-| Read and summarize a file | Haiku | Simple, fast |
-| Write a standard component | Sonnet | Good balance |
-| Debug complex issue | Opus (thinking default) | Depth needed |
-| System architecture | Opus | Maximum reasoning |
-| Critical security review | Opus | High stakes |
-| Generate tests | Haiku | Repetitive pattern |
-| Refactor 50 files | Sonnet orchestrate + Haiku workers | Optimized cost |
+> See [Section 2.5 Model Selection & Thinking Guide](#25-model-selection--thinking-guide) for the canonical decision table with effort levels and cost estimates.
 
 **Cost Optimization Example**:
 ```
@@ -10965,10 +11069,16 @@ The most powerful Claude Code pattern combines three techniques:
 **Key insight**: `effort` affects everything, even when thinking is disabled. Lower effort = fewer tool calls, more concise text. Higher effort = more tool calls with explanations, detailed analysis.
 
 **Effort levels** (API only, official descriptions):
-- **`max`**: Maximum capability, no constraints. **Opus 4.6 only** (returns error on other models). Use for most complex tasks requiring unlimited reasoning depth.
+- **`max`**: Maximum capability, no constraints. **Opus 4.6 only** (returns error on other models). Cross-system reasoning, irreversible decisions.
+  > Example: `"Analyze the microservices event pipeline for race conditions across order-service, inventory-service, and notification-service"`
 - **`high`** (default): Complex reasoning, coding, agentic tasks. Best for production workflows requiring deep analysis.
+  > Example: `"Redesign error handling in the payment module: add retry logic, partial failure recovery, and idempotency guarantees"`
 - **`medium`**: Balance between speed, cost, and performance. Good for agentic tasks with moderate complexity.
+  > Example: `"Convert fetchUser() in api/users.ts from callbacks to async/await"`
 - **`low`**: Most efficient. Ideal for classification, lookups, sub-agents, or tasks where speed matters more than depth.
+  > Example: `"Rename getUserById to findUserById across src/"`
+
+> See [Section 2.5 Model Selection & Thinking Guide](#25-model-selection--thinking-guide) for a complete decision table with effort, model, and cost estimates.
 
 **API syntax**:
 ```python
@@ -12926,14 +13036,7 @@ class UserManager {
 
 **Cost-Effective Model Selection:**
 
-| Task Type | Recommended Model | Reasoning |
-|-----------|------------------|-----------|
-| Typo fixes | Haiku | Simple, fast, cheap |
-| Feature implementation | Sonnet | Best balance |
-| Code review | Haiku/Sonnet | Depends on depth |
-| Architecture design | Opus (plan) → Sonnet (execute) | OpusPlan mode |
-| Complex debugging | Opus with thinking prompts | Worth the cost |
-| Batch operations | Sonnet | Efficient at scale |
+> See [Section 2.5 Model Selection & Thinking Guide](#25-model-selection--thinking-guide) for the canonical decision table with effort levels and cost estimates.
 
 ### Learning & Adoption Pitfalls
 
@@ -13635,17 +13738,7 @@ Practical techniques to minimize API costs while maximizing productivity.
 
 Choose the right model for each task to balance cost and capability.
 
-| Task Type | Model | Cost | When to Use |
-|-----------|-------|------|-------------|
-| **Typo fixes** | Haiku | $ | Simple edits, obvious changes |
-| **Code review** | Haiku | $ | Linting, style checks, simple review |
-| **Unit tests** | Haiku | $ | Straightforward test generation |
-| **Feature implementation** | Sonnet | $$ | Most development work |
-| **Refactoring** | Sonnet | $$ | Code restructuring |
-| **Bug investigation** | Sonnet | $$ | Moderate debugging |
-| **Architecture design** | Opus | $$$ | System design, critical decisions |
-| **Complex debugging** | Opus | $$$ | Multi-layered issues |
-| **Critical reviews** | Opus | $$$ | Security audits, production code |
+> See [Section 2.5 Model Selection & Thinking Guide](#25-model-selection--thinking-guide) for the canonical decision table with effort levels and cost estimates.
 
 **OpusPlan mode (recommended):**
 - **Planning**: Opus for high-level thinking
@@ -19976,4 +20069,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.27.9
+**Last updated**: January 2026 | **Version**: 3.28.0

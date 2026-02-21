@@ -6,9 +6,9 @@
 
 <p align="center">
   <a href="https://github.com/FlorianBruniaux/claude-code-ultimate-guide/stargazers"><img src="https://img.shields.io/github/stars/FlorianBruniaux/claude-code-ultimate-guide?style=for-the-badge" alt="Stars"/></a>
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Feb_21,_2026_·_v3.27.9-brightgreen?style=for-the-badge" alt="Last Update"/></a>
-  <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-274_questions-orange?style=for-the-badge" alt="Quiz"/></a>
-  <a href="./examples/"><img src="https://img.shields.io/badge/Templates-172-green?style=for-the-badge" alt="Templates"/></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Feb_21,_2026_·_v3.28.0-brightgreen?style=for-the-badge" alt="Last Update"/></a>
+  <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-271_questions-orange?style=for-the-badge" alt="Quiz"/></a>
+  <a href="./examples/"><img src="https://img.shields.io/badge/Templates-175-green?style=for-the-badge" alt="Templates"/></a>
   <a href="./guide/security-hardening.md"><img src="https://img.shields.io/badge/🛡️_Threat_DB-19_CVEs_·_655_malicious_skills-red?style=for-the-badge" alt="Threat Database"/></a>
 </p>
 
@@ -32,7 +32,7 @@
 - ✅ **Build mental models** — How Claude Code works internally (architecture, context flow, tool orchestration)
 - ✅ **Master methodologies** — TDD, SDD, BDD with AI collaboration (not just templates)
 - ✅ **Security mindset** — Threat modeling for AI systems (only guide with 18 CVEs + 341 malicious skills database)
-- ✅ **Test your knowledge** — 274-question quiz to validate understanding (no other resource offers this)
+- ✅ **Test your knowledge** — 271-question quiz to validate understanding (no other resource offers this)
 
 **Outcome**: Go from copy-pasting configs to designing your own agentic workflows with confidence.
 
@@ -48,9 +48,9 @@ Both guides serve different needs. Choose based on your priority.
 | **Quick setup** for projects | Available but not the priority | Battle-tested production configs |
 | **Learn trade-offs** (agents vs skills) | Decision frameworks + comparisons | Lists patterns, no trade-off analysis |
 | **Security hardening** | Only threat database (18 CVEs) | Basic patterns only |
-| **Test understanding** | 274-question quiz | Not available |
+| **Test understanding** | 271-question quiz | Not available |
 | **Methodologies** (TDD/SDD/BDD) | Full workflow guides | Not covered |
-| **Copy-paste ready** templates | 172 templates | 200+ templates |
+| **Copy-paste ready** templates | 175 templates | 200+ templates |
 
 ### Ecosystem Positioning
 
@@ -77,7 +77,7 @@ Both guides serve different needs. Choose based on your priority.
 1. **Security-First** — 18 CVEs + 341 malicious skills tracked (no competitor has this depth)
 2. **Methodology Workflows** — TDD/SDD/BDD comparison + step-by-step guides
 3. **Comprehensive Reference** — 19K lines across 16 specialized guides (24× more reference material than everything-cc)
-4. **Educational Progression** — 274-question quiz, beginner → expert path
+4. **Educational Progression** — 271-question quiz, beginner → expert path
 
 **Recommended workflow:**
 1. Learn concepts here (mental models, trade-offs, security)
@@ -136,8 +136,8 @@ graph LR
     root[📦 Repository<br/>Root]
 
     root --> guide[📖 guide/<br/>19K lines]
-    root --> examples[📋 examples/<br/>172 templates]
-    root --> quiz[🧠 quiz/<br/>274 questions]
+    root --> examples[📋 examples/<br/>175 templates]
+    root --> quiz[🧠 quiz/<br/>271 questions]
     root --> tools[🔧 tools/<br/>utils]
     root --> machine[🤖 machine-readable/<br/>AI index]
     root --> docs[📚 docs/<br/>83 evaluations]
@@ -166,14 +166,14 @@ graph LR
 │  ├─ mcp-servers-ecosystem.md  Official & community MCP servers
 │  └─ workflows/          Step-by-step guides
 │
-├─ 📋 examples/           172 Production Templates
-│  ├─ agents/             6 custom AI personas
+├─ 📋 examples/           175 Production Templates
+│  ├─ agents/             9 custom AI personas
 │  ├─ commands/           26 slash commands
 │  ├─ hooks/              31 hooks (bash + PowerShell)
 │  ├─ skills/             14 skills (9 on SkillHub)
 │  └─ scripts/            Utility scripts (audit, search)
 │
-├─ 🧠 quiz/               264 Questions
+├─ 🧠 quiz/               271 Questions
 │  ├─ 9 categories        Setup, Agents, MCP, Trust, Advanced...
 │  ├─ 4 profiles          Junior, Senior, Power User, PM
 │  └─ Instant feedback    Doc links + score tracking
@@ -224,7 +224,7 @@ graph LR
 
 ---
 
-### 📝 264-Question Knowledge Validation (Unique in Ecosystem)
+### 📝 271-Question Knowledge Validation (Unique in Ecosystem)
 
 **Outcome**: Verify your understanding + identify knowledge gaps.
 
@@ -680,7 +680,7 @@ Use this guide critically. Experiment. Share what works for you.
 </details>
 
 <details>
-<summary><strong>Knowledge Quiz</strong> (274 questions)</summary>
+<summary><strong>Knowledge Quiz</strong> (271 questions)</summary>
 
 Test your Claude Code knowledge with an interactive CLI quiz covering all guide sections.
 
@@ -770,12 +770,12 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ### Tools
 - [Ask Zread](https://zread.ai/FlorianBruniaux/claude-code-ultimate-guide) — Ask questions about this guide
-- [Interactive Quiz](./quiz/) — 274 questions
+- [Interactive Quiz](./quiz/) — 271 questions
 - [Landing Site](https://florianbruniaux.github.io/claude-code-ultimate-guide-landing/) — Visual navigation
 
 ---
 
-*Version 3.27.9 | Updated daily · Feb 21, 2026 | Crafted with Claude*
+*Version 3.28.0 | Updated daily · Feb 21, 2026 | Crafted with Claude*
 
 <!-- SEO Keywords -->
 <!-- claude code, claude code tutorial, anthropic cli, ai coding assistant, claude code mcp,

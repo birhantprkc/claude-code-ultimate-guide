@@ -12,7 +12,7 @@ tags: [cheatsheet, reference]
 
 **Written with**: Claude (Anthropic)
 
-**Version**: 3.27.9 | **Last Updated**: February 2026
+**Version**: 3.28.0 | **Last Updated**: February 2026
 
 ---
 
@@ -225,6 +225,16 @@ Model: Sonnet | Ctx: 89.5k | Cost: $2.11 | Ctx(u): 56.0%
 **OpusPlan workflow**: `/model opusplan` → `Shift+Tab × 2` (plan with Opus) → `Shift+Tab` (execute with Sonnet)
 
 **Required for**: features >3 files, architecture, complex debugging
+
+### Quick Model Selection
+
+| Task | Model | Effort |
+|------|-------|--------|
+| Rename, boilerplate, test gen | Haiku | low |
+| Feature dev, debug, refactor | Sonnet | medium–high |
+| Architecture, security audit | Opus | high–max |
+
+> Full decision table with cost estimates: [Section 2.5 Model Selection & Thinking Guide](ultimate-guide.md#25-model-selection--thinking-guide)
 
 ### Dynamic Model Switching (Mid-Session)
 
@@ -545,4 +555,4 @@ where.exe claude; claude doctor; claude mcp list
 
 **Author**: Florian BRUNIAUX | [@Méthode Aristote](https://methode-aristote.fr) | Written with Claude
 
-*Last updated: February 2026 | Version 3.27.9*
+*Last updated: February 2026 | Version 3.28.0*
