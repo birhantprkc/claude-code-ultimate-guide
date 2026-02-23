@@ -158,7 +158,7 @@ graph LR
 ```
 📦 claude-code-ultimate-guide/
 │
-├─ 📖 guide/              Core Documentation (~19K lines)
+├─ 📖 guide/              Core Documentation (~20K lines)
 │  ├─ ultimate-guide.md   Complete reference, 10 sections
 │  ├─ cheatsheet.md       1-page printable
 │  ├─ architecture.md     How Claude Code works internally

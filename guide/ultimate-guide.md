@@ -1771,6 +1771,8 @@ Claude Code uses **Claude Sonnet 4.6** by default (as of Feb 2026):
 
 **Reality check**: A typical 1-hour session costs **$0.10 - $0.50** depending on usage patterns.
 
+> **Model deprecations (Feb 2026)**: `claude-3-haiku-20240307` (Claude 3 Haiku) was deprecated on **February 19, 2026** with **retirement scheduled for April 20, 2026**. If your CLAUDE.md, agent definitions, or scripts hardcode this model ID, migrate to `claude-haiku-4-5-20251001` (Haiku 4.5) before April 2026. Source: [platform.claude.com/docs/model-deprecations](https://platform.claude.com/docs/model-deprecations)
+
 #### 200K vs 1M Context: Performance, Cost & Use Cases
 
 The 1M context window (beta, API + usage tier 4 required) is a significant capability jump — but community feedback consistently frames it as a **niche premium tool**, not a default.
@@ -1910,6 +1912,45 @@ claude --model opus "Design the entire authentication system"
 "Read file1.ts, file2.ts, file3.ts, file4.ts, file5.ts and analyze them together"
 # Shared context, single response
 ```
+
+**Strategy 6: Use prompt caching for repeated context (API)**
+
+If you call the Anthropic API directly (e.g., for custom agents or pipelines), prompt caching cuts costs by up to 90% on repeated prefixes.
+
+```python
+# Mark stable sections with cache_control
+response = client.messages.create(
+    model="claude-sonnet-4-6-20250514",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": "<your large system prompt / codebase context>",
+            "cache_control": {"type": "ephemeral"}  # Cache this prefix
+        }
+    ],
+    messages=[{"role": "user", "content": "Fix the bug in auth.ts"}]
+)
+```
+
+**Prompt caching economics**:
+
+| Operation | Cost multiplier | TTL |
+|-----------|-----------------|-----|
+| Cache write | 1.25x base price | 5 minutes (default) |
+| Cache write (extended) | 2x base price | 1 hour |
+| Cache read (hit) | 0.1x base price | — |
+| Latency reduction | Up to 85% for long prompts | — |
+
+**Break-even**: 2 cache hits with 5-minute TTL. After that, pure savings.
+
+**Rules**:
+- Max **4 cache breakpoints** per request
+- Cache key = exact prefix match (single character change = cache miss)
+- Place breakpoints after large stable sections: system prompt, tool definitions, codebase context
+- For Claude Code itself: caching is handled automatically by the CLI — this applies to API-based workflows you build on top of Claude
+
+> Docs: [prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
 
 #### Tracking Costs
 
@@ -5500,6 +5541,8 @@ disallowedTools:
 | `skills` | ❌ | Skills to inherit |
 | `disallowedTools` | ❌ | Tools to block |
 | `memory` | ❌ | Pre-populated memory context (v2.1.32+) |
+| `background` | ❌ | Always run as background task — non-blocking (v2.1.49+) |
+| `isolation` | ❌ | `"worktree"` — spawn agent in isolated git worktree (v2.1.50+) |
 
 **New in v2.1.32**: The `memory` field enables pre-populated agent context:
 
@@ -5662,6 +5705,64 @@ Before deploying a custom agent, validate against these criteria:
 > 💡 **Rule of Three**: If an agent doesn't save significant time on at least 3 recurring tasks, it's probably over-engineering. Start with skills, graduate to agents only when complexity demands it.
 
 > **Automated audit**: Run `/audit-agents-skills` for a comprehensive quality audit across all agents, skills, and commands. Scores each file on 16 criteria with weighted grading (32 points for agents/skills, 20 for commands). See `examples/skills/audit-agents-skills/` for the full scoring methodology.
+
+### Background Agents (v2.1.49+)
+
+The `background: true` field makes an agent always run non-blocking — the parent session continues immediately instead of waiting for the agent to finish.
+
+```yaml
+---
+name: test-runner
+description: Run the full test suite after every significant change
+model: sonnet
+tools: Bash
+background: true   # Non-blocking — parent continues without waiting
+---
+
+Run `npm test` and report results. Flag failures with file + line number.
+```
+
+**Vs. standard agents:**
+
+| Mode | Behavior | Use when |
+|------|----------|----------|
+| Default | Parent waits for agent output | Need result before continuing |
+| `background: true` | Agent runs in parallel, parent continues | Fire-and-forget (tests, linting, notifications) |
+
+**Managing background agents:**
+
+```bash
+# List running agents
+ctrl+f    # Opens agent manager overlay
+
+# Kill all background agents (double-press within 3s)
+ctrl+c ctrl+c
+# or
+ESC ESC
+```
+
+### `claude agents` CLI (v2.1.50+)
+
+List all configured agents across global and project directories:
+
+```bash
+claude agents
+```
+
+**Example output:**
+
+```
+Global agents (~/.claude/agents/):
+  ├── code-reviewer   [sonnet] — Code quality reviews, security audits
+  ├── test-runner     [sonnet] [background] — Run full test suite
+  └── security-audit  [opus]   — OWASP Top 10, auth, encryption
+
+Project agents (.claude/agents/):
+  ├── backend-arch    [opus]   — API design, database schemas
+  └── docs-writer     [haiku]  — Generate docs from code
+```
+
+Useful for debugging agent discovery issues or auditing which agents are available in a project.
 
 ## 4.5 Agent Examples
 
@@ -8129,6 +8230,8 @@ exit 0
 Security hooks are critical for protecting your system.
 
 > **Advanced patterns**: For comprehensive security including Unicode injection detection, MCP config integrity verification, and CVE-specific mitigations, see [Security Hardening Guide](./security-hardening.md).
+
+> **Claude Code Security (research preview)**: Anthropic offers a dedicated codebase vulnerability scanner that traces data flows across files, challenges findings internally before surfacing them (adversarial validation), and generates patch suggestions. Separate from the Security Auditor Agent above — waitlist access only. See [Security Hardening Guide → Claude Code as Security Scanner](./security-hardening.md#claude-code-as-security-scanner-research-preview).
 
 ### Recommended Security Rules
 
@@ -13823,6 +13926,78 @@ git worktree remove --force .worktrees/old-feature
   - [`examples/commands/git-worktree-status.md`](../examples/commands/git-worktree-status.md) — Status
   - [`examples/commands/git-worktree-remove.md`](../examples/commands/git-worktree-remove.md) — Remove
   - [`examples/commands/git-worktree-clean.md`](../examples/commands/git-worktree-clean.md) — Clean
+
+### Claude Code Native Worktree Features (v2.1.49–v2.1.50)
+
+Claude Code has built-in worktree integration beyond the manual `git worktree` workflow above.
+
+#### Start Claude in an isolated worktree
+
+```bash
+# --worktree / -w flag: creates a temporary worktree based on HEAD
+claude --worktree
+claude -w
+```
+
+The worktree is created automatically, Claude runs inside it, and it is cleaned up on exit (if no changes were made).
+
+#### Declarative isolation in agent definitions
+
+Set `isolation: "worktree"` in an agent's frontmatter to automatically spawn it in a fresh worktree every time (v2.1.50+):
+
+```yaml
+---
+name: refactoring-agent
+description: Large-scale refactors that must not pollute the main working tree
+model: opus
+isolation: "worktree"   # Each invocation gets its own isolated checkout
+---
+
+Perform the requested refactoring. Commit your changes inside the worktree.
+```
+
+This replaces the earlier pattern of manually passing `isolation: "worktree"` to each Task tool call.
+
+#### Custom VCS setup with hook events (v2.1.50+)
+
+Two new hook events fire around agent worktree lifecycle:
+
+| Event | Fires | Use case |
+|-------|-------|----------|
+| `WorktreeCreate` | When an agent worktree is created | Set up DB branch, copy .env, install deps |
+| `WorktreeRemove` | When an agent worktree is torn down | Clean up DB branch, delete temp credentials |
+
+```json
+// .claude/settings.json
+{
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/worktree-setup.sh $CLAUDE_WORKTREE_PATH"
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/worktree-teardown.sh $CLAUDE_WORKTREE_PATH"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Typical `worktree-setup.sh`: create a Neon/PlanetScale DB branch, copy `.env.local`, run `npm install`.
 
 ### Database Branch Isolation with Worktrees
 
@@ -19860,6 +20035,8 @@ Set these in your shell profile (`~/.zshrc`, `~/.bashrc`, or Windows System Prop
 | `ANTHROPIC_SMALL_FAST_MODEL` | Fast model for simple tasks | `claude-haiku-4-20250514` |
 | `BASH_DEFAULT_TIMEOUT_MS` | Bash command timeout | `60000` |
 | `ANTHROPIC_AUTH_TOKEN` | Alternative auth token | Your auth token |
+| `CLAUDE_CODE_DISABLE_1M_CONTEXT` | Disable 1M context window support (v2.1.50+) | `true` |
+| `CLAUDE_CODE_SIMPLE` | Fully minimal mode: disables skills, agents, MCP, hooks, CLAUDE.md loading (v2.1.50+) | `true` |
 
 ### Finding Your Paths
 

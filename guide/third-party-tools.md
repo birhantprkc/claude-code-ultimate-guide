@@ -382,6 +382,7 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 | **Visual hooks editor** | No GUI for managing hooks in `settings.json` — requires JSON editing |
 | **Unified admin panel** | No single dashboard combining config, sessions, cost, and MCP management |
 | **Session replay** | ✅ **FILLED**: Entire CLI (launched Feb 2026) provides rewindable checkpoints with full context replay |
+| **Agent-native issue tracking** | No established tool for markdown-based, git-committable issue tracking with Claude Code. [fp.dev](https://fp.dev/) is an early-stage solution (local-first, `/fp-plan` + `/fp-implement` skills, diff viewer) but lacks adoption signals and requires Apple Silicon for the desktop app. The Tasks API covers state persistence but issues aren't git-committable. |
 | **Per-MCP-server profiler** | No way to measure token cost attributable to each MCP server individually |
 | **Cross-platform config sync** | No tool syncs Claude Code config across machines (must manual copy `~/.claude/`) |
 

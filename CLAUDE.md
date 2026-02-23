@@ -10,7 +10,7 @@ This repository is the **comprehensive documentation for Claude Code** (Anthropi
 
 ```
 guide/                    # Core documentation
-├── ultimate-guide.md     # Main guide (~19K lines, the reference)
+├── ultimate-guide.md     # Main guide (~20K lines, the reference)
 ├── cheatsheet.md         # 1-page printable summary
 ├── architecture.md       # How Claude Code works internally
 ├── methodologies.md      # TDD, SDD, BDD workflows

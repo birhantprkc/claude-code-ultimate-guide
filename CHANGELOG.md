@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **guide/ultimate-guide.md** — 7 sections ajoutées suite à veille hebdo Anthropic 17-23 fev 2026 (éval: `docs/resource-evaluations/2026-02-22-veille-hebdo-anthropic-17-23-fev.md`, score 3/5)
+
+  **P1 — Prompt caching + env vars manquantes**
+  - §1.7 Cost Optimization — Strategy 6 : prompt caching API (`cache_control`, prix cache write/read, break-even, 4 breakpoints max)
+  - §Appendix Environment Variables — `CLAUDE_CODE_DISABLE_1M_CONTEXT` (v2.1.50+) et `CLAUDE_CODE_SIMPLE` (v2.1.50+) ajoutés à la table principale
+
+  **P2 — Model deprecations + agents**
+  - §1.7 Pricing Model — Warning box : `claude-3-haiku-20240307` deprecated 19 fev 2026, retirement 20 avril 2026, migration vers `claude-haiku-4-5-20251001`
+  - §4.2 Frontmatter Fields — `background: true` (non-blocking, v2.1.49+) et `isolation: "worktree"` (spawn isolé, v2.1.50+) ajoutés au tableau
+  - §4.4 Best Practices — Nouvelle section "Background Agents" : comportement, gestion (ctrl+f, double ESC/ctrl+C), comparatif mode default vs background
+  - §4.4 Best Practices — Nouvelle section "`claude agents` CLI" : commande + exemple d'output annoté (v2.1.50+)
+
+  **P3 — Worktree isolation native + cross-ref sécurité**
+  - §9.11 Git Worktrees — Nouvelle sous-section "Claude Code Native Worktree Features" : `--worktree`/`-w` flag, `isolation: "worktree"` déclaratif, hooks `WorktreeCreate`/`WorktreeRemove` avec exemple `settings.json` complet
+  - §7.4 Security Hooks — Callout cross-ref vers `security-hardening.md#claude-code-as-security-scanner-research-preview`
+
+- **docs/resource-evaluations/2026-02-22-veille-hebdo-anthropic-17-23-fev.md** — Fiche d'évaluation veille hebdo Anthropic 17-23 fev 2026 (score 3/5, intégration partielle)
+
+- **README.md + CLAUDE.md** — Mise à jour stat guide : `~19K lines` → `~20K lines` (20 440 lignes)
+
 - **guide/diagrams/09-cost-and-optimization.md + guide/ultimate-guide.md §2.5** — Budget modifier for model selection decision flow
   - Le diagramme "Model Selection Decision Flow" assumait implicitement un budget illimité (Max/API) — angle mort signalé par la communauté
   - Ajout d'un **Budget modifier table** : Max/API → Opus plan + Sonnet impl ; Pro/Teams Standard → Sonnet plan + Haiku impl (tâches mécaniques)
