@@ -278,6 +278,45 @@ claude doctor
 - **After system changes**: Run `claude doctor` to verify health
 - **On unexpected behavior**: Update first, then troubleshoot
 
+### Desktop App: Claude Code Without the Terminal
+
+Claude Code is available in two forms: the CLI (what this guide focuses on) and the **Code tab** in the Claude Desktop app. Same underlying engine, graphical interface instead of terminal. Available on macOS and Windows — no Node.js installation required.
+
+**What the desktop adds on top of standard Claude Code:**
+
+| Feature | Details |
+|---------|---------|
+| Visual diff review | Review file changes inline with comments before accepting |
+| Live app preview | Claude starts your dev server, opens an embedded browser, auto-verifies changes |
+| GitHub PR monitoring | Auto-fix CI failures, auto-merge once checks pass |
+| Parallel sessions | Multiple sessions in the sidebar, each with automatic Git worktree isolation |
+| Connectors | GitHub, Slack, Linear, Notion — GUI setup, no manual MCP config |
+| File attachments | Attach images and PDFs directly to prompts |
+| Remote sessions | Run long tasks on Anthropic's cloud, continue after closing the app |
+| SSH sessions | Connect to remote machines, cloud VMs, dev containers |
+
+**When to choose Desktop vs CLI:**
+
+| Use Desktop when... | Use CLI when... |
+|--------------------|-----------------|
+| You want visual diff review | You need scripting or automation (`--print`, output piping) |
+| You're onboarding colleagues | You use third-party providers (Bedrock, Vertex, Foundry) |
+| You want session management in a sidebar | You need `dontAsk` permission mode |
+| You're doing a live demo or pair review | You need agent teams / multi-agent orchestration |
+| You want file attachments (images, PDFs) | You're on Linux (Desktop is macOS + Windows only) |
+
+**What's NOT available in Desktop** (CLI only): third-party API providers, scripting flags (`--print`, `--output-format`), `--allowedTools`/`--disallowedTools`, agent teams, `--verbose`, Linux.
+
+**Shared configuration**: Desktop and CLI read the same files — CLAUDE.md, MCP servers (via `~/.claude.json` or `.mcp.json`), hooks, skills, and settings. Your CLI setup carries over automatically.
+
+> **Migration tip**: run `/desktop` in the terminal to move an active CLI session into the Desktop app. On macOS and Windows only.
+
+> **Note on MCP servers**: MCP servers configured in `claude_desktop_config.json` (the Chat tab) are separate from Claude Code. To use MCP servers in the Code tab, configure them in `~/.claude.json` or your project's `.mcp.json`. See [Section 8.1 — MCP](#81-what-is-mcp).
+
+> **Full reference**: [code.claude.com/docs/en/desktop](https://code.claude.com/docs/en/desktop)
+
+---
+
 ### Platform-Specific Paths
 
 | Platform | Global Config Path | Shell Config |
@@ -20074,12 +20113,17 @@ This gives you persistent sessions that survive closing your laptop. Combine 6-8
 
 | Issue | Solution |
 |-------|----------|
-| Session not appearing on phone | Ensure same Claude account, refresh app |
+| Session not appearing in Claude app | Known bug (Research Preview) — use `claude.ai/code` in Safari instead (see below) |
+| QR code opens app but session not visible | Known bug on iOS — scan with native camera app, open in Safari rather than Claude app |
 | QR code not showing | Press spacebar after starting remote-control |
 | Slash commands not working | Type them in your local terminal instead |
 | Session expired | Reconnect: run `/rc` again |
 | Corporate firewall blocking | HTTPS outbound (port 443) must be allowed |
 | "Not available" error | Verify Pro or Max subscription (not Team/Enterprise) |
+
+> **Known bug (Research Preview, March 2026)**: On iOS (confirmed iPhone), scanning the QR code opens the Claude app but the remote session doesn't appear in the session list. The bug also affects automatic session discovery in the Claude mobile app. MacStories confirmed this is inconsistent on non-local machines.
+>
+> **Most reliable workaround**: open `claude.ai/code` in Safari on your phone — your active session appears in the list there. Alternatively, copy the session URL from the terminal and paste it directly in Safari. Both paths bypass the app's sync bug entirely.
 
 ### Evolution Timeline
 
