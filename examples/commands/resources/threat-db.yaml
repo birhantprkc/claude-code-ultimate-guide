@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.5.0"
-updated: "2026-03-05"
+version: "2.6.0"
+updated: "2026-03-09"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -128,6 +128,12 @@ sources:
   - name: "Check Point Advisories - CVE-2025-35028 HexStrike AI MCP Server"
     url: "https://advisories.checkpoint.com/defense/advisories/public/2026/cpai-2025-12521.html"
     date: "2026-03-02"
+  - name: "Oasis Security - ClawJacked OpenClaw WebSocket Hijack"
+    url: "https://www.oasis.security/blog/openclaw-vulnerability"
+    date: "2026-02-26"
+  - name: "THN - ClawJacked + 71 Malicious ClawHub Skills"
+    url: "https://thehackernews.com/2026/02/clawjacked-flaw-lets-malicious-sites.html"
+    date: "2026-02-28"
   - name: "NVD - CVE-2026-3484 Nmap-Mcp-Server Command Injection"
     url: "https://nvd.nist.gov/vuln/detail/CVE-2026-3484"
     date: "2026-03-04"
@@ -1254,6 +1260,17 @@ campaigns:
       - "https://adnanthekhan.com/posts/clinejection/"
       - "https://thehackernews.com/2026/02/cline-cli-230-supply-chain-attack.html"
 
+  - name: "ClawHub Wave 2 (71 Skills)"
+    source: "Oasis Security / The Hacker News"
+    date: "2026-02-28"
+    platform: "ClawHub / OpenClaw"
+    skills_count: 71
+    malware: "Various malware + cryptocurrency scams"
+    notes: "Discovered alongside ClawJacked disclosure; second identifiable wave after ClawHavoc (341 skills in Feb 2026). Skills spread malware and crypto scams via ClawHub marketplace. Concurrent with OpenClaw patching the ClawJacked flaw (v2026.2.26) and log poisoning bug (v2026.2.13)."
+    sources:
+      - "https://thehackernews.com/2026/02/clawjacked-flaw-lets-malicious-sites.html"
+      - "https://www.oasis.security/blog/openclaw-vulnerability"
+
 # ═══════════════════════════════════════════════════════════════
 # ATTACK TECHNIQUES TAXONOMY
 # Maps to SAFE-MCP framework and common patterns
@@ -1388,6 +1405,26 @@ attack_techniques:
       - "Monitor web proxy / browser history for clicks to AI-assistant share URLs with prompt parameters"
     source: "Microsoft Security Blog (2026-02-10)"
     mitigation: "Disable URL-based memory pre-population in AI assistants where possible; treat any 'Summarize with AI' button as potentially adversarial; periodically clear AI memory; hover over AI buttons before clicking to inspect destination URL"
+
+  - id: "T014"
+    name: "WebSocket Localhost Gateway Hijacking"
+    description: "Malicious website opens WebSocket connection to locally running AI agent gateway on localhost, brute-forces the gateway password (rate limiter exempts localhost), auto-registers as trusted device, and gains admin-level control of the victim's AI agent session"
+    examples:
+      - "ClawJacked: JavaScript on attacker page connects to OpenClaw localhost port, brute-forces password at hundreds/s, registers device without user confirmation, reads logs and exfiltrates config data"
+      - "Any locally exposed AI agent gateway that exempts localhost from rate limiting or auto-trusts localhost device pairings"
+    affected_platforms: ["OpenClaw (patched v2026.2.26)"]
+    source: "Oasis Security (2026-02-26)"
+    mitigation: "Update OpenClaw to >= v2026.2.26; apply rate limiting to ALL connections including localhost; require explicit user confirmation for device pairing; block WebSocket connections from browser contexts to localhost AI agent ports; use CORS headers to prevent cross-origin WebSocket upgrades"
+
+  - id: "T015"
+    name: "Log Poisoning via WebSocket for Prompt Injection"
+    description: "Attacker writes malicious content to publicly exposed AI agent log files via unauthenticated WebSocket requests; since the agent reads its own logs to troubleshoot tasks, the injected content acts as indirect prompt injection, triggering unintended agent actions"
+    examples:
+      - "OpenClaw: WebSocket requests to TCP port 18789 (publicly accessible) inject adversarial instructions into log files; agent reading logs during troubleshooting executes attacker instructions"
+      - "Any AI agent that parses its own logs as part of context or troubleshooting and has unauthenticated log-write endpoints"
+    affected_platforms: ["OpenClaw (patched v2026.2.13)"]
+    source: "Security Affairs / Oasis Security (2026-02-26 to 2026-03-02)"
+    mitigation: "Update OpenClaw to >= v2026.2.13; require authentication for all WebSocket endpoints including log-write; treat log files as untrusted input when parsed by the AI agent; sandbox log file read context to prevent prompt injection"
 
 # ═══════════════════════════════════════════════════════════════
 # SCANNING TOOLS
@@ -1539,6 +1576,20 @@ scanning_tools:
     limitations:
       - "Commercial/SaaS platform"
 
+  - name: "Verify Security Scanner"
+    vendor: "Verify (mcpmarket.com)"
+    type: "claude-code-skill"
+    url: "https://mcpmarket.com/tools/skills/verify-security-bug-scanner"
+    capabilities:
+      - "Claude Code skill integrating Ultimate Bug Scanner (UBS) directly in agent workflow"
+      - "Detects 1000+ bug patterns across multiple programming languages"
+      - "SARIF and JSON output formats for CI/CD pipeline integration"
+      - "Mandatory pre-commit scan enforcement mode"
+      - "Targets AI-generated code patterns specifically"
+    limitations:
+      - "Claude Code specific — not usable outside OpenClaw/Claude Code skill ecosystem"
+      - "Requires Claude Code with skill support"
+
   - name: "MCPScan.ai"
     vendor: "mcpscan.ai"
     type: "cloud-saas"
@@ -1619,3 +1670,13 @@ defensive_resources:
     url: "https://docs.paloaltonetworks.com/content/techdocs/en_US/ai-runtime-security/administration/prevent-network-security-threats/detect-mcp-threats"
     type: "platform"
     description: "Network-level MCP threat detection by Palo Alto; validates MCP tool communications and detects prompt injection and tool poisoning in real-time traffic (2026-02-09)"
+
+  - name: "GitHub MCP Server Secret Scanning"
+    url: "https://github.com/github/roadmap/issues/1221"
+    type: "platform"
+    description: "GitHub Advanced Security secret scanning integrated into MCP-compatible developer workflows (IDEs and CLIs) via the Remote GitHub MCP Server. Enables detection of exposed secrets in MCP-connected IDE prompts, file reads, and tool calls without leaving the agent workflow. Available 2026-02-27."
+
+  - name: "Cycode AI Guardrails for MCP"
+    url: "https://cycode.com/blog/ai-cybersecurity-tools/"
+    type: "platform"
+    description: "Cycode's AI Governance module enforces MCP usage policies, tracks tool invocations, and provides AI Guardrails that intercept secrets in real time across IDE prompts, file reads, and MCP tool calls before they reach the LLM or external services. Part of broader SAST/SCA/secrets platform."
