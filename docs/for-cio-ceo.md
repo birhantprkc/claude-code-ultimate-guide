@@ -48,7 +48,7 @@ This is not a chatbot. It's a production tool.
 
 **License**: $100/month per developer (Claude Max). For a team of 10, that's $1,000/month — less than 2 days of external consulting.
 
-**Training**: one structured day is enough for a team of 10 to 15 people. A free Brown Bag Lunch (1h) lets you test team interest before committing to anything.
+**Training**: one structured day is enough for a team of 10 to 15 people. A free Brown Bag Lunch (1h) lets you test team interest before committing to anything — and costs you nothing, I do those for the networking and the challenge.
 
 **Doing nothing**: your developers use unvetted free tools, with no data policy, no audit trail. That scenario carries more risk than structured adoption.
 
@@ -70,11 +70,11 @@ This is not a chatbot. It's a production tool.
 
 **Option 1 — You want to understand before deciding**: ask your CTO for a 30-minute demo on a real use case from your codebase.
 
-**Option 2 — You want to move fast**: a free Brown Bag Lunch (1h, in-person or remote) covers the fundamentals for your executive and technical teams simultaneously.
+**Option 2 — You want to move fast**: a free Brown Bag Lunch (1h, in-person or remote) covers the fundamentals for your executive and technical teams simultaneously. Free — I do these for the networking and the challenge.
 
 **Option 3 — You already have teams using it**: a configuration audit (half-day) identifies active risks and optimization opportunities.
 
-→ [Contact Florian Bruniaux](https://florianbruniaux.github.io/claude-code-ultimate-guide-landing/) — availability and pricing
+→ [Contact Florian Bruniaux](https://florian.bruniaux.com/) — availability and, depending on the mission, potentially pricing
 
 ---
 

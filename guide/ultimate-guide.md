@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.35.0
+**Version**: 3.36.0
 
 ---
 
@@ -4588,6 +4588,12 @@ Brief one-sentence description of what this project does.
 
 **Rule of thumb**: If Claude makes a mistake twice because of missing context, add that context to CLAUDE.md. Don't preemptively document everything — and don't ask Claude to generate it for you either. Auto-generated CLAUDE.md files tend to be generic, bloated, and filled with things Claude already detects on its own.
 
+> **Research Note (Feb 2026)**: ETH Zürich published the first empirical evaluation of agent context files across 138 benchmarks and 12 repositories. Key findings: developer-written files improve task success by ~4%, but LLM-generated files (the output of `/init`) *reduce* it by ~3%. Both add 20-23% inference cost. The mechanism: agents follow every instruction in the context file, including those irrelevant to the current task — cognitive overhead, broader exploration, longer reasoning chains. Source: [Gloaguen et al., arXiv 2602.11988](https://arxiv.org/abs/2602.11988)
+
+**The discoverability filter**: before adding any line to CLAUDE.md, ask one question — "Can the agent find this by reading the codebase?" If yes, don't add it. Tech stack, directory structure, and testing conventions are all discoverable. What earns a line: tooling gotchas (`use uv, not pip`), operational landmines (`legacy/ is deprecated but imported by prod — do not delete`), and non-obvious conventions that conflict with standard patterns. Everything else is noise that competes with the actual task.
+
+**The anchoring risk**: every entry in CLAUDE.md is loaded for every session, regardless of what you're building that day. If your CLAUDE.md mentions a deprecated library or an old architectural pattern, the agent is now biased toward it on every prompt. Stale entries are actively harmful — not neutral. Treat periodic CLAUDE.md pruning as maintenance, not cleanup.
+
 **When your project grows**, structure CLAUDE.md around three layers (community-validated pattern):
 
 ```markdown
@@ -5160,7 +5166,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.35.0 Version Control & Backup
+### 3.36.0 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -6103,6 +6109,16 @@ Don't optimize token costs early. Give engineers the freedom to experiment maxim
 The default instinct with AI tools is caution — reviewing every output, second-guessing every suggestion. The better instinct: ship, validate, iterate. Claude Code is designed for high-velocity cycles, not careful deliberation.
 
 > **When to apply**: Teams of 2+ using Claude Code professionally. Solo developers should focus on the first two principles (underfund = treat yourself as a one-person team with AI leverage; unlimited tokens = don't self-censor your experiments).
+
+---
+
+### Going Further: Organizational-Scale Standards Distribution
+
+Profile-Based Module Assembly solves the per-developer consistency problem. It still requires your team to maintain the modules manually and run the assembler. At 50+ developers across 30+ repositories, even that becomes friction.
+
+Tools like [Packmind](../ecosystem/third-party-tools.md#packmind) take the same principle further: define standards once in a central playbook, and distribute them automatically as `CLAUDE.md` files, slash commands, and skills — across repositories and across AI tools (Claude Code, Cursor, Copilot, Windsurf). The playbook can also ingest knowledge from PR review comments, Slack discussions, and incident reports to keep standards current without manual maintenance.
+
+> **When to consider this**: Teams of 10+ developers, 5+ repositories, using more than one AI coding agent.
 
 ---
 
@@ -21295,7 +21311,7 @@ _Quick jump:_ [Commands Table](#101-commands-table) · [Keyboard Shortcuts](#102
 | `/exit` | Exit Claude Code | Session |
 | `/fast` | Toggle fast mode (Opus 4.6, 2.5x faster, 6x price) | Mode |
 | `/hooks` | Interactive hook configuration | Config |
-| `/init` | Generate starter CLAUDE.md based on project structure | Config |
+| `/init` | Generate starter CLAUDE.md based on project structure — ⚠️ output is LLM-generated; review and prune before committing (ETH Zürich research shows auto-generated context files reduce agent task success by ~3% and add 20%+ inference cost) | Config |
 | `/login` | Log in to Claude account | Auth |
 | `/logout` | Log out and re-authenticate | Auth |
 | `/loop [interval] [prompt]` | Run a prompt or slash command on a recurring interval (e.g. `/loop 5m check the deploy`) — v2.1.71+ | Automation |
@@ -23356,4 +23372,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.35.0
+**Last updated**: January 2026 | **Version**: 3.36.0

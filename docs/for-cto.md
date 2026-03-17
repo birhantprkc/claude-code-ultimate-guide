@@ -91,11 +91,12 @@ The real cost isn't the subscription — it's unstructured adoption creating sec
 
 If you want to accelerate adoption or get an independent assessment of your current setup:
 
-**Brown Bag Lunch (1h, free)** — executive + team intro, live demo, Q&A
-**Config audit (half-day)** — review your current setup against security and productivity standards
-**Team formation (1-3 days)** — hands-on training, your codebase, your workflows, measurable outcomes
+**Brown Bag Lunch, talk, or panel (1-3h, free)** — executive + team intro, live demo, Q&A, or speaker slot. I do these for the pleasure of it — getting challenged, sharing what I know, building network. No strings attached.
 
-→ [Contact Florian Bruniaux](https://florianbruniaux.github.io/claude-code-ultimate-guide-landing/) for availability and pricing
+**Config audit (half-day)** — review your current setup against security and productivity standards.
+**Team formation (1-3 days)** — hands-on training, your codebase, your workflows, measurable outcomes. Not something I'm actively seeking right now, but I'm open to the right conversation.
+
+→ [Contact Florian Bruniaux](https://florian.bruniaux.com/) for availability and, depending on the mission, pricing
 
 ---
 

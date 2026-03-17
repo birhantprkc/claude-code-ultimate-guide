@@ -1077,6 +1077,29 @@ proxy:
 
 ---
 
+#### Packmind
+
+**Community tool** for distributing engineering standards as AI context across multiple agents and repositories. Exposes an MCP server for creating and managing playbook standards directly from Claude Code (or any MCP-capable agent).
+
+**Use Case**: Engineering team maintains one playbook; Packmind MCP server lets Claude Code propose new standards or update existing ones during a session without leaving the editor.
+
+**Key Features**:
+
+| Capability | Details |
+|------------|---------|
+| Standards Creation | Create/update playbook entries via MCP tools |
+| Multi-Agent Output | Generates CLAUDE.md, .cursor/rules, Copilot instructions from one source |
+| Knowledge Ingestion | Pull context from GitHub, Slack, Jira, GitLab, Confluence, Notion via their MCP servers |
+| Self-hosted | Docker/Kubernetes, Apache-2.0 CLI |
+
+**Resources**:
+- **GitHub**: https://github.com/PackmindHub/packmind
+- **Demo use cases**: https://github.com/PackmindHub/demo-use-case-skills
+
+> **Cross-ref**: Full tool evaluation in [third-party-tools.md — Engineering Standards Distribution](./third-party-tools.md#engineering-standards-distribution).
+
+---
+
 ## Production Deployment
 
 ### Security Checklist

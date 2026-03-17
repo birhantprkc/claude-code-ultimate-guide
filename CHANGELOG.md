@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.36.0] - 2026-03-17
+
 ### Documentation
 
 - **Resource Evaluation #076**: Addy Osmani — "Stop Using /init for AGENTS.md" (Feb 23, 2026). Score 3/5. Secondary synthesis of ETH Zürich paper (already evaluated). Verified: ETH Zürich claims confirmed. Unverified: Lulla et al. (ICSE JAWs 2026) and ACE framework (ICLR 2026) — no findable academic source. Arize AI concept verified, specific numbers uncorroborated. Integration: added discoverability filter + anchoring risk concepts to §3.1, added research note (ETH Zürich), added `/init` warning in commands table.

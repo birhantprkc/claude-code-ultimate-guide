@@ -81,11 +81,11 @@ Full coverage in WP03 — Security and WP06 — Privacy *(whitepapers, coming so
 
 If you want structured onboarding rather than self-learning:
 
-- **Brown Bag Lunch (1h, free)** — intro session covering core concepts + team config live
-- **Team formation (1-2 days)** — hands-on, your codebase, your workflows
-- **Config audit** — review your current setup against security and productivity best practices
+- **Brown Bag Lunch, talk, or panel (1-3h, free)** — intro session, live demo, or speaker slot. Done for the pleasure of it: sharing, getting challenged, building network.
+- **Config audit** — review your current setup against security and productivity best practices.
+- **Team formation (1-2 days)** — hands-on, your codebase, your workflows. Not something I'm actively looking for, but open to the right conversation.
 
-→ [Contact Florian Bruniaux](https://florianbruniaux.github.io/claude-code-ultimate-guide-landing/) for availability
+→ [Contact Florian Bruniaux](https://florian.bruniaux.com/) for availability and, depending on the mission, potentially pricing
 
 ---
 

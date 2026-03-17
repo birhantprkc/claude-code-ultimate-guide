@@ -102,6 +102,8 @@ Term coined by [Andrej Karpathy](https://x.com/karpathy/status/18861921848081493
 
 > **Related**: For context management strategies that prevent vibe coding chaos, see [Anti-Pattern: Context Overload](./ultimate-guide.md#anti-pattern-context-overload) in the main guide (§9.8).
 
+**At team scale**, vibe coding accumulates into what some practitioners call *comprehension debt* (an emerging term, 2025-2026): the growing gap between how much code exists in a system and how much any human genuinely understands. Unlike technical debt, which surfaces through slow builds and tangled dependencies, comprehension debt breeds false confidence — velocity looks fine, tests are green, and the reckoning arrives at the worst possible moment, usually during an incident or an audit.
+
 ---
 
 ## The Reality of AI Productivity
@@ -150,6 +152,8 @@ The pattern: **AI excels at well-defined, repeatable tasks**. It struggles with 
 - Skipping code review because "AI wrote it"
 
 The difference isn't the tool — it's the organizational discipline around it.
+
+**The review bottleneck has inverted.** When code was expensive to produce, senior engineers could review it faster than juniors could write it — review was a quality gate. AI flips this: a junior can now generate code faster than a senior can critically audit it. The rate-limiting factor that historically kept review meaningful has been removed. What used to be a quality gate is now a throughput problem. Teams that don't account for this end up rubber-stamping AI-generated code at scale.
 
 > **For team leads**: If you're responsible for structuring this — onboarding, policies, growth measurement — jump to [§12 For Tech Leads & Engineering Managers](#for-tech-leads--engineering-managers).
 
@@ -1003,6 +1007,18 @@ Warning Signs
 ☐ Debt accumulation monitored (not just feature throughput)
 ☐ Juniors can explain code they shipped last sprint
 ```
+
+---
+
+### Regulatory Exposure (Regulated Industries)
+
+For teams shipping AI-generated code into healthcare, finance, or government systems, comprehension debt is no longer just a quality risk — it is a compliance risk.
+
+The **EU AI Act** classifies healthcare AI systems as high-risk, with mandatory human oversight requirements active since August 2, 2025 for general-purpose AI models and fully applicable from August 2, 2026 (medical devices: August 2027). Non-compliance carries penalties up to 6% of global annual turnover. The requirement for "meaningful human oversight" of AI outputs creates an implicit obligation to actually understand what your team is shipping — "the model wrote it" does not satisfy the standard.
+
+The **FDA's January 2025 draft guidance** for AI-enabled device software functions mandates AI Bill of Materials (AIBOMs), data lineage documentation, and post-market monitoring plans. The June 2025 cybersecurity guidance adds third-party component transparency requirements. A team that cannot explain the behavior of AI-generated code in a medical device submission is not compliant with this guidance.
+
+**Practical consequence for tech leads**: If your team is building in a regulated space, the "explain this" gate in code review is not a learning exercise — it is a documentation requirement. Reviewers who rubber-stamp AI-generated code are creating liability, not just technical risk. This is worth stating explicitly in your team AI policy.
 
 ---
 
