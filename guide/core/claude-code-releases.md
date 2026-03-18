@@ -10,13 +10,13 @@ tags: [reference, release]
 > **Full details**: [github.com/anthropics/claude-code/CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 > **Machine-readable**: [claude-code-releases.yaml](../machine-readable/claude-code-releases.yaml)
 
-**Latest**: v2.1.77 | **Updated**: 2026-03-17
+**Latest**: v2.1.78 | **Updated**: 2026-03-18
 
 ---
 
 ## Quick Jump
 
-- [2.1.x Series (January-March 2026)](#21x-series-january-march-2026) — Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command
+- [2.1.x Series (January-March 2026)](#21x-series-january-march-2026) — Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line
 - [2.0.x Series (Nov 2025 - Jan 2026)](#20x-series-november-2025---january-2026) — Opus 4.5, Claude in Chrome, Background agents
 - [Breaking Changes Summary](#breaking-changes-summary)
 - [Milestone Features](#milestone-features)
@@ -24,6 +24,29 @@ tags: [reference, release]
 ---
 
 ## 2.1.x Series (January-March 2026)
+
+### v2.1.78 (2026-03-18)
+
+- **New**: `StopFailure` hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)
+- **New**: `${CLAUDE_PLUGIN_DATA}` variable for plugin persistent state that survives plugin updates; `/plugin uninstall` now prompts before deleting plugin data
+- **New**: `effort`, `maxTurns`, and `disallowedTools` frontmatter support for plugin-shipped agents
+- **New**: `ANTHROPIC_CUSTOM_MODEL_OPTION` env var to add a custom entry to the `/model` picker (with optional `_NAME` and `_DESCRIPTION` suffixed vars)
+- **New**: Terminal notifications (iTerm2/Kitty/Ghostty popups, progress bar) now reach the outer terminal when running inside tmux with `set -g allow-passthrough on`
+- **New**: Response text now streams line-by-line as it's generated
+- **Fixed**: ⚠️ **Security** — Silent sandbox disable when `sandbox.enabled: true` is set but dependencies are missing — now shows a visible startup warning
+- **Fixed**: ⚠️ **Security** — `deny: ["mcp__servername"]` permission rules were not removing MCP server tools before sending to the model, allowing it to see and attempt blocked tools
+- **Fixed**: ⚠️ **Security** — `.git`, `.claude`, and other protected directories were writable without a prompt in `bypassPermissions` mode
+- **Fixed**: Infinite loop when API errors triggered stop hooks that re-fed blocking errors to the model
+- **Fixed**: `cc log` and `--resume` silently truncating conversation history on large sessions (>5 MB) that used subagents
+- **Fixed**: `sandbox.filesystem.allowWrite` not working with absolute paths (previously required `//` prefix)
+- **Fixed**: `--worktree` flag not loading skills and hooks from the worktree directory
+- **Fixed**: `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS` and `includeGitInstructions` setting not suppressing git status section in system prompt
+- **Fixed**: Bash tool not finding Homebrew and other PATH-dependent binaries when VS Code is launched from Dock/Spotlight
+- **Fixed**: Voice mode modifier-combo push-to-talk keybindings requiring a hold instead of activating immediately
+- **Fixed**: Voice mode not working on WSL2 with WSLg (Windows 11)
+- **Fixed**: `ANTHROPIC_BETAS` environment variable being silently ignored when using Haiku models
+- **VSCode**: Fixed "API Error: Rate limit reached" when selecting Opus — model dropdown no longer offers 1M context variant to subscribers whose plan tier is unknown
+- **Performance**: Improved memory usage and startup time when resuming large sessions
 
 ### v2.1.77 (2026-03-17)
 

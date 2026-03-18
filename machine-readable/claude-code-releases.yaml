@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.77"
-updated: "2026-03-17"
+latest: "2.1.78"
+updated: "2026-03-18"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,16 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-March 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.78"
+    date: "2026-03-18"
+    highlights:
+      - "StopFailure hook event fires when turn ends due to API error (rate limit, auth failure)"
+      - "${CLAUDE_PLUGIN_DATA} variable for persistent plugin state that survives plugin updates"
+      - "effort, maxTurns, disallowedTools frontmatter support for plugin-shipped agents"
+      - "Response text now streams line-by-line as generated"
+      - "Security: Fixed silent sandbox disable when sandbox.enabled:true but dependencies missing"
+      - "Fixed deny permission rules not removing MCP server tools before sending to model"
 
   - version: "2.1.77"
     date: "2026-03-17"
@@ -826,6 +836,7 @@ breaking_summary:
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.78": "StopFailure hook, ${CLAUDE_PLUGIN_DATA} persistent state, streaming line-by-line, security: silent sandbox disable fix"
   "2.1.69": "InstructionsLoaded hook, ${CLAUDE_SKILL_DIR}, 4 security fixes, 15+ memory fixes, Voice STT 20 languages"
   "2.1.68": "ultrathink re-introduced, Opus 4.6 medium effort default, Opus 4/4.1 removed"
   "2.1.63": "HTTP hooks, worktree config sharing, /simplify + /batch bundled commands"
