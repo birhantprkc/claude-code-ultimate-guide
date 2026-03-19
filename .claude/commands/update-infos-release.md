@@ -96,6 +96,28 @@ echo "X.Y.Z" > VERSION
 - Reason: [major features added / significant updates / breaking changes in CC]
 ```
 
+### 4.5. Add RSS Entry (for notable CC releases)
+
+Add an entry to `src/data/rss-entries.ts` in the landing repo **only if** at least one of:
+- Release has ⭐ feature(s)
+- Release has breaking changes
+- Release has ≥3 highlights
+
+If none of these → skip (patch/bugfix-only releases don't need an RSS entry).
+
+Entry format:
+```typescript
+{
+  type: 'guide_release',
+  title: 'Claude Code vX.Y.Z',
+  date: 'Mon DD, YYYY',
+  description: '[1-2 sentences: main feature(s), plain text no HTML]',
+  link: 'https://cc.bruniaux.com/releases/#vX.Y.Z',
+},
+```
+
+Prepend at the top of the `rssEntries` array.
+
 ### 5. Verify Synchronization
 
 ```bash

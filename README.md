@@ -870,7 +870,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 ### Tools
 - [Ask Zread](https://zread.ai/FlorianBruniaux/claude-code-ultimate-guide) — Ask questions about this guide
 - [Interactive Quiz](./quiz/) — 271 questions
-- [Landing Site](https://florianbruniaux.github.io/claude-code-ultimate-guide-landing/) — Visual navigation
+- [Landing Site](https://cc.bruniaux.com) — Visual navigation, cheat sheets, ebooks, quiz
+- [RSS Feed](https://cc.bruniaux.com/rss.xml) — Subscribe to guide updates, new content, and CC releases
 
 ---
 
