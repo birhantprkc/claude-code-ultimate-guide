@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.81"
-updated: "2026-03-22"
+latest: "2.1.83"
+updated: "2026-03-25"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,16 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-March 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.83"
+    date: "2026-03-25"
+    highlights:
+      - "managed-settings.d/ drop-in directory — separate teams can deploy independent policy fragments that merge alphabetically"
+      - "CwdChanged and FileChanged hook events for reactive environment management (direnv, auto-toolchain switching)"
+      - "Transcript search — press / in transcript mode (Ctrl+O) to search, n/N to step through matches"
+      - "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1 strips Anthropic and cloud provider credentials from subprocess environments"
+      - "Security: Fixed --mcp-config CLI flag bypassing allowedMcpServers/deniedMcpServers managed policy"
+      - "Fixed macOS exit hang; fixed screen flashing blank when idle; added sandbox.failIfUnavailable setting"
 
   - version: "2.1.81"
     date: "2026-03-22"

@@ -10,13 +10,13 @@ tags: [reference, release]
 > **Full details**: [github.com/anthropics/claude-code/CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 > **Machine-readable**: [claude-code-releases.yaml](../machine-readable/claude-code-releases.yaml)
 
-**Latest**: v2.1.81 | **Updated**: 2026-03-22
+**Latest**: v2.1.83 | **Updated**: 2026-03-25
 
 ---
 
 ## Quick Jump
 
-- [2.1.x Series (January-March 2026)](#21x-series-january-march-2026) — Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line, --console auth flag, SessionEnd fix, enterprise retry fix, rate_limits statusline field, effort frontmatter for skills, --channels MCP research preview, --bare flag, worktree session resume fix, MCP query collapsing
+- [2.1.x Series (January-March 2026)](#21x-series-january-march-2026) — Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line, --console auth flag, SessionEnd fix, enterprise retry fix, rate_limits statusline field, effort frontmatter for skills, --channels MCP research preview, --bare flag, worktree session resume fix, MCP query collapsing, managed-settings.d/ drop-in, CwdChanged/FileChanged hooks, transcript search, credential scrubbing
 - [2.0.x Series (Nov 2025 - Jan 2026)](#20x-series-november-2025---january-2026) — Opus 4.5, Claude in Chrome, Background agents
 - [Breaking Changes Summary](#breaking-changes-summary)
 - [Milestone Features](#milestone-features)
@@ -24,6 +24,33 @@ tags: [reference, release]
 ---
 
 ## 2.1.x Series (January-March 2026)
+
+### v2.1.83 (2026-03-25)
+
+- **New**: `managed-settings.d/` drop-in directory alongside `managed-settings.json` — separate teams can deploy independent policy fragments that merge alphabetically
+- **New**: `CwdChanged` and `FileChanged` hook events for reactive environment management (e.g., direnv, auto-toolchain switching)
+- **New**: `sandbox.failIfUnavailable` setting — exits with an error when sandbox is enabled but cannot start, instead of running unsandboxed
+- **New**: `disableDeepLinkRegistration` setting to prevent `claude-cli://` protocol handler registration
+- **New**: `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` strips Anthropic and cloud provider credentials from Bash tool, hooks, and MCP stdio server subprocess environments
+- **New**: Transcript search — press `/` in transcript mode (Ctrl+O) to search, `n`/`N` to step through matches
+- **New**: `Ctrl+X Ctrl+E` as an alias for opening the external editor (readline-native binding; `Ctrl+G` still works)
+- **New**: Pasted images now insert an `[Image #N]` chip at cursor for positional referencing in prompts
+- **New**: Agents can declare `initialPrompt` in frontmatter to auto-submit a first turn
+- **New**: `chat:killAgents` and `chat:fastMode` are now rebindable via `~/.claude/keybindings.json`
+- **Security**: Fixed `--mcp-config` CLI flag bypassing `allowedMcpServers`/`deniedMcpServers` managed policy enforcement
+- **Fixed**: Claude Code hanging on exit on macOS
+- **Fixed**: Screen flashing blank after being idle for a few seconds
+- **Fixed**: Mouse tracking escape sequences leaking to shell prompt after exit
+- **Fixed**: Background subagents becoming invisible after context compaction (could cause duplicate agents)
+- **Fixed**: `--mcp-config` CLI flag bypassing `allowedMcpServers`/`deniedMcpServers` managed policy
+- **Fixed**: Native modules not loading on Amazon Linux 2 and glibc 2.26 systems; Linux sandbox failing with "ripgrep not found"
+- **Fixed**: Sessions with `saved_hook_context` causing startup performance issues
+- **Fixed**: Conditional `.claude/rules/*.md` and nested CLAUDE.md files not loading in print mode
+- **Fixed**: Agents from `.claude/agents/` not discovered in git worktrees (now loads from main repo)
+- **Improved**: `WebFetch` identifies as `Claude-User` in requests; binary content (PDFs, audio) saved to disk with correct extension
+- **Improved**: Reduced scrollback resets from once per turn to once per ~50 messages
+- **Improved**: Increased non-streaming fallback token cap (21k → 64k) and timeout (120s → 300s)
+- **Changed**: "Stop all background agents" keybinding moved from `Ctrl+F` to `Ctrl+X Ctrl+K`
 
 ### v2.1.81 (2026-03-22)
 

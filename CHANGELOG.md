@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Claude Code Releases**: Updated tracking to v2.1.83
+  - `managed-settings.d/` drop-in directory for independent policy fragments
+  - `CwdChanged` and `FileChanged` hook events for reactive environment management
+  - Transcript search in Ctrl+O mode; `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` credential scrubbing
+  - Security: Fixed `--mcp-config` bypassing `allowedMcpServers`/`deniedMcpServers` managed policy
+  - Fixed macOS exit hang; `sandbox.failIfUnavailable` setting
+
+### Added
+- **Glossary** (`guide/core/glossary.md`): new alphabetical reference with 120+ Claude Code-specific terms, community-coined patterns, and AI engineering concepts. Single table with 4 columns (Term, Definition, Category, Subcategory). Covers Claude Code modes, hooks, permissions, models, workflow patterns, security concepts, and ecosystem tools. Linked from `guide/README.md` Core Reference section and `machine-readable/reference.yaml`.
+- **"Slop" attribution** (`guide/ultimate-guide.md`): added one-sentence attribution to Simon Willison's 2024 coinage before the Desloppify section, with link to source article.
+
+### Fixed
+- **`paths:` array bug in rules frontmatter** (`guide/ultimate-guide.md`): Both path-scoped rules examples (lines ~5147 and ~5856) used the documented `paths:` YAML array syntax, which fails silently. Replaced with `globs:` field and unquoted CSV patterns in both code examples. Added blockquote warnings at both locations explaining the root cause (internal CSV parser bug, confirmed GH#17204 and 8 duplicate issues) and the working workaround.
+
 ## [3.37.5] - 2026-03-23
 
 ### Added
