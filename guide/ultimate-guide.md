@@ -1914,6 +1914,8 @@ Instead of managing context within a session, you can **restart with a fresh ses
 while :; do cat TASK.md PROGRESS.md | claude -p ; done
 ```
 
+> **Naming note**: "Ralph Loop" is used in two distinct ways in the community. Geoffrey Huntley's original pattern (above) is about context rotation — spawning fresh sessions to avoid context rot. A separate usage, popularized by Addy Osmani and others in 2026, applies the same term to *atomic task iteration* in multi-agent teams: pick task → implement → validate → commit → reset context → repeat. Both share the same core mechanic (stateless loop with external state), but the scope differs. When the term appears without attribution, clarify which variant is meant.
+
 **State persists via**:
 - `TASK.md` — Current task definition with acceptance criteria
 - `PROGRESS.md` — Learnings, completed tasks, blockers
@@ -16921,7 +16923,7 @@ You: "Implement the caching layer following the plan"
 
 Note: These are loaded **once at session start**, not per request. A 200-line CLAUDE.md costs ~2K tokens upfront but doesn't grow during the session. The concern is the cumulative effect when combined with multiple `@includes` and all files in `.claude/rules/`.
 
-> **Important**: Beyond file size, context files containing non-essential information (style guides, architecture descriptions, general conventions) add **+20-23% inference cost per session** regardless of line count — because agents process and act on every instruction. ([Gloaguen et al., 2026](https://arxiv.org/abs/2602.11988))
+> **Important**: Beyond file size, context files containing non-essential information (style guides, architecture descriptions, general conventions) add **+20-23% inference cost per session** regardless of line count — because agents process and act on every instruction. The same research confirms that LLM-generated context files reduce task success by ~3%, while developer-written files improve it by ~4%. ([Gloaguen et al., 2026](https://arxiv.org/abs/2602.11988))
 
 > **See also**: [Memory Loading Comparison](#memory-loading-comparison) for when each method loads.
 

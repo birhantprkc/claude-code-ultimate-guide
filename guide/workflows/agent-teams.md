@@ -1037,6 +1037,31 @@ Team lead
       └─ Agent 2b: State management
 ```
 
+### AGENTS.md for Compound Learning
+
+Agent teams benefit from a shared context file that accumulates cross-session learnings — patterns that worked, pitfalls to avoid, codebase-specific gotchas. This file is called `AGENTS.md` (analogous to `CLAUDE.md` but scoped to agentic workflows).
+
+**What to put in AGENTS.md**:
+```markdown
+## Proven Patterns
+- Use Interface-First decomposition for this codebase (see src/types/)
+- Backend agent must run `db:migrate` before tests — env is not auto-seeded
+
+## Pitfalls
+- Do NOT modify auth.ts and session.ts in parallel — circular imports cause test failures
+- Linter runs on save; do not commit with lint errors, the CI gate is strict
+
+## Style
+- All API responses must follow the ApiResponse<T> wrapper type
+- Error codes live in src/constants/errors.ts — always reuse, never hardcode strings
+```
+
+**Critical rule — never let agents write AGENTS.md directly**. ETH Zürich research (Gloaguen et al., 2026) confirms that LLM-generated context files reduce task success by ~3% and increase inference costs by 20%+, compared to a ~4% improvement from developer-written files. The mechanism: agents generate generic, bloated context that creates cognitive overhead for every subsequent agent reading it.
+
+Every line in AGENTS.md should be approved by a human. If a teammate identifies a new pattern worth documenting, it sends a suggestion to the team lead — the lead decides whether to add it.
+
+**Maintenance**: Review AGENTS.md after each team session (Retro step of the Factory Model). Remove entries that are no longer relevant — stale instructions are actively harmful, not neutral.
+
 ### Git Worktree Management
 
 **Why worktrees matter**:
@@ -1090,6 +1115,15 @@ git worktree add ../project-agent1 main
    Agent 2, check if user.ts has same patterns."
    ```
 
+5. **Hard token budgets per agent**: Assign domain-specific limits to prevent runaway consumption
+   ```bash
+   # In task brief to each teammate
+   "Frontend agent: stay under 180k tokens total.
+   Backend agent: stay under 280k tokens total.
+   Auto-pause and report status at 85% of your budget."
+   ```
+   Token costs scale linearly with team size — a 5-agent team can consume 5× the tokens of a single session. Caps prevent one agent's rabbit hole from blowing the entire session budget.
+
 ### Quality Assurance
 
 **Validation checklist**:
@@ -1112,6 +1146,44 @@ git diff main..agent-teams-branch  # Review all changes
 npm test                           # Run full test suite
 npm run lint                       # Check code style
 ```
+
+### Loop Guardrails
+
+Agent teams can get stuck in unproductive retry cycles without hard iteration limits. Two mechanisms prevent this:
+
+**MAX_ITERATIONS per teammate**:
+
+Set a hard cap in the task brief for each teammate:
+```
+"Maximum 8 attempts on any single failing task.
+Before retrying, answer: What specifically failed? What one change would fix it?
+If still blocked after 8 attempts, stop and report to team lead."
+```
+
+The mandatory reflection prompt ("What failed? What specific change would fix it?") reduces stuck agents substantially — it forces the agent to change approach rather than repeat the same failing action with minor variations.
+
+**Kill and reassign criteria**:
+- Stuck 3+ iterations on the same blocker → kill the task, reassign with more specific context
+- Task consumed >85% of its token budget with no commit → pause and report
+- No progress after 2 reflection cycles → escalate to team lead
+
+### Dedicated Reviewer Teammate
+
+For production agent teams, adding a read-only reviewer agent improves output quality without slowing throughput:
+
+**Setup**:
+```
+Reviewer brief:
+- Model: Claude Opus 4.6 (for thoroughness)
+- Tools available: lint, run tests, security-scan only — no file writes
+- Trigger: automatically review on every TaskCompleted event
+- Scope: the specific files changed in that task, not the full codebase
+- Output: structured findings (blocking / non-blocking) added to shared task list
+```
+
+**Ratio**: 1 reviewer per 3-4 builders. With fewer builders, the reviewer becomes a bottleneck; with more, the review queue backs up.
+
+**Why read-only matters**: a reviewer with write access will start fixing issues itself, which creates merge conflicts and defeats the purpose of parallel isolation.
 
 ---
 
