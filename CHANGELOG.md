@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.38.0] - 2026-03-27
+
 ### Added
 - `guide/ultimate-guide.md` §7.6 Hook Profiles: environment-variable-based hook gating (minimal/standard/strict) for scaling hooks across teams without one-size-fits-all enforcement. Per-hook level assignment via `HOOK_REQUIRED_LEVEL` env prefix. Credit: Everything Claude Code (Affaan Mustafa).
 - `guide/ultimate-guide.md` §9.24 Instinct-Based Continuous Learning: lightweight observation capture at Stop hook (not UserPromptSubmit), confidence scoring, decay model, and promotion pipeline from instincts to CLAUDE.md rules or skills. Credit: Everything Claude Code v2.
