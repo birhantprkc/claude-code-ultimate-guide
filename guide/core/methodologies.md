@@ -67,7 +67,7 @@ Where each methodology sits on two axes: **Spec-First vs Code-First** (Y) and **
 **How to read it:**
 
 - **Top-left** — Spec-first lean: `SDD`, `Doc-Driven`, `Plan-First`. Natural entry point for solo devs and small teams moving away from "code first".
-- **Top-right** — Spec-first governed: `BMAD`, `Req-Driven`, `ATDD`, `DDD`. Real governance, but costly to set up. ROI starts at 5-10 devs.
+- **Top-right** — Spec-first governed: `BMAD`, `Req-Driven`, `ATDD`, `DDD`. Real governance, but costly to set up. ROI is driven by project complexity and requirement stability, not headcount alone.
 - **Bottom-left** — Code-first lean: the natural Claude Code terrain. `TDD` + `Ralph Loop` + `Iterative` = core solo workflow.
 - **Bottom-right** — Code-first at scale: `Multi-Agent`, `Eval-Driven`, `JiTTesting` (Meta, 100M+ LoC). Emerging patterns for high-volume teams.
 - **On the axis** — `Plan-First`, `CDD`, `ADR-Driven`, `GSD`: hybrid approaches that adapt to any context.
@@ -82,14 +82,14 @@ Organized in a 6-tier pyramid from strategic orchestration down to optimization 
 
 | Name | What | Best For | Claude Fit |
 |------|------|----------|------------|
-| **BMAD** | Multi-agent governance with constitution as guardrail | Enterprise 10+ teams, long-term projects | ⭐⭐ Niche but powerful |
+| **BMAD** | Multi-agent governance with constitution as guardrail | High-complexity projects with stable requirements, compliance or governance needs | ⭐⭐ Niche but powerful |
 | **GSD** | Meta-prompting 6-phase workflow with fresh contexts per task | Solo devs, Claude Code CLI | ⭐⭐ Similar to patterns in guide |
 
 **BMAD (Breakthrough Method for Agile AI-Driven Development)** inverts the traditional paradigm: documentation becomes the source of truth, not code. Uses specialized agents (Analyst, PM, Architect, Developer, QA) orchestrated with strict governance. *Note: BMAD's role-based agent naming reflects their methodology; see §9.17 Agent Anti-Patterns for scope-focused alternatives.*
 
 - **Key concept**: Constitution.md as strategic guardrail
 - **When to use**: Complex enterprise projects needing governance
-- **When to avoid**: Small teams, MVPs, rapid prototyping
+- **When to avoid**: MVPs, rapid prototyping, evolving requirements — BMAD is brittle when specs change mid-project
 
 **GSD (Get Shit Done)** addresses context rot through systematic 6-phase workflow (Initialize → Discuss → Plan → Execute → Verify → Complete) with fresh 200k-token contexts per task. Core concepts (multi-agent orchestration, fresh context management) overlap significantly with existing patterns like Ralph Loop, Gas Town, and BMAD. See [resource evaluation](../docs/resource-evaluations/gsd-evaluation.md) for detailed comparison.
 
@@ -253,7 +253,7 @@ No open-source implementation exists yet. You can approximate this today: before
 
 | Name | What | Best For | Claude Fit |
 |------|------|----------|------------|
-| **FDD** | Feature-by-feature delivery | Large teams 10+ | ⭐⭐ Structure |
+| **FDD** | Feature-by-feature delivery | Feature teams with parallel delivery | ⭐⭐ Structure |
 | **Context Eng.** | Context as first-class design | Long sessions | ⭐⭐⭐ Fundamental |
 
 **FDD (Feature-Driven Development)** — Five processes:
@@ -508,24 +508,24 @@ Recommended stacks by situation:
 | Team 5-10, greenfield | Spec Kit + TDD + BDD | Governance + quality + collaboration |
 | Microservices | CDD + Specmatic | Contract-first, parallel dev |
 | Existing SaaS (100+ features) | OpenSpec + BDD | Change tracking, no spec drift |
-| Enterprise 10+ | BMAD + Spec Kit + Specmatic | Full governance + contracts |
+| High-complexity / compliance | BMAD + Spec Kit + Specmatic | Full governance + contracts |
 | LLM-native product | Eval-Driven + Multi-Agent | Self-improving systems |
 
 ---
 
 ## Quick Reference Table
 
-| Methodology | Level | Primary Focus | Team Size | Learning Curve |
-|-------------|-------|---------------|-----------|----------------|
-| BMAD | Orchestration | Governance | 10+ | High |
+| Methodology | Level | Primary Focus | Best Context | Learning Curve |
+|-------------|-------|---------------|--------------|----------------|
+| BMAD | Orchestration | Governance | High complexity, stable requirements | High |
 | SDD | Specification | Contracts | Any | Medium |
 | Doc-Driven | Specification | Alignment | Any | Low |
-| Req-Driven | Specification | Context | 5+ | Medium |
-| DDD | Specification | Domain | 5+ | Very High |
-| BDD | Behavior | Collaboration | 5+ | Medium |
-| ATDD | Behavior | Compliance | 5+ | Medium |
-| CDD | Behavior | APIs | 5+ | Medium |
-| FDD | Delivery | Features | 10+ | Medium |
+| Req-Driven | Specification | Context | Complex requirements, many artifacts | Medium |
+| DDD | Specification | Domain | Complex business domain | Very High |
+| BDD | Behavior | Collaboration | Multi-role stakeholder involvement | Medium |
+| ATDD | Behavior | Compliance | Regulated, explicit acceptance criteria | Medium |
+| CDD | Behavior | APIs | Service boundaries, parallel teams | Medium |
+| FDD | Delivery | Features | Feature teams, parallel delivery | Medium |
 | Context Eng. | Delivery | AI sessions | Any | Low |
 | TDD | Implementation | Quality | Any | Low |
 | Eval-Driven | Implementation | AI outputs | Any | Medium |

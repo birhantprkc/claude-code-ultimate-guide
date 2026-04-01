@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **BMAD selection criterion corrected**: Replaced "Enterprise 10+ teams" with "High-complexity projects with stable requirements" across all docs. The real driver is project complexity + requirement stability, not headcount. BMAD is usable solo or at any team size — and becomes a liability when specs change mid-project. Updated `guide/core/methodologies.md`, `guide/ultimate-guide.md`, `whitepapers/fr/07-guide-reference.qmd`, `whitepapers/en/07-reference-guide.qmd`, `landing/src/pages/methodologies/index.astro`, `landing/src/data/methodology-quiz.ts`. Added explicit "when to avoid: evolving requirements" warning throughout.
+
+- **FDD selection criterion corrected**: Replaced "Large teams 10+" with "Feature teams, parallel delivery" — FDD is organized around feature ownership and parallel delivery structure, not raw headcount. Updated same files.
+
 ### Added
 
 - **`/methodology-advisor` command**: New slash command that reads the codebase silently (contributors, test maturity, spec files, LLM signals, file count) and asks only 3 targeted questions to recommend one of 8 methodology stacks — with contextual quick start using real project paths. Available in `examples/commands/methodology-advisor.md`.

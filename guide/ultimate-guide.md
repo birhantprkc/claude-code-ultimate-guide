@@ -17956,7 +17956,7 @@ Time savings from effective Claude Code usage typically far outweigh API costs f
 
 | Tier | Methodologies | Claude Fit |
 |------|--------------|------------|
-| Orchestration | BMAD | ⭐⭐ Enterprise governance |
+| Orchestration | BMAD | ⭐⭐ High-complexity governance |
 | Specification | SDD, Doc-Driven, Req-Driven, DDD | ⭐⭐⭐ Core patterns |
 | Behavior | BDD, ATDD, CDD | ⭐⭐⭐ Testing focus |
 | Delivery | FDD, Context Engineering | ⭐⭐ Process |
@@ -17983,7 +17983,7 @@ Time savings from effective Claude Code usage typically far outweigh API costs f
 | Team 5-10, greenfield | Spec Kit + TDD + BDD |
 | Microservices | CDD + Specmatic |
 | Existing SaaS | OpenSpec + BDD |
-| Enterprise 10+ | BMAD + Spec Kit |
+| High-complexity / compliance | BMAD + Spec Kit |
 | LLM-native product | Eval-Driven + Multi-Agent |
 
 ---
