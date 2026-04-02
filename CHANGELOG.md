@@ -6,9 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.38.2] - 2026-04-02
+
 ### Documentation
 
 - **`/powerup` documented across learning surfaces**: Added `/powerup` (interactive animated lessons, v2.1.90) to `guide/cheatsheet.md` (Essential Commands table), `guide/roles/learning-with-ai.md` (new "Start Here" subsection), `whitepapers/fr/09-apprendre-avec-ia.qmd` (Slash Commands pour l'Apprentissage), `whitepapers/en/09-learning-with-ai.qmd` (Slash Commands for Learning), `whitepapers/recap-cards/fr/01-commandes-essentielles.qmd` (Commandes Slash Core), and `landing/src/content/docs/guide/learning-with-ai.md` (Slash Commands for Learning).
+- **Hook events expanded to complete 27-event list**: The Event Types table previously listed 22 events. Added the 5 missing events (`Setup`, `PostCompact`, `InstructionsLoaded`, `Elicitation`, `ElicitationResult`) and restructured all 27 events into 7 logical groups (Lifecycle, Agent actions, Permissions, Compaction, Multi-agent, Configuration, File system, User interaction) for easier scanning.
+- **Session-scoped hooks documented**: Added new "Session-Scoped Hooks" subsection explaining that hooks can be registered ephemerally at runtime without writing to `settings.json`. Clarifies that this is the mechanism skills use to register temporary callbacks during their invocation.
+- **`bypassPermissions` safety invariant documented**: Added a protection table listing the paths and files Claude Code always prompts before modifying even in `bypassPermissions` mode (`.git/`, `.claude/`, shell configs, `.gitconfig`, `.mcp.json`, `.claude.json`). Also clarified that content-specific `allow` rules survive `bypassPermissions`.
+- **MEMORY.md file limits documented**: Added concrete enforcement limits to the Auto-Memories section (200-line cap, 25 KB max per file, 200-file directory cap) with a table explaining truncation behavior and the warning appended when limits are exceeded.
+
+### Maintenance
+
+- **`machine-readable/reference.yaml` synced**: Updated `updated` date to 2026-04-02, expanded `hook_events` from 4 to 27 complete events organized in 8 groups, added `hooks_session_scoped` pointer (line 9507), `permissions.bypass_safety_invariant` pointer (line 1076) with protected paths list, and `auto_memories_file_limits` pointer (line 5020) with limit detail string.
+- **README.md stats updated**: Templates count 225 → 228, guide lines 22K+/23K+ → 24K+ (24,734 lines), date badge synced to Apr 2, 2026.
 
 ### Fixed
 

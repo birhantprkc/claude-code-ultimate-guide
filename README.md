@@ -6,9 +6,9 @@
 
 <p align="center">
   <a href="https://github.com/FlorianBruniaux/claude-code-ultimate-guide/stargazers"><img src="https://img.shields.io/github/stars/FlorianBruniaux/claude-code-ultimate-guide?style=for-the-badge" alt="Stars"/></a>
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Mar_31,_2026_·_v3.38.1-brightgreen?style=for-the-badge" alt="Last Update"/></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Apr_2,_2026_·_v3.38.2-brightgreen?style=for-the-badge" alt="Last Update"/></a>
   <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-271_questions-orange?style=for-the-badge" alt="Quiz"/></a>
-  <a href="./examples/"><img src="https://img.shields.io/badge/Templates-225-green?style=for-the-badge" alt="Templates"/></a>
+  <a href="./examples/"><img src="https://img.shields.io/badge/Templates-228-green?style=for-the-badge" alt="Templates"/></a>
   <a href="./guide/security/security-hardening.md"><img src="https://img.shields.io/badge/🛡️_Threat_DB-15_vulnerabilities_·_655_malicious_skills-red?style=for-the-badge" alt="Threat Database"/></a>
   <a href="./mcp-server/"><img src="https://img.shields.io/badge/MCP_Server-npx_ready-blueviolet?style=for-the-badge" alt="MCP Server"/></a>
 </p>
@@ -78,7 +78,7 @@ Both guides serve different needs. Choose based on your priority.
 | **Security hardening** | Only threat database (24 CVEs) | Basic patterns only |
 | **Test understanding** | 271-question quiz | Not available |
 | **Methodologies** (TDD/SDD/BDD) | Full workflow guides | Not covered |
-| **Copy-paste ready** templates | 219 templates | 200+ templates |
+| **Copy-paste ready** templates | 228 templates | 200+ templates |
 
 ### Ecosystem Positioning
 
@@ -87,7 +87,7 @@ Both guides serve different needs. Choose based on your priority.
                            ▲
                            │
                            │  ★ This Guide
-                           │  Security + Methodologies + 23K+ lines
+                           │  Security + Methodologies + 24K+ lines
                            │
                            │  [Everything-You-Need-to-Know]
                            │  SDLC/BMAD beginner
@@ -104,7 +104,7 @@ Both guides serve different needs. Choose based on your priority.
 **4 unique gaps no competitor covers:**
 1. **Security-First** — 24 CVEs + 655 malicious skills tracked (no competitor has this depth)
 2. **Methodology Workflows** — TDD/SDD/BDD comparison + step-by-step guides
-3. **Comprehensive Reference** — 23K+ lines across 16 specialized guides (24× more reference material than everything-cc)
+3. **Comprehensive Reference** — 24K+ lines across 16 specialized guides (24× more reference material than everything-cc)
 4. **Educational Progression** — 271-question quiz, beginner → expert path
 
 **Recommended workflow:**
@@ -162,8 +162,8 @@ claude "Use the claude-code-guide MCP server. Activate the claude-code-expert pr
 graph LR
     root[📦 Repository<br/>Root]
 
-    root --> guide[📖 guide/<br/>23K+ lines]
-    root --> examples[📋 examples/<br/>219 templates]
+    root --> guide[📖 guide/<br/>24K+ lines]
+    root --> examples[📋 examples/<br/>228 templates]
     root --> quiz[🧠 quiz/<br/>271 questions]
     root --> tools[🔧 tools/<br/>utils]
     root --> machine[🤖 machine-readable/<br/>AI index]
@@ -184,7 +184,7 @@ graph LR
 ```
 📦 claude-code-ultimate-guide/
 │
-├─ 📖 guide/              Core Documentation (22K+ lines)
+├─ 📖 guide/              Core Documentation (24K+ lines)
 │  ├─ ultimate-guide.md   Complete reference, 10 sections
 │  ├─ cheatsheet.md       1-page printable
 │  ├─ architecture.md     How Claude Code works internally
@@ -194,7 +194,7 @@ graph LR
 │  ├─ mcp-servers-ecosystem.md  Official & community MCP servers
 │  └─ workflows/          Step-by-step guides
 │
-├─ 📋 examples/           225 Production Templates
+├─ 📋 examples/           228 Production Templates
 │  ├─ agents/             9 custom AI personas
 │  ├─ commands/           26 slash commands
 │  ├─ hooks/              31 hooks (bash + PowerShell)
@@ -252,7 +252,7 @@ graph LR
 
 [Browse all 41 diagrams →](./guide/diagrams/)
 
-**What this means for you**: Understand the master loop before reading 23K+ lines, see multi-agent topologies at a glance, share visual security threat models with your team.
+**What this means for you**: Understand the master loop before reading 24K+ lines, see multi-agent topologies at a glance, share visual security threat models with your team.
 
 ---
 
@@ -743,7 +743,7 @@ Use this guide critically. Experiment. Share what works for you.
 
 | File | Purpose | Time |
 |------|---------|------|
-| **[Ultimate Guide](./guide/ultimate-guide.md)** | Complete reference (23K+ lines), 10 sections | 30-40h (full) • Most consult sections |
+| **[Ultimate Guide](./guide/ultimate-guide.md)** | Complete reference (24K+ lines), 10 sections | 30-40h (full) • Most consult sections |
 | **[Cheat Sheet](./guide/cheatsheet.md)** | 1-page printable reference | 5 min |
 | **[Visual Reference](./guide/core/visual-reference.md)** | 20 ASCII diagrams for key concepts | 5 min |
 | **[Architecture](./guide/core/architecture.md)** | How Claude Code works internally | 25 min |
@@ -761,7 +761,7 @@ Use this guide critically. Experiment. Share what works for you.
 | **[Claude Code Releases](./guide/core/claude-code-releases.md)** | Official release history | 10 min |
 
 <details>
-<summary><strong>Examples Library</strong> (219 templates)</summary>
+<summary><strong>Examples Library</strong> (228 templates)</summary>
 
 **Agents** (6): [code-reviewer](./examples/agents/code-reviewer.md), [test-writer](./examples/agents/test-writer.md), [security-auditor](./examples/agents/security-auditor.md), [refactoring-specialist](./examples/agents/refactoring-specialist.md), [output-evaluator](./examples/agents/output-evaluator.md), [devops-sre](./examples/agents/devops-sre.md) ⭐
 
@@ -903,7 +903,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ---
 
-*Version 3.38.1 | Updated daily · Mar 31, 2026 | Crafted with Claude*
+*Version 3.38.2 | Updated daily · Apr 2, 2026 | Crafted with Claude*
 
 <!-- SEO Keywords -->
 <!-- claude code, claude code tutorial, anthropic cli, ai coding assistant, claude code mcp,

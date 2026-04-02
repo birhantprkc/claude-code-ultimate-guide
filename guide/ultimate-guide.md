@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.38.1
+**Version**: 3.38.2
 
 ---
 
@@ -1072,6 +1072,19 @@ Use for restrictive workflows where you want tight control over which tools run,
 Auto-approves everything, including shell commands. No permission prompts at all.
 
 ⚠️ **Warning**: Only use in sandboxed CI/CD environments. Requires `--dangerously-skip-permissions` to enable from CLI. Never use on production systems or with untrusted code.
+
+**Safety invariant — some paths always prompt, even in `bypassPermissions` mode**:
+
+Certain writes are considered too sensitive to auto-approve under any configuration. Claude Code always prompts before modifying:
+
+| Protected target | Examples |
+|-----------------|---------|
+| `.git/` directory | git hooks, refs, config inside the repo |
+| `.claude/` directory | agents, skills, hooks, settings — except `.claude/worktrees/` |
+| Shell config files | `.bashrc`, `.zshrc`, `.bash_profile`, `.profile` |
+| VCS and tool configs | `.gitconfig`, `.mcp.json`, `.claude.json` |
+
+Content-specific `allow` rules (e.g., `Bash(npm publish:*)`) defined in `settings.json` or CLAUDE.md also survive `bypassPermissions` — they continue to apply as additional filters on top of any permission mode. This lets you build precise guardrails (e.g., "always ask before publishing to npm") that hold regardless of how the session is launched.
 
 ### Permission Fatigue (anti-pattern)
 
@@ -5004,6 +5017,16 @@ Claude Code automatically saves useful context across sessions without manual CL
 - Automatically recalled in future sessions for the same project
 - Manage with `/memory`: view, edit, or delete stored entries
 
+**File limits** (enforced at read time):
+
+| Limit | Value | Behavior when exceeded |
+|-------|-------|------------------------|
+| `MEMORY.md` max lines | 200 lines | Truncated at line 200, warning appended |
+| `MEMORY.md` max size | 25 KB | Truncated at last newline before 25 KB, warning appended |
+| Memory directory | 200 files | Oldest files pruned when limit is reached |
+
+Line truncation happens first; if the file is still over 25 KB after line truncation, byte truncation is applied at the last complete line. Both truncations append a warning comment so you can see that content was cut. The Auto Dream consolidation process keeps `MEMORY.md` under the 200-line cap as part of its Phase 4 pruning step.
+
 **What gets remembered** (examples):
 - Architectural decisions: "We use Prisma for database access"
 - Preferences: "This team prefers functional components over class components"
@@ -5316,7 +5339,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.38.1 Version Control & Backup
+### 3.38.2 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -9227,29 +9250,72 @@ Hooks are scripts that run automatically when specific events occur.
 
 ### Event Types
 
+**Lifecycle** (session-level events):
+
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
 | `SessionStart` | Session begins or resumes | No | Initialization, load dev context |
-| `UserPromptSubmit` | User submits prompt, before Claude processes it | Yes | Context enrichment, prompt validation |
-| `PreToolUse` | Before a tool call executes | Yes | Security validation, input modification |
-| `PermissionRequest` | Permission dialog appears | Yes | Custom approval logic |
-| `PostToolUse` | After a tool completes successfully | No | Formatting, logging |
-| `PostToolUseFailure` | After a tool call fails | No | Error logging, recovery actions |
-| `Notification` | Claude sends notification | No | Sound alerts, custom notifications |
-| `SubagentStart` | Sub-agent spawned | No | Subagent initialization |
-| `SubagentStop` | Sub-agent finishes | Yes | Subagent cleanup |
+| `Setup` | Environment setup phase at session start | No | Install tools, validate prerequisites |
+| `SessionEnd` | Session terminates | No | Cleanup, logging |
+
+**Agent actions** (tool execution pipeline):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
 | `Stop` | Claude finishes responding | Yes | Post-response actions, continue loops |
 | `StopFailure` | Turn ends due to API error (rate limit, auth failure) | No | Alert on quota exhaustion, observability |
+| `PreToolUse` | Before a tool call executes | Yes | Security validation, input modification |
+| `PostToolUse` | After a tool completes successfully | No | Formatting, logging |
+| `PostToolUseFailure` | After a tool call fails | No | Error logging, recovery actions |
+
+**Permissions** (approval flow):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
+| `PermissionRequest` | Permission dialog appears | Yes | Custom approval logic |
+| `PermissionDenied` | A permission is denied | No | Audit denied operations, alert |
+
+**Compaction** (context management):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
+| `PreCompact` | Before context compaction | No | Save state before compaction |
+| `PostCompact` | After context compaction completes | No | Restore state, log compaction |
+
+**Multi-agent** (orchestration):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
+| `SubagentStart` | Sub-agent spawned | No | Subagent initialization |
+| `SubagentStop` | Sub-agent finishes | Yes | Subagent cleanup |
 | `TeammateIdle` | Agent team member about to go idle | Yes | Team coordination, quality gates |
+| `TaskCreated` | Task created via TaskCreate | No | Task monitoring, audit logging |
 | `TaskCompleted` | Task being marked as completed | Yes | Enforce completion criteria |
+
+**Configuration** (settings & instructions):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
 | `ConfigChange` | Config file changes during session | Yes (except policy) | Enterprise audit, block unauthorized changes |
-| `WorktreeCreate` | Worktree being created | Yes (non-zero exit) | Custom VCS setup |
-| `WorktreeRemove` | Worktree being removed | No | Clean up VCS state |
+| `InstructionsLoaded` | CLAUDE.md or instructions file loaded | No | Audit which instruction files are active |
+
+**File system** (workspace changes):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
 | `CwdChanged` | Working directory changes during session | No | direnv reload, toolchain switching |
 | `FileChanged` | A file is modified during session | No | Reload config, trigger watchers |
-| `TaskCreated` | Task created via TaskCreate | No | Task monitoring, audit logging |
-| `PreCompact` | Before context compaction | No | Save state before compaction |
-| `SessionEnd` | Session terminates | No | Cleanup, logging |
+| `WorktreeCreate` | Worktree being created | Yes (non-zero exit) | Custom VCS setup |
+| `WorktreeRemove` | Worktree being removed | No | Clean up VCS state |
+
+**User interaction** (prompts & notifications):
+
+| Event | When It Fires | Can Block? | Use Case |
+|-------|---------------|------------|----------|
+| `UserPromptSubmit` | User submits prompt, before Claude processes it | Yes | Context enrichment, prompt validation |
+| `Notification` | Claude sends notification | No | Sound alerts, custom notifications |
+| `Elicitation` | Claude requests information from user (headless) | Yes | Intercept and pre-answer questions in automation |
+| `ElicitationResult` | Response to an elicitation is received | No | Log or audit user responses to Claude's questions |
 
 > **`Stop` and `SubagentStop` — `last_assistant_message` field (v2.1.47+)**: These events now include a `last_assistant_message` field in their JSON input, giving direct access to Claude's final response without parsing transcript files. Useful for orchestration pipelines that need to inspect or log the last output.
 >
@@ -9437,6 +9503,19 @@ gh pr create --title "..." --body "..."
 | `async` | If `true`, runs in background without blocking (for `command` type only) |
 | `statusMessage` | Custom spinner message displayed while hook runs |
 | `once` | If `true`, runs only once per session then is removed (skills only) |
+
+### Session-Scoped Hooks
+
+Hooks do not have to be persisted in `settings.json`. Claude Code supports ephemeral **session-scoped hooks** that are registered at runtime and last only for the duration of the current session. They are never written to any config file and disappear when the session ends.
+
+This is the mechanism skills use internally: when you invoke a skill, it can register one or more hooks for that invocation without permanently modifying your configuration. Once the skill finishes (or the session ends), those hooks are gone.
+
+**When to use session-scoped hooks**:
+- Skills that need event callbacks only while they are active
+- Temporary automation (e.g., "audit every file I edit during this session only")
+- CI pipelines or orchestration scripts that inject hooks via the API programmatically
+
+Session-scoped hooks follow the same JSON schema as `settings.json` hooks (same event names, matchers, types, and output format) and can be registered through the programmatic API or by skills at invocation time.
 
 **Hook types:**
 
@@ -24652,4 +24731,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.38.1
+**Last updated**: January 2026 | **Version**: 3.38.2
