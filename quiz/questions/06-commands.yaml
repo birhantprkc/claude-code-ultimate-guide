@@ -304,3 +304,139 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "10.1 Commands Table"
       anchor: "#quick-actions"
+
+  - id: "06-013"
+    difficulty: "junior"
+    profiles: ["junior", "senior", "power"]
+    question: "What does the `/powerup` command do in Claude Code (added in v2.1.90)?"
+    options:
+      a: "Upgrades your Claude Code subscription to Pro tier"
+      b: "Increases the model effort level to maximum for the current session"
+      c: "Runs interactive animated lessons teaching Claude Code features with live terminal demos"
+      d: "Enables fast mode (2.5x speed) for the session"
+    correct: "c"
+    explanation: |
+      `/powerup` was added in v2.1.90 as a learning tool that delivers interactive animated lessons teaching Claude Code features through live terminal demonstrations. It is distinct from `/fast` (which toggles a faster, more expensive mode), from effort settings, and from subscription management. Think of it as an in-terminal tutorial system, useful for onboarding or discovering features you may have missed.
+    doc_reference:
+      file: "guide/core/claude-code-releases.md"
+      section: "v2.1.90"
+      anchor: "#v2190"
+
+  - id: "06-014"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "You run `/loop 5m check the deploy`. How does Claude Code execute this, and how do you stop it?"
+    options:
+      a: "Runs the prompt once, then waits for manual re-trigger. Stop by closing the terminal."
+      b: "Executes the prompt every 5 minutes until you press Ctrl+C or send any new message"
+      c: "Creates a background cron job that continues even after Claude Code exits"
+      d: "Runs the prompt in a separate sub-agent session on a 5-minute schedule"
+    correct: "b"
+    explanation: |
+      `/loop [interval] [prompt]` runs the given prompt or slash command repeatedly at the specified interval. After each execution, Claude waits the interval and executes again. The default interval when none is provided is 10 minutes. Stopping is simple: press Ctrl+C or send any new message. The loop does not persist beyond the session. Common use cases include monitoring deploys, polling for PR feedback, and checking on background tasks.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "The /loop Command"
+      anchor: "#the-loop-command"
+
+  - id: "06-015"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What is the key difference between `/branch` and starting a fresh `claude` session at a decision point?"
+    options:
+      a: "There is no difference — `/branch` is just an alias for starting a new session"
+      b: "`/branch` forks the current session into an independent copy that preserves all prior context, while a fresh session starts empty"
+      c: "`/branch` creates a git branch automatically, while a fresh session does not"
+      d: "`/branch` is only available in Plan Mode; a fresh session works in any mode"
+    correct: "b"
+    explanation: |
+      `/branch` creates a new independent session that starts from the current session's history. Both branches then evolve independently. The equivalent CLI approach is `claude --resume <session-id> --fork-session`. A fresh `claude` session starts with no conversation history, losing all context accumulated up to the decision point. Use `/branch` when you want to try two different approaches to the same problem without losing either starting point.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Session Forking"
+      anchor: "#session-forking"
+
+  - id: "06-016"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What does the `argument-hint` frontmatter field do in a custom command or skill file?"
+    options:
+      a: "Provides a fallback value for `$ARGUMENTS` when the user invokes the command with no arguments"
+      b: "Displays placeholder text in the slash command picker UI showing the expected argument format"
+      c: "Validates the arguments against a schema before the command runs"
+      d: "Sets the default effort level when the command is invoked with arguments"
+    correct: "b"
+    explanation: |
+      `argument-hint` is a frontmatter field that controls what placeholder text appears in the slash command picker when a command or skill accepts `$ARGUMENTS`. When a user types the command name, the picker shows the hint as a visual guide to the expected argument format. Example: `argument-hint: "<env> [--skip-tests] [--dry-run]"`. This field has no effect on argument validation or default values — it is purely a UI affordance for discoverability.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "6.3 Variable Interpolation"
+      anchor: "#variable-interpolation"
+
+  - id: "06-017"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "Among the guide's example commands `/investigate`, `/qa`, and `/canary`, which pairing of command to purpose is correct?"
+    options:
+      a: "`/investigate` = post-deploy monitoring; `/qa` = root-cause debugging; `/canary` = quality assurance testing"
+      b: "`/investigate` = root-cause debugging before any fix; `/qa` = diff-aware web app QA testing; `/canary` = post-deploy production monitoring"
+      c: "`/investigate` = code review workflow; `/qa` = canary deployment rollout; `/canary` = automated test generation"
+      d: "`/investigate` = security vulnerability scan; `/qa` = test coverage report; `/canary` = gradual traffic rollout"
+    correct: "b"
+    explanation: |
+      All three are custom command templates in `examples/commands/`. `/investigate` enforces systematic root-cause analysis before writing any fix. `/qa` runs diff-aware, tiered quality assurance on a web app by identifying affected routes from the current branch's changes. `/canary` monitors a live application after deployment and compares against a pre-deploy baseline. These commands show how structured workflows can be encoded beyond simple prompts.
+    doc_reference:
+      file: "examples/commands/"
+      section: "Custom Command Templates"
+      anchor: "#command-examples"
+
+  - id: "06-018"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "You need deterministic CI/CD execution unaffected by local developer settings. Which CLI flag achieves this?"
+    options:
+      a: "`--dangerously-skip-permissions` — bypasses all permission checks for headless execution"
+      b: "`--bare` — disables hooks, LSP, plugin sync, and skill directory scanning; requires ANTHROPIC_API_KEY"
+      c: "`--no-mcp` — disables all MCP servers for a clean execution environment"
+      d: "`-p` alone — print mode already provides a hermetic execution environment"
+    correct: "b"
+    explanation: |
+      `--bare` was added specifically for scripted `-p` calls in CI environments. It disables hooks, LSP, plugin sync, and skill directory walks so that local developer configuration never bleeds into pipeline execution. It also disables auto-memory entirely and requires `ANTHROPIC_API_KEY` or `apiKeyHelper` via `--settings`. Without `--bare`, a `claude -p` call in CI could pick up local hooks, plugins, and skills installed on the machine that set up the runner, making pipeline behavior non-deterministic.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "9.2 CI/CD Integration"
+      anchor: "#bare-flag"
+
+  - id: "06-019"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the purpose of the `--channels` CLI flag?"
+    options:
+      a: "Specifies which communication channels (Slack, email, webhook) receive Claude's output"
+      b: "Sets the number of parallel tool execution channels for improved performance"
+      c: "Enables a permission relay where MCP channel servers can forward tool approval prompts to an external system"
+      d: "Configures Claude to subscribe to specific event channels from external services"
+    correct: "c"
+    explanation: |
+      `--channels` is a permission relay mechanism. MCP servers that declare the `permission` capability can use it to forward tool approval prompts out of the terminal, for example to your phone, so you can approve or deny tool calls remotely without being at your keyboard. This is distinct from Remote Control (which mirrors the full session). The channels feature is specifically about delegating the permission decision flow to an external system.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "CLI Flags"
+      anchor: "#channels-flag"
+
+  - id: "06-020"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "When running `claude auth login`, what does the `--console` flag do?"
+    options:
+      a: "Outputs the authentication token to stdout instead of storing it in the keychain"
+      b: "Authenticates via Anthropic Console (API billing) instead of the default claude.ai OAuth flow"
+      c: "Opens a browser console debug view for troubleshooting authentication issues"
+      d: "Enables structured JSON output for the login command"
+    correct: "b"
+    explanation: |
+      The `--console` flag routes authentication through the Anthropic Console, which is the API billing path. This is the correct choice for teams and developers who access Claude Code via API keys managed in console.anthropic.com, as opposed to the standard claude.ai subscription OAuth flow. If your organization manages API credentials through the Anthropic Console rather than individual claude.ai accounts, use `claude auth login --console` to authenticate correctly.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "1.1 Installation"
+      anchor: "#console-auth"

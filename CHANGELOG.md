@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Quiz
+
+- **Quiz expanded from 271 to 334 questions (+63 questions, 16 categories)**: Comprehensive update covering v3.34.10 → v3.38.3 guide changes.
+  - **New category `16-team-metrics.yaml`** (12 questions): DORA 4 metrics + 2024 benchmarks, 2025 DORA archetype shift (7 archetypes, 8 dimensions), SPACE framework 5 dimensions, Velocity Trap, AI-specific metrics (CFR by code origin, review time comparison), Bug Escape Rate formula, vanity metrics to drop, 4-question test, 5-person vs 25-person stack, implementation roadmap.
+  - **`07-hooks.yaml`** (+8 questions): `defer` permission value, multi-hook precedence (deny > defer > ask > allow), session-scoped hooks, bypassPermissions safety invariant, Setup/Elicitation/ElicitationResult events, conditional `if` field, PostCompact event.
+  - **`09-advanced-patterns.yaml`** (+8 questions): Loop Guardrails (MAX_ITERATIONS=8), Dedicated Reviewer 1:4 ratio, Iterative Retrieval WHY/WHAT pattern, cache prefix hierarchy (tools > system > messages), 20-block lookback degradation, RPI workflow Gate 1, Opus 4.6 min token threshold (4,096), Context Chaining vs Ralph Loop.
+  - **`06-commands.yaml`** (+8 questions): /powerup animated lessons, /loop, /branch + --fork-session, argument-hint frontmatter, /investigate//qa//canary, --bare, --channels, --console.
+  - **`03-memory-settings.yaml`** (+6 questions): Agent Memory 3 scopes, managed-settings.d/, ${CLAUDE_PLUGIN_DATA} persistent storage, MEMORY.md hard limits (200-line/25KB/200-file), `effort` frontmatter field, MEMORY.md management.
+  - **`12-architecture.yaml`** (+5 questions): Context Rot n² structural nature, JIT vs RAG retrieval, MMD drift detection, Goldilocks altitude problem, MCP tool count limits (<10 servers, <80 tools).
+  - **`13-security.yaml`** (+3 questions): bypassPermissions protected paths, Cache Bug 2 (87-118K tokens/resume), CLAUDE_CODE_ATTRIBUTION_HEADER/Bug 3 marginal impact.
+  - **`14-privacy-observability.yaml`** (+3 questions): CLAUDE_CODE_SUBPROCESS_ENV_SCRUB, sandbox.failIfUnavailable, X-Claude-Code-Session-Id nginx passthrough.
+  - **`11-learning-with-ai.yaml`** (+3 questions): Team-Level Steering Metrics (2 levels), Velocity Trap warning, Monday ritual.
+  - **`15-ai-ecosystem.yaml`** (+2 questions): Google Antigravity agent-first IDE, AGENTS.md Compound Learning (+4% human-curated vs -3% LLM-generated).
+  - **`05-skills.yaml`** (+3 questions, already applied): Skills 2.0 taxonomy, Skill Lifecycle 3 phases, Skill Evals.
+  - **`02-core-concepts.yaml`** (+2 questions): BMAD criterion (high-complexity + stable requirements), FDD criterion (feature teams + parallel delivery).
+  - **Stale fixes (7 questions updated)**: 07-001 (exit code 2 stderr-only), 07-002 (17→27 hook events), 07-004 (if field), 02-001 (auto-compact mechanism), 03-001 (managed-settings.d/), 12-002 (TodoWrite→Tasks API), 12-004 (Claude 3.5 Sonnet→Sonnet 4.6).
+
+## [3.38.4] - 2026-04-03
+
+### Fixed
+
+- **`guide/diagrams/04-architecture-internals.md` — Master Loop rendering bug**: Two backward edges (`G --> C` and `J --> A`) were creating giant black arrow artifacts in Mermaid renderers (dagre layout engine routes long cycle-breaking edges around the entire diagram). Fixed by enclosing the inner tool-execution loop inside a `subgraph AGENT_LOOP` so `F --> C` renders as a contained cycle within the box. Outer conversation loop now routes `J -->|Yes| B` (rebuild prompt) instead of `J -->|Yes| A`, which is also semantically more accurate. Removed the separate "Parse tool calls" node by merging into "Execute tools in parallel" (reflects `StreamingToolExecutor` reality). Description updated to explicitly name the two nested loops.
+
+### Documentation
+
+- **`guide/diagrams/04-architecture-internals.md` — System Prompt Assembly**: Updated to reflect two-zone architecture confirmed by source analysis. Diagram now shows the `BOUNDARY MARKER` separating STATIC zone (`cacheScope: 'global'`, shared across all users) from DYNAMIC zone (per-session cache). Added note that MCP instructions are always recomputed and uncached (confirmed in source: "servers connect/disconnect between turns"). Added `machine-readable` source footnote with 2026-03-31 confirmation date.
+
 ## [3.38.3] - 2026-04-03
 
 ### Documentation

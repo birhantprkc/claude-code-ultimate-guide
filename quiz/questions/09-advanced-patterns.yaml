@@ -1064,3 +1064,139 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "2.5 Effort Levels"
       anchor: "#effort-levels"
+
+  - id: "09-044"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What does MAX_ITERATIONS=8 control in agent team workflows, and what happens when the limit is reached?"
+    options:
+      a: "Maximum files an agent can read — agent stops reading and proceeds with available context"
+      b: "Maximum retry attempts on any failing task — agent stops and reports to the team lead rather than continuing to retry"
+      c: "Maximum number of teammate agents — team lead stops spawning and works sequentially"
+      d: "Maximum token budget per agent — agent switches to low-effort mode to conserve tokens"
+    correct: "b"
+    explanation: |
+      Loop Guardrails prevent agents from getting stuck in unproductive retry cycles. MAX_ITERATIONS sets a hard cap on retry attempts for any single failing task. When the limit is reached, the agent stops and reports to the team lead instead of retrying. A reflection prompt ("What specifically failed? What one change would fix it?") runs before each retry, forcing the agent to change approach rather than repeat the same failing action. Without iteration limits, agents can consume their entire token budget retrying a blocked task while the rest of the work queue stalls.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "9.9 Multi-Agent Teams"
+      anchor: "#loop-guardrails"
+
+  - id: "09-045"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "In the Dedicated Reviewer Teammate pattern, what is the recommended ratio and why must the reviewer be read-only?"
+    options:
+      a: "1 reviewer per 10 builders — reviewer is a bottleneck at lower ratios; read-only prevents context overload"
+      b: "1 reviewer per 3-4 builders — fewer builders makes reviewer a bottleneck, more causes queue backup; read-only prevents merge conflicts"
+      c: "1 reviewer per builder — parity maximizes review coverage; read-only is optional"
+      d: "2 reviewers per builder — double review catches more bugs; read-only is required by the API"
+    correct: "b"
+    explanation: |
+      The Dedicated Reviewer Teammate adds a read-only agent that reviews on every TaskCompleted event. Ratio: 1 reviewer per 3-4 builders. Below this range the reviewer becomes a bottleneck. Above it, the review queue backs up and findings arrive too late to be acted on cleanly. Read-only is essential: a reviewer with write access will start fixing issues itself, creating merge conflicts and defeating the purpose of parallel isolation. The reviewer's job is to produce structured findings (blocking vs non-blocking), not to apply fixes.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "9.9 Multi-Agent Teams"
+      anchor: "#dedicated-reviewer-teammate"
+
+  - id: "09-046"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the WHY/WHAT structure in the Iterative Retrieval pattern for sub-agents, and what is the maximum number of retrieval cycles?"
+    options:
+      a: "WHY = task description, WHAT = output format — maximum 5 cycles"
+      b: "WHY = the problem being solved, WHAT = the specific task — maximum 3 cycles"
+      c: "WHY = reason for spawning the agent, WHAT = files to read — maximum 2 cycles"
+      d: "WHY = business rationale, WHAT = architecture decision — maximum 1 cycle"
+    correct: "b"
+    explanation: |
+      Iterative Retrieval gives sub-agents a bounded context budget. WHY = the problem being solved or constraint being met (gives the agent decision context). WHAT = the specific task to execute. An agent that only knows WHAT lacks the business constraints that prevent wrong choices. WHY steers implementation without additional correction cycles. Maximum 3 cycles: Cycle 1 uses initial context, Cycle 2 is a specific targeted request, Cycle 3 is a final targeted request where the agent must produce output regardless of remaining uncertainty.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "9.9 Multi-Agent Teams"
+      anchor: "#iterative-retrieval-for-sub-agents"
+
+  - id: "09-047"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "How does Claude Code structure its cache prefix hierarchy, and which layers are almost always cache hits?"
+    options:
+      a: "messages > system > tools — messages layer is always a hit, tools layer is always a miss"
+      b: "system > tools > messages — only system prompt hits reliably"
+      c: "tools > system > messages — tools and system layers are almost always hits, messages layer varies"
+      d: "tools > messages > system — all three layers hit equally often"
+    correct: "c"
+    explanation: |
+      Every API call structures content in a fixed order: tools then system then messages. Cache matching always starts from the beginning of this prefix. Tools (the tool list) and system (CLAUDE.md) are stable across most turns. This means the first two layers are almost always cache hits, and only new message turns require fresh computation. Placing the most stable content first maximizes the proportion of each request served from cache at 0.1x base cost.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Cost Optimization"
+      anchor: "#how-claude-code-handles-caching-automatically"
+
+  - id: "09-048"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the 20-block lookback in prompt caching, what problem does it cause in long sessions, and what is the fix?"
+    options:
+      a: "Claude reads only the last 20 user messages — older context is lost permanently; the fix is /save"
+      b: "Cache matching looks back approximately 20 message blocks — long sessions lose cache efficiency as early blocks fall outside the window; the fix is /compact"
+      c: "Cache is invalidated after 20 tool calls — agents must pause every 20 calls; the fix is to reduce tool usage"
+      d: "After 20 turns the session context is truncated — the fix is to start a new session"
+    correct: "b"
+    explanation: |
+      Cache matching uses a bounded lookback of approximately 20 blocks. In long sessions with many tool calls, blocks from early in the conversation fall outside this window and become cache misses even if their content hasn't changed. The practical consequence: very long sessions gradually lose cache efficiency at the message layer. The fix is /compact: it compresses conversation history into a single summary block, resetting the lookback window and restoring high cache hit rates for subsequent turns.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Cost Optimization"
+      anchor: "#how-claude-code-handles-caching-automatically"
+
+  - id: "09-049"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "In the RPI workflow (Research > Plan > Implement), what artifact does each phase produce, and what happens at Gate 1?"
+    options:
+      a: "Research produces NOTES.md, Plan produces SPEC.md, Implement produces code — Gate 1 is a code review"
+      b: "Research produces RESEARCH.md, Plan produces PLAN.md, Implement produces code — Gate 1 is a GO/NO-GO decision by the human before any planning begins"
+      c: "Research produces a prompt, Plan produces a task list, Implement produces a diff — Gate 1 is an automated test pass"
+      d: "All phases share a PROGRESS.md — gates are enforced by Claude automatically"
+    correct: "b"
+    explanation: |
+      RPI structures feature development into three locked phases. Phase 1 (Research): produces RESEARCH.md covering feasibility, risks, decision points, and an effort estimate. Gate 1: the human marks GO or NO-GO. Phase 2 (Plan): produces PLAN.md with architecture decisions and sequential implementation steps. Gate 2: human approves before any code is written. Phase 3 (Implement): produces working code with per-step test gates. Gate 1 is the most important: a NO-GO saves the cost of a full implementation that would need to be discarded.
+    doc_reference:
+      file: "guide/workflows/rpi.md"
+      section: "RPI Workflow"
+      anchor: "#rpi-workflow"
+
+  - id: "09-050"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the prompt caching minimum token threshold for Opus 4.6, and what is the practical implication for short CLAUDE.md files?"
+    options:
+      a: "Opus 4.6: 1,024 tokens — any CLAUDE.md over one paragraph is cached"
+      b: "Opus 4.6: 4,096 tokens — a CLAUDE.md under ~4,000 tokens is never cached on Opus 4.6"
+      c: "Opus 4.6: 2,048 tokens — Opus and Sonnet share the same minimum"
+      d: "Opus 4.6: 8,192 tokens — most CLAUDE.md files are too short to be cached"
+    correct: "b"
+    explanation: |
+      Minimum token thresholds for prompt caching eligibility vary by model. Opus 4.6, Opus 4.5, and Haiku 4.5 require 4,096 tokens minimum. Sonnet 4.6 requires 2,048 tokens. Sonnet 4.5 and earlier require 1,024 tokens. Blocks smaller than the threshold are never cached regardless of stability. A short CLAUDE.md that doesn't cross the threshold for the target model provides zero caching benefit, which is relevant for teams optimizing session costs on Opus 4.6.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Cost Optimization"
+      anchor: "#how-claude-code-handles-caching-automatically"
+
+  - id: "09-051"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "How does Context Chaining differ from the Ralph Loop in multi-session workflows?"
+    options:
+      a: "Context Chaining is for single-session work; Ralph Loop spans multiple sessions"
+      b: "Context Chaining uses curated session-to-session summaries that capture key decisions; Ralph Loop re-feeds the full prior session transcript"
+      c: "Context Chaining relies on MCP servers for persistence; Ralph Loop uses CLAUDE.md files"
+      d: "There is no functional difference; they are two names for the same pattern"
+    correct: "b"
+    explanation: |
+      Context Chaining and Ralph Loop both maintain continuity across sessions but differ fundamentally in what they carry forward. Context Chaining produces a curated summary at session end capturing decisions made, current state, and what remains to do, then injects only that summary at the start of the next session. Ralph Loop re-feeds the complete prior session transcript, preserving raw detail at the cost of context bloat. Context Chaining is preferred when you want deliberate, lean continuity. Ralph Loop suits cases where the full history is genuinely needed.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "9.5 Tight Feedback Loops"
+      anchor: "#context-chaining"

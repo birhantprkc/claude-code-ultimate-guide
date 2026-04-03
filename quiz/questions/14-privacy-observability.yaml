@@ -194,3 +194,54 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "AI Traceability"
       anchor: "#ai-traceability"
+
+  - id: "14-012"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What does CLAUDE_CODE_SUBPROCESS_ENV_SCRUB do and why is it needed?"
+    options:
+      a: "It clears the terminal output after each command"
+      b: "It prevents sensitive environment variables from leaking into subprocess contexts (e.g., MCP servers, hooks)"
+      c: "It disables all environment variable expansion in bash commands"
+      d: "It encrypts environment variables before they are passed to Claude"
+    correct: "b"
+    explanation: |
+      CLAUDE_CODE_SUBPROCESS_ENV_SCRUB is a security control that prevents sensitive env vars (API keys, tokens, secrets) from leaking into subprocess contexts. Without it, environment variables present in the parent shell are inherited by MCP server processes, hooks, and spawned subprocesses. Set it to a comma-separated list of var names to scrub, or use a glob pattern. Critical for teams where Claude runs in environments with production credentials.
+    doc_reference:
+      file: "guide/security/data-privacy.md"
+      section: "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"
+      anchor: "#claude_code_subprocess_env_scrub"
+
+  - id: "14-013"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What does sandbox.failIfUnavailable control in Claude Code settings?"
+    options:
+      a: "Whether Claude Code crashes when the network is unavailable"
+      b: "Whether Claude Code refuses to run if its sandbox isolation layer cannot be activated"
+      c: "Whether MCP servers fail gracefully when their sandbox times out"
+      d: "Whether hooks are skipped when the sandbox is busy"
+    correct: "b"
+    explanation: |
+      sandbox.failIfUnavailable (boolean, default: false) controls whether Claude Code hard-fails when sandbox isolation cannot be activated. Set to true in production/CI environments to enforce that every session runs inside the sandbox — no silent fallback to unsandboxed mode. Set to false in dev environments where sandbox may not be available (e.g., certain Linux kernels or Docker-in-Docker). Part of the defense-in-depth configuration.
+    doc_reference:
+      file: "guide/security/sandbox-native.md"
+      section: "sandbox.failIfUnavailable"
+      anchor: "#sandboxfaililunavailable"
+
+  - id: "14-014"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the X-Claude-Code-Session-Id header and how should it be handled in nginx?"
+    options:
+      a: "A header that Claude Code injects to authenticate API requests, should be removed before forwarding"
+      b: "A session correlation header sent on every Claude Code API request, useful for tracing; nginx should pass it through to upstream services"
+      c: "A rate-limiting header that nginx uses to throttle Claude Code traffic"
+      d: "A header that identifies the Claude model version, set by Anthropic servers"
+    correct: "b"
+    explanation: |
+      X-Claude-Code-Session-Id is a session correlation header that Claude Code attaches to every outbound API request. It enables distributed tracing: you can correlate a session's tool calls, API requests, and logs across microservices. In nginx, pass it through to upstream: `proxy_pass_header X-Claude-Code-Session-Id;`. In observability stacks, use it as a trace root to group all activity from a single Claude session.
+    doc_reference:
+      file: "guide/ops/observability.md"
+      section: "X-Claude-Code-Session-Id"
+      anchor: "#x-claude-code-session-id"

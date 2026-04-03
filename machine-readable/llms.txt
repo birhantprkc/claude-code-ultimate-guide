@@ -11,7 +11,7 @@
 - License: CC BY-SA 4.0 (free, open source)
 - Lines of Documentation: 24,700+
 - Production Templates: 232
-- Quiz Questions: 271
+- Quiz Questions: 334
 
 ## What This Guide Covers
 

@@ -1072,11 +1072,11 @@ deep_dive:
   myths_tasks_api_autonomous: 20965
   myths_100x_faster: 20997
   myths_reliable_sources: 20983
-  # Quiz System (271 questions, 15 categories)
+  # Quiz System (334 questions, 16 categories)
   quiz_overview: "quiz/README.md"
   quiz_file: "quiz/questions.json"
-  quiz_count: 271
-  quiz_categories: 15
+  quiz_count: 334
+  quiz_categories: 16
   quiz_beginner: "quiz/categories/basics,commands,shortcuts,reference"
   quiz_beginner_count: 60
   quiz_intermediate: "quiz/categories/workflows,context,agents,hooks"
@@ -1490,7 +1490,7 @@ rules:
 ecosystem:
   this_guide:
     focus: "Education - Learn & master"
-    unique: ["architecture docs", "TDD/SDD methodologies", "271-question quiz", "YAML index", "MCP server"]
+    unique: ["architecture docs", "TDD/SDD methodologies", "334-question quiz", "YAML index", "MCP server"]
   mcp_server:
     npm: "claude-code-ultimate-guide-mcp"
     install: "npx -y claude-code-ultimate-guide-mcp"
@@ -1618,7 +1618,7 @@ ecosystem:
       local: "/Users/florianbruniaux/Sites/perso/claude-code-ultimate-guide-landing/"
       purpose: "Marketing site for Claude Code guide"
       audience: "Developers discovering the guide"
-      features: ["badges (version, templates, lines)", "quiz (271 questions)", "FAQ", "cross-links to Cowork"]
+      features: ["badges (version, templates, lines)", "quiz (334 questions)", "FAQ", "cross-links to Cowork"]
       sync_with: "Guide Code (version, templates count, guide lines)"
     cowork_landing:
       local: "/Users/florianbruniaux/Sites/perso/claude-cowork-guide-landing/"

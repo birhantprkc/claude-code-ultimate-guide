@@ -14,7 +14,7 @@ questions:
       d: "All CLAUDE.md files have equal priority"
     correct: "b"
     explanation: |
-      The precedence is: Local (.claude/CLAUDE.md) > Project (/project/CLAUDE.md) > Global (~/.claude/CLAUDE.md). More specific beats more general. Local overrides are personal (gitignored), project settings are shared (committed), and global settings apply to all projects. This hierarchy allows personal preferences to override team conventions when needed.
+      The precedence is: Local (.claude/CLAUDE.md) > Project (/project/CLAUDE.md) > Global (~/.claude/CLAUDE.md). More specific beats more general. Local overrides are personal (gitignored), project settings are shared (committed), and global settings apply to all projects. This hierarchy allows personal preferences to override team conventions when needed. Enterprise note: `managed-settings.d/` provides an admin-controlled governance layer that sits above all three levels — policies deployed there cannot be overridden by any user-level CLAUDE.md.
     doc_reference:
       file: "guide/ultimate-guide.md"
       section: "3.4 Precedence Rules"
@@ -336,3 +336,105 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "Fresh Context Pattern"
       anchor: "#fresh-context-pattern"
+
+  - id: "03-020"
+    difficulty: "intermediate"
+    profiles: ["senior", "power"]
+    question: "What are the three scopes for Claude Code's agent memory system?"
+    options:
+      a: "Local, Remote, Cloud"
+      b: "User (global), Project (repo-level), Local (gitignored per-machine)"
+      c: "Session, Persistent, Archived"
+      d: "Read-only, Write-once, Append-only"
+    correct: "b"
+    explanation: |
+      Agent Memory has 3 scopes: (1) User — global memory in ~/.claude/, applies to all projects, personal preferences and cross-project knowledge. (2) Project — repo-level memory in .claude/, committed to git, shared with the team. (3) Local — gitignored per-machine memory in .claude/memory/ (local), for machine-specific state that should not be shared. Understanding the scope prevents accidentally committing personal notes or missing team-level context.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Agent Memory Scopes"
+      anchor: "#agent-memory-scopes"
+
+  - id: "03-021"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What is managed-settings.d/ and what governance problem does it solve?"
+    options:
+      a: "A directory for storing backup copies of settings.json"
+      b: "An enterprise governance layer where admins drop config fragments that merge with project settings, overriding team-level settings"
+      c: "A directory for version-controlled settings history"
+      d: "A staging area for settings changes that need approval before applying"
+    correct: "b"
+    explanation: |
+      managed-settings.d/ is an enterprise governance mechanism: administrators drop JSON config fragments into this directory, and Claude Code merges them with (and overrides) project-level settings.json. This solves the problem of enforcing org-wide security policies (banned tools, required hooks, blocked paths) without modifying each team's repo. IT/Security teams control the managed layer; developers control their project layer; managed always wins conflicts.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "managed-settings.d/"
+      anchor: "#managed-settingsd"
+
+  - id: "03-022"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is ${CLAUDE_PLUGIN_DATA} used for in Claude Code skills?"
+    options:
+      a: "A variable that stores the plugin's API key for authentication"
+      b: "A persistent storage path for skills to read/write cross-session data (not cleaned between sessions)"
+      c: "A temporary directory that is wiped after each skill execution"
+      d: "The path to the skill's source code directory"
+    correct: "b"
+    explanation: |
+      ${CLAUDE_PLUGIN_DATA} provides persistent storage for skills — a directory path that persists across sessions and is not wiped between runs. Skills can use it to store learned preferences, cached lookups, counters, or any state that should survive session restarts. Contrast with /tmp (ephemeral) or the project directory (pollutes repo). Example: a skill that tracks how many times it has been run, or caches expensive API results.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Skill Persistent Storage"
+      anchor: "#skill-persistent-storage"
+
+  - id: "03-023"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What are the three hard limits for the MEMORY.md auto-memory system?"
+    options:
+      a: "100 lines, 10KB, 50 files"
+      b: "200 lines (index cap), 25KB (file size max), 200 files (directory cap)"
+      c: "500 lines, 100KB, 1000 files"
+      d: "50 lines, 5KB, 20 files"
+    correct: "b"
+    explanation: |
+      MEMORY.md auto-memory has three hard limits: (1) 200-line cap — lines beyond 200 in MEMORY.md are truncated and never loaded into context; (2) 25KB max per memory file — larger files are split or truncated; (3) 200-file directory cap — the memory directory is capped at 200 individual memory files. These limits exist to prevent the memory system from consuming too much context window. Manage proactively: archive old memories, merge duplicates, keep the index concise.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "MEMORY.md Limits"
+      anchor: "#memorymd-limits"
+
+  - id: "03-024"
+    difficulty: "intermediate"
+    profiles: ["senior", "power"]
+    question: "What does the `effort` frontmatter field in a skill do?"
+    options:
+      a: "Sets the maximum token budget for the skill execution"
+      b: "Signals to the user the expected cognitive/time investment: ○ low, ◐ medium, ● high"
+      c: "Controls how many retries the skill attempts before failing"
+      d: "Specifies the minimum model tier required to run the skill"
+    correct: "b"
+    explanation: |
+      The `effort` frontmatter field is a UX signal for users: ○ = low effort (quick, <1 min), ◐ = medium effort (moderate, a few minutes), ● = high effort (substantial, may take many minutes or require review). It appears in the slash command picker so users can anticipate the investment before triggering a skill. Does not affect execution — purely informational.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "Skill Frontmatter"
+      anchor: "#skill-frontmatter"
+
+  - id: "03-025"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What is the correct approach when MEMORY.md index approaches 200 lines?"
+    options:
+      a: "Delete the oldest entries to stay under the limit"
+      b: "Archive stale entries to separate files, merge duplicates, and keep the index to short pointer lines under 150 chars each"
+      c: "Create a second MEMORY.md file as MEMORY2.md to extend capacity"
+      d: "Increase the limit by adding a setting in settings.json"
+    correct: "b"
+    explanation: |
+      When MEMORY.md approaches 200 lines: archive stale memories (move outdated content to an archive file but remove the index pointer), merge duplicates (two entries about the same topic → one updated entry), and ensure each index line is short (under ~150 chars) — the index is just pointers, not content. MEMORY.md is an index file; the actual content lives in individual memory files. Never create a second MEMORY.md — there is no MEMORY2.md support.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "MEMORY.md Management"
+      anchor: "#memorymd-management"

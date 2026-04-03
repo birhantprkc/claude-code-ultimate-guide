@@ -17,11 +17,11 @@ questions:
       Hook exit codes have specific meanings:
 
       - **Exit code 0**: Success - Allow the operation to proceed
-      - **Exit code 2**: Block - Prevent the operation from executing
+      - **Exit code 2**: Block - Prevent the operation from executing. Important: exit code 2 silently discards any stdout/JSON output — only stderr is forwarded to Claude as an error message.
       - **Other codes**: Error - Log the error and continue
 
       This is critical for security hooks that need to prevent dangerous commands.
-      For example, a hook that detects `rm -rf /` should `exit 2` to block execution.
+      For example, a hook that detects `rm -rf /` should `exit 2` to block execution and write a reason to stderr.
     doc_reference:
       file: "guide/ultimate-guide.md"
       section: "7.2 Creating Hooks"
@@ -40,20 +40,17 @@ questions:
     explanation: |
       The `PreToolUse` event fires before any tool runs.
 
-      Claude Code supports 17 hook events:
-      - **PreToolUse**: Before tool execution (security validation)
-      - **PostToolUse**: After tool succeeds (formatting, logging)
-      - **PostToolUseFailure**: After tool fails (error logging)
-      - **UserPromptSubmit**: When user sends a message (context enrichment)
-      - **Notification**: When Claude sends a notification
-      - **SessionStart/SessionEnd**: Session lifecycle events
-      - **Stop**: When Claude finishes responding
-      - **PermissionRequest**: Permission dialog appears
-      - **SubagentStart/SubagentStop**: Sub-agent lifecycle
-      - **TeammateIdle/TaskCompleted**: Agent team events
-      - **ConfigChange**: Config file changes during session
-      - **WorktreeCreate/WorktreeRemove**: Worktree lifecycle
-      - **PreCompact**: Before context compaction
+      Claude Code supports 27 hook events, organized in 7 groups:
+      - **Lifecycle**: SessionStart, SessionEnd, Setup, Stop
+      - **Agent actions**: PreToolUse (security), PostToolUse (formatting), PostToolUseFailure (error logging)
+      - **Permissions**: PermissionRequest, PermissionDenied
+      - **Compaction**: PreCompact, PostCompact
+      - **Multi-agent**: SubagentStart, SubagentStop, TeammateIdle, TaskCompleted, TaskCreated
+      - **Configuration**: ConfigChange, InstructionsLoaded, CwdChanged
+      - **File system**: WorktreeCreate, WorktreeRemove, FileChanged
+      - **User interaction**: UserPromptSubmit, Notification, Elicitation, ElicitationResult
+
+      Hooks can also be registered session-scoped at runtime (without modifying settings.json) — this is how skills register temporary callbacks during their invocation.
     doc_reference:
       file: "guide/ultimate-guide.md"
       section: "7.1 The Event System"
@@ -116,8 +113,7 @@ questions:
       }
       ```
 
-      This hook would trigger for Bash, Edit, or Write tools.
-      You can match specific tools or use `.*` to match all tools.
+      This hook would trigger for Bash, Edit, or Write tools. You can match specific tools or use `.*` to match all tools. Beyond `matcher`, hooks also support a conditional `if` field for runtime filtering — `if` evaluates a condition against the hook input JSON and skips execution if false, enabling environment-based gating (e.g., only run in CI, or only if a specific file is being edited).
     doc_reference:
       file: "guide/ultimate-guide.md"
       section: "7.2 Creating Hooks"
@@ -433,3 +429,139 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "Hook Execution Model"
       anchor: "#hook-execution-model"
+
+  - id: "07-017"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "A PreToolUse hook returns `permissionDecision: \"defer\"`. What happens next and where does this work?"
+    options:
+      a: "Claude asks the user interactively for approval, in any session type"
+      b: "Claude pauses with stop_reason: \"tool_deferred\" and waits for --resume; only works in headless sessions"
+      c: "The tool is denied permanently for the rest of the session"
+      d: "Claude falls back to the default permission prompt"
+    correct: "b"
+    explanation: |
+      The `defer` permission decision (v2.1.89+) is designed exclusively for headless integrations. When returned, Claude pauses with `stop_reason: "tool_deferred"` and waits for the external orchestrator to collect input and resume the session with `--resume <session-id>`. In interactive terminal sessions, `defer` is ignored with a warning. This enables human-in-the-loop approval flows from external UIs, queues, or approval systems without breaking the session.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.2 Creating Hooks"
+      anchor: "#hook-output"
+
+  - id: "07-018"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "When multiple PreToolUse hooks return conflicting permission decisions in v2.1.89+, what is the correct precedence order (highest to lowest)?"
+    options:
+      a: "allow > ask > defer > deny"
+      b: "deny > ask > defer > allow"
+      c: "deny > defer > ask > allow"
+      d: "ask > deny > defer > allow"
+    correct: "c"
+    explanation: |
+      Since v2.1.89, when multiple PreToolUse hooks return different `permissionDecision` values, the resolution order is: `deny` > `defer` > `ask` > `allow`. The most restrictive decision wins. A single hook returning `deny` blocks the tool even if other hooks allow it, and `defer` (pause for external approval) takes priority over `ask` (interactive prompt). Design your hook pipelines with this precedence in mind so security hooks can always override permissive ones.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.2 Creating Hooks"
+      anchor: "#hook-output"
+
+  - id: "07-019"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What distinguishes session-scoped hooks from hooks defined in settings.json?"
+    options:
+      a: "Session-scoped hooks run with elevated permissions and can bypass security gates"
+      b: "Session-scoped hooks are registered at runtime, last only for the current session, and are never written to any config file"
+      c: "Session-scoped hooks only support the `command` type, not `http` or `agent`"
+      d: "Session-scoped hooks fire before settings.json hooks in all events"
+    correct: "b"
+    explanation: |
+      Session-scoped hooks are ephemeral: registered at runtime via the programmatic API or by skills at invocation time, they exist only for the duration of that session and disappear when it ends. Nothing is written to `settings.json` or any config file. This is exactly how skills register temporary callbacks during their invocation. Once the skill finishes or the session ends, those hooks are gone. Session-scoped hooks follow the same JSON schema as persistent hooks.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.2 Creating Hooks"
+      anchor: "#session-scoped-hooks"
+
+  - id: "07-020"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "Which paths are ALWAYS protected and prompt for approval even when running in `bypassPermissions` mode?"
+    options:
+      a: ".env files, node_modules/, and /tmp/ paths"
+      b: ".git/, .claude/ (except .claude/worktrees/), shell config files (.bashrc, .zshrc), .gitconfig, .mcp.json, and .claude.json"
+      c: "Any file outside the current working directory"
+      d: "Only production database configs and SSH keys"
+    correct: "b"
+    explanation: |
+      The `bypassPermissions` mode auto-approves everything except a fixed set of always-protected paths. Claude Code will always prompt before modifying: the `.git/` directory, the `.claude/` directory (excluding `.claude/worktrees/`), shell config files (`.bashrc`, `.zshrc`, `.bash_profile`, `.profile`), and tool configs (`.gitconfig`, `.mcp.json`, `.claude.json`). This safety invariant holds regardless of permission mode, preventing accidental or malicious modification of the configuration layer itself.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "1.4 Permission Modes"
+      anchor: "#bypasspermissions-safety-invariant"
+
+  - id: "07-021"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What does the `Setup` hook event fire during, and what is its primary use case?"
+    options:
+      a: "After the first user message, to initialize project-specific tooling"
+      b: "During the environment setup phase at session start, for installing tools or validating prerequisites before the session accepts prompts"
+      c: "When a CLAUDE.md file is first loaded, to audit instruction content"
+      d: "Before each tool call, to prepare the execution environment"
+    correct: "b"
+    explanation: |
+      The `Setup` event fires during the environment setup phase at session start (not after the first user message). It cannot block operations. Its primary use case is installing tools, validating prerequisites, or running any initialization logic that should complete before the session begins accepting user prompts. This is different from `SessionStart` (fires when the session begins or resumes) and from `InstructionsLoaded` (fires when a CLAUDE.md file is loaded).
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.1 The Event System"
+      anchor: "#event-types"
+
+  - id: "07-022"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "Which pairing correctly maps `Elicitation` and `ElicitationResult` hook events to their use cases?"
+    options:
+      a: "Elicitation = fires when user submits a form; ElicitationResult = fires after Claude responds"
+      b: "Elicitation = fires when Claude requests information from the user (can block); ElicitationResult = fires when the response is received (cannot block)"
+      c: "Elicitation = fires on SubagentStart for data collection; ElicitationResult = fires on SubagentStop"
+      d: "Both events fire in sequence only during multi-agent orchestration"
+    correct: "b"
+    explanation: |
+      `Elicitation` fires when Claude requests information from the user, primarily in headless sessions where interactive prompts are unavailable. It can block, allowing a hook to intercept and pre-answer the question before it reaches any interactive UI (useful in CI pipelines or web frontends). `ElicitationResult` fires after the response is received and cannot block, making it suitable for logging or auditing. Together they give headless integrations full control over Claude's information-gathering flows.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.1 The Event System"
+      anchor: "#event-types"
+
+  - id: "07-023"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the main performance benefit of using the `if` field on hooks over handling conditions inside the hook script?"
+    options:
+      a: "The `if` field enables parallel hook execution across multiple events"
+      b: "Hooks with `if` run in a separate process pool and never time out"
+      c: "The `if` field avoids spawning the subprocess entirely when the condition is false, reducing overhead when events fire hundreds of times per session"
+      d: "The `if` field compresses hook output before sending it back to Claude"
+    correct: "c"
+    explanation: |
+      Without `if`, every PostToolUse event spawns a subprocess even when the hook logic immediately exits because the tool does not match. In large repos, PostToolUse can fire hundreds of times per session. The `if` field is evaluated by Claude Code before any subprocess is created. When the condition is false the hook is simply skipped, eliminating the subprocess spawn entirely. Moving the filter into the hook script with a `case` statement achieves the same logic but still incurs the cost of starting the process every time.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.2 Creating Hooks"
+      anchor: "#conditional-hooks-with-if"
+
+  - id: "07-024"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What does the `PostCompact` hook event allow you to do that no other lifecycle hook provides?"
+    options:
+      a: "Prevent context compaction from running when context is still small"
+      b: "Run cleanup logic after a session ends and transcripts are archived"
+      c: "Restore state or log metadata after context compaction completes"
+      d: "Inject system messages before Claude's next turn following a compaction"
+    correct: "c"
+    explanation: |
+      `PostCompact` fires after context compaction completes and cannot block. It is the only hook event scoped specifically to the compaction lifecycle. Its primary use cases are restoring state that was captured by a `PreCompact` hook before compaction ran, and logging metadata about when and how often compaction is happening. Neither `SessionStart` nor any other lifecycle hook fires in response to a compaction event, making `PostCompact` the right place for any logic that depends on knowing compaction just occurred.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "7.1 The Event System"
+      anchor: "#event-types"

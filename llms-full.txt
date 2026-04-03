@@ -17,7 +17,7 @@
 - Landing: https://cc.bruniaux.com
 - Lines of Documentation: 24,700+
 - Production Templates: 232
-- Quiz Questions: 271
+- Quiz Questions: 334
 - Whitepapers: 9 titles (FR + EN)
 
 ---

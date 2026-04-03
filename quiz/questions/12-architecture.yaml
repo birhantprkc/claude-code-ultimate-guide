@@ -31,7 +31,7 @@ questions:
       d: "Unlimited (model-dependent)"
     correct: "b"
     explanation: |
-      Claude Code has exactly 8 core tools: Bash (universal adapter), Read (file contents), Edit (modify files), Write (create/overwrite), Grep (search contents), Glob (find files), Task (sub-agents), and TodoWrite (progress tracking). That's the entire arsenal.
+      Claude Code has 8 core tools: Bash (universal adapter), Read (file contents), Edit (modify files), Write (create/overwrite), Grep (search contents), Glob (find files), Task (sub-agents), and the Tasks API for progress tracking. Note: TodoWrite was deprecated in v2.1.16+ and replaced by the Tasks API (TaskCreate, TaskGet, TaskList, TaskUpdate) which adds task dependencies via blockedBy/blocks fields.
     doc_reference:
       file: "guide/architecture.md"
       section: "The Tool Arsenal"
@@ -57,7 +57,7 @@ questions:
   - id: "12-004"
     difficulty: "intermediate"
     profiles: ["senior", "power"]
-    question: "What is the approximate context budget for Claude Code with Claude 3.5 Sonnet?"
+    question: "What is the approximate context budget for Claude Code (e.g., with Sonnet 4.6)?"
     options:
       a: "~32K tokens"
       b: "~100K tokens"
@@ -257,3 +257,88 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "TeammateTool"
       anchor: "#teammatetool"
+
+  - id: "12-016"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What is 'Context Rot' and what makes it structural rather than incidental?"
+    options:
+      a: "Gradual quality degradation caused by too many code comments in the context window"
+      b: "The n² attention cost: as context grows, each new token attends to all previous tokens, causing exponential slowdown and quality degradation regardless of content quality"
+      c: "Rot caused by leaving unused variables and dead code in the context"
+      d: "API rate limiting that causes degraded responses when context is large"
+    correct: "b"
+    explanation: |
+      Context Rot is structural, not incidental: transformer attention is O(n²) — each new token attends to all previous tokens. As context grows, the effective attention per token dilutes, early context gets underweighted, and recent tokens dominate disproportionately. This happens even with high-quality context content. Solutions: /compact (prune), context chaining (fresh session with curated summary), or JIT retrieval (never load; fetch on demand). You cannot fix structural rot by cleaning up your prompts.
+    doc_reference:
+      file: "guide/core/architecture.md"
+      section: "Context Rot"
+      anchor: "#context-rot"
+
+  - id: "12-017"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the key difference between JIT (Just-In-Time) retrieval and RAG in the context of Claude Code sub-agents?"
+    options:
+      a: "JIT retrieval uses vector databases while RAG uses keyword search"
+      b: "JIT retrieval never pre-loads context — sub-agents fetch only what they need at the moment of need; RAG pre-indexes and embeds documents upfront for semantic lookup"
+      c: "JIT is faster but less accurate; RAG is slower but more precise"
+      d: "JIT is for code retrieval only; RAG handles documentation retrieval"
+    correct: "b"
+    explanation: |
+      JIT retrieval in sub-agents means: never pre-load context — the agent identifies what it needs (WHY/WHAT pattern), fetches only that, processes it, then discards. This keeps context windows small per agent. RAG pre-indexes and embeds a corpus upfront, enabling semantic similarity lookup at query time. For Claude Code sub-agents: JIT is preferred for targeted retrieval tasks (no embedding setup, no stale index); RAG suits knowledge bases queried repeatedly across many sessions.
+    doc_reference:
+      file: "guide/core/architecture.md"
+      section: "JIT vs RAG Retrieval"
+      anchor: "#jit-vs-rag-retrieval"
+
+  - id: "12-018"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is MMD (Maximum Mean Discrepancy) used for in context drift detection?"
+    options:
+      a: "Measuring the maximum number of tokens that can drift before a session crashes"
+      b: "A statistical test comparing the distribution of recent token embeddings to a baseline distribution to detect semantic drift in ongoing conversations"
+      c: "Tracking the maximum memory distance between two related CLAUDE.md files"
+      d: "A compression algorithm that minimizes mean deviation in context summaries"
+    correct: "b"
+    explanation: |
+      MMD (Maximum Mean Discrepancy) is a kernel-based statistical test that compares two distributions without assuming a parametric form. In context drift detection: you embed tokens/messages from a baseline window and a recent window, then compute MMD between the two distributions. A high MMD score indicates the conversation has drifted semantically from its original topic — a signal to /compact or start a fresh session. Threshold: MMD > 0.3 typically warrants intervention. More robust than cosine distance for multi-modal drift.
+    doc_reference:
+      file: "guide/core/architecture.md"
+      section: "Context Drift Detection"
+      anchor: "#context-drift-detection"
+
+  - id: "12-019"
+    difficulty: "intermediate"
+    profiles: ["senior", "power"]
+    question: "What is the 'Goldilocks altitude problem' for CLAUDE.md project rules?"
+    options:
+      a: "Finding the right file size for CLAUDE.md — not too large (context waste) nor too small (insufficient guidance)"
+      b: "The challenge of writing rules at the right abstraction level: too high-level (ignored/mis-applied) vs too low-level (brittle, over-specified)"
+      c: "Choosing the right directory depth for nested CLAUDE.md files in a monorepo"
+      d: "Balancing rule strictness — too strict causes Claude to refuse valid tasks, too loose provides no guidance"
+    correct: "b"
+    explanation: |
+      The Goldilocks altitude problem: rules written too high ("write good code") are too abstract to apply consistently. Rules written too low ("always add a blank line after function declarations") are brittle — they conflict with context or become stale. The sweet spot is mid-altitude: specific enough to be actionable, abstract enough to generalize across similar situations. Example of right altitude: "prefer functional style for data transformations; use classes only when you need stateful lifecycle management."
+    doc_reference:
+      file: "guide/core/architecture.md"
+      section: "Goldilocks Altitude"
+      anchor: "#goldilocks-altitude"
+
+  - id: "12-020"
+    difficulty: "intermediate"
+    profiles: ["senior", "power"]
+    question: "What are the recommended MCP server and tool count limits to avoid context overhead?"
+    options:
+      a: "Max 50 servers, max 500 tools"
+      b: "Max 10 servers, max 80 total tools across all servers"
+      c: "No limit — Claude handles any number of MCP tools efficiently"
+      d: "Max 3 servers, max 20 tools"
+    correct: "b"
+    explanation: |
+      Recommended limits: fewer than 10 MCP servers and fewer than 80 total tools across all servers. Each MCP server's tools are announced at session start and consume context window space permanently for that session. Beyond ~80 tools, the tool announcement overhead meaningfully degrades available context for actual work. Beyond 10 servers, initialization latency and inter-server coordination complexity compound. Audit your MCP stack: disable unused servers in settings.json, use scoped configs per project type.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "MCP Tool Count Limits"
+      anchor: "#mcp-tool-count-limits"

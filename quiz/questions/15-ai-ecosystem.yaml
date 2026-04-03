@@ -342,3 +342,37 @@ questions:
       file: "guide/ultimate-guide.md"
       section: "Skeleton Projects Workflow"
       anchor: "#skeleton-projects-workflow"
+
+  - id: "15-014"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "What is Google Antigravity and how does it differ from traditional IDEs?"
+    options:
+      a: "A Google internal testing framework that simulates zero-gravity code reviews"
+      b: "An agent-first IDE where the AI drives execution and the human reviews rather than the reverse"
+      c: "A VSCode extension that integrates Google's Gemini model into the editor"
+      d: "Google's replacement for GitHub Copilot using a different suggestion UI"
+    correct: "b"
+    explanation: |
+      Google Antigravity is an agent-first IDE that inverts the traditional IDE model. In classic IDEs, the human drives and the AI assists. In Antigravity, the agent drives execution while the human reviews, approves, and steers. The human becomes the reviewer rather than the typist. This represents a paradigm shift from AI-assisted coding to AI-led coding with human oversight — the model that Claude Code's agentic mode already approximates.
+    doc_reference:
+      file: "guide/ecosystem/ai-ecosystem.md"
+      section: "Google Antigravity"
+      anchor: "#google-antigravity"
+
+  - id: "15-015"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What does research show about AGENTS.md Compound Learning — specifically human-curated vs LLM-generated updates?"
+    options:
+      a: "LLM-generated updates are always superior because they are more consistent and complete"
+      b: "Human-curated AGENTS.md updates yield +4% performance improvement; LLM-generated updates yield -3% performance with +20% cost increase"
+      c: "Both methods produce identical results, so LLM generation is preferred for automation"
+      d: "Human-curated updates are only better for junior developers; LLM-generated outperforms for senior codebases"
+    correct: "b"
+    explanation: |
+      AGENTS.md Compound Learning research shows a stark divergence: human-curated updates to AGENTS.md (based on real session feedback and corrections) produce a +4% improvement in agent performance across benchmark tasks. LLM-auto-generated AGENTS.md updates produce -3% performance regression and +20% cost increase because auto-generated rules tend to over-specify, conflict, or add noise. Implication: invest human review time in AGENTS.md/CLAUDE.md maintenance — it compounds.
+    doc_reference:
+      file: "guide/ecosystem/ai-ecosystem.md"
+      section: "AGENTS.md Compound Learning"
+      anchor: "#agentsmd-compound-learning"

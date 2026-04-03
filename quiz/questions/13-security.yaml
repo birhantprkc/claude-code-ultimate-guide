@@ -206,3 +206,54 @@ questions:
       file: "guide/known-issues.md"
       section: "GitHub Issue Auto-Creation Bug"
       anchor: "#github-issue-auto-creation-bug"
+
+  - id: "13-013"
+    difficulty: "senior"
+    profiles: ["senior", "power"]
+    question: "Which paths are protected by the bypassPermissions safety invariant, meaning Claude ALWAYS prompts before modifying them?"
+    options:
+      a: "Only .git/ and .env files"
+      b: ".git/, .claude/, shell configs (.bashrc, .zshrc), .gitconfig, .mcp.json, and .claude.json"
+      c: "All dotfiles in the home directory"
+      d: "Any file larger than 100KB"
+    correct: "b"
+    explanation: |
+      The bypassPermissions safety invariant protects a specific set of high-impact paths: .git/ (repository integrity), .claude/ (agent configuration, excluding .claude/worktrees/), shell config files (.bashrc, .zshrc — modifying these can persist malicious behavior across sessions), .gitconfig, .mcp.json, and .claude.json. Even when bypassPermissions is enabled, Claude always surfaces a confirmation prompt before touching these paths. The rationale: mistakes in these files have outsized, hard-to-reverse consequences.
+    doc_reference:
+      file: "guide/ultimate-guide.md"
+      section: "1.4 Permission Modes"
+      anchor: "#bypasspermissions-safety-invariant"
+
+  - id: "13-014"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What is the root cause of Cache Bug 2, and what is its cost impact on --resume sessions?"
+    options:
+      a: "The API rate limiter resets token counters, causing full context re-reads on each resume"
+      b: "The JSONL writer strips deferred_tools_delta records before writing; on --resume, full re-announcement shifts all message positions, producing 0% cache hit rate and 87-118K tokens rebuilt per resume"
+      c: "Cache TTL expires after 5 minutes of inactivity, forcing a full context reload"
+      d: "Tool call results are not serialized, so they are regenerated from scratch on each resume"
+    correct: "b"
+    explanation: |
+      Cache Bug 2 root cause: the JSONL writer strips DTD (deferred_tools_delta) records before writing the conversation to disk. When a session is resumed with --resume, Claude performs a full re-announcement of all tools, which shifts the position of every subsequent message. Because Anthropic's prompt cache is position-sensitive, these shifted positions produce a 0% cache hit rate. Cost impact: 87,000 to 118,000 tokens are rebuilt from scratch on every --resume. Workaround: avoid using --resume for long sessions until the bug is fixed.
+    doc_reference:
+      file: "guide/core/known-issues.md"
+      section: "Prompt Cache Bugs"
+      anchor: "#prompt-cache-bugs"
+
+  - id: "13-015"
+    difficulty: "power"
+    profiles: ["power"]
+    question: "What does CLAUDE_CODE_ATTRIBUTION_HEADER=false address, and why is its impact considered marginal compared to Cache Bug 2?"
+    options:
+      a: "It disables all request headers, eliminating the session tracking overhead that causes Bug 2"
+      b: "It removes the attribution header from API requests (workaround for Cache Bug 3), but Bug 3 has minor cost impact compared to Bug 2's 87-118K token rebuild per resume"
+      c: "It disables code attribution in generated files, reducing token usage by 30%"
+      d: "It prevents Claude from adding co-author comments to commits, speeding up git operations"
+    correct: "b"
+    explanation: |
+      CLAUDE_CODE_ATTRIBUTION_HEADER=false is the workaround for Cache Bug 3, which involves the attribution header affecting cache behavior. However, Cache Bug 3's cost impact is marginal in practice. Cache Bug 2 — the JSONL writer stripping deferred_tools_delta records and causing 0% cache hit rate on --resume — is the dominant issue, rebuilding 87,000 to 118,000 tokens per resume. Fixing Bug 3 without addressing Bug 2 produces negligible savings for teams that regularly use --resume.
+    doc_reference:
+      file: "guide/core/known-issues.md"
+      section: "Prompt Cache Bugs"
+      anchor: "#prompt-cache-bugs"
