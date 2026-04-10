@@ -150,6 +150,22 @@ deep_dive:
   output_styles_description: "Three built-in modes: Default (concise), Explanatory (adds design rationale blocks), Learning (pair-programming with TODO(human) markers). Activate via /config or outputStyle in settings.json. Custom styles via .claude/styles/."
   output_styles_custom_template: "examples/styles/custom-style-template.md"
   output_styles_official_docs: "https://code.claude.com/docs/en/output-styles"
+  # Scheduled Tasks (three methods)
+  scheduled_tasks: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_description: "Three methods: Cloud (/schedule, machine-off, min 1h, Anthropic infra, fresh repo clone), Desktop (local machine, min 1min, full file access), /loop (session-scoped, min 1min, stops when session ends)"
+  scheduled_tasks_cloud: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_cloud_plans: "Pro, Max, Team, Enterprise"
+  scheduled_tasks_cloud_interval: "1 hour minimum"
+  scheduled_tasks_cloud_entry_points: "claude.ai/code/scheduled, Desktop app, /schedule CLI command"
+  scheduled_tasks_cloud_branch_prefix: "claude/ (default)"
+  scheduled_tasks_cloud_official_docs: "https://code.claude.com/docs/en/web-scheduled-tasks.md"
+  scheduled_tasks_desktop: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_desktop_interval: "1 minute minimum"
+  scheduled_tasks_loop_command: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_loop_interval: "1 minute minimum"
+  scheduled_tasks_loop_max_per_session: 50
+  scheduled_tasks_loop_added: "v2.1.71"
+  scheduled_tasks_comparison_table: "guide/ultimate-guide.md:9004"
   # Cost optimization - Local execution bridge
   bridge_script: "examples/scripts/bridge.py"
   bridge_schema: "examples/scripts/bridge-plan-schema.json"

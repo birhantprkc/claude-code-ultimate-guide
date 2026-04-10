@@ -10,13 +10,13 @@ tags: [reference, release]
 > **Full details**: [github.com/anthropics/claude-code/CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 > **Machine-readable**: [claude-code-releases.yaml](../machine-readable/claude-code-releases.yaml)
 
-**Latest**: v2.1.98 | **Updated**: 2026-04-10
+**Latest**: v2.1.101 | **Updated**: 2026-04-10
 
 ---
 
 ## Quick Jump
 
-- [2.1.x Series (January-April 2026)](#21x-series-january-april-2026) — Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line, --console auth flag, SessionEnd fix, enterprise retry fix, rate_limits statusline field, effort frontmatter for skills, --channels MCP research preview, --bare flag, worktree session resume fix, MCP query collapsing, managed-settings.d/ drop-in, CwdChanged/FileChanged hooks, transcript search, credential scrubbing, PowerShell tool Windows preview, conditional hooks if field, MCP headersHelper multi-server env vars, headless AskUserQuestion hooks, X-Claude-Code-Session-Id header, Jujutsu/Sapling VCS exclusions, @ mention token reduction, Read tool compact format, Cowork Dispatch fix, PermissionDenied hook, thinking summaries off by default, "defer" PreToolUse permission, CLAUDE_CODE_NO_FLICKER, /powerup interactive lessons, PowerShell hardened permissions, SSE linear-time performance, MCP 500K result override, disableSkillShellExecution, plugin bin/ executables, Edit tool shorter anchors, interactive Bedrock wizard, forceRemoteSettingsRefresh, /cost per-model breakdown, interactive /release-notes, Linux sandbox apply-seccomp fix, Bedrock Mantle support, high effort default for API/enterprise users, Bedrock auth fix, NO_FLICKER focus view (Ctrl+O), refreshInterval status line, 30+ bug fixes, Vertex AI wizard, Monitor tool, CLAUDE_CODE_PERFORCE_MODE, Bash security hardening, subprocess PID namespace sandboxing
+- [2.1.x Series (January-April 2026)](#21x-series-january-april-2026) — Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line, --console auth flag, SessionEnd fix, enterprise retry fix, rate_limits statusline field, effort frontmatter for skills, --channels MCP research preview, --bare flag, worktree session resume fix, MCP query collapsing, managed-settings.d/ drop-in, CwdChanged/FileChanged hooks, transcript search, credential scrubbing, PowerShell tool Windows preview, conditional hooks if field, MCP headersHelper multi-server env vars, headless AskUserQuestion hooks, X-Claude-Code-Session-Id header, Jujutsu/Sapling VCS exclusions, @ mention token reduction, Read tool compact format, Cowork Dispatch fix, PermissionDenied hook, thinking summaries off by default, "defer" PreToolUse permission, CLAUDE_CODE_NO_FLICKER, /powerup interactive lessons, PowerShell hardened permissions, SSE linear-time performance, MCP 500K result override, disableSkillShellExecution, plugin bin/ executables, Edit tool shorter anchors, interactive Bedrock wizard, forceRemoteSettingsRefresh, /cost per-model breakdown, interactive /release-notes, Linux sandbox apply-seccomp fix, Bedrock Mantle support, high effort default for API/enterprise users, Bedrock auth fix, NO_FLICKER focus view (Ctrl+O), refreshInterval status line, 30+ bug fixes, Vertex AI wizard, Monitor tool, CLAUDE_CODE_PERFORCE_MODE, Bash security hardening, subprocess PID namespace sandboxing, /team-onboarding command, OS CA cert store trust by default, /ultraplan auto-cloud-environment, 40+ bug fixes
 - [2.0.x Series (Nov 2025 - Jan 2026)](#20x-series-november-2025---january-2026) — Opus 4.5, Claude in Chrome, Background agents
 - [Breaking Changes Summary](#breaking-changes-summary)
 - [Milestone Features](#milestone-features)
@@ -24,6 +24,28 @@ tags: [reference, release]
 ---
 
 ## 2.1.x Series (January-April 2026)
+
+### v2.1.101 (2026-04-10)
+
+> /team-onboarding command for teammate ramp-up, OS CA certificate store trusted by default for enterprise TLS proxies, /ultraplan auto-creates cloud environment, and 40+ bug fixes including --resume context loss, Bedrock SigV4 auth, sub-agent worktree file access, and Grep ENOENT self-heal.
+
+- **New**: `/team-onboarding` command — generates a teammate ramp-up guide from your local Claude Code usage patterns
+- **New**: OS CA certificate store is now trusted by default — enterprise TLS proxies work without extra config; set `CLAUDE_CODE_CERT_STORE=bundled` to revert to bundled CAs only
+- **New**: `/ultraplan` and other remote-session features now auto-create a default cloud environment instead of requiring web setup first
+- **Improved**: `claude -p --resume <name>` now accepts session titles set via `/rename` or `--name`
+- **Improved**: Unrecognized hook event names in `settings.json` no longer cause the entire file to be ignored
+- **Improved**: Rate-limit retry messages show which limit was hit and when it resets (instead of opaque countdown)
+- **Improved**: Brief mode retries once when Claude responds with plain text instead of a structured message
+- **Fixed**: `--resume`/`--continue` losing conversation context on large sessions when the loader anchored on a dead-end branch
+- **Fixed**: Bedrock SigV4 authentication failing with 403 when `ANTHROPIC_AUTH_TOKEN`, `apiKeyHelper`, or `ANTHROPIC_CUSTOM_HEADERS` set an Authorization header
+- **Fixed**: Sub-agents running in isolated worktrees denied Read/Edit access to files inside their own worktree
+- **Fixed**: `RemoteTrigger` tool's `run` action sending an empty body and being rejected by the server
+- **Fixed**: Grep tool ENOENT when the embedded ripgrep binary path becomes stale (VS Code extension auto-update, macOS App Translocation) — now falls back to system `rg` and self-heals mid-session
+- **Fixed**: Hardcoded 5-minute request timeout aborting slow backends (local LLMs, extended thinking, slow gateways) regardless of `API_TIMEOUT_MS`
+- **Fixed**: Command injection vulnerability in POSIX `which` fallback used by LSP binary detection
+- **Fixed**: `permissions.deny` rules not overriding a PreToolUse hook's `permissionDecision: "ask"`
+- **Fixed**: Memory leak where long sessions retained dozens of historical copies of the message list in the virtual scroller
+- **Fixed**: `/btw` writing a full conversation copy to disk on every use
 
 ### v2.1.98 (2026-04-10)
 

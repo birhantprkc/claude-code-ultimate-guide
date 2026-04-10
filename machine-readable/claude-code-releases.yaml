@@ -3,7 +3,7 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.98"
+latest: "2.1.101"
 updated: "2026-04-10"
 
 # ════════════════════════════════════════════════════════════════
@@ -14,6 +14,14 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-April 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.101"
+    date: "2026-04-10"
+    highlights:
+      - "⭐ /team-onboarding command — generates a teammate ramp-up guide from your local Claude Code usage"
+      - "OS CA certificate store trusted by default — enterprise TLS proxies work without extra config; set CLAUDE_CODE_CERT_STORE=bundled to use only bundled CAs"
+      - "/ultraplan and remote-session features auto-create a default cloud environment (no web setup required first)"
+      - "Bug fixes: --resume context loss on large sessions, Bedrock SigV4 auth 403, sub-agents in worktrees denied file access, RemoteTrigger run action, Grep tool ENOENT self-heal"
 
   - version: "2.1.98"
     date: "2026-04-10"

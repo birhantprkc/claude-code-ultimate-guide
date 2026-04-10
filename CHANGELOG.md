@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- **`examples/commands/scaffold.md`**: Interactive coaching command that asks 4-5 targeted questions to determine whether a use case calls for an agent, command, skill, hook, or rule — then generates a ready-to-use template. Covers decision tree logic, hybrid case handling, and produces scaffolds for all five component types. Inspired by real-world configurations from field projects.
+- **Scheduled Tasks** (`guide/ultimate-guide.md` §6.1, `guide/cheatsheet.md`, `machine-readable/reference.yaml`): Documented all four scheduling methods as a unified section. Cloud Scheduled Tasks (`/schedule`) was previously undocumented in the guide: runs on Anthropic infrastructure, machine-off capable, minimum 1-hour interval, fresh GitHub repo clone per run, branches prefixed `claude/`, available on Pro/Max/Team/Enterprise. Desktop Scheduled Tasks: local machine, minimum 1-minute interval, full local file access, missed runs queued and replayed on reopen. DIY method: system cron + `claude --print` for full control without Desktop app. `/loop` section updated with explicit constraints (max 50 tasks/session, max 3 days, session-scoped). Added comparison table across all three methods. Updated cheatsheet "Features Méconnues" table with separate rows for Cloud and Desktop tasks. Added 15 indexed entries to `reference.yaml`. All launched March 9, 2026.
+- **`scripts/update-cc-releases.sh`**: Extended release tracking to cover three sources instead of one. Added Source 2 (weekly docs digest at `code.claude.com/docs/en/whats-new/YYYY-wN.md`) for Desktop/Web/Cloud features not published in the GitHub CHANGELOG — this was the gap that caused Scheduled Tasks to be missed. Added Source 3 (reference links to Help Center and GitHub releases). Script now fetches the last 3 weekly digest pages and surfaces key feature headlines alongside the CLI CHANGELOG diff.
+
+## [3.38.14] - 2026-04-10
+
+### Documentation
+
+- **Claude Code Releases**: Updated tracking to v2.1.101
+  - /team-onboarding command — generates teammate ramp-up guide from local Claude Code usage
+  - OS CA certificate store trusted by default (enterprise TLS proxies work without extra config; CLAUDE_CODE_CERT_STORE=bundled to revert)
+  - /ultraplan and remote-session features auto-create default cloud environment (no web setup required first)
+  - 40+ bug fixes: --resume context loss on large sessions, Bedrock SigV4 auth 403, sub-agents in worktrees denied file access, RemoteTrigger run action, Grep ENOENT self-heal, hardcoded 5-min timeout removed, LSP command injection fix
+
 ## [3.38.13] - 2026-04-10
 
 ### Documentation

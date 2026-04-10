@@ -9001,9 +9001,75 @@ Added in v2.1.63, `/batch` orchestrates large-scale codebase changes by distribu
 
 > **Note**: Both `/simplify` and `/batch` are bundled slash commands that ship with Claude Code v2.1.63+. No configuration required.
 
-### The /loop Command
+### Scheduled Tasks: Three Methods
 
-`/loop [interval] [prompt]` runs a prompt or slash command on a recurring interval — until you stop it. Turn any repetitive check or workflow into an automated background task.
+Claude Code provides three distinct mechanisms for running recurring tasks. They differ on where the execution happens, whether a machine needs to be on, and how much infrastructure access you get.
+
+#### Comparison Table
+
+| | Cloud Tasks (`/schedule`) | Desktop Tasks | `/loop` |
+|--|--|--|--|
+| Runs on | Anthropic cloud | Local machine | Local machine |
+| Machine must be on | No | Yes | Yes |
+| Session must be open | No | No | Yes |
+| Persists between restarts | Yes | Yes | No |
+| Local file access | No (fresh repo clone) | Yes | Yes |
+| MCP servers | Configured connectors per task | Config files + connectors | Inherited from session |
+| Permission prompts | None (autonomous) | Configurable | Inherited from session |
+| Minimum interval | 1 hour | 1 minute | 1 minute |
+
+#### Cloud Scheduled Tasks (`/schedule`)
+
+Cloud tasks run on Anthropic's infrastructure. Your machine can be completely off. Each run clones a fresh copy of your GitHub repository, so there is no access to local files outside of version control.
+
+**Access**: Pro, Max, Team, and Enterprise plans.
+
+**Create a task** via any of these three entry points:
+- `claude.ai/code/scheduled` — web interface
+- Desktop app — visual schedule builder
+- `/schedule` command in the CLI
+
+```bash
+/schedule "every Monday at 9am, open a PR summarizing last week's merged PRs"
+/schedule "every day at 6am, run the test suite and post results to Slack"
+```
+
+**How each run works**: Anthropic clones your repo, spins up a Claude session with the configured MCP connectors, executes the task, then pushes any commits to a branch prefixed `claude/` by default.
+
+**Key constraints**:
+- Minimum interval is 1 hour (not suitable for sub-hour checks)
+- No local file access (files not in the GitHub repo are not visible)
+- Supports MCP connectors: Slack, Linear, Google Drive, and others configured per task
+- Can catch up on missed runs if the machine was offline
+
+**Official docs**: `https://code.claude.com/docs/en/web-scheduled-tasks.md`
+
+#### Desktop Scheduled Tasks
+
+Desktop tasks run on your local machine via the Claude Code Desktop app. Your machine must be on, but you do not need an active terminal session.
+
+Unlike Cloud tasks, Desktop tasks have full access to local files and your existing MCP configuration. The minimum interval is 1 minute.
+
+**Create a task**: open the Desktop app, go to the **Schedule** page, click **New task**. You can also create a remote (cloud) task from the same page by selecting **New remote task**.
+
+**How each run works**: A fresh Claude instance starts, reads your project files, executes the task prompt, and shuts down. Missed runs (machine was off) are queued and executed when the app reopens.
+
+**Official docs**: `https://code.claude.com/docs/en/desktop-scheduled-tasks`
+
+#### DIY: System Cron + `claude --print`
+
+For full control without the Desktop app, wire up the system cron directly with Claude's headless flag:
+
+```bash
+# crontab -e
+0 8 * * 1-5 bash -c 'source /home/user/.env && cd /your/repo && claude --print "summarize git changes since yesterday" >> /var/log/claude-daily.log 2>&1'
+```
+
+This approach runs entirely offline without any Anthropic infrastructure and has no minimum interval. Three things to get right: use the full path to `claude` (check with `which claude`), load your `ANTHROPIC_API_KEY` from a file rather than hardcoding it, and redirect both stdout and stderr to a log file so you have a record of each run.
+
+#### The /loop Command
+
+`/loop [interval] [prompt]` runs a prompt or slash command on a recurring interval within your current session. It stops when you press `Ctrl+C` or send any new message.
 
 ```bash
 /loop 5m check the deploy
@@ -9021,9 +9087,9 @@ Added in v2.1.63, `/batch` orchestrates large-scale codebase changes by distribu
 | `/loop 30m /slack-feedback` | Post PRs for team feedback every 30 min |
 | `/loop 1h /pr-pruner` | Clean up stale PRs on a schedule |
 
-**Stopping a loop**: Press `Ctrl+C` or send any new message.
+**Constraints**: Session-scoped only. Max 3 days runtime, minimum 1 minute interval, maximum 50 tasks per session.
 
-> Added in v2.1.71. Timestamp markers in loop transcripts added in v2.1.86.
+> `/loop` added in v2.1.71. Timestamp markers in loop transcripts added in v2.1.86. Cloud and Desktop Scheduled Tasks launched March 9, 2026. Source: [code.claude.com/docs/en/whats-new](https://code.claude.com/docs/en/whats-new)
 
 ### Custom Commands
 
