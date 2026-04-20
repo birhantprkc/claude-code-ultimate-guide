@@ -16476,6 +16476,51 @@ User: Add error boundaries to all page components:
 List affected files first, then make changes."
 ```
 
+### macOS Batch Automation: Shell + AppleScript
+
+Batch operations extend beyond code changes. The same pattern applies to file conversion pipelines using native macOS tooling, with no external dependencies.
+
+**Use case**: Convert a folder of PPTX presentations to PDF using Keynote.
+
+```bash
+# Requirements: macOS + Keynote installed. No LibreOffice, no Python.
+./pptx-to-pdf.sh ~/Downloads/Prose   # recursive, processes all subdirectories
+```
+
+The script ([`examples/scripts/pptx-to-pdf.sh`](../examples/scripts/pptx-to-pdf.sh)):
+- Finds all `.pptx` files recursively under the target folder
+- Skips files where a `.pdf` already exists (idempotent, safe to re-run)
+- Opens each file via shell, exports to PDF via AppleScript, then closes Keynote
+- Prints a summary of all generated PDFs at the end
+
+**Critical gotcha — open via shell, not AppleScript**:
+
+The intuitive approach fails:
+```applescript
+-- This triggers error -1719 "Index non valable" on ~12% of files
+tell application "Keynote" to open pptx_file
+-- document 1 is sometimes empty, AppleScript throws on access
+```
+
+The fix: use `open -a "Keynote" "$pptx"` from the shell *before* the AppleScript block, with an 8-second sleep to let Keynote fully register the document. When Keynote opens a file via its own `open` command, it doesn't always add it to the `documents` list. When the shell hands it a file path via `open -a`, it does.
+
+```bash
+# Correct pattern
+open -a "Keynote" "$pptx"   # shell open
+sleep 8                      # wait for Keynote to register the document
+
+osascript << EOF
+tell application "Keynote"
+  if (count of documents) > 0 then
+    export document 1 to (POSIX file "$pdf") as PDF
+    close document 1 saving no
+  end if
+end tell
+EOF
+```
+
+This same shell-open-then-AppleScript pattern generalizes to any macOS app that supports scripting but has unreliable document registration via its own `open` command.
+
 ## 9.10 Continuous Improvement Mindset
 
 The goal isn't just to use AI for coding — it's to **continuously improve the workflow** so AI produces better results with less intervention.

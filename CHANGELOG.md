@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **ultimate-guide.md § 9.9**: Added "macOS Batch Automation: Shell + AppleScript" subsection — batch PPTX→PDF conversion via Keynote, with the shell-open-then-AppleScript pattern to avoid error -1719
+- **examples/scripts/pptx-to-pdf.sh**: New utility script — recursive PPTX→PDF conversion on macOS using Keynote + AppleScript, no external dependencies
+
 - **ultimate-guide.md**: Added Claude Opus 4.7 documentation throughout
   - Pricing table updated with Opus 4.7 ($5/$25, April 2026), tokenizer note (1.0–1.35x tokens), Mythos Preview mention
   - Model aliases: `opus` now resolves to Claude Opus 4.7
