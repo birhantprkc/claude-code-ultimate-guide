@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.116"
-updated: "2026-04-21"
+latest: "2.1.117"
+updated: "2026-04-22"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,14 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-April 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.117"
+    date: "2026-04-22"
+    highlights:
+      - "⭐ Default effort changed to `high` for Pro/Max subscribers on Opus 4.6 and Sonnet 4.6 (was `medium`)"
+      - "⭐ Fixed Opus 4.7 sessions showing inflated /context percentages — was computing against 200K instead of native 1M context window"
+      - "Native macOS/Linux builds: Glob and Grep tools replaced by embedded bfs/ugrep for faster searches without tool round-trip (Windows/npm unchanged)"
+      - "/model selections persist across restarts; startup header shows model source pin; plugin install handles missing deps; 15+ bug fixes"
 
   - version: "2.1.116"
     date: "2026-04-21"

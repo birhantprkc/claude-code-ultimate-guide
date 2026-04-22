@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **Claude Code Releases**: Updated tracking to v2.1.117
+  - Default effort changed to `high` for Pro/Max subscribers on Opus 4.6 and Sonnet 4.6 (was `medium`)
+  - Fixed Opus 4.7 sessions computing `/context` against 200K instead of 1M context window
+  - Native macOS/Linux builds: Glob/Grep replaced by embedded `bfs`/`ugrep` (faster, no round-trip)
+  - `/model` selections persist across restarts; startup header shows model source pin
+  - 15+ bug fixes: OAuth 401 refresh, WebFetch hang on large HTML, HTTP 204 crash, NO_PROXY under Bun, Bedrock Opus 4.7 thinking disabled
+
 - **README.md**: Updated date badge (Apr 22, 2026), Quick Start with Learning Path entry, repo structure with `learning-path/` and `examples/CATALOG.md`, "5 unique gaps" updated from 4
 
 - **Learning Path (NEW)**: Added structured 7-module learning path for beginners
