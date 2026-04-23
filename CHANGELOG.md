@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **Claude Code Releases**: Updated tracking to v2.1.118
+  - Vim visual mode (`v`) and visual-line mode (`V`) with selection and operators
+  - `/cost` and `/stats` merged into `/usage` (both old commands remain as shortcuts)
+  - Custom named themes from `/theme` or `~/.claude/themes/`; plugins can ship themes
+  - Hooks can invoke MCP tools directly via `type: "mcp_tool"` in hook config
+  - `DISABLE_UPDATES` env var; `wslInheritsWindowsSettings` policy; 15+ bug fixes
+
 - **Built-in Commands Reference** (major update): Added 26 missing commands to the reference table introduced in v2.1.108–v2.1.117
   - `/recap`, `/effort`, `/tui`, `/focus`, `/undo`, `/proactive`, `/less-permission-prompts`, `/team-onboarding`, `/terminal-setup`, `/reload-plugins`
   - `/config`, `/model`, `/context`, `/cost`, `/doctor`, `/release-notes`, `/copy`, `/resume`, `/loop`, `/mcp`, `/memory`, `/plugin`, `/keybindings`, `/setup-bedrock`, `/setup-vertex`, `/ultrareview`
