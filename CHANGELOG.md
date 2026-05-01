@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- **Claude Code Releases**: Updated tracking to v2.1.126
+  - /model picker lists models from gateway's /v1/models endpoint (ANTHROPIC_BASE_URL gateway support)
+  - claude project purge [path] — delete all Claude Code state for a project
+  - claude auth login accepts pasted OAuth code for WSL2/SSH/container environments
+  - Windows: PowerShell 7 from MS Store/MSI/.NET global tool now detected, treated as primary shell
+  - Security: Fixed allowManagedDomainsOnly/allowManagedReadPathsOnly ignored in managed-settings
+  - 40+ bug fixes: image paste crash >2000px, Stream idle timeout after sleep, CJK text on Windows, OAuth timeout, Agent SDK hang on malformed tool names
+
 - **Claude Code Releases**: Updated tracking to v2.1.123 (v2.1.120 through v2.1.123)
   - v2.1.120: Windows PowerShell fallback (no Git Bash required), claude ultrareview CI subcommand, ${CLAUDE_EFFORT} in skills
   - v2.1.121: alwaysLoad MCP config, plugin prune, PostToolUse output replacement for all tools, critical memory leak fixes
