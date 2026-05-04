@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.114"
-updated: "2026-04-18"
+latest: "2.1.126"
+updated: "2026-05-01"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -12,8 +12,77 @@ updated: "2026-04-18"
 releases:
 
   # ─────────────────────────────────────────────────────────────
-  # 2.1.x Series (January-April 2026)
+  # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.126"
+    date: "2026-05-01"
+    highlights:
+      - "⭐ /model picker lists models from gateway's /v1/models endpoint when ANTHROPIC_BASE_URL points at a compatible gateway"
+      - "⭐ claude project purge [path] — delete all Claude Code state for a project (transcripts, tasks, file history, config entry); supports --dry-run, -y, -i, --all"
+      - "claude auth login accepts pasted OAuth code when browser callback can't reach localhost (WSL2, SSH, containers); Windows PowerShell 7 detected + treated as primary shell"
+      - "Security: Fixed allowManagedDomainsOnly/allowManagedReadPathsOnly ignored when higher-priority managed-settings lacked sandbox block; 40+ bug fixes (image paste crash >2000px, Stream idle timeout after sleep, CJK text garbled on Windows, OAuth timeout on slow connections, Agent SDK hang on malformed tool names)"
+
+  - version: "2.1.123"
+    date: "2026-04-29"
+    highlights:
+      - "Fixed OAuth authentication failing with 401 retry loop when CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1 is set"
+
+  - version: "2.1.122"
+    date: "2026-04-28"
+    highlights:
+      - "⭐ ANTHROPIC_BEDROCK_SERVICE_TIER env var to select Bedrock service tier (default/flex/priority) via X-Amzn-Bedrock-Service-Tier header"
+      - "Pasting a PR URL into /resume search finds the session that created it (GitHub/GitLab/Bitbucket); /mcp shows duplicate connector hint"
+      - "Fixes: Vertex AI/Bedrock output_config errors, image resize corrected (2576→2000px max), remote control idle redraw flood in tmux, ToolSearch missing late-connecting MCP tools, !exit/!quit in bash mode crash, malformed hooks entry no longer invalidates settings.json"
+
+  - version: "2.1.121"
+    date: "2026-04-27"
+    highlights:
+      - "⭐ alwaysLoad MCP server config option — all tools from that server skip tool-search deferral and are always available"
+      - "⭐ claude plugin prune removes orphaned auto-installed plugin deps; PostToolUse hooks can replace output for all tools (previously MCP-only)"
+      - "Type-to-filter search in /skills; --dangerously-skip-permissions skips .claude/ dirs; MCP servers auto-retry 3x on startup; VSCode /context native dialog; OpenTelemetry improvements"
+      - "Critical fixes: unbounded memory growth (multi-GB RSS) with many images; /usage memory leak (~2GB); Bash tool unusable when start dir deleted; --resume crash on large/corrupted sessions"
+
+  - version: "2.1.120"
+    date: "2026-04-24"
+    highlights:
+      - "⭐ Windows: Git for Windows (Git Bash) no longer required — PowerShell used as shell tool when absent"
+      - "⭐ claude ultrareview [target] subcommand for non-interactive CI/script use; --json flag for raw output"
+      - "Skills can reference effort level with ${CLAUDE_EFFORT}; AI_AGENT env var for gh traffic attribution; faster startup with many connectors; auto-compact shows 'auto' in auto mode"
+      - "Fixes: Esc during stdio MCP call closing server (regression 2.1.105), /rewind keyboard input after --resume, scrollback duplication, DISABLE_TELEMETRY not suppressing metrics, false-positive rm permission prompts in auto mode"
+
+  - version: "2.1.119"
+    date: "2026-04-24"
+    highlights:
+      - "⭐ /config settings (theme, editor mode, verbose, etc.) now persist to ~/.claude/settings.json and participate in project/local/policy override precedence"
+      - "⭐ --from-pr now accepts GitLab merge-request, Bitbucket pull-request, and GitHub Enterprise PR URLs"
+      - "--print mode honors agent tools:/disallowedTools: frontmatter; --agent honors permissionMode; PowerShell auto-approve in permission mode; PostToolUse hooks include duration_ms"
+      - "Security: blockedMarketplaces enforces hostPattern/pathPattern; prUrlTemplate setting; CLAUDE_CODE_HIDE_CWD env var; 30+ bug fixes including CRLF paste, Glob/Grep disappearing on macOS, /plan mode fix, TaskList ordering, Agent worktree stale reuse"
+
+  - version: "2.1.118"
+    date: "2026-04-23"
+    highlights:
+      - "⭐ Vim visual mode (`v`) and visual-line mode (`V`) with selection, operators, and visual feedback"
+      - "⭐ /cost and /stats merged into /usage — both remain as typing shortcuts that open the relevant tab"
+      - "⭐ Custom named themes from /theme (or hand-edit JSON in ~/.claude/themes/); plugins can ship themes via themes/ directory"
+      - "Hooks can invoke MCP tools directly via `type: \"mcp_tool\"`; DISABLE_UPDATES env var; wslInheritsWindowsSettings policy; 15+ bug fixes including MCP OAuth, credentials, /fork memory, Alt+K freeze"
+
+  - version: "2.1.117"
+    date: "2026-04-22"
+    highlights:
+      - "⭐ Default effort changed to `high` for Pro/Max subscribers on Opus 4.6 and Sonnet 4.6 (was `medium`)"
+      - "⭐ Fixed Opus 4.7 sessions showing inflated /context percentages — was computing against 200K instead of native 1M context window"
+      - "Native macOS/Linux builds: Glob and Grep tools replaced by embedded bfs/ugrep for faster searches without tool round-trip (Windows/npm unchanged)"
+      - "/model selections persist across restarts; startup header shows model source pin; plugin install handles missing deps; 15+ bug fixes"
+
+  - version: "2.1.116"
+    date: "2026-04-21"
+    highlights:
+      - "⭐ Regression fix: ends the six-week Triple Harness Incident (Mar 4–Apr 20, 2026) — all three harness-level changes (effort defaults, thinking-budget clear, verbosity instruction) reverted or fixed in this release"
+      - "⭐ /resume up to 67% faster on large sessions (40MB+); handles dead-fork entries more efficiently"
+      - "Thinking spinner shows inline progress: 'still thinking', 'thinking more', 'almost done thinking'"
+      - "Security: sandbox auto-allow no longer bypasses dangerous-path check for rm/rmdir targeting /, $HOME, or critical directories"
+      - "Agent frontmatter hooks: now fire when running as main-thread agent via --agent; /config search matches option values; many terminal, scrolling, and UI bug fixes"
 
   - version: "2.1.114"
     date: "2026-04-18"

@@ -12,7 +12,7 @@ tags: [cheatsheet, reference]
 
 **Written with**: Claude (Anthropic)
 
-**Version**: 3.39.1 | **Last Updated**: March 2026
+**Version**: 3.40.0 | **Last Updated**: May 2026
 
 ---
 
@@ -41,9 +41,16 @@ tags: [cheatsheet, reference]
 | `/mobile` | Get Claude mobile app download links |
 | `/fast` | Toggle fast mode (2.5x speed, 6x cost) |
 | `/voice` | Toggle voice input (hold Space to speak, release to send) |
+| `/recap` | Session context summary on return to a break (v2.1.108) |
+| `/effort [level]` | Thinking depth: low/medium/high/xhigh/max; no arg = interactive slider (v2.1.111) |
+| `/tui [fullscreen]` | Full-screen flicker-free TUI rendering (v2.1.110) |
+| `/focus` | Toggle minimal focus view, separate from Ctrl+O (v2.1.110) |
+| `/less-permission-prompts` | Scan transcripts and propose a read-only tool allowlist (v2.1.111) |
 | `/btw [question]` | Side question overlay — read-only ephemeral agent, no history pollution, no tools |
 | `/loop [interval] [prompt]` | Run a prompt on repeat (ex: `/loop 5m check the deploy`, default 10m) |
-| `/stats` | Usage graph, favorite model, streak |
+| `/stats` | Usage graph, favorite model, streak *(alias for `/usage` since v2.1.118)* |
+| `/usage` | Token + cost usage per model (v2.1.118) |
+| `/ultrareview` | Multi-agent cloud code review (v2.1.114) |
 | `/rename [name]` | Name or rename the current session |
 | `/copy` | Interactive picker to copy a code block or full response |
 | `/debug` | Systematic troubleshooting |
@@ -101,7 +108,7 @@ tags: [cheatsheet, reference]
 | **Cloud Scheduled Tasks** | 2026 | Machine-off scheduling via `/schedule` or `claude.ai/code/scheduled`. Runs on Anthropic infra, clones repo fresh each run, min 1h interval. Pro/Max/Team/Enterprise |
 | **Desktop Scheduled Tasks** | 2026 | Local machine scheduling via Desktop app. Min 1 min, full local file access, no session required |
 | **Skill Evals** | Mar 2026 | Two skill types: Capability Uplift (fills model gap, fades) / Encoded Preference (encodes workflow, stays). Benchmark Mode, A/B testing, Trigger Tuning. |
-| **Output Styles** | Aug 2025 | `/config` → "Preferred output style": **Default** (concise), **Explanatory** (adds design rationale), **Learning** (pair-programming, `TODO(human)` markers). Custom styles via `.claude/styles/`. |
+| **Output Styles** | v2.1.108 | `/config` → "Preferred output style": **Default** (concise), **Explanatory** (adds design rationale), **Learning** (pair-programming, `TODO(human)` markers). Custom styles via `.claude/styles/`. |
 
 **Activate LSP**: Add to `~/.claude/settings.json` → `{ "env": { "ENABLE_LSP_TOOL": "1" } }` (requires LSP server installed for your language: `tsserver`, `pylsp`, `gopls`, `rust-analyzer`, `sourcekit-lsp`...)
 
@@ -239,16 +246,16 @@ Model: Sonnet | Ctx: 89.5k | Cost: $2.11 | Ctx(u): 56.0%
 | **OpusPlan** | `/model opusplan` | Opus for planning, Sonnet for execution |
 | **Ultraplan** | `/ultraplan <prompt>` | Cloud planning, browser review, terminal stays free (v2.1.91+, GitHub required) |
 
-> **Opus 4.6** (v2.1.68+): Default effort = **medium** for Max/Team. Use `ultrathink` to force high effort for the next turn. "think hard" remains cosmetic.
+> **Opus 4.7** (v2.1.114+): Default effort in Claude Code = **xhigh** (all plans). New `xhigh` level sits between `high` and `max` — finer reasoning/latency control. Use `ultrathink` to force max effort for the next turn.
 
 | Control | Action | Persistence |
 |---------|--------|-------------|
 | **Alt+T** | Toggle thinking on/off | Session |
 | **/config** | Enable/disable globally | Permanent |
-| **`/model` slider** | Left/right arrows: `low\|medium\|high` | Session |
-| **`CLAUDE_CODE_EFFORT_LEVEL`** | Env var: `low\|medium\|high` | Shell session |
-| **`effortLevel` setting** | In settings.json: `low\|medium\|high` | Permanent |
-| **`effort` in skill frontmatter** (v2.1.80+) | Per-skill override: `low\|medium\|high` | Per invocation |
+| **`/model` slider** | Left/right arrows: `low\|medium\|high\|xhigh` | Session |
+| **`CLAUDE_CODE_EFFORT_LEVEL`** | Env var: `low\|medium\|high\|xhigh\|max` | Shell session |
+| **`effortLevel` setting** | In settings.json: `low\|medium\|high\|xhigh\|max` | Permanent |
+| **`effort` in skill frontmatter** (v2.1.80+) | Per-skill override: `low\|medium\|high\|xhigh` | Per invocation |
 
 **Cost tip**: For simple tasks, Alt+T to disable thinking → faster & cheaper.
 
@@ -297,9 +304,9 @@ claude
 **Cost Impact**:
 | Model | Input | Output | Use Case |
 |-------|--------|--------|----------|
-| Opus  | $15/MTok | $75/MTok | Complex reasoning (10-20% of tasks) |
-| Sonnet | $3/MTok | $15/MTok | Most development (70-80% of tasks) |
-| Haiku | $0.25/MTok | $1.25/MTok | Simple validation (5-10% of tasks) |
+| Opus 4.7 | $5/MTok | $25/MTok | Complex reasoning (10-20% of tasks) |
+| Sonnet 4.6 | $3/MTok | $15/MTok | Most development (70-80% of tasks) |
+| Haiku 4.5 | $0.80/MTok | $4/MTok | Simple validation (5-10% of tasks) |
 
 **Dynamic switching** optimizes cost while maintaining quality on complex tasks.
 
@@ -654,4 +661,4 @@ Speed: `rg` (~20ms) → Serena (~100ms) → ast-grep (~200ms) → grepai (~500ms
 
 **Author**: Florian BRUNIAUX | [@Méthode Aristote](https://methode-aristote.fr) | Written with Claude
 
-*Last updated: March 2026 | Version 3.39.1*
+*Last updated: May 2026 | Version 3.40.0*

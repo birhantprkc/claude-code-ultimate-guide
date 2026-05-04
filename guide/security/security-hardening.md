@@ -71,6 +71,8 @@ This attack exploits the one-time approval model: once you approve an MCP, updat
 | **CVE-2025-35028** | **Critical (9.1)** | HexStrike AI MCP Server — semicolon-prefixed arg causes OS command injection in EnhancedCommandExecutor, typically running as root; no auth required | **No fix yet** — avoid exposing to untrusted inputs/networks |
 | **CVE-2025-15061** | **Critical (9.8)** | Framelink Figma MCP Server — fetchWithRetry method executes attacker-controlled shell metacharacters; unauthenticated RCE | Update to latest patched version |
 | **CVE-2026-3484** | Medium (6.5) | nmap-mcp-server (PhialsBasement) — command injection in `child_process.exec` Nmap CLI handler; remotely exploitable | Apply patch commit `30a6b9e` |
+| **CVE-2026-33032** | **Critical (9.8)** | nginx-ui MCPwn — missing `AuthRequired()` on `/mcp_message` endpoint allows unauthenticated full nginx takeover in 2 HTTP requests; actively exploited, 2,689+ exposed instances | **Update to nginx-ui >= v2.3.4 immediately** |
+| **ADVISORY-MCP-STDIO-2026-001** | Critical | OX Security: MCP STDIO interface lacks input validation across all SDK languages — enables RCE in any MCP-integrated app that doesn't sanitize inputs; Anthropic considers this by design; 150M+ downloads affected | Sanitize all STDIO inputs; sandbox MCP services; see OX Security advisory |
 
 **v2.1.34 Security Fix (Feb 2026)**: Claude Code v2.1.34 patched a sandbox bypass vulnerability where commands excluded from sandboxing could bypass Bash permission enforcement. **Upgrade immediately** if running v2.1.33 or earlier. Note: this is separate from CVE-2026-25725 (a different sandbox escape fixed later).
 
@@ -79,6 +81,8 @@ This attack exploits the one-time approval model: once you approve an MCP, updat
 **⚠️ CVE-2025-35028 (No Patch)**: Critical RCE in HexStrike AI MCP Server (CVSS 9.1). Passing any argument starting with `;` to the API endpoint executes arbitrary OS commands, typically as root. No fix confirmed. Do not expose this server to untrusted inputs or networks.
 
 **⚠️ CVE-2025-15061 (Jan 2026)**: Critical RCE in Framelink Figma MCP Server (CVSS 9.8). The `fetchWithRetry` method passes unsanitized user input to shell — unauthenticated remote code execution. Update Figma MCP Server to the latest patched version immediately.
+
+**⚠️ CVE-2026-33032 (MCPwn, April 2026 — Actively Exploited)**: Critical authentication bypass in nginx-ui's MCP integration (CVSS 9.8). The `/mcp_message` endpoint is missing the `AuthRequired()` middleware, allowing any network-adjacent attacker to invoke 12 destructive MCP tools — including nginx config write/reload — with zero authentication in two HTTP requests. Added to VulnCheck KEV April 13, 2026. 2,689+ publicly reachable instances confirmed. **Update nginx-ui to >= v2.3.4 immediately.** Chains with CVE-2026-27944 (unauthenticated `/api/backup` endpoint leaking SSL keys and credentials).
 
 **⚠️ CVE-2026-25253 (OpenClaw, Feb 2026)**: One-click RCE affecting OpenClaw/clawdbot/Moltbot (CVSS 8.8). A malicious link causes OpenClaw to automatically establish a WebSocket to an attacker-controlled server, leaking the auth token — which grants full system control since OpenClaw runs with filesystem and shell access. Over 17,500 internet-exposed instances identified. Update to >= 2026.1.29.
 
@@ -548,7 +552,19 @@ If you suspect an MCP server has been compromised:
 
 ### 3.3 Automated Security Audit
 
-For comprehensive security scanning, use the [security-auditor agent](../examples/agents/security-auditor.md):
+**Config-level scanning (`.claude/` directory)**
+
+[AgentShield](../ecosystem/third-party-tools.md#security-scanning) scans your Claude Code configuration for secrets, permission misconfigs, hook injection vectors, MCP server risks, and prompt injection patterns. 102 rules, A–F grading:
+
+```bash
+npx ecc-agentshield scan        # Zero-install scan
+agentshield scan --fix          # Auto-remediate safe issues
+agentshield scan --format json  # CI-friendly output
+```
+
+**Code-level scanning (project source)**
+
+For comprehensive security scanning of your project code, use the [security-auditor agent](../examples/agents/security-auditor.md):
 
 ```bash
 # Run OWASP-based security audit

@@ -10,15 +10,15 @@
 
 - Title: Claude Code Ultimate Guide
 - Author: Florian Bruniaux (Founding Engineer @ Méthode Aristote)
-- Version: 3.39.1
-- Last Updated: April 16, 2026
+- Version: 3.40.0
+- Last Updated: May 3, 2026
 - License: CC BY-SA 4.0
 - Repository: https://github.com/FlorianBruniaux/claude-code-ultimate-guide
 - Landing: https://cc.bruniaux.com
-- Lines of Documentation: 25,100+
-- Production Templates: 246
-- Quiz Questions: 334
-- Whitepapers: 9 titles (FR + EN)
+- Lines of Documentation: 25,368
+- Production Templates: 186
+- Quiz Questions: 271
+- Whitepapers: 11 titles (FR + EN)
 
 ---
 
@@ -26,7 +26,7 @@
 
 Claude Code is Anthropic's official CLI for AI-assisted development. It lets developers interact with Claude directly from the terminal to write, edit, debug, and review code. Unlike IDE plugins, it has full filesystem access, can run shell commands, and works autonomously on multi-step tasks.
 
-This guide is the most comprehensive community resource for Claude Code. It covers everything from installation to production security, with 225 ready-to-use templates for agents, hooks, commands, and skills.
+This guide is the most comprehensive community resource for Claude Code. It covers everything from installation to production security, with 186 ready-to-use templates for agents, hooks, commands, and skills.
 
 ## Who This Guide Is For
 
@@ -45,7 +45,7 @@ This guide is the most comprehensive community resource for Claude Code. It cove
 - Sub-agents: isolated context, max depth=1
 - Philosophy: "less scaffolding, more model"
 
-**Main Guide Sections** (`guide/ultimate-guide.md`, 22,900+ lines):
+**Main Guide Sections** (`guide/ultimate-guide.md`, 25,368 lines):
 1. Quick Start — Installation, first workflow, essential commands
 2. Core Concepts — Context management, Plan Mode, Rewind, Mental Model
 3. Memory & Settings — CLAUDE.md files, .claude/ folder, precedence rules
@@ -61,7 +61,7 @@ This guide is the most comprehensive community resource for Claude Code. It cove
 
 ## Full Cheatsheet
 
-**Version**: 3.34.4 | **Last Updated**: March 2026
+**Version**: 3.40.0 | **Last Updated**: May 2026
 
 ---
 
@@ -89,7 +89,17 @@ This guide is the most comprehensive community resource for Claude Code. It cove
 | `/fast` | Toggle fast mode (2.5x speed, 6x cost) |
 | `/voice` | Toggle voice input (hold Space to speak, release to send) |
 | `/loop [interval] [prompt]` | Run a prompt on repeat (ex: `/loop 5m check the deploy`, default 10m) |
-| `/stats` | Usage graph, favorite model, streak |
+| `/usage` | Token + cost usage per model (v2.1.118, replaces /cost and /stats) |
+| `/cost` | Alias for /usage (v2.1.118+) |
+| `/stats` | Alias for /usage (v2.1.118+) — Usage graph, favorite model, streak |
+| `/recap` | Summarize the current session (v2.1.108) |
+| `/effort` | Set thinking effort level: xlow/low/default/high/xhigh (v2.1.111) |
+| `/tui` | Show tool calls in TUI mode (v2.1.110) |
+| `/focus` | Focus agent on specific files or tasks (v2.1.110) |
+| `/less-permission-prompts` | Reduce permission prompt frequency (v2.1.111) |
+| `/ultrareview` | Multi-agent cloud code review (v2.1.114) |
+| `/proactive` | Enable proactive suggestions alias (v2.1.105) |
+| `/undo` | Revert last action (v2.1.108) |
 | `/rename [name]` | Name or rename the current session |
 | `/copy` | Interactive picker to copy a code block or full response |
 | `/debug` | Systematic troubleshooting |
@@ -314,9 +324,9 @@ Deep analysis     → Use Opus (thinking on by default)
 
 ---
 
-## Template Library (246 templates)
+## Template Library (186 templates)
 
-### Agents (16 files + sub-projects)
+### Agents (23 files)
 - `adr-writer.md` — Architecture Decision Records
 - `architecture-reviewer.md` — System architecture review
 - `code-reviewer.md` — Code quality review
@@ -334,7 +344,7 @@ Deep analysis     → Use Opus (thinking on by default)
 - `analytics-with-eval/` — Full analytics agent with eval framework
 - `cyber-defense/` — Multi-agent cyber defense team
 
-### Commands (19 files)
+### Commands (52 files)
 - `audit-agents-skills.md` — Quality audit for .claude/ configs
 - `audit-codebase.md` — Full codebase audit
 - `catchup.md` — Daily catchup briefing
@@ -372,7 +382,7 @@ Deep analysis     → Use Opus (thinking on by default)
 
 **PowerShell hooks** (Windows equivalents for all above)
 
-### Skills (17 modules)
+### Skills (64 modules)
 - `ast-grep-patterns.md` — AST-based code search patterns
 - `audit-agents-skills/` — Agents/skills quality audit system
 - `ccboard/` — Claude Code monitoring dashboard
@@ -425,7 +435,7 @@ Deep analysis     → Use Opus (thinking on by default)
 ## FAQ
 
 **Q: What is the Claude Code Ultimate Guide?**
-A: The most comprehensive community guide for Claude Code (Anthropic's CLI). 25,100+ lines of documentation, 246 production-ready templates, 334-question quiz, and security threat database. Free and open-source (CC BY-SA 4.0).
+A: The most comprehensive community guide for Claude Code (Anthropic's CLI). 25,368 lines of documentation, 186 production-ready templates, 271-question quiz, and security threat database. Free and open-source (CC BY-SA 4.0).
 
 **Q: Is this guide free?**
 A: Yes, completely free. The guide is CC BY-SA 4.0 (share and adapt with attribution). Templates are CC0 (copy-paste freely, no attribution needed). No paywall, no login required.
@@ -458,7 +468,7 @@ A: Skills are reusable knowledge modules stored in `.claude/skills/`. Two types:
 A: Monitor context usage via `/status`. At 70%: run `/compact` to summarize and free context. At 90%: use `/clear` for a fresh start. Use Plan Mode early to explore without consuming context. For long projects, use Tasks API (`CLAUDE_CODE_TASK_LIST_ID`) for cross-session persistence.
 
 **Q: Is Claude Code safe for production use?**
-A: With proper hardening, yes. Key steps: never use `bypassPermissions` in production, vet all MCP servers against the threat database (24 CVEs tracked), use hooks to block dangerous commands, enable audit logging, run `claude doctor` regularly. See `guide/security-hardening.md` for the complete checklist.
+A: With proper hardening, yes. Key steps: never use `bypassPermissions` in production, vet all MCP servers against the threat database (28+ CVEs tracked), use hooks to block dangerous commands, enable audit logging, run `claude doctor` regularly. See `guide/security-hardening.md` for the complete checklist.
 
 ---
 
@@ -479,13 +489,13 @@ claude-code-ultimate-guide/
 ├── llms.txt                        # This file (short version, for AI indexing)
 ├── llms-full.txt                   # Full content (you are here)
 ├── guide/                          # Core documentation
-│   ├── ultimate-guide.md           # Complete guide (22,900+ lines)
+│   ├── ultimate-guide.md           # Complete guide (25,368 lines)
 │   ├── cheatsheet.md               # 1-page reference
 │   ├── architecture.md             # How Claude Code works internally
 │   ├── security-hardening.md       # Security best practices
 │   ├── data-privacy.md             # What data is sent to Anthropic
 │   └── claude-code-releases.md     # Official release tracking
-├── examples/                       # 227 production-ready templates
+├── examples/                       # 186 production-ready templates
 │   ├── agents/                     # Custom AI personas
 │   ├── commands/                   # Slash commands
 │   ├── hooks/                      # Event automation (bash + PowerShell)
@@ -495,7 +505,7 @@ claude-code-ultimate-guide/
 │   ├── reference.yaml              # Machine-optimized index (~2K tokens)
 │   └── llms.txt                    # Short version
 ├── whitepapers/                    # 9 focused PDFs (FR + EN)
-└── quiz/                           # 334-question interactive quiz
+└── quiz/                           # 271-question interactive quiz
 ```
 
 ---

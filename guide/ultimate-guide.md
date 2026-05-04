@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.39.1
+**Version**: 3.40.0
 
 ---
 
@@ -216,6 +216,9 @@ If you only have time for 5 sections:
   - [9.20 Agent Teams (Multi-Agent Coordination)](#920-agent-teams-multi-agent-coordination)
   - [9.21 Legacy Codebase Modernization](#921-legacy-codebase-modernization)
   - [9.22 Remote Control (Mobile Access)](#922-remote-control-mobile-access)
+  - [9.23 Configuration Lifecycle & The Update Loop](#923-configuration-lifecycle--the-update-loop)
+  - [9.24 Instinct-Based Continuous Learning](#924-instinct-based-continuous-learning)
+  - [9.25 Harness Engineering](#925-harness-engineering)
 - [10. Reference](#10-reference) `🟢 All levels` `⏱ As needed`
   - [10.1 Commands Table](#101-commands-table)
   - [10.2 Keyboard Shortcuts](#102-keyboard-shortcuts)
@@ -1068,6 +1071,19 @@ Auto-denies tools unless pre-approved via `/permissions` or `permissions.allow` 
 
 Use for restrictive workflows where you want tight control over which tools run, without interactive confirmation.
 
+### Auto Mode (Max subscribers, v2.1.114+)
+
+Auto mode lets Claude make permission decisions on your behalf during long-running tasks. Instead of stopping every time a risky action needs approval, Claude applies its own judgment — and you review the result rather than approving each step.
+
+```
+# Enable via settings.json
+{ "permissionMode": "auto" }
+```
+
+Unlike `bypassPermissions` (which approves blindly), auto mode uses a classifier to evaluate each action. `PermissionDenied` hooks fire when the classifier blocks something, giving you visibility into what was declined. Designed for long tasks with fewer interruptions and less risk than skipping all permissions.
+
+**Requirements**: Max plan subscription. Available as of v2.1.114.
+
 ### Bypass Permissions Mode (`bypassPermissions`)
 
 Auto-approves everything, including shell commands. No permission prompts at all.
@@ -1097,6 +1113,7 @@ The fix is to pick the right mode upfront rather than clicking through prompts o
 |-----------|-----------|-----|
 | Exploratory work, unfamiliar codebase | Plan mode | Can't accidentally change anything |
 | Trusted local edits, no shell ops | `acceptEdits` | Approves edits silently, still gates commands |
+| Long agentic tasks, Max plan | Auto mode | Claude judges actions; fewer interruptions with less risk than bypass |
 | Automated pipeline, sandboxed env | `bypassPermissions` | No prompts at all — but only safe in isolation |
 | You need one tool auto-approved | `permissions.allow` in CLAUDE.md | Granular, not all-or-nothing |
 | Default new session | Default mode | Explicit review of each action |
@@ -2133,22 +2150,28 @@ Example output:
 
 Claude Code isn't free - you're using API credits. Understanding costs helps optimize usage.
 
-#### Pricing Model (as of February 2026)
+#### Pricing Model (as of April 2026)
 
-The default model depends on your subscription: **Max/Team Premium** subscribers get **Opus 4.6** by default, while **Pro/Team Standard** subscribers get **Sonnet 4.6**. If Opus usage hits the plan threshold, it auto-falls back to Sonnet.
+The default model depends on your subscription: **Max/Team Premium** subscribers get **Opus 4.7** by default, while **Pro/Team Standard** subscribers get **Sonnet 4.6**. If Opus usage hits the plan threshold, it auto-falls back to Sonnet.
+
+> **Model lineup (April 2026)**: Claude Opus 4.7 is the standard production Opus model (`claude-opus-4-7`). Claude Mythos Preview is more capable but remains in limited release. Opus 4.7 is the recommended upgrade path from Opus 4.6.
 
 | Model | Input (per 1M tokens) | Output (per 1M tokens) | Context Window | Notes |
 |-------|----------------------|------------------------|----------------|-------|
-| **Sonnet 4.6** | $3.00 | $15.00 | 200K tokens | Default model (Feb 2026) |
-| Sonnet 4.5 | $3.00 | $15.00 | 200K tokens | Legacy (same price) |
-| Opus 4.6 (standard) | $5.00 | $25.00 | 200K tokens | Released Feb 2026 |
-| Opus 4.6 (1M context) | $5.00 | $25.00 | 1M tokens | GA for Max/Team/Enterprise; API requires tier 4 |
-| Opus 4.6 (fast mode) | $30.00 | $150.00 | 200K tokens | 2.5x faster, 6x price |
+| **Sonnet 4.6** | $3.00 | $15.00 | 200K tokens | Default (Pro/Team Standard) |
+| Sonnet 4.5 | $3.00 | $15.00 | 200K tokens | Legacy |
+| **Opus 4.7** | $5.00 | $25.00 | 200K tokens | Released April 2026; default for Max/Team Premium |
+| Opus 4.7 (1M context) | $5.00 | $25.00 | 1M tokens | GA for Max/Team/Enterprise; API requires tier 4 |
+| Opus 4.6 (standard) | $5.00 | $25.00 | 200K tokens | Previous generation |
+| Opus 4.6 (1M context) | $5.00 | $25.00 | 1M tokens | Previous generation |
+| Opus 4.6 (fast mode) | $30.00 | $150.00 | 200K tokens | Fast mode; 2.5x faster, 6x price |
 | Haiku 4.5 | $0.80 | $4.00 | 200K tokens | Budget option |
+
+> **Opus 4.7 tokenizer**: A new tokenizer means the same input can map to roughly **1.0–1.35×** more tokens depending on content type. At higher effort levels, Opus 4.7 also produces more output tokens (more reasoning). Measure your real traffic when migrating from Opus 4.6; use the `effort` parameter to control spend.
 
 **Reality check**: A typical 1-hour session costs **$0.10 - $0.50** depending on usage patterns.
 
-> **Model deprecations (Feb 2026)**: `claude-3-haiku-20240307` (Claude 3 Haiku) was deprecated on **February 19, 2026** with **retirement scheduled for April 20, 2026**. If your CLAUDE.md, agent definitions, or scripts hardcode this model ID, migrate to `claude-haiku-4-5-20251001` (Haiku 4.5) before April 2026. Source: [platform.claude.com/docs/model-deprecations](https://platform.claude.com/docs/model-deprecations)
+> **Model retirement (April 2026)**: `claude-3-haiku-20240307` (Claude 3 Haiku) was retired on **April 20, 2026**. If your CLAUDE.md, agent definitions, or scripts still hardcode this model ID, migrate to `claude-haiku-4-5-20251001` (Haiku 4.5) immediately. Source: [platform.claude.com/docs/model-deprecations](https://platform.claude.com/docs/model-deprecations)
 
 #### 200K vs 1M Context: Performance, Cost & Use Cases
 
@@ -2181,13 +2204,13 @@ For comparison: Gemini 1.5 Pro offers a 2M context window at $3.50/$10.50/MTok �
 | Scenario | Recommendation |
 |----------|---------------|
 | Bug fix, PR review, daily coding | Sonnet 4.6 @ 200K — fast and cheap |
-| Full-repo audit, entire codebase load | Opus 4.6 @ 1M — worth the cost for precision |
+| Full-repo audit, entire codebase load | Opus 4.7 @ 1M — worth the cost for precision |
 | Cross-module refactoring | Sonnet 4.6 @ 1M — but weigh cost vs. chunking + RAG |
-| Architecture analysis, Agent Teams | Opus 4.6 @ 1M — strongest retrieval at scale |
+| Architecture analysis, Agent Teams | Opus 4.7 @ 1M — strongest retrieval at scale |
 | Large-document RAG (PDFs, legal, books) | Consider Gemini 1.5 Pro — cheaper at this scale |
 
 **Key facts**
-- Opus 4.6 max output: **128K tokens**; Sonnet 4.6 max output: **64K tokens**
+- Opus 4.7 max output: **128K tokens** (same as Opus 4.6); Sonnet 4.6 max output: **64K tokens**
 - 1M context ≈ 30,000 lines of code / 750,000 words
 - 1M context is **GA for Max/Team/Enterprise Claude Code plans** (v2.1.75, March 2026) — API direct use still requires tier 4 or custom rate limits
 - API direct use above 200K input tokens: Sonnet 4.6 doubles to $6/$22.50/MTok; Opus 4.6 doubles to $10/$37.50/MTok (standard rate applies for Claude Code Max/Team/Enterprise plans)
@@ -2347,7 +2370,7 @@ A block must meet a minimum size to be eligible for caching. Blocks smaller than
 
 | Model family | Minimum tokens |
 |---|---|
-| Claude Opus 4.6, Opus 4.5, Haiku 4.5 | 4,096 |
+| Claude Opus 4.7, Opus 4.6, Opus 4.5, Haiku 4.5 | 4,096 |
 | Claude Sonnet 4.6 | 2,048 |
 | Claude Sonnet 4.5, Sonnet 4, Sonnet 3.7, Opus 4.1, Opus 4 | 1,024 |
 | Claude Haiku 3.5, Haiku 3 | 2,048 |
@@ -2407,7 +2430,7 @@ Claude Code │ Ctx(u): 45% │ Cost: $0.23 │ Session: 1h 23m
 
 **Advanced tracking with `ccusage`**:
 
-The `ccusage` CLI tool provides detailed cost analytics beyond the `/cost` command:
+The `ccusage` CLI tool provides detailed cost analytics beyond the `/cost` command (use `/usage` since v2.1.118):
 
 ```bash
 ccusage                    # Overview all periods
@@ -2433,7 +2456,7 @@ ccusage --model-breakdown  # Cost by model (Sonnet/Opus/Haiku)
 └──────────────────────────────────────────────────────┘
 ```
 
-**Why use `ccusage` over `/cost`?**
+**Why use `ccusage` over `/cost` (alias for `/usage` since v2.1.118)?**
 - **Historical trends**: Track usage patterns over days/weeks/months
 - **Model breakdown**: See which model tier drives costs
 - **Budget planning**: Set monthly spending targets
@@ -2586,6 +2609,8 @@ Anthropic provides no in-app real-time usage metrics. Community tools like [`ccu
 For subscription usage history: Check your [Anthropic Console](https://console.anthropic.com/settings/usage) or Claude.ai settings.
 
 **Historical Note**: In October 2025, users reported significant undocumented limit reductions coinciding with Sonnet 4.5's release. Pro users who previously sustained 40-80 Sonnet hours weekly reported hitting limits after only 6-8 hours. Anthropic acknowledged the limits but did not explain the discrepancy.
+
+**Peak Hours (March 2026)**: On March 26, 2026, Anthropic adjusted how session limits are consumed during peak demand — the 5-hour rolling window drains faster during **weekdays 5am–11am PT** (1pm–7pm GMT). Same weekly total, different distribution. Anthropic cited GPU capacity constraints; roughly 7% of users hit limits they wouldn't have before. Max users reported going from 21% to 100% usage on a single prompt during peak. Practical workaround: move compute-heavy agentic tasks (long sub-agent chains, large refactors) to evenings or weekends. Off-peak usage clears faster, stretching the same budget further.
 
 ### Context Poisoning (Bleeding)
 
@@ -2882,7 +2907,7 @@ Claude Code supports six model aliases via `/model` (each always resolves to the
 |-------|-------------|----------|
 | `default` | Latest model for your plan tier | Standard usage |
 | `sonnet` | Claude Sonnet 4.6 | Fast, cost-efficient |
-| `opus` | Claude Opus 4.6 | Deep reasoning |
+| `opus` | Claude Opus 4.7 | Deep reasoning |
 | `haiku` | Claude Haiku 4.5 | Budget, high-volume |
 | `sonnet[1m]` | Sonnet with 1M context | Large codebases |
 | `opusplan` | Opus (plan) + Sonnet (act) | Hybrid intelligence |
@@ -2893,6 +2918,7 @@ Model can also be set via `claude --model <alias>`, `ANTHROPIC_MODEL` env var, o
 
 | Model | Knowledge Cutoff |
 |-------|-----------------|
+| Claude Opus 4.7 | Not yet published |
 | Claude Sonnet 4.6 | August 2025 |
 | Claude Opus 4.6 | May 2025 |
 | Claude Haiku 4.5 | February 2025 |
@@ -3031,14 +3057,14 @@ User: Implement the plan from round 3.
 
 **Status**: Research preview — requires Claude Code v2.1.91+ and a Claude Code on the web account.
 
-**Concept**: Offload planning to Anthropic's cloud while your terminal stays free. Claude drafts the plan remotely using multiple Opus 4.6 agents in parallel; you review it in your browser with inline comments, then choose whether to execute in the cloud or teleport the plan back to your terminal.
+**Concept**: Offload planning to Anthropic's cloud while your terminal stays free. Claude drafts the plan remotely using multiple Opus 4.7+ agents in parallel; you review it in your browser with inline comments, then choose whether to execute in the cloud or teleport the plan back to your terminal.
 
 This solves the core friction of local Plan Mode: on complex tasks, the terminal blocks for minutes while planning runs. Ultraplan runs asynchronously — you keep working, check back when ready.
 
 **How It Works**
 
 1. CLI launches a cloud session → terminal shows a live status indicator
-2. Multiple Opus 4.6 agents explore the codebase in parallel (planning windows up to 30 minutes)
+2. Multiple Opus 4.7+ agents explore the codebase in parallel (planning windows up to 30 minutes)
 3. Browser opens the plan with outline sidebar, inline commenting, and emoji reactions
 4. You iterate on the plan — comment on specific sections, request revisions
 5. Choose where to execute: cloud (opens a PR) or terminal (teleports the plan back)
@@ -3105,7 +3131,7 @@ Teleport sub-options:
 |---------|-----------|----------|-----------|
 | Execution | Local | Local | Cloud |
 | Terminal blocked? | Yes | Yes | No |
-| Models | Active model | Opus (plan) + Sonnet (act) | Opus 4.6 (multi-agent) |
+| Models | Active model | Opus (plan) + Sonnet (act) | Opus 4.7 (multi-agent) |
 | Review surface | Terminal scrollback | Terminal scrollback | Browser with inline comments |
 | Requires GitHub | No | No | Yes |
 | Token accounting | Counts locally | Counts locally | Cloud planning free from local quota |
@@ -3125,6 +3151,40 @@ Skip it for:
 **Token Note**: Early tests show cloud planning consuming ~37% fewer tokens than equivalent local plans (82K vs 131K for a ~55 min migration task). Cloud planning tokens don't count against your local quota; only implementation tokens do.
 
 > **See also**: [§9.16 Session Teleportation](#916-session-teleportation) for the broader web ↔ terminal workflow. Ultraplan uses the same cloud infrastructure with planning-specific review capabilities.
+
+---
+
+### Ultrareview (v2.1.114+)
+
+Cloud-based parallel multi-agent code review. Where Ultraplan handles planning, Ultrareview handles review: multiple Opus 4.7 agents read through your changes simultaneously and surface bugs and design issues that careful reviewers would catch.
+
+**Activation**:
+
+```bash
+/ultrareview              # Review current branch (diff from base)
+/ultrareview <PR#>        # Review a specific GitHub PR
+```
+
+Ultrareview operates on **diffs, not the full codebase** — it reviews what changed on the current branch, or the changes in a given PR. The cloud session dispatches parallel agents to analyse the diff; results arrive in the browser and can optionally be teleported back to the terminal.
+
+**Launch offer**: Pro and Max subscribers receive three free ultrareviews to try the feature.
+
+**Requirements**:
+
+| Requirement | Detail |
+|-------------|--------|
+| Claude Code version | v2.1.114+ |
+| Account | Pro or Max |
+| Providers | Anthropic API only |
+
+**Ultraplan vs. Ultrareview**
+
+| | Ultraplan | Ultrareview |
+|---|---|---|
+| Purpose | Plan before coding | Review after coding |
+| Input | Prompt describing the task | Current branch diff or PR diff |
+| Scope | Unbounded | Diffs only (not full codebase) |
+| Output | Architectural plan | Bug and design issue report |
 
 ---
 
@@ -3337,7 +3397,10 @@ The `effort` parameter (Opus 4.6 API) controls the model's **overall computation
 - **`high`** — Design decisions, edge cases, multiple concerns
   > `"Redesign error handling in the payment module: add retry logic, partial failure recovery, and idempotency guarantees"` — Architectural choices, not just pattern application.
 
-- **`max`** _(Opus 4.6 only — returns error on other models)_ — Cross-system reasoning, irreversible decisions
+- **`xhigh`** _(Opus 4.7+, v2.1.114+)_ — Extra-high effort between `high` and `max`; default for Claude Code (all plans) with Opus 4.7
+  > `"Debug this race condition in the distributed job queue with concurrent writes and partial reads"` — More reasoning depth than `high`, faster than `max`.
+
+- **`max`** _(Opus 4.7+ only — returns error on other models)_ — Cross-system reasoning, irreversible decisions
   > `"Analyze the microservices event pipeline for race conditions across order-service, inventory-service, and notification-service"` — Multi-service hypothesis testing, adversarial thinking.
 
 ---
@@ -5468,7 +5531,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.39.1 Version Control & Backup
+### 3.40.0 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -8019,6 +8082,81 @@ This skill is now installed in the Méthode Aristote repository at:
 - Pattern reference: `examples/skills/design-patterns/reference/*.md`
 - Detection rules: `examples/skills/design-patterns/signatures/*.yaml`
 
+### Example 4: Tally Form Builder Skill
+
+**Purpose**: Create and modify Tally forms via MCP — no browser, no UI, just `/tally-form-builder` and a description.
+
+**Location**: `~/.claude/skills/tally-form-builder/`
+
+**What This Pattern Demonstrates**: MCP wrapping with deferred tool loading. The Tally MCP tools are not available by default — their schemas must be fetched via `ToolSearch` before any call. This skill handles that automatically and documents all the gotchas that cause failures when calling the API blind.
+
+**Key Features**:
+- OAuth flow management (authenticate → browser → callback URL → complete)
+- Block-chaining with `insertAfterBlockUuid` to preserve order
+- HTML support awareness (TEXT blocks yes, option labels no)
+- Batch text updates in a single call
+- Known-issues reference file with 7 documented limitations and workarounds
+
+**Structure**:
+```
+tally-form-builder/
+├── SKILL.md                     # Full workflow + rules + anti-patterns
+└── references/
+    ├── block-types.md           # All block types with payloads and examples
+    └── known-issues.md          # 7 limitations with workarounds
+```
+
+**Core Concept: Deferred Tools**
+
+Tally MCP tools are deferred — calling them without `ToolSearch` first returns `InputValidationError`. The skill enforces a mandatory `ToolSearch` step before any MCP call. This pattern applies to any MCP server with deferred tools.
+
+```
+ToolSearch → authenticate → list_workspaces → create_new_form
+          → create_blocks → configure_blocks → update_text → save_form
+```
+
+**Block Chaining Pattern**:
+
+Each block must reference the UUID of the block that precedes it. The skill tracks UUIDs across calls to maintain correct insertion order:
+
+```
+FORM_TITLE (uuid: "abc")
+  → create_blocks([TITLE], insertAfterBlockUuid: "abc") → returns "def"
+  → create_blocks([CHECKBOX × N], insertAfterBlockUuid: "def") → returns "ghi"
+  → create_blocks([PAGE_BREAK], insertAfterBlockUuid: "ghi") → ...
+```
+
+**Critical Rule**: `save_form` is mandatory. Without it, the form does not exist in Tally and `list_forms` returns 0 results.
+
+**Usage**:
+
+```
+/tally-form-builder
+Create a survey form on [topic] with:
+- Page 1: intro + checkbox question with options [A, B, C, D]
+- Page 2: context questions (team size, role)
+- Page 3: optional contact info (first name, email)
+Publish as PUBLISHED.
+```
+
+```
+/tally-form-builder
+Edit form [formId]:
+- Change "2 min" to "3 min max" in the intro
+- Add a "SMB" option to the team size question
+```
+
+**Key Limitations (documented in `references/known-issues.md`)**:
+- Options (checkbox, dropdown, multiple choice) do not support HTML — labels are always plain text
+- "Other" option generates a fixed small input; cannot be converted to a textarea via API
+- `list_forms` always returns 0 until `save_form` is called
+
+**Reference**:
+- Full skill: `~/.claude/skills/tally-form-builder/SKILL.md`
+- Block types: `~/.claude/skills/tally-form-builder/references/block-types.md`
+- Known issues: `~/.claude/skills/tally-form-builder/references/known-issues.md`
+- MCP wrapping template: `examples/skills/mcp-integration-reference/SKILL.md`
+
 ## 5.5 Community Skill Repositories
 
 ### Registry-based Discovery: ctx7 CLI
@@ -8665,13 +8803,39 @@ Slash commands are shortcuts for common workflows.
 | `/clear` | Clear conversation |
 | `/compact` | Summarize context |
 | `/status` | Show session info |
+| `/context` | Detailed context/token breakdown with actionable suggestions |
+| `/cost` | Per-model token cost breakdown for the session *(use `/usage` since v2.1.118)* |
 | `/plan` | Enter Plan Mode |
 | `/rewind` | Undo changes |
+| `/undo` | Alias for /rewind |
+| `/resume` | Resume a previous session with interactive picker |
 | `/voice` | Toggle voice input (hold Space to speak, release to send) |
+| `/recap` | Show context summary when returning to a session after a break |
+| `/config` | Interactive configuration editor |
+| `/model` | Switch model (sonnet/opus/opusplan) |
+| `/effort [level]` | Set thinking depth: low/medium/high/xhigh/max; no arg = interactive slider |
+| `/focus` | Toggle focus view (minimal UI, hides metadata) |
+| `/tui [fullscreen]` | Switch to full-screen flicker-free TUI rendering |
+| `/copy` | Interactive picker: copy a code block or full response |
+| `/loop [interval] [prompt]` | Run a prompt on a recurring interval |
+| `/proactive` | Alias for /loop |
 | `/simplify` | Review changed code and fix over-engineering |
 | `/batch` | Large-scale changes via parallel worktree agents |
 | `/insights` | Generate usage analytics report |
-| `/btw [question]` | Side question via ephemeral overlay — read-only, no tools, single response, doesn't pollute main history |
+| `/btw [question]` | Side question via ephemeral overlay: read-only, no tools, single response, doesn't pollute main history |
+| `/doctor` | Diagnostic check: environment, settings, connectivity |
+| `/release-notes` | Browse Claude Code changelog interactively |
+| `/less-permission-prompts` | Scan transcripts and propose a read-only tool allowlist |
+| `/team-onboarding` | Generate a teammate ramp-up guide from CLAUDE.md and recent sessions |
+| `/terminal-setup` | Configure terminal scroll sensitivity (VS Code, Cursor, Windsurf) |
+| `/reload-plugins` | Reload MCP plugins and auto-install missing dependencies |
+| `/mcp` | Show MCP server status |
+| `/memory` | View/edit memory files |
+| `/plugin` | Manage plugins (install, list, update) |
+| `/keybindings` | Edit key bindings (opens ~/.claude/keybindings.json) |
+| `/setup-bedrock` | Interactive Bedrock configuration wizard |
+| `/setup-vertex` | Interactive Vertex AI configuration wizard |
+| `/ultrareview` | Cloud-based parallel multi-agent code review (Pro/Max) |
 | `/exit` | Exit Claude Code |
 
 ### The /btw Command
@@ -8719,6 +8883,24 @@ claude --resume <session-id> --fork-session
 **After forking**: both branches are independent — changes in one don't affect the other. Resume either later with `claude --resume` and the interactive session picker.
 
 **Tip**: run `/rename` before forking so you can tell the two branches apart in the picker.
+
+### /recap: Session Context on Return
+
+`/recap` provides a context summary when you come back to a session after a break. Claude automatically detects the absence and generates a brief recap of what was being worked on, the last actions taken, and what comes next. This makes returning to a long session significantly less disorienting, especially after an overnight gap or a context compaction.
+
+**Behavior**: The recap fires automatically on re-entry to a session. It does not trigger at the end of a session; the trigger is when you *return* to one that has been inactive.
+
+**Configuration options:**
+
+| Method | Effect |
+|--------|--------|
+| `/config` then search "recap" | Enable/disable the feature in the UI |
+| `CLAUDE_CODE_ENABLE_AWAY_SUMMARY=1` | Force-enable (useful if telemetry is disabled) |
+| `CLAUDE_CODE_ENABLE_AWAY_SUMMARY=0` | Disable completely |
+
+The feature works even with telemetry disabled (Bedrock, Vertex, Foundry, `DISABLE_TELEMETRY`). You can also toggle it from `/config` without touching environment variables.
+
+**Version history**: Introduced in v2.1.108. Extended to telemetry-disabled environments in v2.1.110. A regression that caused auto-firing while the user was still composing a message was fixed in v2.1.113.
 
 ### The /insights Command
 
@@ -10363,7 +10545,7 @@ echo "Exit code: $?"  # Should be 0
 
 The Claude Code team uses a pattern where permission requests are routed to a **more capable model** acting as a security gate, rather than relying solely on static rule matching.
 
-**Concept**: A `PreToolUse` hook intercepts permission requests and forwards them to Opus 4.6 (or another capable model) via the API. The gate model scans for prompt injection, dangerous patterns, and unexpected tool usage — then auto-approves safe requests or blocks suspicious ones.
+**Concept**: A `PreToolUse` hook intercepts permission requests and forwards them to Opus 4.7 (or another capable model) via the API. The gate model scans for prompt injection, dangerous patterns, and unexpected tool usage — then auto-approves safe requests or blocks suspicious ones.
 
 ```bash
 # .claude/hooks/opus-security-gate.sh (conceptual)
@@ -14098,6 +14280,29 @@ The Claude Code plugin ecosystem has grown significantly. Here are verified comm
 
 > **Source**: Stats from [claude-plugins.dev](https://claude-plugins.dev), [Firecrawl analysis](https://www.firecrawl.dev/blog/best-claude-code-plugins) (Jan 2026). Counts evolve rapidly.
 
+### Production-Ready Plugins from This Guide
+
+All 181 templates in this guide's `examples/` directory are available as installable plugins — no file copying, hooks auto-wired on install:
+
+```bash
+claude plugin marketplace add FlorianBruniaux/claude-code-plugins
+```
+
+| Plugin | What's inside |
+|--------|---------------|
+| `security-suite` | OWASP auditing, 4-agent cyber-defense pipeline, 13 protective hooks |
+| `devops-pipeline` | CI/CD (auto-detects Python/Node/Rust), git worktrees, GitHub Actions |
+| `release-automation` | Changelog, release notes (3 formats), social content from `git log` |
+| `code-quality` | SOLID refactoring, TDD, GoF patterns, 6 specialist review agents |
+| `pr-workflow` | CEO + Eng planning gates, PR/issue triage, session handoffs |
+| `session-tools` | ccboard dashboard, voice refinement, 11 session hooks |
+| `ai-methodology` | Scaffolding, 6-stage talk pipeline, landing page generator |
+| `session-summary` | Analytics dashboard at session end (15 configurable sections) |
+
+Install only what you need. Source of truth for all templates stays in `examples/` — the plugins repo is the published distribution layer.
+
+→ **[github.com/FlorianBruniaux/claude-code-plugins](https://github.com/FlorianBruniaux/claude-code-plugins)**
+
 ### Featured Community Plugins
 
 Two community plugins address complementary problems that AI-assisted development creates: **code quality drift** (accumulation of poorly-structured AI-generated code) and **hallucination in generated solutions**.
@@ -14499,7 +14704,7 @@ The most powerful Claude Code pattern combines three techniques:
 
 ### Extended Thinking (Opus 4.5+) & Adaptive Thinking (Opus 4.6+)
 
-> **⚠️ Breaking Change (Opus 4.6, Feb 2026)**: Opus 4.6 replaces **budget-based thinking** with **Adaptive Thinking**, which automatically decides when to use deep reasoning based on query complexity. The `budget_tokens` parameter is **deprecated** on Opus 4.6.
+> **⚠️ Breaking Change (Opus 4.6, Feb 2026)**: Opus 4.6 replaces **budget-based thinking** with **Adaptive Thinking**, which automatically decides when to use deep reasoning based on query complexity. The `budget_tokens` parameter is **deprecated** on Opus 4.6+.
 
 #### Evolution Timeline
 
@@ -14508,17 +14713,20 @@ The most powerful Claude Code pattern combines three techniques:
 | **Opus 4.5** (pre-v2.0.67) | Opt-in, keyword-triggered (~4K/10K/32K tokens) | Prompt keywords |
 | **Opus 4.5** (v2.0.67+) | Always-on at max budget | Alt+T toggle, `/config` |
 | **Opus 4.6** (Feb 2026) | **Adaptive thinking** (dynamic depth) | `effort` parameter (API), Alt+T (CLI) |
+| **Opus 4.7** (Apr 2026) | **Adaptive thinking + xhigh** (new effort level) | `effort` parameter (API), Alt+T (CLI) |
 
-#### Adaptive Thinking (Opus 4.6)
+#### Adaptive Thinking (Opus 4.6 and Opus 4.7)
 
 **How it works**: The `effort` parameter controls the model's **overall computational budget** — not just thinking tokens, but the entire response including text generation and tool calls. The model dynamically allocates this budget based on query complexity.
 
 **Key insight**: `effort` affects everything, even when thinking is disabled. Lower effort = fewer tool calls, more concise text. Higher effort = more tool calls with explanations, detailed analysis.
 
 **Effort levels** (API only, official descriptions):
-- **`max`**: Maximum capability, no constraints. **Opus 4.6 only** (returns error on other models). Cross-system reasoning, irreversible decisions.
+- **`max`**: Maximum capability, no constraints. **Opus 4.7+ only** (returns error on other models). Cross-system reasoning, irreversible decisions.
   > Example: `"Analyze the microservices event pipeline for race conditions across order-service, inventory-service, and notification-service"`
-- **`high`** (default): Complex reasoning, coding, agentic tasks. Best for production workflows requiring deep analysis.
+- **`xhigh`** _(Opus 4.7+, v2.1.114+)_: Extra-high effort, between `high` and `max`. **Default in Claude Code (all plans) with Opus 4.7.** Use when you want more reasoning depth without full `max` latency.
+  > Example: `"Debug the race condition in the distributed job queue with concurrent writes"`
+- **`high`** (default for API): Complex reasoning, coding, agentic tasks. Best for production workflows requiring deep analysis.
   > Example: `"Redesign error handling in the payment module: add retry logic, partial failure recovery, and idempotency guarantees"`
 - **`medium`**: Balance between speed, cost, and performance. Good for agentic tasks with moderate complexity.
   > Example: `"Convert fetchUser() in api/users.ts from callbacks to async/await"`
@@ -14530,9 +14738,9 @@ The most powerful Claude Code pattern combines three techniques:
 **API syntax**:
 ```python
 response = client.messages.create(
-    model="claude-opus-4-6",
+    model="claude-opus-4-7",
     max_tokens=16000,
-    output_config={"effort": "medium"},  # low|medium|high|max
+    output_config={"effort": "xhigh"},  # low|medium|high|xhigh|max
     messages=[{"role": "user", "content": "Analyze..."}]
 )
 ```
@@ -16417,6 +16625,51 @@ User: Add error boundaries to all page components:
 List affected files first, then make changes."
 ```
 
+### macOS Batch Automation: Shell + AppleScript
+
+Batch operations extend beyond code changes. The same pattern applies to file conversion pipelines using native macOS tooling, with no external dependencies.
+
+**Use case**: Convert a folder of PPTX presentations to PDF using Keynote.
+
+```bash
+# Requirements: macOS + Keynote installed. No LibreOffice, no Python.
+./pptx-to-pdf.sh ~/Downloads/Prose   # recursive, processes all subdirectories
+```
+
+The script ([`examples/scripts/pptx-to-pdf.sh`](../examples/scripts/pptx-to-pdf.sh)):
+- Finds all `.pptx` files recursively under the target folder
+- Skips files where a `.pdf` already exists (idempotent, safe to re-run)
+- Opens each file via shell, exports to PDF via AppleScript, then closes Keynote
+- Prints a summary of all generated PDFs at the end
+
+**Critical gotcha — open via shell, not AppleScript**:
+
+The intuitive approach fails:
+```applescript
+-- This triggers error -1719 "Index non valable" on ~12% of files
+tell application "Keynote" to open pptx_file
+-- document 1 is sometimes empty, AppleScript throws on access
+```
+
+The fix: use `open -a "Keynote" "$pptx"` from the shell *before* the AppleScript block, with an 8-second sleep to let Keynote fully register the document. When Keynote opens a file via its own `open` command, it doesn't always add it to the `documents` list. When the shell hands it a file path via `open -a`, it does.
+
+```bash
+# Correct pattern
+open -a "Keynote" "$pptx"   # shell open
+sleep 8                      # wait for Keynote to register the document
+
+osascript << EOF
+tell application "Keynote"
+  if (count of documents) > 0 then
+    export document 1 to (POSIX file "$pdf") as PDF
+    close document 1 saving no
+  end if
+end tell
+EOF
+```
+
+This same shell-open-then-AppleScript pattern generalizes to any macOS app that supports scripting but has unreliable document registration via its own `open` command.
+
 ## 9.10 Continuous Improvement Mindset
 
 The goal isn't just to use AI for coding — it's to **continuously improve the workflow** so AI produces better results with less intervention.
@@ -18035,16 +18288,15 @@ python3 ~/.claude/scripts/extract-signatures.py src/
 | Use case | Tool | Install |
 |---|---|---|
 | General exploration | mcp-server-tree-sitter | `pip install mcp-server-tree-sitter` |
-| PR code reviews | code-review-graph (MIT, ~2k stars) | `pip install code-review-graph` |
+| PR code reviews | code-review-graph (MIT, 10k+ stars) | `pip install code-review-graph` |
 | Symbol lookup | jCodeMunch (free non-commercial) | `claude mcp add jcodemunch uvx jcodemunch-mcp` |
 
-**code-review-graph** is the strongest standalone option: MIT, Claude Code marketplace, 6.8x average token reduction on PR reviews across real codebases (httpx: 26x, FastAPI: 8x, Next.js: 6x).
+**code-review-graph** is the strongest standalone option: MIT, 10k+ stars, 8.2x average token reduction across real codebases (gin: 16x, flask: 9x, FastAPI: 8x, Next.js: 8x). Builds a Tree-sitter AST of your repo, tracks blast radius per change, and exposes 28 MCP tools so Claude reads only the files that matter. Supports 23 languages + Jupyter notebooks, auto-updates on every git commit (< 2s re-index), and ships a multi-repo daemon for editor-agnostic setups.
 
 ```bash
 pip install code-review-graph
-code-review-graph install
-# or
-claude plugin marketplace add tirth8205/code-review-graph
+code-review-graph install   # auto-detects Claude Code, Cursor, Windsurf, Zed, Continue, Kiro...
+code-review-graph build     # first-time parse (~10s for 500 files)
 ```
 
 **Honest benchmarks:**
@@ -18747,7 +18999,7 @@ Boris Cherny, creator of Claude Code, shared his workflow orchestrating 5-15 Cla
 - **5-10 instances** on claude.ai/code (`--teleport` to sync with local)
 - **Git worktrees** for isolation (each instance = separate checkout)
 - **CLAUDE.md**: 2.5k tokens, team-shared and versioned in git
-- **Model**: Opus 4.6 (slower but fewer corrections needed, adaptive thinking)
+- **Model**: Opus 4.6 or Opus 4.7 (slower but fewer corrections needed, adaptive thinking)
 - **Slash commands**: `/commit-push-pr` used "dozens of times per day"
 
 **Results** (30 days, January 2026):
@@ -18769,7 +19021,7 @@ Boris Cherny, creator of Claude Code, shared his workflow orchestrating 5-15 Cla
 
 > **On verification loops**: "I give Claude a way to verify output (browser/tests): verification drives quality."
 
-**Why Opus 4.6 with Adaptive Thinking**: Although more expensive per token ($5/1M input vs $3/1M for Sonnet, or $10/1M for 1M context beta), Opus requires fewer correction iterations thanks to adaptive thinking. Net result: faster delivery and lower total cost despite higher unit price.
+**Why Opus 4.6 or Opus 4.7 with Adaptive Thinking**: Although more expensive per token ($5/1M input vs $3/1M for Sonnet), Opus requires fewer correction iterations thanks to adaptive thinking. Net result: faster delivery and lower total cost despite higher unit price.
 
 **The supervision model**: Boris describes his role as "tending to multiple agents" rather than "doing every click yourself." The workflow becomes about **steering outcomes** across 5-10 parallel sessions, unblocking when needed, rather than sequential execution.
 
@@ -21936,7 +22188,7 @@ I'll decide based on our team context.
 
 **Reading time**: 5 minutes (overview) | [Quick Start →](./workflows/agent-teams-quick-start.md) (8-10 min, practical) | [Full workflow guide →](./workflows/agent-teams.md) (~30 min, theory)
 **Skill level**: Month 2+ (Advanced)
-**Status**: ⚠️ Experimental (v2.1.32+, Opus 4.6 required)
+**Status**: ⚠️ Experimental (v2.1.32+, Opus 4.6 or Opus 4.7 required)
 
 ### What Are Agent Teams?
 
@@ -21962,7 +22214,7 @@ OR in ~/.claude/settings.json:
 ### When Introduced & Production Validation
 
 **Version**: v2.1.32 (2026-02-05) as research preview
-**Model requirement**: Opus 4.6 minimum
+**Model requirement**: Opus 4.6 or Opus 4.7 minimum
 
 **Production metrics** (validated cases):
 - **Fountain** (workforce management): 50% faster screening, 2x conversions
@@ -22530,7 +22782,7 @@ Before moving to Section 10 (Reference), verify you understand:
 - [ ] **Remote Control**: Monitor/control local sessions from mobile or browser (Research Preview, Pro/Max)
 - [ ] **Background Tasks**: Run tasks in cloud while working locally (`%` prefix)
 - [ ] **Multi-Instance Scaling**: Understand when/how to orchestrate parallel Claude instances (advanced teams only)
-- [ ] **Agent Teams**: Multi-agent coordination for read-heavy tasks (experimental, Opus 4.6+)
+- [ ] **Agent Teams**: Multi-agent coordination for read-heavy tasks (experimental, Opus 4.7+)
 - [ ] **Permutation Frameworks**: Systematically test multiple approaches before committing
 - [ ] **Legacy Modernization**: 4-step workflow (Discovery → Risk → Planning → Incremental) for large legacy codebases
 
@@ -22861,6 +23113,202 @@ The promotion step stays manual by design — you decide what gets encoded. The 
 > **Credit**: Instinct-based learning pipeline and the Stop hook capture pattern from [Everything Claude Code v2](https://github.com/affaan-m/everything-claude-code) (Affaan Mustafa). The confidence scoring, decay model, and instinct → skill evolution pipeline are their original contribution.
 
 > **See also**: [§9.23 Configuration Lifecycle & The Update Loop](#923-configuration-lifecycle--the-update-loop) — deliberate maintenance vs. incidental capture
+
+---
+
+## 9.25 Harness Engineering
+
+**Reading time**: 10 minutes
+**Skill level**: Month 2+
+
+> **The core insight**: model capability and execution reliability are orthogonal. The same model produces fundamentally different outcomes depending on the infrastructure around it, not the model's quality. That infrastructure is the harness.
+
+### What Is a Harness?
+
+The harness is everything in the engineering environment around the agent: the instruction files, initialization scripts, state tracking, verification commands, and feedback loops. It is not a prompt file and not a list of guidelines. The harness is the workbench the agent operates inside.
+
+Five subsystems make up a complete harness:
+
+| Subsystem | Purpose | Core artifacts |
+|-----------|---------|----------------|
+| **Instructions** | Defines what the agent should do and how to behave | AGENTS.md, CLAUDE.md |
+| **Tools** | Shell access, file editing, command execution | Native Claude Code tools |
+| **Environment** | Dependencies, versions, reproducible baseline | init.sh, lockfiles, devcontainers |
+| **State** | Tracks scope and progress across sessions | feature_list.json, progress.md |
+| **Feedback** | Signals whether work is correct before declaring done | Tests, lint, typecheck, E2E |
+
+The most common failure modes map directly to missing subsystems. Agents that forget context between sessions are missing State. Agents that redo completed work are missing State. Agents that declare done before tests pass are missing Feedback.
+
+### The Verification Gap
+
+The most dangerous failure mode in agentic workflows: the agent announces "done" while tests are still failing, types are broken, or the build doesn't compile. This is not a model quality issue; it is a harness design issue. Without an enforced verification step, the agent relies on code inspection rather than actual execution, and its confidence is uncalibrated.
+
+The fix is to make verification non-optional. Add a three-layer check before the agent can declare completion:
+
+```bash
+# Layer 1: Static analysis
+npm run lint && npm run typecheck
+
+# Layer 2: Unit and integration tests
+npm test
+
+# Layer 3: End-to-end smoke test
+npm run e2e
+```
+
+Encode this as a hard rule in CLAUDE.md:
+
+```markdown
+## Definition of Done
+
+A feature is NOT done until all three layers pass:
+1. `npm run lint && npm run typecheck` — clean
+2. `npm test` — all tests pass
+3. `npm run e2e` — smoke test passes
+
+Do NOT commit or report completion before running all three.
+```
+
+The third layer matters more than most teams expect. Unit tests pass when components work in isolation. End-to-end tests catch interface mismatches, state propagation errors, and lifecycle issues that unit tests structurally cannot detect. Agents that know E2E verification is enforced also tend to write better integration code, because they know it will be tested.
+
+### WIP=1: One Feature at a Time
+
+When multiple features are in progress simultaneously, verification becomes ambiguous (which feature broke the tests?), progress tracking becomes noisy, and context fills faster with no clear completion signal. The agent distributes attention across the full task list instead of closing one thing.
+
+Enforce WIP=1 in your feature list: only one feature can be in `active` state at any time. The agent picks one, finishes it through all three verification layers, then picks the next. This constraint feels restrictive and produces measurably better completion rates.
+
+### The Session Lifecycle
+
+A reliable session follows this sequence every time, not just at startup:
+
+| Step | Action | Subsystem |
+|------|--------|-----------|
+| 1. READ | Read AGENTS.md and CLAUDE.md | Instructions |
+| 2. INIT | Run `./init.sh` — verify environment is healthy | Environment |
+| 3. RESUME | Read `progress.md` — what happened last session | State |
+| 4. SELECT | Pick one feature with `not_started` status from `feature_list.json` | State |
+| 5. EXECUTE | Implement only that feature | — |
+| 6. VERIFY | Run all three verification layers | Feedback |
+| 7. UPDATE | Set feature status to `passing`, record evidence | State |
+| 8. LOG | Update `progress.md` with what changed and what's next | State |
+| 9. CLEANUP | Remove temp files, leave repo in restartable state | Environment |
+| 10. COMMIT | Commit only when verification passes and state is clean | — |
+
+Steps 2 (INIT) and 6 (VERIFY) are where most harness failures occur. INIT that silently continues past broken dependencies produces confusing errors for the rest of the session. VERIFY that runs but doesn't block completion produces false positives that erode trust in the agent's output.
+
+### feature_list.json: Structured Scope Tracking
+
+A plain text task list is insufficient for reliable agent operation: no machine-readable state, no evidence field, no dependency ordering. `feature_list.json` adds structure that both the agent and your tooling can read.
+
+Each feature needs three things: a description of the expected behavior, the verification command that proves it works, and a status field the agent updates throughout the session.
+
+```json
+{
+  "features": [
+    {
+      "id": "feat-001",
+      "name": "Document Import",
+      "description": "User can import PDF and TXT files from the local filesystem",
+      "dependencies": [],
+      "status": "passing",
+      "evidence": "npm test -- --grep 'document import' → 4 tests pass"
+    },
+    {
+      "id": "feat-002",
+      "name": "Document Chunking",
+      "description": "Imported documents split into ~500-char chunks with position metadata",
+      "dependencies": ["feat-001"],
+      "status": "active",
+      "evidence": ""
+    },
+    {
+      "id": "feat-003",
+      "name": "Search Index",
+      "description": "Full-text search across all imported documents",
+      "dependencies": ["feat-002"],
+      "status": "not_started",
+      "evidence": ""
+    }
+  ]
+}
+```
+
+Status values follow a one-way flow: `not_started` → `active` → `passing` (or `blocked` if a dependency is unresolvable). The `evidence` field is the highest-signal part of the schema: it records what verification actually ran, not just that the code was written. An empty `evidence` field on a `passing` feature is a red flag.
+
+### init.sh: Bootstrap Contract
+
+Every session starts from an unknown environment state. Dependencies may have changed, build artifacts may be stale, or types may be broken from a previous incomplete session. `init.sh` establishes a known-good baseline before any work begins.
+
+```bash
+#!/bin/bash
+set -e  # Fail fast on any error
+
+echo "=== Initialization ==="
+npm install
+npm run build
+npm run typecheck
+npm test
+
+echo "=== Environment ready ==="
+echo "Next: read feature_list.json and pick one not_started feature"
+```
+
+`set -e` is non-negotiable. If install fails, the script stops. An agent that proceeds past a broken environment produces confusing errors for the rest of the session, and the root cause becomes difficult to isolate. Run it idempotently — calling it five times should produce the same result as calling it once.
+
+### progress.md: Session Continuity
+
+Context windows are finite. Every session that ends without a handoff note forces the next session to reconstruct context from scratch: reading git log, grepping for recent changes, inferring what was in progress. This reconstruction is expensive and imprecise, and it's where subtle errors get introduced.
+
+`progress.md` eliminates the reconstruction cost. It's a short, structured note written at the end of every session, read at the start of the next.
+
+```markdown
+# Session Progress
+
+## Last Updated
+2026-05-04 — Session 7
+
+## Active Feature
+feat-002: Document Chunking
+
+## Done This Session
+- [x] Implemented chunk() function in src/services/chunker.ts
+- [x] Added position metadata (start_char, end_char, chunk_index)
+- [x] Unit tests pass (8/8)
+
+## In Progress
+- [ ] Chunker integration with DocumentService
+  - Status: function exists, wiring not complete
+  - Blocker: none
+
+## Next Steps
+1. Wire chunker into DocumentService.import()
+2. Add integration test covering full import-to-chunk flow
+3. Update feat-002 status to passing once integration test passes
+
+## Evidence
+- lint: clean
+- typecheck: clean
+- unit tests: 8/8 pass
+- integration tests: not yet (feat-002 not complete)
+
+## Notes for Next Session
+chunk() is in src/services/chunker.ts:42. DocumentService expects a
+ChunkResult[] type (defined in src/types/documents.ts:18). The wiring
+point is DocumentService.import() at line 67.
+```
+
+The "Notes for Next Session" section is the highest-ROI part: concrete file paths, line numbers, and specific wiring points that save 5-10 minutes of orientation at session start. Treat it as a message to a colleague who knows the codebase but has no memory of what happened today.
+
+### Templates
+
+Ready-to-use starting points:
+
+- `feature_list.json` template: [`examples/templates/feature-list.json`](../examples/templates/feature-list.json)
+- `progress.md` session handoff: [`examples/claude-md/agent-progress.md`](../examples/claude-md/agent-progress.md)
+
+> **Source**: Framework and patterns from [Learn Harness Engineering](https://github.com/humanlayer/learn-harness-engineering) (HumanLayer, 2026), adapted and integrated. The verification gap concept, WIP=1 principle, and session lifecycle structure are the course's primary contributions.
+
+> **See also**: [§3.1 CLAUDE.md](#31-memory-files-claudemd) — instruction files, the Instructions subsystem. [§9.5 Tight Feedback Loops](#95-tight-feedback-loops) — automated feedback, the Feedback subsystem. [§9.24 Instinct-Based Continuous Learning](#924-instinct-based-continuous-learning) — capturing session observations across sessions.
 
 ---
 
@@ -25116,4 +25564,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.39.1
+**Last updated**: January 2026 | **Version**: 3.40.0

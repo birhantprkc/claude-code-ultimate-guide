@@ -12,6 +12,7 @@ Utility scripts for Claude Code power users.
 
 | Script | Description |
 |--------|-------------|
+| `pptx-to-pdf.sh` | Batch convert PPTX to PDF via Keynote on macOS (no dependencies) |
 | `audit-scan.sh` | Security and quality audit of Claude Code setup |
 | `check-claude.sh/.ps1` | Health check for Claude Code installation |
 | `clean-reinstall-claude.sh/.ps1` | Clean reinstall of Claude Code |
@@ -327,3 +328,27 @@ Get statistics about your Claude Code usage.
 ```bash
 ./session-stats.sh
 ```
+
+---
+
+## PPTX to PDF (macOS)
+
+Batch convert PPTX presentations to PDF using Keynote. No LibreOffice, no Python — just macOS + Keynote.
+
+```bash
+# Convert all PPTX in a folder (recursive)
+./pptx-to-pdf.sh ~/Downloads/Prose
+
+# Convert current directory
+./pptx-to-pdf.sh
+```
+
+**Requirements**: macOS + Keynote installed.
+
+**Behavior**:
+- Recursive: finds all `.pptx` files in subdirectories
+- Idempotent: skips files where a `.pdf` already exists
+- Output: PDF created alongside each PPTX, same folder, same name
+- Summary printed at the end
+
+**Key gotcha**: The script opens files via `open -a "Keynote"` from the shell, not via AppleScript's own `open` command. When Keynote opens a PPTX via AppleScript, it sometimes doesn't register the document in its internal list, causing error -1719 on `document 1`. The shell open + 8-second sleep pattern fixes this reliably.

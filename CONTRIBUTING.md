@@ -54,6 +54,32 @@ git checkout -b fix/typo-in-section-3
 git checkout -b feature/add-debugging-guide
 ```
 
+### 2.5. Install Pre-commit Hooks
+
+This repository uses pre-commit hooks to enforce quality gates (markdown lint, YAML validation, version consistency, etc.). Set them up once:
+
+```bash
+# macOS/Linux
+pip install pre-commit
+pre-commit install
+
+# Windows (PowerShell)
+pip install pre-commit
+pre-commit install
+```
+
+Pre-commit will now run automatically on `git commit`. You can also run manually:
+
+```bash
+pre-commit run --all-files
+```
+
+**What the hooks check:**
+- ✓ Markdown formatting consistency
+- ✓ YAML syntax validity
+- ✓ VERSION file consistency across the repo
+- ✓ No broken symlinks or sensitive files
+
 ### 3. Make Changes
 
 Follow [Content Guidelines](#content-guidelines) below.

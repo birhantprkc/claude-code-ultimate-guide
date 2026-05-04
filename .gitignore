@@ -5,10 +5,11 @@
 *.swo
 *~
 
-# Claude Code (ignore personal config, but keep shared commands and agents)
+# Claude Code (ignore personal config, but keep shared commands, agents, and hooks)
 .claude/
 !.claude/commands/
 !.claude/agents/
+!.claude/hooks/
 
 # OS
 .DS_Store

@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.13.0"
-updated: "2026-04-11"
+version: "2.16.0"
+updated: "2026-05-03"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -290,6 +290,87 @@ sources:
   - name: "Praetorian - Indirect Prompt Injection: The LLM Supervisor Blind Spot"
     url: "https://www.praetorian.com/blog/indirect-prompt-injection-llm/"
     date: "2026-04-10"
+  - name: "Pluto Security / Rapid7 - CVE-2026-33032 MCPwn nginx-ui Authentication Bypass"
+    url: "https://www.rapid7.com/blog/post/etr-cve-2026-33032-nginx-ui-missing-mcp-authentication/"
+    date: "2026-04-16"
+  - name: "Picus Security - CVE-2026-33032 MCPwn Full Analysis"
+    url: "https://www.picussecurity.com/resource/blog/cve-2026-33032-mcpwn-how-a-missing-middleware-call-in-nginx-ui-hands-attackers-full-web-server-takeover"
+    date: "2026-04-16"
+  - name: "OX Security - The Mother of All AI Supply Chains: MCP STDIO Design Flaw"
+    url: "https://www.ox.security/blog/the-mother-of-all-ai-supply-chains-critical-systemic-vulnerability-at-the-core-of-the-mcp/"
+    date: "2026-04-15"
+  - name: "The Register - MCP Design Flaw Puts 200K Servers at Risk"
+    url: "https://www.theregister.com/2026/04/16/anthropic_mcp_design_flaw/"
+    date: "2026-04-16"
+  - name: "OWASP GenAI Exploit Round-up Report Q1 2026"
+    url: "https://genai.owasp.org/2026/04/14/owasp-genai-exploit-round-up-report-q1-2026/"
+    date: "2026-04-15"
+  - name: "SecurityWeek / TechZine - Comment and Control: Claude Code, Gemini CLI, GitHub Copilot Prompt Injection"
+    url: "https://www.securityweek.com/claude-code-gemini-cli-github-copilot-agents-vulnerable-to-prompt-injection-via-comments/"
+    date: "2026-04-16"
+  - name: "SentinelOne - CVE-2025-56404 MariaDB MCP Information Disclosure"
+    url: "https://www.sentinelone.com/vulnerability-database/cve-2025-56404/"
+    date: "2026-04-15"
+  - name: "Cequence.ai - Prompt Injection Exposes AI Agent Credentials"
+    url: "https://www.cequence.ai/blog/ai/even-the-best-ai-agents-leak-secrets-prompt-injection-is-why/"
+    date: "2026-04-16"
+  - name: "SecurityWeek - Cursor AI Vulnerability Exposed Developer Devices (NomShub full coverage)"
+    url: "https://www.securityweek.com/cursor-ai-vulnerability-exposed-developer-devices/"
+    date: "2026-04-17"
+  - name: "THN - Anthropic MCP Design Vulnerability Enables RCE (7000+ servers, 150M downloads)"
+    url: "https://thehackernews.com/2026/04/anthropic-mcp-design-vulnerability.html"
+    date: "2026-04-20"
+  - name: "Red Hat - CVE-2026-6494 AAP MCP Server Log Injection"
+    url: "https://access.redhat.com/security/cve/cve-2026-6494"
+    date: "2026-04-17"
+  - name: "SentinelOne - CVE-2025-69256 Serverless Framework MCP RCE"
+    url: "https://www.sentinelone.com/vulnerability-database/cve-2025-69256/"
+    date: "2026-04-22"
+  - name: "InfoSecurity Magazine - 10 In-the-Wild Indirect Prompt Injection Payloads"
+    url: "https://www.infosecurity-magazine.com/news/researchers-10-wild-indirect/"
+    date: "2026-04-23"
+  - name: "Straiker - 94% of AI Agents Vulnerable to Prompt Injection (empirical study)"
+    url: "https://www.straiker.ai/blog/why-94-of-ai-agents-are-vulnerable-to-prompt-injection----and-what-to-do-about-it"
+    date: "2026-04-22"
+  - name: "IBM X-Force - Agentic AI is growing fast, as are the vulnerabilities"
+    url: "https://www.ibm.com/think/x-force/agentic-ai-growing-fast-vulnerabilities"
+    date: "2026-04-24"
+  - name: "THN - Google Patches Antigravity IDE Flaw / Claudy Day / Claude Memory Poisoning"
+    url: "https://thehackernews.com/2026/04/google-patches-antigravity-ide-flaw.html"
+    date: "2026-04-21"
+  - name: "Cisco - AI Agent Security Scanner for IDEs"
+    url: "https://blogs.cisco.com/ai/introducing-the-ai-agent-security-scanner-for-ides-verify-your-agents"
+    date: "2026-04-21"
+  - name: "SentinelOne - CVE-2026-35021 Claude Code CLI OS Command Injection"
+    url: "https://www.sentinelone.com/vulnerability-database/cve-2026-35021/"
+    date: "2026-04-10"
+  - name: "SentinelOne - CVE-2026-39861 Anthropic Claude Code RCE"
+    url: "https://www.sentinelone.com/vulnerability-database/cve-2026-39861/"
+    date: "2026-04-23"
+  - name: "Sonar - Two Critical Flaws in Claude Code CLI Allowing Arbitrary Code Execution"
+    url: "https://www.sonarsource.com/blog/claude-arbitrary-code-execution"
+    date: "2026-04-30"
+  - name: "Trend Micro - Exposed MCP Servers Widen to Cloud Attack Surface"
+    url: "https://www.trendmicro.com/vinfo/us/security/news/vulnerabilities-and-exploits/update-on-exposed-mcp-servers-the-threat-widens-to-the-cloud"
+    date: "2026-04-28"
+  - name: "The Register - 30 ClawHub Skills Secretly Turn AI Agents into Crypto Swarm"
+    url: "https://www.theregister.com/2026/04/29/30_clawhub_skills_mine_crypto/"
+    date: "2026-04-29"
+  - name: "Acronis - AI Supply Chain Attacks on Hugging Face and OpenClaw"
+    url: "https://www.acronis.com/en/tru/posts/poisoning-the-well-ai-supply-chain-attacks-on-hugging-face-and-openclaw/"
+    date: "2026-04-30"
+  - name: "SecurityWeek - Hugging Face and ClawHub Abused for Malware Distribution via Indirect Prompt Injection"
+    url: "https://www.securityweek.com/hugging-face-clawhub-abused-for-malware-distribution/"
+    date: "2026-05-01"
+  - name: "Red Hat - CVE-2026-30625 Upsonic MCP Server RCE"
+    url: "https://access.redhat.com/security/cve/cve-2026-30625"
+    date: "2026-04-16"
+  - name: "NVD - CVE-2026-7593 Sunwood-ai-labs command-executor-mcp-server Command Injection"
+    url: "https://nvd.nist.gov/vuln/detail/CVE-2026-7593"
+    date: "2026-05-01"
+  - name: "NVD - CVE-2026-7591 TimBroddin astro-mcp-server Vulnerability"
+    url: "https://nvd.nist.gov/vuln/detail/CVE-2026-7591"
+    date: "2026-05-01"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS AUTHORS (confirmed by security researchers)
@@ -1320,10 +1401,185 @@ cve_database:
     cwe: "CWE-287"
     notes: "OAuth bypass in a widely used MCP authentication component — high impact given FastMCP's adoption across many MCP server implementations"
 
+  # --- nginx-ui MCPwn (missing authentication on MCP endpoint) ---
+  - id: "CVE-2026-33032"
+    component: "nginx-ui (MCP integration, /mcp_message endpoint)"
+    severity: "critical"
+    cvss: 9.8
+    description: "Missing authentication middleware on the /mcp_message endpoint in nginx-ui's MCP integration — the /mcp_message handler lacks the AuthRequired() middleware present on the /mcp endpoint, allowing unauthenticated network-adjacent attackers to invoke all 12 MCP tools (including nginx_config_add with auto-reload) and achieve complete nginx server takeover in two HTTP requests. 2,689 publicly reachable instances confirmed exposed. Actively exploited in the wild since March 2026; added to VulnCheck KEV April 13, 2026."
+    source: "Pluto Security / Rapid7 / Picus Security (2026-04-15 to 2026-04-16)"
+    fixed_in: "v2.3.4 (released 2026-03-15)"
+    mitigation: "Update nginx-ui to >= v2.3.4 immediately; restrict /mcp_message to localhost or trusted network; do not expose nginx-ui admin interfaces to untrusted networks; audit nginx configs for unauthorized modifications"
+    cwe: "CWE-306"
+    notes: "Reported by Yotam Perkal (Pluto Security); 27-character fix (adding AuthRequired() middleware); chains with CVE-2026-27944 (unauthenticated /api/backup endpoint leaking encryption keys) for combined credential exfiltration + full takeover; commit 413dc63"
+
+  # --- nginx-ui backup endpoint key leak (chains with CVE-2026-33032) ---
+  - id: "CVE-2026-27944"
+    component: "nginx-ui (/api/backup endpoint)"
+    severity: "critical"
+    cvss: 9.8
+    description: "Unauthenticated /api/backup endpoint in nginx-ui leaks encryption keys used to decrypt database backups, exposing user credentials, SSL private keys, and node_secret values stored in the nginx-ui configuration"
+    source: "Picus Security (2026-04-16)"
+    fixed_in: "v2.3.4"
+    mitigation: "Update nginx-ui to >= v2.3.4; restrict admin interface to trusted networks; rotate all credentials stored in nginx-ui after any exposure"
+    cwe: "CWE-522"
+    notes: "Chains with CVE-2026-33032 (MCPwn) — combined exploit achieves unauthenticated credential theft + full nginx server takeover"
+
+  # --- MariaDB MCP (information disclosure) ---
+  - id: "CVE-2025-56404"
+    component: "MariaDB MCP server (SSE service)"
+    severity: "medium"
+    description: "Information disclosure vulnerability in MariaDB MCP server — the SSE (Server-Sent Events) service lacks proper user validation, allowing unauthenticated attackers to access sensitive MCP data including database connection information and query results streamed via the SSE endpoint"
+    source: "SentinelOne (2026-04-15)"
+    fixed_in: "update to latest version — check upstream MariaDB MCP releases"
+    mitigation: "Update MariaDB MCP to latest version; enforce authentication on all SSE endpoints; do not expose MariaDB MCP server to untrusted networks"
+    cwe: "CWE-306"
+
+  # --- Windsurf zero-click prompt injection (OX Security MCP chain) ---
+  - id: "CVE-2026-30615"
+    component: "Windsurf AI IDE (MCP integration)"
+    severity: "high"
+    description: "Zero-click prompt injection in Windsurf's MCP integration — attacker crafts malicious prompts that developers copy and paste, causing the MCP agent to write malicious configuration entries and execute arbitrary commands without any user interaction; part of the broader OX Security STDIO design flaw research affecting 150M+ MCP SDK downloads"
+    source: "OX Security (2026-04-15)"
+    fixed_in: "check upstream Windsurf releases"
+    mitigation: "Update Windsurf to latest patched version; treat all copied prompts from untrusted sources as potentially adversarial; audit MCP server configurations after opening external repositories; sandbox MCP service execution"
+    cwe: "CWE-77"
+    notes: "One of several IDEs affected by the architectural OX Security finding; Anthropic has stated MCP STDIO input sanitization is developer responsibility"
+
+  # --- OX Security MCP STDIO architectural design flaw ---
+  - id: "ADVISORY-MCP-STDIO-2026-001"
+    component: "MCP STDIO interface (all SDK languages: Python, TypeScript, Java, Rust)"
+    severity: "critical"
+    description: "Architectural design flaw in Anthropic's Model Context Protocol STDIO interface — the SDK receives a configuration to start a tool, uses STDIO to run it, and performs no validation of input before executing commands on the operating system. Affects all major MCP SDKs and an estimated 200,000+ servers and 150M+ downloads. Anthropic has stated this is 'by design' and that input sanitization is the developer's responsibility. Enables arbitrary command execution in any application that integrates MCP without its own validation layer."
+    source: "OX Security (2026-04-15); The Register (2026-04-16)"
+    fixed_in: "no vendor patch — Anthropic considers behavior by design"
+    mitigation: "Validate and sanitize ALL user input before passing to MCP STDIO; run MCP services in sandboxes with restricted OS permissions; block public IP access to MCP services; treat all MCP configurations as untrusted; use only official MCP server directories; apply defense-in-depth with OS-level sandboxing"
+    notes: "Affects Google, Microsoft, Anthropic IDE integrations; attackers can bypass filtering by wrapping commands with legitimate tools like npx; CVE-2026-30615 (Windsurf) is one documented instance of this class"
+
+  # --- LiteLLM MCP STDIO command injection (OX Security chain) ---
+  - id: "CVE-2026-30623"
+    component: "LiteLLM (MCP SDK stdio transport)"
+    severity: "critical"
+    description: "Command injection via MCP SDK stdio transport in LiteLLM — StdioServerParameters executes the configured command even when it fails to produce a valid server handle, allowing arbitrary OS command execution when an attacker controls the command string via prompt injection or poisoned MCP marketplace configuration"
+    source: "OX Security / LiteLLM (2026-04-15); CyberSecurityNews (2026-04-21)"
+    fixed_in: "patched — update LiteLLM to latest version"
+    mitigation: "Update LiteLLM immediately; validate all MCP stdio command parameters; never derive MCP command strings from user-controlled input"
+    cwe: "CWE-77"
+    notes: "Part of the broader OX Security MCP STDIO design flaw research (ADVISORY-MCP-STDIO-2026-001); one of 10+ CVEs across the MCP ecosystem"
+
+  # --- Flowise MCP STDIO command injection (OX Security chain) ---
+  - id: "CVE-2026-40933"
+    component: "Flowise (MCP STDIO integration)"
+    severity: "high"
+    description: "Command injection via MCP STDIO interface in Flowise — attacker-controlled MCP configuration allows arbitrary OS command execution through the stdio transport layer without user interaction; discovered as part of OX Security's MCP STDIO architectural research"
+    source: "OX Security (2026-04-15); THN (2026-04-20)"
+    fixed_in: "check upstream Flowise releases for patch"
+    mitigation: "Update Flowise to latest version; sandbox MCP service execution; block public IP access to Flowise MCP endpoints; treat all MCP STDIO configurations as untrusted"
+    cwe: "CWE-77"
+    notes: "Part of ADVISORY-MCP-STDIO-2026-001 family; LangChain, LangFlow, and LibreChat also affected by the same class"
+
+  # --- Bisheng MCP STDIO command injection (OX Security chain) ---
+  - id: "CVE-2026-33224"
+    component: "Bisheng (MCP STDIO integration)"
+    severity: "critical"
+    description: "Command injection via MCP STDIO interface in Bisheng — arbitrary OS command execution through the stdio transport layer; discovered and patched as part of OX Security's MCP STDIO architectural research affecting the broader ecosystem"
+    source: "OX Security (2026-04-15); CyberSecurityNews (2026-04-21)"
+    fixed_in: "patched — update Bisheng to latest version"
+    mitigation: "Update Bisheng immediately; validate all MCP command parameters at the application layer"
+    cwe: "CWE-77"
+    notes: "Part of ADVISORY-MCP-STDIO-2026-001; one of few instances where a vendor patch was issued quickly after OX Security disclosure"
+
+  # --- Serverless Framework MCP server RCE ---
+  - id: "CVE-2025-69256"
+    component: "Serverless Framework (experimental MCP server feature)"
+    severity: "high"
+    description: "Command injection RCE vulnerability in Serverless Framework's experimental MCP server feature — allows attackers to execute arbitrary system commands via maliciously crafted MCP requests to the Serverless CLI's MCP endpoint"
+    source: "SentinelOne (2026-04-22)"
+    fixed_in: "check upstream Serverless Framework releases"
+    mitigation: "Disable Serverless Framework experimental MCP server feature if not required; update to latest Serverless Framework version; do not expose the MCP endpoint to untrusted networks"
+    cwe: "CWE-78"
+
+  # --- Red Hat AAP MCP server log injection ---
+  - id: "CVE-2026-6494"
+    component: "Red Hat Ansible Automation Platform (AAP) MCP server"
+    severity: "medium"
+    description: "Unauthenticated remote log injection in the Red Hat AAP MCP server — an unauthenticated attacker can exploit a log injection vulnerability by sending specially crafted input to manipulate log entries, potentially poisoning audit trails or triggering downstream log processing vulnerabilities"
+    source: "Red Hat Customer Portal (2026-04-17)"
+    fixed_in: "check Red Hat AAP MCP server security errata"
+    mitigation: "Apply Red Hat security errata for AAP MCP server; sanitize all MCP server log inputs; restrict MCP endpoint access to trusted networks only"
+    cwe: "CWE-117"
+
+  # --- Claude Code CLI (OS command injection) ---
+  - id: "CVE-2026-35021"
+    component: "Claude Code CLI and Claude Agent SDK"
+    severity: "critical"
+    description: "OS command injection vulnerability in Claude Code CLI and Agent SDK — attackers craft malicious file paths containing shell metacharacters (e.g., $() or backticks) that are passed to system calls without sanitization, allowing arbitrary command execution with the privileges of the running agent"
+    source: "SentinelOne (2026-04-10)"
+    fixed_in: "update Claude Code to latest version; see minimum_safe_versions"
+    mitigation: "Update Claude Code to latest version; never process untrusted file paths without sanitization; restrict shell metacharacter input in file path arguments; run Claude Code with minimum required OS permissions"
+    cwe: "CWE-78"
+    notes: "Identified as part of broader research on prompt injection as an attack surface for Claude Code CLI; pairs with T025 (Comment and Control) and T011 (Project Configuration Hijacking)"
+
+  # --- Claude Code RCE (Sonar research) ---
+  - id: "CVE-2026-39861"
+    component: "Anthropic Claude Code"
+    severity: "critical"
+    description: "Remote code execution vulnerability in Anthropic Claude Code — two critical flaws documented by Sonar researchers allow attackers to execute arbitrary code by tricking a user into running Claude Code in a directory containing malicious project files; attackers exploit the way Claude Code reads and processes configuration and project files on startup"
+    source: "SentinelOne (2026-04-23); Sonar blog (2026-04-30)"
+    fixed_in: "update Claude Code to latest version; see minimum_safe_versions"
+    mitigation: "Update Claude Code to latest version; never run Claude Code in untrusted directories without reviewing project files first (CLAUDE.md, .mcp.json, .claude/settings.json); use --no-memory flag in untrusted contexts; treat project config files as executable code"
+    cwe: "CWE-94"
+    notes: "Two separate RCE code paths documented in Sonar research (April 30, 2026); relates to T011 (Project Configuration Hijacking) and T027 (Supply Chain Memory Poisoning)"
+
+  # --- Upsonic (MCP server/task creation RCE) ---
+  - id: "CVE-2026-30625"
+    component: "Upsonic 0.71.6 (MCP server/task creation)"
+    severity: "critical"
+    description: "Remote code execution in Upsonic 0.71.6 — the application allows users to define MCP server configurations including command and arguments that are executed server-side without adequate validation; attackers with access to MCP configuration endpoints can achieve arbitrary command execution with service account privileges"
+    source: "Red Hat Customer Portal (2026-04-16)"
+    fixed_in: "update Upsonic to version after 0.71.6 — check upstream releases"
+    mitigation: "Update Upsonic to latest version; restrict access to MCP server configuration interfaces; validate and sanitize all command parameters before execution; do not expose Upsonic configuration API to untrusted networks"
+    cwe: "CWE-77"
+    notes: "Part of the broader OX Security STDIO design flaw class (ADVISORY-MCP-STDIO-2026-001); applications that allow users to define MCP server command+args without validation are systematically vulnerable"
+
+  # --- Sunwood-ai-labs command-executor-mcp-server (0-day command injection) ---
+  - id: "CVE-2026-7593"
+    component: "Sunwood-ai-labs command-executor-mcp-server (up to 0.1.0)"
+    severity: "high"
+    description: "OS command injection in Sunwood-ai-labs command-executor-mcp-server up to version 0.1.0 — the execute_command function is vulnerable to command injection via unsanitized user-supplied input; a public exploit is available; vendor has not responded to disclosure"
+    source: "NVD / Tenable (2026-05-01)"
+    fixed_in: "no vendor patch — treat as unpatched; avoid using this MCP server in any environment"
+    mitigation: "Remove command-executor-mcp-server from all MCP configurations; do not run MCP servers with broad shell command execution capabilities without proper sandboxing and input validation; use alternative MCP servers with active security maintenance"
+    cwe: "CWE-78"
+    notes: "Public exploit disclosed with no vendor response; similar risk profile to aws-mcp-server CVE-2026-5058; any MCP server named 'command-executor' warrants extreme scrutiny"
+
+  # --- TimBroddin astro-mcp-server ---
+  - id: "CVE-2026-7591"
+    component: "TimBroddin astro-mcp-server (up to 1.1.1)"
+    severity: "medium"
+    description: "Security vulnerability in TimBroddin astro-mcp-server up to version 1.1.1 — the impacted function is in src/index.ts; exact nature not yet fully documented at time of writing"
+    source: "NVD (2026-05-01)"
+    fixed_in: "1.1.2 or later — update to latest version"
+    mitigation: "Update astro-mcp-server to >= 1.1.2; monitor NVD entry for full advisory"
+    notes: "Limited details available; monitor CVE for full disclosure and update this entry when advisory is published"
+
+  # --- aws-mcp-server second 0-day (CVE-2026-5059) ---
+  - id: "CVE-2026-5059"
+    component: "aws-mcp-server"
+    severity: "critical"
+    cvss: 9.8
+    description: "Second command injection vulnerability in aws-mcp-server (ZDI-CAN-27969) — distinct from CVE-2026-5058 (ZDI-CAN-27968); both rated CVSS 9.8 unauthenticated RCE; vendor rejected reports for both CVEs and no patch is available for either"
+    source: "ZDI-26-246 (2026-03-30)"
+    fixed_in: "no vendor patch — both CVE-2026-5058 and CVE-2026-5059 are unpatched 0-days"
+    mitigation: "Do not use aws-mcp-server in any network-accessible environment; use alternative AWS MCP implementations with active security support; apply OS-level command allowlists; monitor ZDI for future vendor engagement"
+    cwe: "CWE-77"
+    notes: "Paired 0-day with CVE-2026-5058 — both rejected by vendor and published by ZDI; CVSS 9.8 unauthenticated for both; avoid aws-mcp-server entirely until patched"
+
 # ═══════════════════════════════════════════════════════════════
 # MINIMUM SAFE VERSIONS (quick reference for scanning)
 # ═══════════════════════════════════════════════════════════════
 minimum_safe_versions:
+  "nginx-ui": "2.3.4"
   "filesystem-mcp": "0.6.3"
   "mcp-inspector": "0.14.1"
   "mcp-server-git": "2026.1.14"
@@ -1350,6 +1606,10 @@ minimum_safe_versions:
   "agentfront-enclave": "2.11.1"
   "go-mcp-sdk": "1.4.0"
   "a11y-mcp": "1.0.6"
+  "litellm": "check upstream — CVE-2026-30623 patched"
+  "astro-mcp-server": "1.1.2"
+  "upsonic": "check upstream — CVE-2026-30625 patched post-0.71.6"
+  "command-executor-mcp-server": "avoid — CVE-2026-7593 unpatched"
 
 # ═══════════════════════════════════════════════════════════════
 # IOCs (Indicators of Compromise)
@@ -1380,8 +1640,12 @@ iocs:
       source: "Koi ClawHavoc"
       notes: "Credential exfiltration endpoint"
 
-  # Malicious / fake domains (ClickFix + lookalike campaigns)
+  # Malicious / fake domains (ClickFix + lookalike campaigns + crypto swarm)
   malicious_domains:
+    - domain: "onlyflies.buzz"
+      campaign: "ClawHub Crypto Swarm"
+      date: "2026-04-29"
+      notes: "Mining pool registration endpoint — AI agents silently registered here by 30 malicious ClawHub skills to join $FLY token crypto mining swarm; block outbound connections"
     - domain: "app-clawbot[.]org"
       campaign: "ClickFix OpenClaw"
       date: "2026-03-02"
@@ -1747,6 +2011,29 @@ campaigns:
     sources:
       - "https://www.trendmicro.com/en_us/research/26/b/openclaw-skills-used-to-distribute-atomic-macos-stealer.html"
 
+  - name: "ClawHub Crypto Swarm"
+    source: "The Register (2026-04-29)"
+    date: "2026-04-29"
+    platform: "ClawHub / OpenClaw"
+    skills_count: 30
+    malware: "No traditional malware — JavaScript-based agent co-option for cryptocurrency mining"
+    technique: "30 skills published by a single author silently register AI agents at onlyflies.buzz to participate in a coordinated $FLY token cryptocurrency mining operation; no malware dropper, no user consent, no traditional IOCs — agents become mining nodes through skill-injected instructions that commandeer agent compute resources; bypasses traditional AV and malware detection since no binary payload is deployed"
+    iocs:
+      - "onlyflies.buzz (mining pool registration endpoint)"
+    notes: "Represents tactical evolution from AMOS dropper campaigns (ClawHavoc) to consent-less resource hijacking; first documented AI agent crypto mining swarm via skills; no malware binary means VirusTotal scanning is ineffective; detection requires behavioral analysis of skill execution and outbound network monitoring"
+    sources:
+      - "https://www.theregister.com/2026/04/29/30_clawhub_skills_mine_crypto/"
+
+  - name: "Hugging Face + ClawHub Malware Distribution via Indirect Prompt Injection"
+    source: "SecurityWeek / Acronis (2026-05-01)"
+    date: "2026-05-01"
+    platform: "Hugging Face / ClawHub"
+    technique: "Threat actors abuse both Hugging Face model/dataset files and ClawHub skills to distribute malware by injecting indirect prompts into malicious files; AI agents that read these files during development or model evaluation tasks execute the injected instructions, triggering malware installation or credential exfiltration; extends the supply chain attack surface from traditional package registries to ML model repositories"
+    notes: "First confirmed large-scale abuse of Hugging Face as a vector for AI agent malware distribution; parallels ClawHub attack patterns but targets ML/data-science workflows; defenders must extend skill scanning policies to cover Hugging Face downloads used by AI agents"
+    sources:
+      - "https://www.securityweek.com/hugging-face-clawhub-abused-for-malware-distribution/"
+      - "https://www.acronis.com/en/tru/posts/poisoning-the-well-ai-supply-chain-attacks-on-hugging-face-and-openclaw/"
+
   - name: "ClawHub Wave 2 (71 Skills)"
     source: "Oasis Security / The Hacker News"
     date: "2026-02-28"
@@ -1997,6 +2284,40 @@ attack_techniques:
     source: "Dark Reading / Equixly vibe coding security research (2026-04-07)"
     mitigation: "Never rely on agent UI summaries alone — review raw tool call parameters before approving; require structured, machine-readable confirmation format that shows exact command and arguments; use runtime monitors (Jozu Agent Guard, Semgrep MCP) to validate actual tool invocations against approved summaries; treat any mismatch between confirmation text and executed command as an incident"
 
+  - id: "T025"
+    name: "Comment and Control: CI/CD Agent Credential Theft via PR Injection"
+    description: "Attacker embeds malicious instructions in GitHub pull request titles, issue descriptions, or review comments that are processed by AI coding agents running in GitHub Actions without proper input sanitization. The agent executes the injected instructions and leaks credentials (ANTHROPIC_API_KEY, GITHUB_TOKEN, etc.) back via PR comments or external exfiltration channels. Rated CVSS 9.4 Critical for affected agents."
+    examples:
+      - "Claude Code Security Review: PR title processed into system prompt without sanitization — attacker injects bash commands to leak ANTHROPIC_API_KEY and GITHUB_TOKEN via PR comment"
+      - "Google Gemini CLI Action: vulnerable to same PR comment injection pattern"
+      - "GitHub Copilot Agent: vulnerable to issue comment injection"
+      - "Any GitHub Actions AI agent that processes untrusted PR/issue content as task context"
+    affected_platforms: ["Claude Code Security Review", "Google Gemini CLI Action", "GitHub Copilot Agent"]
+    source: "Johns Hopkins University researchers / SecurityWeek / TechZine (2026-04-16)"
+    mitigation: "Sanitize all GitHub event inputs (PR titles, issue bodies, comments) before including in agent prompts; use input allowlists for agent task context; run CI/CD AI agents with minimal token scopes; require human review before agent-generated PR comments; use OIDC tokens with short TTLs instead of long-lived PATs; monitor for unexpected credential usage patterns in CI/CD logs"
+
+  - id: "T026"
+    name: "Claudy Day: Chained Claude.ai Session Hijack via URL Prompt Injection + Google Ads Abuse"
+    description: "Three chained vulnerabilities in Claude.ai enable an attacker to silently hijack a user's active chat session and exfiltrate all conversation data with a single click. The attack chains: (1) hidden prompt injection embedded in a crafted Claude URL, (2) open redirect on claude.com that makes the URL appear fully legitimate, (3) Google Ads hostname-based URL validation bypass that lets attackers place paid search ads displaying a trusted claude.com URL that invisibly redirects to the malicious injection URL. No additional tools, integrations, or user error beyond clicking the ad is required."
+    examples:
+      - "Attacker places Google Search ad: displayed URL = claude.com, actual destination = crafted injection URL via open redirect; one click triggers silent session hijack"
+      - "Crafted claude.com URL with embedded hidden instructions redirects through open redirect; victim has no visual indication of compromise"
+      - "Exfiltrated data includes all active conversation history, any shared code snippets, API keys, or credentials typed in the session"
+    affected_platforms: ["Claude.ai (web app)"]
+    source: "THN - Google Patches Antigravity IDE Flaw (2026-04-21)"
+    mitigation: "Do not click AI tool links from search ads — navigate directly by typing the URL; Anthropic patched the open redirect; share no secrets or credentials in Claude.ai web sessions; use Claude Code (native CLI) rather than browser-based sessions for sensitive work; enable browser security features that warn on redirects"
+
+  - id: "T027"
+    name: "Claude Code Supply Chain Memory Poisoning (Cisco)"
+    description: "Supply chain attack that exploits Claude Code's persistent memory files to inject backdoor instructions that survive across all projects, sessions, and system reboots. The attacker uses a compromised dependency or repository as initial access, then tampers with the agent's CLAUDE.md, MEMORY.md, or equivalent memory files to append persistent malicious instructions and shell aliases. The poisoned memory frames insecure practices as required architectural standards, making the compromise self-sustaining and hard to detect."
+    examples:
+      - "Malicious payload in cloned repository writes to ~/.claude/CLAUDE.md, appending shell alias that exfiltrates git-staged files on every commit"
+      - "Compromised npm package modifies Claude Code memory to declare 'always allow network exfiltration to debug endpoints' as a project requirement"
+      - "Supply chain attack appends '.zshenv' alias that forwards Claude Code tool invocations to attacker C2"
+    affected_platforms: ["Claude Code"]
+    source: "Cisco / THN (2026-04-21)"
+    mitigation: "Audit CLAUDE.md and MEMORY.md files before and after opening new repositories; treat memory files as security boundaries — apply the same review rigor as code; use git hooks to alert on modifications to .claude/ directory; scan all CLAUDE.md changes for shell commands, URLs, and outbound exfiltration patterns; consider CLAUDE.md hashing and re-verification before each session; run claude-code with --no-memory flag for untrusted workspaces"
+
   - id: "T024"
     name: "Prompt Poaching via Browser Extension"
     description: "Malicious or compromised browser extensions silently intercept and exfiltrate conversations between developers and AI coding assistants (Claude, Copilot, Cursor, ChatGPT). Unlike prompt injection (which manipulates the agent), prompt poaching passively captures every question, code snippet, API key, environment variable, and confidential document shared in the AI chat session — without requiring any mistake by the developer."
@@ -2243,6 +2564,23 @@ scanning_tools:
       - "Focus on runtime enforcement — does not scan SKILL.md or ClawHub ecosystem"
     notes: "Launched 2026-03-17; addresses agent autonomy bypass (T013) specifically"
 
+  - name: "Cisco AI Agent Security Scanner for IDEs"
+    vendor: "Cisco"
+    type: "ide-extension"
+    url: "https://blogs.cisco.com/ai/introducing-the-ai-agent-security-scanner-for-ides-verify-your-agents"
+    capabilities:
+      - "MCP Server Scanning: inspects tool descriptions, configurations, and endpoints for hidden instructions, exfiltration patterns, and cross-tool attack chains"
+      - "Agent Skill Scanning: detects command injection, obfuscation, privilege escalation, and supply chain indicators in Claude Code, Cursor, Codex, and Antigravity skills without executing them"
+      - "AI-Generated Code Analysis: checks code produced during development for security vulnerabilities"
+      - "Watchdog: continuous SHA-256/HMAC monitoring of critical AI config files (CLAUDE.md, .mcp.json, hooks) for unauthorized modifications with diff view and snapshot restore"
+      - "Security Dashboard with severity overview and trend analysis"
+      - "Cursor hooks integration to block, warn, or prompt at MCP execution time based on configurable thresholds"
+      - "Scan comparison to track security posture over time"
+    limitations:
+      - "VS Code Marketplace extension — not available outside VS Code ecosystem"
+      - "Cisco-maintained — may lag on coverage of smaller or community skill ecosystems"
+    notes: "Launched April 21, 2026; integrates cisco-ai-defense/skill-scanner and Cisco MCP Scanner; complements Cisco DefenseClaw (pre-deployment + runtime) with IDE-integrated scanning; available via VS Code Marketplace (search 'AI Agent Security Scanner for IDEs')"
+
   - name: "MCP Sentinel"
     vendor: "George Gerchow / Bedrock Data (RSAC 2026)"
     type: "cli"
@@ -2409,6 +2747,37 @@ scanning_tools:
       - "Relies on skills installing correctly — does not protect against install-time attacks"
       - "Effectiveness depends on threat intelligence freshness"
     notes: "Available 2026-04-10; designed as a full-coverage security layer complementing mcp-scan and static analysis with behavioral monitoring"
+
+  - name: "Snyk Agent Scan"
+    vendor: "Snyk"
+    type: "cli"
+    command: "npx @snyk/agent-scan"
+    url: "https://github.com/snyk/agent-scan"
+    capabilities:
+      - "Security scanner for AI agents and MCP server configurations"
+      - "Detects vulnerable, malicious, and misconfigured MCP servers"
+      - "Scans agent skill definitions for suspicious patterns and embedded payloads"
+      - "Integrates Snyk vulnerability database for package-level risk scoring"
+      - "Outputs structured reports suitable for CI/CD pipeline integration"
+    limitations:
+      - "Newer tool — coverage of skills.sh / ClawHub ecosystem being expanded"
+      - "Requires Snyk account for full vulnerability database access"
+    notes: "Available April 2026; from Snyk, same vendor as ToxicSkills research and mcp-scan; complements mcp-scan with extended agent-focused scanning"
+
+  - name: "Straiker MCP Security Platform"
+    vendor: "Straiker"
+    type: "cloud-saas"
+    url: "https://www.straiker.ai/solution/mcp-security"
+    capabilities:
+      - "Discover AI: inventories internal and external MCP servers, scores each for hygiene risks"
+      - "Ascend AI: continuous red-teaming of MCP connections (tool poisoning, rug pulls, privilege escalation)"
+      - "Defend AI: runtime guardrails on tool calls, blocks unauthorized actions and data exfiltration at 98%+ accuracy"
+      - "Detects that 91% of successful attacks on productivity agents result in silent data exfiltration without jailbreaks"
+      - "Comprehensive MCP server risk scoring and inventory"
+    limitations:
+      - "Commercial SaaS platform — not open-source"
+      - "Runtime enforcement focus — does not scan ClawHub/skills.sh skill marketplace directly"
+    notes: "Available April 2026; enterprise-grade three-component platform addressing discovery, red-teaming, and runtime defense for MCP ecosystems"
 
 # ═══════════════════════════════════════════════════════════════
 # DEFENSIVE FRAMEWORKS & BLOCKLISTS

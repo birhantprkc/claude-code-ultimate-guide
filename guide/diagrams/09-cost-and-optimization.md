@@ -28,7 +28,7 @@ flowchart TD
 
     B -->|Complex| G{Needs deep<br/>reasoning?}
     G -->|Yes| H["Complex tasks:<br/>architecture decisions,<br/>security review,<br/>multi-file analysis"]
-    H --> I([Opus 4.6 / Sonnet + --think-hard<br/>💰💰💰 Most capable<br/>~5x more than Sonnet])
+    H --> I([Opus 4.7 — Maximum capability xhigh<br/>Opus 4.6 — Deep analysis<br/>💰💰💰 Most capable<br/>~5x more than Sonnet])
 
     G -->|No: just large| J["Large but clear tasks:<br/>big refactors,<br/>doc generation"]
     J --> F
@@ -52,7 +52,7 @@ flowchart TD
     click F href "https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#25-model-selection--thinking-guide" "Sonnet 4.5/4.6"
     click G href "https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#25-model-selection--thinking-guide" "Needs deep reasoning?"
     click H href "https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#25-model-selection--thinking-guide" "Complex tasks"
-    click I href "https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#25-model-selection--thinking-guide" "Opus 4.6 / Sonnet + --think-hard"
+    click I href "https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#25-model-selection--thinking-guide" "Opus 4.7 / Opus 4.6 / Sonnet + --think-hard"
     click J href "https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#25-model-selection--thinking-guide" "Large but clear tasks"
 ```
 
@@ -62,7 +62,8 @@ flowchart TD
 
 | Plan | Planning phase | Implementation phase |
 |------|---------------|---------------------|
-| **Max / API unconstrained** | Opus | Sonnet |
+| **Max / API unconstrained (xhigh)** | Opus 4.7 | Sonnet |
+| **Max / API unconstrained** | Opus 4.6 | Sonnet |
 | **Pro / Teams Standard** | Sonnet | Haiku (mechanical tasks) |
 | **API tight budget** | Sonnet | Haiku |
 
@@ -76,12 +77,13 @@ Task complexity?
 ├─ Simple (typos, format, rename) → Haiku 4.5       ($  — ~5x cheaper than Sonnet)
 ├─ Standard (features, bugs)      → Sonnet 4.5/4.6  ($$ — best price/quality ratio)
 └─ Complex (architecture, sec.)
-   ├─ Needs deep reasoning?        → Opus 4.6        ($$$ — ~5x more than Sonnet)
-   └─ Just large/clear?            → Sonnet 4.6      ($$ — handles it)
+   ├─ Needs deep reasoning?        → Opus 4.7 (xhigh) / Opus 4.6  ($$$ — ~5x more than Sonnet)
+   └─ Just large/clear?            → Sonnet 4.6                    ($$ — handles it)
 
 Budget modifier (downgrade one tier on constrained plans):
-  Max/API    → Opus plan, Sonnet impl
-  Pro/Teams  → Sonnet plan, Haiku impl (mechanical tasks)
+  Max/API (xhigh)  → Opus 4.7 plan, Sonnet impl
+  Max/API          → Opus 4.6 plan, Sonnet impl
+  Pro/Teams        → Sonnet plan, Haiku impl (mechanical tasks)
 ```
 
 </details>
@@ -164,6 +166,8 @@ High costs?
 ```
 
 </details>
+
+> **Effort slider** — `/effort xlow/low/default/high/xhigh` (v2.1.111) lets you tune thinking depth per task. Lower effort = fewer tokens consumed on thinking. Combine with model selection for fine-grained cost control.
 
 > **Source**: [Cost Optimization](../ultimate-guide.md#cost-optimization) — Line ~8878
 
@@ -336,5 +340,7 @@ Model selection (Haiku for simple)    → -50-90% on simple tasks
 ```
 
 </details>
+
+> **Track usage** — Use `/usage` to monitor token consumption and costs (replaces `/cost` as of v2.1.118; `/cost` remains a valid alias).
 
 > **Source**: [Token Optimization](../ultimate-guide.md#token-optimization) — Line ~13355

@@ -127,6 +127,25 @@ cd whitepapers && quarto render guide-export-fr.qmd --to epub
 
 **Quarto uses the `_extensions/` closest to the .qmd** — patching the root copy has no effect on fr/ or en/.
 
+## PDF Deployment Checklist — 3 Files to Update
+
+When pushing updated PDFs to the landing/portfolio, **3 files must always be updated together**. Missing any one of them causes old files to be served.
+
+| File | Repo | Role |
+|------|------|------|
+| `florian-portfolio/public/guides/` | portfolio | Physical PDF files (copy with new versioned filename) |
+| `landing/src/data/whitepapers-data.ts` | landing | Direct download buttons (`const V`, `hashedFileFr/En`) |
+| `florian-portfolio/api/guides.mjs` | portfolio | **Email links** — `GUIDE_MANIFEST` stable-ID → versioned filename |
+
+**`guides.mjs` is the one that's easy to forget.** It controls what URL is sent by email when a user subscribes. Old links in emails redirect through `/api/guides?id=...`, so updating this file retroactively fixes all past email recipients too.
+
+```bash
+# Verify all 3 are in sync after an update:
+grep "const V" landing/src/data/whitepapers-data.ts          # should show new version
+grep "08-agent-teams.en" florian-portfolio/api/guides.mjs    # should show new version
+ls florian-portfolio/public/guides/ | grep "v3.40.0" | wc -l # should show 18+ files
+```
+
 ## Ebook Versioning
 
 Each ebook has its own version, independent from the guide version.

@@ -8,27 +8,53 @@ tags: [template, reference, workflows, architecture]
 
 Annotated templates that teach you **why** patterns work, not just how to configure them. Each template includes comments explaining trade-offs, alternatives, and when to deviate.
 
-> **[Browse Interactive Catalog](./index.html)** — View, copy, and download all templates with syntax highlighting
+> **[📚 Browse Auto-Generated Catalog](./CATALOG.md)** — Indexed by complexity, time, domain (181 templates)  
+> **[🔍 Browse Interactive Catalog](./index.html)** — View, copy, and download templates with syntax highlighting
+
+## New: Auto-Generated Catalog
+
+**[`CATALOG.md`](./CATALOG.md)** is now auto-generated from template metadata, organized by:
+- **Complexity**: Beginner, Intermediate, Advanced
+- **Time**: 5 min to 4+ hours
+- **Domain**: Security, Testing, Deployment, Performance, Architecture, Automation
+- **Keywords**: Searchable tags for discoverability
+
+Every template includes metadata:
+```yaml
+---
+name: template-name
+description: One-line description
+complexity: beginner|intermediate|advanced
+time: 5 min|15 min|30 min|1 hour|2 hours|4+ hours|varies
+domain: security|testing|deployment|etc
+prerequisites: []
+status: stable|experimental|deprecated
+keywords: [tag1, tag2]
+---
+```
+
+**See [`docs/template-metadata-schema.md`](../docs/template-metadata-schema.md)** for complete specification.
 
 ## Structure
 
 | Folder | Description | Count |
 |--------|-------------|-------|
-| [`agents/`](./agents/) | Custom AI personas for specialized tasks | 14 + 2 collections |
-| [`commands/`](./commands/) | Slash commands (workflow automation) | 32 |
-| [`hooks/`](./hooks/) | Event-driven security & automation scripts | 34 |
-| [`skills/`](./skills/) | Reusable knowledge modules — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux) | 20 |
+| [`agents/`](./agents/) | Custom AI personas for specialized tasks | 21 + 2 collections |
+| [`commands/`](./commands/) | Slash commands (workflow automation) | 52 |
+| [`hooks/`](./hooks/) | Event-driven security & automation scripts | 37 |
+| [`skills/`](./skills/) | Reusable knowledge modules — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux) | 68 |
 | [`claude-md/`](./claude-md/) | CLAUDE.md configuration profiles | 7 |
-| [`config/`](./config/) | Settings, MCP, git templates | 8 |
-| [`memory/`](./memory/) | CLAUDE.md memory file templates | 2 |
+| [`config/`](./config/) | Settings, MCP, git templates | 6 |
+| [`memory/`](./memory/) | CLAUDE.md memory file templates | 1 |
 | [`rules/`](./rules/) | Behavioral rules for common review patterns | 5 |
-| [`scripts/`](./scripts/) | Diagnostic & utility scripts | 16 |
+| [`scripts/`](./scripts/) | Diagnostic & utility scripts | 17 |
 | [`team-config/`](./team-config/) | Team onboarding templates | 3 |
 | [`templates/`](./templates/) | Session and workflow templates | 1 |
-| [`github-actions/`](./github-actions/) | CI/CD workflows | 4 |
+| [`github-actions/`](./github-actions/) | CI/CD workflows | 6 |
 | [`workflows/`](./workflows/) | Advanced development workflows | 3 |
 | [`plugins/`](./plugins/) | Community plugins (SE-CoVe, claude-mem) | 2 |
-| [`integrations/`](./integrations/) | External tool integrations (Agent Vibes TTS) | 1 |
+| [`integrations/`](./integrations/) | External tool integrations (Agent Vibes TTS) | 3 |
+| [`context-engineering/`](./context-engineering/) | Context engineering patterns and profiles | 10 |
 | [`mcp-configs/`](./mcp-configs/) | MCP server configurations | 1 |
 | [`modes/`](./modes/) | Behavioral modes (SuperClaude) | 1 |
 | [`semantic-anchors/`](./semantic-anchors/) | Precise vocabulary for better LLM outputs | 1 |
@@ -56,7 +82,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 
 ## Templates Index
 
-### Agents (16)
+### Agents (23)
 
 | File | Purpose | Model |
 |------|---------|-------|
@@ -77,7 +103,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | [analytics-with-eval/](./agents/analytics-with-eval/) | Collection: analytics agent + evaluation hooks | — |
 | [cyber-defense/](./agents/cyber-defense/) | Collection: anomaly detector, log ingestor, risk classifier, threat reporter | — |
 
-### Skills (20) — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux)
+### Skills (68) — [9 on SkillHub](https://skills.palebluedot.live/owner/FlorianBruniaux)
 
 | File | Purpose |
 |------|---------|
@@ -102,7 +128,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | [talk-pipeline/](./skills/talk-pipeline/) | 6-stage pipeline: raw material to slides via Kimi |
 | [eval-rules/](./skills/eval-rules/) | Audit `.claude/rules/` files — resolves glob patterns against real project files, interactive usefulness review, in-place edits |
 
-### Commands (32)
+### Commands (52)
 
 | File | Trigger | Purpose |
 |------|---------|---------|
@@ -139,7 +165,7 @@ Annotated templates that teach you **why** patterns work, not just how to config
 | [review-plan.md](./commands/review-plan.md) | `/review-plan` | Structured plan review across 4 axes before writing code |
 | [check-cache-bugs.md](./commands/check-cache-bugs.md) | `/check-cache-bugs` | Audit for CC#40524 cache bugs that can silently 10-20x API costs |
 
-### Hooks (34)
+### Hooks (37)
 
 Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 monitoring hooks.
 
@@ -204,7 +230,7 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 
 > **See [hooks/README.md](./hooks/README.md) for full documentation, configuration examples, and security hardening patterns**
 
-### Config (8)
+### Config (6)
 
 | File | Purpose |
 |------|---------|
@@ -217,7 +243,7 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 | [settings-personalization.json](./config/settings-personalization.json) | UI personalization: spinner verbs, custom tips carousel |
 | [settings.local.json.example](./config/settings.local.json.example) | Local overrides example (gitignored) |
 
-### Memory (2)
+### Memory (1)
 
 | File | Purpose |
 |------|---------|
@@ -239,7 +265,7 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 > **See [guide/learning-with-ai.md](../guide/learning-with-ai.md) for learning mode documentation**
 > **See [guide/devops-sre.md](../guide/devops-sre.md) for DevOps/SRE guide**
 
-### Scripts (16)
+### Scripts (17)
 
 | File | Purpose | Output |
 |------|---------|--------|
@@ -286,7 +312,7 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 |------|---------|
 | [session-handoff-lorenz.md](./templates/session-handoff-lorenz.md) | Session handoff template for context continuity |
 
-### GitHub Actions (4)
+### GitHub Actions (6)
 
 | File | Trigger | Purpose |
 |------|---------|---------|
@@ -312,7 +338,7 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 | [se-cove.md](./plugins/se-cove.md) | Chain-of-Verification for independent code review (Meta AI, ACL 2024) |
 | [claude-mem.md](./plugins/claude-mem.md) | Persistent memory management plugin |
 
-### Integrations (1)
+### Integrations (3)
 
 | Tool | Purpose |
 |------|---------|
