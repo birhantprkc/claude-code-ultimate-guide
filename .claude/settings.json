@@ -89,7 +89,7 @@
     ]
   },
   "env": {
-    "ALLOWED_PATHS": "/Users/florianbruniaux/Sites/perso/claude-code-plugins"
+    "ALLOWED_PATHS": "/Users/florianbruniaux/Sites/perso/claude-code-plugins:/Users/florianbruniaux/Sites/perso/ctxharness"
   },
   "$schema": "https://json.schemastore.org/claude-code-settings.json"
 }
