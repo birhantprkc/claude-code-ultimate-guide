@@ -7,6 +7,7 @@ Prompts and utilities for Claude Code setup and optimization.
 | File | Description | Usage |
 |------|-------------|-------|
 | [audit-prompt.md](./audit-prompt.md) | Comprehensive setup audit with personalized recommendations | `cat audit-prompt.md \| claude` |
+| [spec-completeness-audit.md](./spec-completeness-audit.md) | Audit how well a project is specified for safe agent delegation (5 spec layers, score /100) | `cat spec-completeness-audit.md \| claude` |
 | [onboarding-prompt.md](./onboarding-prompt.md) | Personalized guided tour based on your profile | `cat onboarding-prompt.md \| claude` |
 | [mobile-access.md](./mobile-access.md) | Setup guide for mobile access via ttyd + Tailscale | Step-by-step |
 

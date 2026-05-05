@@ -12105,9 +12105,77 @@ Claude: [Full context of decisions and changes]
 
 ---
 
+### Graphify (Codebase Knowledge Graphs)
+
+**GitHub**: [safishamsi/graphify](https://github.com/safishamsi/graphify) | **PyPI**: `graphifyy` | **Stars**: 42K | **License**: MIT
+
+Graphify converts a project directory into a persistent knowledge graph and injects a compact structural report (`GRAPH_REPORT.md`) into Claude Code. The assistant answers architecture questions by reading the pre-built graph instead of re-scanning raw files on each prompt. Initial extraction runs once; subsequent sessions query the graph at near-zero token cost.
+
+**How it works**: Three passes per run:
+
+1. **Local AST extraction** — tree-sitter parses 25+ languages (Python, TS, Go, Rust, Java, etc.) into a call graph. No API cost, no network.
+2. **Optional local transcription** — faster-whisper transcribes audio/video locally.
+3. **Parallel semantic extraction** — Claude subagents process docs, PDFs, and images using your existing API key.
+
+Results merge into a NetworkX graph clustered with the Leiden algorithm (topology-based — no vector embeddings). Every relationship is tagged `EXTRACTED`, `INFERRED`, or `AMBIGUOUS`. Three output files land in `graphify-out/`:
+
+- `graph.html` — interactive browser visualization
+- `GRAPH_REPORT.md` — god nodes, cross-file connections, suggested queries (injected into Claude)
+- `graph.json` — persistent, queryable without re-extraction
+
+**Install**:
+
+```bash
+# Requires Python 3.10+. PyPI package: graphifyy (double-y). CLI: graphify.
+uv tool install graphifyy && graphify install
+
+# Always-on Claude Code integration (writes CLAUDE.md section + hook)
+graphify claude install
+
+# Build graph for current directory
+/graphify .
+
+# Incremental update (re-extracts only changed files, uses SHA256 hashing)
+/graphify . --update
+
+# Query the graph directly
+/graphify query "what connects auth to the database layer?"
+/graphify path "UserService" "DatabasePool"
+/graphify explain "RateLimiter"
+
+# Auto-rebuild on git commits (local AST only, zero API cost)
+graphify hook install
+```
+
+**Optional extras**:
+
+```bash
+pip install "graphifyy[office]"   # .docx, .xlsx support
+pip install "graphifyy[video]"    # .mp4, .mov, .mp3 transcription
+```
+
+**Graphify vs GrepAI**: Different layers, complementary. GrepAI (Ollama, local, free) handles real-time semantic lookups during active coding — fast, targeted, exact. Graphify pre-computes structural relationships across the full codebase (call chains, cross-file dependencies, community clusters) and replaces repeated file reads with a single compact report per session. GrepAI for discovery; Graphify for architectural reasoning and multi-hop questions.
+
+**Graphify vs claude-mem**: Separate concerns. claude-mem stores what you *discussed* across sessions (decisions, tool calls, observations). Graphify maps what the *codebase contains* (structure, dependencies, concept clusters). No overlap — they address different layers of context loss.
+
+**Team workflow**: Commit `graphify-out/` (excluding `manifest.json` and `cache/`) to git so teammates inherit the pre-built graph without running extraction themselves.
+
+**Caveats**:
+
+- Non-code files (docs, PDFs, images) are sent to your AI assistant's API on first run — costs accumulate on large mixed-media repositories.
+- Without the post-commit hook, the graph drifts from the codebase.
+- Token efficiency claims from the author (71.5x–120x fewer tokens vs grep-based exploration) are self-reported benchmarks without independent reproduction. Treat as directional.
+- No native query language — graph queries go through the AI assistant, not Cypher/SQL.
+
+**Stats**: 42K GitHub stars | v0.7.4 (2026-05-04) | Python ≥3.10 | MIT
+
+> **Source**: [safishamsi/graphify](https://github.com/safishamsi/graphify)
+
+---
+
 ### 🧩 Memory Tools Decision Matrix
 
-Now that you've seen Serena, grepai, and claude-mem, here's when to use each:
+Now that you've seen Serena, grepai, claude-mem, and Graphify, here's when to use each:
 
 | Need | Tool | Example |
 |------|------|---------|
@@ -12118,14 +12186,17 @@ Now that you've seen Serena, grepai, and claude-mem, here's when to use each:
 | **"Find code that does X"** | grepai | `grepai search "payment validation"` |
 | **"Summary of all sessions"** | claude-mem | Web dashboard at localhost:37777 |
 | **"Exact pattern match"** | rg (native) | `rg "authenticate" --type ts` |
+| **"What does this module depend on?"** | Graphify | `/graphify query "auth dependencies"` |
+| **"Map the full codebase structure"** | Graphify | `/graphify . --update` |
 
-**Memory Stack Pattern** (4 layers):
+**Memory Stack Pattern** (5 layers):
 
 ```
-Layer 4: Session Capture   → claude-mem (automatic)
-Layer 3: Symbol Memory     → Serena (manual decisions)
-Layer 2: Semantic Search   → grepai (discovery)
-Layer 1: Exact Search      → rg (native, fast)
+Layer 5: Session Capture      → claude-mem (automatic)
+Layer 4: Symbol Memory        → Serena (manual decisions)
+Layer 3: Semantic Search      → grepai (discovery)
+Layer 2: Structural Graph     → Graphify (architecture, cross-file dependencies)
+Layer 1: Exact Search         → rg (native, fast)
 ```
 
 **Integrated Workflow Example**:
@@ -18042,6 +18113,73 @@ grepai trace callers "MyFunction"  # Empty result → safe to investigate for de
 ```
 
 > **Community tools**: [CodeXRay](https://github.com/NeuralRays/codexray) (Tree-sitter + SQLite, 16 MCP tools, 15 languages) and [Claudette](https://github.com/nicmarti/Claudette) (Go binary, 4 languages) are early implementations of this approach. Both are alpha-stage as of March 2026 — use grepai for production workflows.
+
+---
+
+### Caveman (Compressed AI Responses)
+
+**GitHub**: [juliusbrussee/caveman](https://github.com/juliusbrussee/caveman) | **Stars**: 53K | **License**: MIT
+
+Caveman is a Claude Code skill (also available for Cursor, Windsurf, Codex, Gemini CLI, and 26 other agents) that rewrites the assistant's output style into compressed, telegraphic fragments. Articles, pleasantries, transitional summaries, and verbose explanations are stripped. Code blocks, file paths, URLs, commands, headings, and version numbers are preserved verbatim.
+
+**Install for Claude Code**:
+
+```bash
+claude plugin marketplace add JuliusBrussee/caveman
+claude plugin install caveman@caveman
+```
+
+Universal installer (auto-detects your agent):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
+```
+
+**Activation at runtime**:
+
+```
+/caveman           # activate (full mode — default)
+/caveman lite      # grammar intact, only filler removed
+/caveman ultra     # maximum telegraphic compression
+stop caveman       # return to normal
+```
+
+Also auto-triggers on phrases like "be brief" or "less tokens please." Auto-disables for security-critical messages and destructive operations.
+
+**Four compression modes**:
+
+| Mode | Style |
+|------|-------|
+| Lite | Full grammar, pleasantries stripped |
+| Full (default) | Fragmented sentences, articles dropped |
+| Ultra | Maximum telegraphic compression |
+| Wenyan (文言文) | Classical Chinese literary mode — experimental |
+
+**How it saves tokens** — two mechanisms:
+
+1. **Output compression**: Prose responses run 65% shorter on average (22–87% range depending on task type). Most effective on explanation-heavy back-and-forth: architecture discussions, debugging narratives, Q&A.
+
+2. **Input compression via `/caveman-compress`**: Rewrites your CLAUDE.md and project memory files into compressed form in-place — claimed ~46% reduction in session startup token cost. Code blocks, URLs, and paths are untouched.
+
+**Companion tools included**:
+
+- `/caveman-commit` — conventional commit messages under 50 chars, focused on "why"
+- `/caveman-review` — one-line PR comments with emoji severity markers
+- `/caveman-stats` — session token usage and lifetime savings (Claude Code only)
+- `caveman-shrink` — MCP wrapper that compresses tool/prompt description fields before they load into context
+
+**Honest numbers**: The headline "75% fewer output tokens" applies to individual prose responses. In a typical session, prose represents a small fraction of total token budget — whole-session savings are closer to 4–10%. Caveman pays off most on sessions heavy in conversational back-and-forth, and least on sessions dominated by file reads, tool calls, or code generation.
+
+**When NOT to use it**:
+
+- Documentation generation — output is meant to be read by humans
+- Code review comments shared with non-technical stakeholders
+- Debugging sessions where reasoning transparency matters
+- Multi-agent chains where downstream agents parse prior responses to reconstruct state
+
+**Stats**: 53K GitHub stars | Created 2026-04-04 | MIT | Benchmark harness (`evals/`) is still maturing — treat specific percentages as directional
+
+> **Source**: [juliusbrussee/caveman](https://github.com/juliusbrussee/caveman)
 
 ### Command Output Optimization with RTK
 
@@ -25047,6 +25185,44 @@ Use the included audit prompt to analyze your current Claude Code configuration:
 | 🟢 Low | MCP Serena | ❌ | Configure for large codebase |
 
 The audit covers: Memory files, folder structure, agents, hooks, MCP servers, context management, and CI/CD integration patterns.
+
+#### Audit Your Project's Spec Completeness
+
+Before delegating heavy coding work to an agent, check whether your project is well-specified enough to do it safely:
+
+**File**: [`tools/spec-completeness-audit.md`](../tools/spec-completeness-audit.md)
+
+**The problem**: agents don't fail because they lack capability — they fail because the spec is incomplete. They silently fill gaps from training priors (average public code). This audit finds the holes before you delegate.
+
+**Framework** — 5 layers, 100 pts total:
+
+| Layer | What it covers | Weight |
+|-------|---------------|--------|
+| 1. Behavioral | What the code does: features, flows | 15 pts |
+| 2. Interface | Types, error contracts, invariants | 20 pts |
+| 3. Architectural | What NOT to create, module boundaries, reuse constraints | 30 pts |
+| 4. Lifecycle | What's deferred, known debt, maintenance intent | 20 pts |
+| 5. Cultural | Conventions, naming, what "good code" means here | 15 pts |
+
+Layer 3 weighs the most because it's the most frequently absent and produces the hardest-to-detect bugs: code that works today and drifts next month.
+
+**Output**: per-layer score + risk tier (🟢/🟡/🔴), silent-fill prediction for each gap, delegation verdict, and 3 quick wins with templates.
+
+**Delegation verdict**:
+
+| Score | Tier | Posture |
+|-------|------|---------|
+| ≥80 | Safe | Broad delegation OK |
+| 60–79 | Supervised | Delegate with explicit L3 per task |
+| 40–59 | Risky | Plan-mode + review agent |
+| <40 | Unsafe | Code tasks only, never architectural |
+
+**Available as a slash command** if the `ai-methodology` plugin is installed:
+
+```bash
+/spec-completeness-audit              # current project
+/spec-completeness-audit ~/other      # another project
+```
 
 ---
 

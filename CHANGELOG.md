@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Claude Code Releases**: Updated tracking to v2.1.128 (2026-05-05)
+  - EnterWorktree creates branch from local HEAD — unpushed commits no longer dropped
+  - --plugin-dir accepts .zip plugin archives; --channels works with console (API key) auth
+  - /mcp shows tool count per server; parallel bash tool call fix (failing read-only no longer cancels siblings)
+  - Sub-agent prompt cache fix (~3x cache_creation reduction); 1M-context false "Prompt is too long" fixed
+  - 35+ additional bug fixes (MCP stdio corrupted args, MCP images dropped, clipboard whitespace)
+
+- **New tool: Spec Completeness Audit** — `tools/spec-completeness-audit.md`, self-contained prompt auditing how well a project is specified for safe agent delegation. Scores /100 across 5 layers (Behavioral 15pts, Interface 20pts, Architectural 30pts, Lifecycle 20pts, Cultural 15pts). Layer 3 weighted highest (most commonly missing, hardest to detect). Output: per-layer risk tier 🟢/🟡/🔴, silent-fill prediction ("what the agent will invent"), delegation verdict (Safe/Supervised/Risky/Unsafe), and 3 quick wins with templates. Based on Hamidreza Saghir's "Your coding agent is under-specified" (May 2026). `tools/README.md` updated.
+
+- **New tool documentation: Graphify** — added `### Graphify (Codebase Knowledge Graphs)` section in §8.2 (after claude-mem). Covers: three-pass extraction (AST local + faster-whisper + Claude subagents), Leiden clustering, `graphify-out/` output structure, install commands, team git workflow, comparison vs GrepAI and vs claude-mem. Decision Matrix updated to 5-layer stack (added Layer 2: Structural Graph → Graphify). Stats: 42K stars, MIT, v0.7.4. Token efficiency claims flagged as self-reported/unverified. Source: github.com/safishamsi/graphify.
+
+- **New tool documentation: Caveman** — added `### Caveman (Compressed AI Responses)` section in §9.13 Cost Optimization (before RTK section). Covers: 4 compression modes (lite/full/ultra/wenyan), install via plugin marketplace or curl installer, companion tools (caveman-compress, caveman-commit, caveman-review, caveman-stats, caveman-shrink), honest token numbers (4-10% whole-session savings vs 75% prose-only claim), when not to use. Stats: 53K stars, MIT, created 2026-04-04. Source: github.com/juliusbrussee/caveman.
+
+- **Harness engineering concepts integrated from Learn Harness Engineering course (HumanLayer/Anthropic, 2026)**: three new sections across existing workflow files, two new templates, two cross-reference notes
+  - `guide/workflows/spec-first.md`: new subsection "Feature List: Machine-Readable Scope Control" — triple structure (behavior, shell verify command, state), one-way state machine (not_started → active → blocked → passing), WIP=1 rule, evidence field, connection to handoff pattern
+  - `guide/workflows/tdd-with-claude.md`: new subsection "The Verification Gap" — failure mode where agent declares done before verification, three-layer stack (lint/tests/e2e), independent evaluator principle, Anthropic game experiment citation (https://www.anthropic.com/engineering/harness-design-long-running-apps)
+  - `guide/workflows/task-management.md`: new section "Session Lifecycle Protocol" — 10-step table (START through HANDOFF), progress.md as continuity artifact with inline template, connection to existing handoff triad
+  - `guide/core/methodologies.md`: one-sentence cross-ref added after Verification Loops callout
+  - `guide/security/production-safety.md`: one-sentence cross-ref added after Verification Paradox
+  - New templates: `examples/workflows/feature-list.json`, `examples/hooks/bash/verification-gate.sh`
+  - Claims: only VERIFIED sources cited (Anthropic engineering blog, OpenAI harness-engineering post); illustrative percentages from course dropped
+
 - **New section §9.25 Harness Engineering**: five-subsystem model (Instructions, Tools, Environment, State, Feedback), verification gap pattern, WIP=1 principle, 10-step session lifecycle, feature_list.json schema with evidence field, init.sh bootstrap contract, progress.md session handoff. Source: Learn Harness Engineering (HumanLayer, 2026). TOC updated (also adds 9.23 and 9.24 entries that were missing). Templates: `examples/templates/feature-list.json`, `examples/claude-md/agent-progress.md`.
 
 - **Whitepapers P2 polish** (FR + EN): WP00, WP06 final consistency pass
