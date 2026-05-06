@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **Claude Code Releases**: Updated tracking to v2.1.131 (2026-05-06)
+  - v2.1.131: VS Code extension Windows activation fix (hardcoded createRequire build path), Mantle auth fix (missing x-api-key header)
+  - v2.1.129: --plugin-url flag for session-scoped plugin .zip from URL, CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE for Homebrew/WinGet, Ctrl+R all-projects history restored (pre-2.1.124), skillOverrides setting now works
+  - v2.1.129: 1h cache TTL downgrade fix, OAuth refresh race fix, Bash(mkdir *) allow rules fix, /context token waste fix (~1.6k per call), 20+ additional bug fixes
 - **Claude Code Releases**: Updated tracking to v2.1.128 (2026-05-05)
   - EnterWorktree creates branch from local HEAD — unpushed commits no longer dropped
   - --plugin-dir accepts .zip plugin archives; --channels works with console (API key) auth

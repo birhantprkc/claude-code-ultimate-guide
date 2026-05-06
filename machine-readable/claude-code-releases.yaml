@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.128"
-updated: "2026-05-05"
+latest: "2.1.131"
+updated: "2026-05-06"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,20 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.131"
+    date: "2026-05-06"
+    highlights:
+      - "Fixed VS Code extension failing to activate on Windows (hardcoded createRequire build path in bundled SDK)"
+      - "Fixed Mantle endpoint authentication failing with missing x-api-key header"
+
+  - version: "2.1.129"
+    date: "2026-05-06"
+    highlights:
+      - "--plugin-url <url> flag to fetch a plugin .zip archive from URL for the current session"
+      - "CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE: Homebrew/WinGet installations auto-upgrade in background with restart prompt"
+      - "Ctrl+R history picker restored to all-projects default (pre-2.1.124); Ctrl+S to narrow to current project or session; skillOverrides setting now works"
+      - "Fixes: 1h prompt cache TTL downgrade, OAuth refresh race after sleep, Bash(mkdir *) allow rules, /clear tab title reset, /context wasting ~1.6k tokens, 20+ bug fixes"
 
   - version: "2.1.128"
     date: "2026-05-05"
