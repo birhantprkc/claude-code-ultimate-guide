@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **Claude Code Releases**: Updated tracking to v2.1.133 (2026-05-08)
+  - v2.1.133: worktree.baseRef setting (fresh|head) — default fresh reverts 2.1.128 EnterWorktree behavior (breaking), hooks receive effort level via effort.level JSON + $CLAUDE_EFFORT, subagent skills discovery fix, parallel sessions 401 race fix, MCP OAuth proxy fix
+  - v2.1.132: CLAUDE_CODE_SESSION_ID in Bash subprocess env, CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN opt-out, MCP stdio memory growth fix (10GB+ RSS), 20+ terminal/TUI fixes (SIGINT shutdown, --resume emoji crash, fullscreen blank, JetBrains scroll, mouse wheel speed, / paste swallow, context_window counts, Alt+T macOS, MCP 0-tool silent failure)
 - **Claude Code Releases**: Updated tracking to v2.1.131 (2026-05-06)
   - v2.1.131: VS Code extension Windows activation fix (hardcoded createRequire build path), Mantle auth fix (missing x-api-key header)
   - v2.1.129: --plugin-url flag for session-scoped plugin .zip from URL, CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE for Homebrew/WinGet, Ctrl+R all-projects history restored (pre-2.1.124), skillOverrides setting now works
