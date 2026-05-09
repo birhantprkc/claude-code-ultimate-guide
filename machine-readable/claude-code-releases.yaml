@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.131"
-updated: "2026-05-06"
+latest: "2.1.133"
+updated: "2026-05-08"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,24 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.133"
+    date: "2026-05-08"
+    highlights:
+      - "⭐ worktree.baseRef setting (fresh | head) — fresh (default) branches from origin/<default>; set head to keep local HEAD with unpushed commits (reverts 2.1.128 EnterWorktree behavior)"
+      - "Hooks receive active effort level via effort.level JSON field and $CLAUDE_EFFORT env var in Bash subcommands"
+      - "Fixed subagents not discovering project/user/plugin skills via Skill tool"
+      - "Fixed parallel sessions dead-ending at 401 after refresh-token race; MCP OAuth flow now respects HTTP(S)_PROXY/NO_PROXY/mTLS"
+    breaking:
+      - "worktree.baseRef defaults to fresh (origin/<default>), reverting 2.1.128 where EnterWorktree used local HEAD — set worktree.baseRef: head to restore prior behavior"
+
+  - version: "2.1.132"
+    date: "2026-05-08"
+    highlights:
+      - "CLAUDE_CODE_SESSION_ID env var now passed to Bash tool subprocess environment (matches session_id in hooks)"
+      - "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 to opt out of the fullscreen alternate-screen renderer"
+      - "Fixed unbounded memory growth (10GB+ RSS) when stdio MCP server writes non-protocol data to stdout"
+      - "Fixed 20+ terminal/TUI/MCP issues: SIGINT graceful shutdown, --resume emoji crash, fullscreen blank after sleep, JetBrains scroll, mouse wheel speed, pasting / swallow, statusline context token counts, Alt+T on macOS, MCP tools/list failure handling"
 
   - version: "2.1.131"
     date: "2026-05-06"
