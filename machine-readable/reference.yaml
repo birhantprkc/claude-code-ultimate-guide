@@ -1044,6 +1044,15 @@ deep_dive:
   session_lifecycle_feature_list_template: "examples/workflows/feature-list.json"  # Machine-readable scope tracker template
   session_lifecycle_verification_hook: "examples/hooks/bash/verification-gate.sh"  # PostToolUse independent evaluator hook
   atdd_with_agents: "guide/core/methodologies.md:161"  # ATDD + Gherkin for agentic workflows
+  harness_agents_md_as_toc: "guide/ultimate-guide.md:23447"  # AGENTS.md as ~100-line TOC pointing to docs/ hierarchy, not encyclopedia
+  harness_knowledge_boundary: "guide/ultimate-guide.md:23487"  # "What agent can't see doesn't exist": encode Slack/docs as repo markdown
+  harness_knowledge_base: "guide/ultimate-guide.md:23505"  # Structured docs/ with design-docs/, exec-plans/, product-specs/, references/
+  harness_observability_stack: "guide/ultimate-guide.md:23543"  # Ephemeral per-worktree observability: Vector + VictoriaLogs/Metrics/Traces + LogQL/PromQL/TraceQL
+  harness_taste_invariants: "guide/ultimate-guide.md:23563"  # Taste invariants + custom linters with agent-readable error messages
+  harness_anti_entropy: "guide/ultimate-guide.md:23563"  # Doc-gardening agent + background cleanup + quality score per domain
+  harness_layered_arch: "guide/ultimate-guide.md:23563"  # Layered domain arch enforced by linters: Types→Config→Repo→Service→Runtime→UI
+  harness_throughput_merge: "guide/ultimate-guide.md:23563"  # High-throughput merge philosophy: fixes cheap, waiting expensive
+  openai_harness_engineering: "docs/resource-evaluations/2026-02-11-openai-harness-engineering.md"  # Score 5/5: OpenAI Codex team, 1M lines, 5 months, 3 engineers, no manual code
   commands_table: 47
   shortcuts_table: 368
   troubleshooting: 11311

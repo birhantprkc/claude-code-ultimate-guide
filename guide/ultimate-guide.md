@@ -23444,7 +23444,177 @@ Ready-to-use starting points:
 - `feature_list.json` template: [`examples/templates/feature-list.json`](../examples/templates/feature-list.json)
 - `progress.md` session handoff: [`examples/claude-md/agent-progress.md`](../examples/claude-md/agent-progress.md)
 
-> **Source**: Framework and patterns from [Learn Harness Engineering](https://github.com/humanlayer/learn-harness-engineering) (HumanLayer, 2026), adapted and integrated. The verification gap concept, WIP=1 principle, and session lifecycle structure are the course's primary contributions.
+### 9.25.1 AGENTS.md as TOC, Not Encyclopedia
+
+The most common failure pattern with instruction files: they start small and accumulate. Every team adds rules, guidelines, conventions, and exceptions. After three months the file is 800 lines. The agent reads all 800 lines every session, consuming context budget before any work starts. Rules that appear 600 lines in are effectively invisible. The file cannot be linted. Contradictions accumulate silently.
+
+The failure mode is structural, not a content quality problem. A long AGENTS.md will degrade regardless of how carefully each rule is written.
+
+The OpenAI Codex team's approach: keep AGENTS.md to approximately 100 lines and make it a map, not a manual. The file tells the agent where to look, not everything it needs to know.
+
+```markdown
+# AGENTS.md
+
+## Architecture
+See docs/DESIGN.md for system architecture.
+See docs/design-docs/core-beliefs.md for foundational decisions.
+Layer boundaries: Types → Config → Repo → Service → Runtime → UI.
+Cross-cutting concerns (auth, telemetry, feature flags) only via Provider interfaces.
+
+## Product and Planning
+Active exec plans: docs/exec-plans/active/
+Product specs by feature: docs/product-specs/
+Tech debt tracker: docs/exec-plans/tech-debt-tracker.md
+
+## Quality and Standards
+Quality score by domain: docs/QUALITY_SCORE.md
+Taste invariants (enforced by linters): docs/RELIABILITY.md, docs/SECURITY.md
+Frontend conventions: docs/FRONTEND.md
+
+## External Libraries
+LLM-ready docs for external dependencies: docs/references/
+Example: docs/references/nixpacks-llms.txt
+
+## Verification
+Before marking done: run `make verify` (lint + typecheck + tests + e2e).
+Definition of Done: all layers pass, no skips.
+```
+
+The docs/ hierarchy does the heavy lifting. The agent reads only what it needs for the current task: the product spec for the feature it is implementing, the exec plan for the task it is executing, the reliability doc when touching infrastructure. Progressive disclosure through the file system.
+
+**CI enforcement**: the knowledge base must be maintained like code. Linters check that docs/ references in AGENTS.md resolve, that exec plans in active/ are not stale, and that QUALITY_SCORE.md reflects the last cleanup run. A broken link in AGENTS.md is a build failure, not a documentation oversight.
+
+### 9.25.2 What the Agent Can't See Doesn't Exist
+
+Agents have one knowledge boundary: the repository. Everything that exists outside the repository (Slack threads, video calls, Google Docs, tacit understanding between teammates) does not exist for the agent. This is not a limitation to work around. It is a design constraint that shapes how a team must operate.
+
+A decision made in a Slack thread and not encoded as a markdown file in the repo will be violated by the agent on the next task. Not because the agent is careless, but because it genuinely does not know. The same is true of conventions discussed in a code review but not written into a linter rule or doc. The same is true of architecture decisions made six months ago that "everyone on the team knows."
+
+The practical test: "If a new engineer joined the team today with no onboarding, would they know this from reading the repo?" If not, the agent doesn't know it either.
+
+Three categories require particular attention:
+
+**Decisions**: architectural choices, rejected alternatives, tradeoffs accepted. These belong in docs/design-docs/ as design records, not in someone's memory. A design record does not need to be long. A short document that states the decision, the alternatives considered, and the reason for the choice is sufficient and survives every team change.
+
+**Conventions**: naming rules, structural patterns, file organization. These belong in linter rules (so they are enforced, not just documented) or in targeted docs that AGENTS.md links to. A convention that lives only in a README section will drift.
+
+**Plans**: what is being built, why, and in what sequence. These belong in exec plans (see §9.25.3). A plan that exists only in a project management tool the agent cannot read is not a plan for the agent.
+
+The corollary: when a human makes a decision during code review or changes direction mid-task, that decision must be written into the repo before the next agent session. Review comment responses that change architecture are not repo content. Writing them into a design doc or updating an exec plan is the required step, not optional cleanup.
+
+### 9.25.3 The Knowledge Base Structure
+
+A structured docs/ hierarchy turns the knowledge boundary from a liability into an asset. When all relevant context is in the repo and consistently organized, the agent can navigate to exactly what it needs for any task.
+
+The structure the OpenAI Codex team converged on:
+
+```
+docs/
+├── design-docs/
+│   ├── index.md           # Index of all design records
+│   └── core-beliefs.md    # Foundational architectural decisions
+├── exec-plans/
+│   ├── active/            # Plans currently in progress
+│   ├── completed/         # Finished plans (historical record)
+│   └── tech-debt-tracker.md
+├── generated/
+│   └── db-schema.md       # Auto-generated from actual schema (never edited by hand)
+├── product-specs/
+│   └── index.md           # One spec per feature
+├── references/
+│   └── nixpacks-llms.txt  # LLM-ready docs for each external library
+├── DESIGN.md              # System architecture overview
+├── FRONTEND.md            # Frontend conventions
+├── PLANS.md               # Current planning status
+├── PRODUCT_SENSE.md       # Product judgment and principles
+├── QUALITY_SCORE.md       # Quality scores per domain/layer
+├── RELIABILITY.md         # Reliability requirements and taste invariants
+└── SECURITY.md            # Security requirements and patterns
+```
+
+**Exec plans as first-class artifacts**: for any non-trivial task, the agent creates a plan document before writing code. Simple changes get ephemeral plans: a short markdown file with the approach and expected outcome, created at the start of the task and moved to completed/ when done. Complex tasks get full exec plans with progress logs, decision records, and explicit notes on alternatives rejected. The separation of active/ and completed/ keeps the agent's attention on current work while preserving a searchable history of past decisions. The tech-debt-tracker.md is the backlog for known quality issues, populated by the background cleanup agents described in §9.25.5, addressed incrementally rather than in a disruptive periodic cleanup.
+
+**generated/ directory**: certain documentation must track code exactly. Database schemas, API surface areas, generated type definitions. These go in generated/ and are produced by automated scripts, not written by hand. The doc-gardening agent (described below) enforces the invariant that generated/ files match the actual runtime state.
+
+**The doc-gardening agent**: a recurring background agent that reads docs/ and compares documentation claims against actual code behavior. When it detects drift (a documented API that has changed signature, or a design record that contradicts current implementation), it opens a PR to fix the documentation. This treats the knowledge base as code: it has correctness requirements, and those requirements are enforced automatically. Without this agent, the knowledge base degrades as the codebase evolves. With it, the degradation is caught and corrected continuously rather than discovered when an agent acts on stale information.
+
+**references/ for external libraries**: each significant external dependency gets a dedicated file in references/ (the library's official llms.txt if available, or a curated summary of the relevant API surface). The agent reads the relevant reference file when implementing against that library rather than relying on its training data, which may be outdated or incomplete.
+
+### 9.25.4 Agent-Readable Observability
+
+The verification stack in §9.25 (lint, typecheck, tests, e2e) covers correctness. A separate layer covers performance and runtime behavior: observability. Without it, the agent cannot answer whether a change meets performance requirements and can only inspect code and guess.
+
+The OpenAI Codex team gave each git worktree its own ephemeral, isolated observability stack. The stack is created at task start and torn down after completion; it is never committed to the repository.
+
+```
+Data pipeline:    app logs/metrics/traces → Vector (collector/router)
+                                              ↓
+Storage layer:    VictoriaLogs (logs)     VictoriaMetrics (metrics)     trace store (traces)
+                                              ↓
+Query APIs:       LogQL                   PromQL                         TraceQL
+                                              ↓
+Agent access:     curl / CLI tools → structured data in agent context
+```
+
+The stack enables metric-based prompts that were previously impossible. Instead of "implement service startup," the prompt becomes "ensure service startup completes in under 800ms." Instead of "optimize the checkout flow," it becomes "no UI journey through checkout should exceed 2 seconds." The agent implements a change, restarts the application, runs the workload, queries the observability stack, reads the result, and iterates. The feedback loop is closed without human measurement.
+
+This approach requires infrastructure that not every team has available. The pattern is worth knowing because it illustrates the direction: as harness investment increases, the agent can take on work that was previously impossible to delegate because verification required human judgment on runtime behavior. Teams without this stack can approximate it by making performance requirements explicit (run this benchmark before and after, compare output) and scripting the measurement, even if the infrastructure is not as complete.
+
+### 9.25.5 Enforcing Architecture and Taste
+
+At agent throughput levels, the natural tendency toward entropy accelerates. Agents replicate patterns they observe in the codebase. If an imperfect pattern exists anywhere, it will be reproduced everywhere within a few sessions. The compounding is faster than with human developers because the agent works faster and is more likely to generalize from examples. Architecture must be enforced, not documented.
+
+**Layered domain architecture**
+
+The OpenAI Codex team enforced a fixed layer order within each business domain:
+
+```
+Types → Config → Repo → Service → Runtime → UI
+```
+
+Each layer may depend only on layers below it. Cross-cutting concerns (auth, connectors, telemetry, feature flags) are available only through explicit Provider interfaces, not by importing directly. Violations are build failures enforced by custom linters and structural tests.
+
+This is the kind of architecture typically deferred in early-stage products with the reasoning "we'll add this structure when we have more engineers." At agent throughput levels, the reasoning inverts: without this structure, agents will introduce cross-layer dependencies within days, and the resulting tangle is difficult to reverse. Layered architecture becomes a prerequisite rather than a future optimization.
+
+**Taste invariants and custom linters**
+
+Taste invariants are opinionated rules that go beyond style. Examples: "prefer shared utility packages over ad-hoc helpers," "validate at boundaries or use typed SDKs," "use structured logging in all service-layer code," "schemas and types follow the naming convention X." These rules are not written as guidelines; they are encoded as custom linters.
+
+The linter error messages are written specifically for agent consumption, not for human developers. A conventional linter message says what is wrong. A taste-invariant linter message says what is wrong and what to do instead, written in a form the agent can act on:
+
+```
+TASTE-003: Untyped API response found in services/payment.ts:47
+Prefer typed SDK responses. Use PaymentClient from @internal/payment-sdk
+instead of direct fetch(). See docs/RELIABILITY.md#api-boundaries for the pattern.
+```
+
+The error message injects the fix instruction directly into the agent's context window. Once encoded, the rule applies instantly to every file in the codebase, including files the agent has never seen. This is the amplifier effect: one linter rule enforces consistent behavior across the entire project with zero additional per-file effort.
+
+The custom linters were themselves generated by the Codex agents, not written by hand. A human describes the rule in plain language; the agent generates the linter implementation. This compounds the amplifier: taste invariants are cheap to create, so more of them get created, so more of the codebase behavior is enforced rather than documented.
+
+**Anti-entropy via background cleanup agents**
+
+The problem with architectural drift: it is incremental and invisible until it compounds. An agent replicates a slightly imperfect pattern. Another agent extends it. A third adds a dependency that should not exist. Three months in, the codebase has structural problems that are expensive to reverse, and no single change introduced them.
+
+The OpenAI Codex team's approach was to treat anti-entropy like garbage collection: continuous incremental cleanup rather than periodic disruptive rewrites. A team of background agents runs on a recurring schedule:
+
+1. Scan for deviations from taste principles and architectural layer rules
+2. Update QUALITY_SCORE.md with current scores per domain and layer
+3. Open targeted refactor PRs for detected violations
+
+The PRs are scoped to be reviewable in under a minute and auto-merged when they pass verification. Each addresses one deviation, not a broad refactor. The cumulative effect is that tech debt is paid down continuously rather than in a disruptive periodic cleanup. The tech-debt-tracker.md in docs/exec-plans/ records known issues, and the background agents work through them incrementally.
+
+QUALITY_SCORE.md tracks health over time per architectural layer and business domain. A quality score that is declining is a signal before the decline becomes a problem.
+
+**High-throughput merge philosophy**
+
+At 3.5 PRs per engineer per day, conventional merge gates become the bottleneck. A PR that waits two hours for a flaky CI run is a two-hour delay in a workflow that produces multiple PRs per hour. The OpenAI team's approach: minimal merge blocks, fixes applied via follow-up runs rather than blocking merges.
+
+The reasoning: at genuine agent throughput levels, a broken test is fixed faster by a follow-up agent run than by blocking the current PR. "Fixes are cheap; waiting is expensive" inverts the usual risk calculus that is correct at human development throughput.
+
+This philosophy only applies when throughput is genuinely high. At normal development throughput, blocking merges on failing tests is correct: the cost of a merge block is low, and the cost of merging broken code is high. The inversion happens only when the agent can produce a fix faster than a human can review and unblock the PR. Applying this philosophy prematurely, without the throughput to support it, produces a codebase with accumulated failures rather than one with efficient flow.
+
+> **Sources**: Session lifecycle, Verification Gap, WIP=1, feature_list.json, init.sh, and progress.md patterns from [Learn Harness Engineering](https://github.com/humanlayer/learn-harness-engineering) (HumanLayer, 2026). AGENTS.md-as-TOC, knowledge boundary principle, exec plans, docs/ structure, ephemeral observability stack, taste invariants, doc-gardening agent, anti-entropy model, layered domain architecture, and high-throughput merge philosophy from "Harness engineering: exploiting Codex in the agent era," Ryan Lopopolo, OpenAI Engineering blog, Feb 11, 2026 (https://openai.com/index/harness-engineering/).
 
 > **See also**: [§3.1 CLAUDE.md](#31-memory-files-claudemd) — instruction files, the Instructions subsystem. [§9.5 Tight Feedback Loops](#95-tight-feedback-loops) — automated feedback, the Feedback subsystem. [§9.24 Instinct-Based Continuous Learning](#924-instinct-based-continuous-learning) — capturing session observations across sessions.
 

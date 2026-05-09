@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **§9.25 Harness Engineering extended**: added §9.25.1 through §9.25.5 covering OpenAI Codex team patterns: AGENTS.md as ~100-line TOC, knowledge boundary principle ("what the agent can't see doesn't exist"), docs/ knowledge base structure with exec plans and doc-gardening agent, ephemeral per-worktree observability stack, taste invariants with agent-readable linter messages, anti-entropy via background cleanup agents with QUALITY_SCORE.md, layered domain architecture enforced by linters (Types→Config→Repo→Service→Runtime→UI), and high-throughput merge philosophy. Source: Ryan Lopopolo, OpenAI Engineering blog, Feb 11, 2026. Resource evaluation: `docs/resource-evaluations/2026-02-11-openai-harness-engineering.md` (score 5/5).
+
 - **Claude Code Releases**: Updated tracking to v2.1.133 (2026-05-08)
   - v2.1.133: worktree.baseRef setting (fresh|head) — default fresh reverts 2.1.128 EnterWorktree behavior (breaking), hooks receive effort level via effort.level JSON + $CLAUDE_EFFORT, subagent skills discovery fix, parallel sessions 401 race fix, MCP OAuth proxy fix
   - v2.1.132: CLAUDE_CODE_SESSION_ID in Bash subprocess env, CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN opt-out, MCP stdio memory growth fix (10GB+ RSS), 20+ terminal/TUI fixes (SIGINT shutdown, --resume emoji crash, fullscreen blank, JetBrains scroll, mouse wheel speed, / paste swallow, context_window counts, Alt+T macOS, MCP 0-tool silent failure)
