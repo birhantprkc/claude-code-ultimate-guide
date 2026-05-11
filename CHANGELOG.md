@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **Claude Code Releases**: Updated tracking to v2.1.138 (2026-05-11)
+  - v2.1.138: Internal fixes
+  - v2.1.137: [VSCode] Fixed extension failing to activate on Windows
+  - v2.1.136: settings.autoMode.hard_deny for unconditional auto mode blocking rules; CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL for enterprises; fixed MCP servers disappearing after /clear in VS Code/JetBrains/Agent SDK; MCP OAuth concurrent refresh token race fixed; 40+ UI/terminal fixes (plan mode write blocking, extended thinking 400 fix, --resume with underscores, WSL2 image paste fallback)
+
 - **§9.25 Harness Engineering extended**: added §9.25.1 through §9.25.5 covering OpenAI Codex team patterns: AGENTS.md as ~100-line TOC, knowledge boundary principle ("what the agent can't see doesn't exist"), docs/ knowledge base structure with exec plans and doc-gardening agent, ephemeral per-worktree observability stack, taste invariants with agent-readable linter messages, anti-entropy via background cleanup agents with QUALITY_SCORE.md, layered domain architecture enforced by linters (Types→Config→Repo→Service→Runtime→UI), and high-throughput merge philosophy. Source: Ryan Lopopolo, OpenAI Engineering blog, Feb 11, 2026. Resource evaluation: `docs/resource-evaluations/2026-02-11-openai-harness-engineering.md` (score 5/5).
 
 - **Claude Code Releases**: Updated tracking to v2.1.133 (2026-05-08)

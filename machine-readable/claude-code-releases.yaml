@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.133"
-updated: "2026-05-08"
+latest: "2.1.138"
+updated: "2026-05-11"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,24 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.138"
+    date: "2026-05-11"
+    highlights:
+      - "Internal fixes"
+
+  - version: "2.1.137"
+    date: "2026-05-11"
+    highlights:
+      - "[VSCode] Fixed extension failing to activate on Windows"
+
+  - version: "2.1.136"
+    date: "2026-05-11"
+    highlights:
+      - "⭐ settings.autoMode.hard_deny — auto mode classifier rules that block unconditionally regardless of user intent or allow exceptions"
+      - "CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL to re-enable session quality survey for enterprises capturing responses via OpenTelemetry"
+      - "Fixed MCP servers disappearing after /clear in VS Code/JetBrains/Agent SDK; MCP OAuth concurrent refresh token race fixed (no more daily re-auth for multi-server users)"
+      - "40+ UI/terminal fixes: plan mode not blocking file writes with matching Edit allow rule, extended thinking redacted-block API 400 fix, --resume with underscores in project path, WSL2 image paste via PowerShell fallback"
 
   - version: "2.1.133"
     date: "2026-05-08"
