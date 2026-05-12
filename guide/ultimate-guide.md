@@ -24132,6 +24132,9 @@ Set these in your shell before launching Claude Code (these cannot be configured
 | `USE_BUILTIN_RIPGREP=0` | Use system ripgrep instead of built-in (useful on Alpine Linux) |
 | `CLAUDE_CODE_SIMPLE` | Enable simple mode (Bash + Edit tools only, no agents/hooks/MCP) |
 | `CLAUDE_BASH_NO_LOGIN=1` | Skip login shell invocation for BashTool |
+| `CLAUDE_CODE_SESSION_ID` | Unique identifier for the current Claude Code session. Passed to all Bash tool subprocess environments. Matches `session_id` in hook stdin JSON. Use for correlating tool output with sessions in observability pipelines. (v2.1.132) |
+| `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1` | Opt out of the fullscreen alternate-screen renderer. Terminal output stays in the native scrollback buffer instead of the alternate screen. Use in environments that don't support alternate screen (some log-capture setups, embedded terminals). (v2.1.132) |
+| `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` | When set, Homebrew or WinGet auto-upgrades Claude Code in the background and prompts to restart when a new version is available. (v2.1.129) |
 
 For variables configurable via the `"env"` key in `settings.json` (including `MAX_THINKING_TOKENS`, `CLAUDE_CODE_SHELL`, `CLAUDE_CODE_ENABLE_TASKS`, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, and more), see section 10.3 Configuration Reference.
 
