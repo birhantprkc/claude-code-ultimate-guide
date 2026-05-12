@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **Agent View documented** (§9.17, `guide/ultimate-guide.md`): added native session manager introduced in v2.1.139 — `claude agents`, `/bg`, `claude --bg [task]`, peek + inline reply. Contextualized vs tmux/Conductor/third-party tools. Updated `claude agents` subcommand description in CLI reference.
+
+- **Piebald added** (`guide/ecosystem/third-party-tools.md`): new entry in "Alternative UIs" section — cross-platform (Windows/macOS/Linux/Web), free, multi-provider (Claude/Copilot/Bedrock/Qwen), explicit hooks + AGENTS.md compatibility. Added cross-ref in Multi-Agent Orchestration table. Covers the Windows GUI gap absent from all other listed tools.
+
 - **Claude Code Releases**: Updated tracking to v2.1.139 (2026-05-12)
   - v2.1.139: Agent view (Research Preview), /goal command, hook args exec form + continueOnBlock, 40+ bug fixes
   - v2.1.137: [VSCode] Fixed extension failing to activate on Windows

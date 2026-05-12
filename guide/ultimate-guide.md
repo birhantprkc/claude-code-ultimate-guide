@@ -19073,6 +19073,40 @@ claude --teleport
 
 ---
 
+### Agent View: Native Session Management (v2.1.139+)
+
+> **Research Preview** — Available on Pro, Max, Team, Enterprise, and Claude API plans. Opt-in: `claude agents`.
+
+Before setting up tmux grids or third-party orchestrators, try Agent View — Claude Code's built-in session manager.
+
+**How to access**:
+- `claude agents` from any terminal
+- Left arrow `←` from within any active session
+
+**What you see**: each row shows session name, status (working / waiting on you / done), last response preview, and time since last interaction.
+
+**Key commands**:
+
+| Action | How |
+|--------|-----|
+| Open agent view | `claude agents` or `←` from any session |
+| Background current session | `/bg` |
+| Launch new background session | `claude --bg [task]` |
+| Peek at last turn | Select session |
+| Reply inline (waiting session) | Select → type reply → session resumes |
+| Attach to full transcript | Enter on any session |
+
+**Workflow patterns** (from early users):
+
+- **Dispatch and return**: Send multiple tasks with `claude --bg`, return to a list of PRs ready for review
+- **Long-running agents**: PR babysitters and looping jobs show next run time in the list
+- **Quick context switch**: Left arrow, start a related task or quick question, peek for the answer, right arrow back
+- **Status scan**: Status indicators tell you which sessions produced a PR without entering each one
+
+**Relation to third-party tools**: Before Agent View, parallel session management required tmux, multiclaude, or apps like Conductor. Agent View covers the core "what's running and what needs me" use case natively. Conductor and similar tools remain relevant for GitHub CI integration, PR workflows, and multi-repo management beyond what Agent View provides.
+
+---
+
 ### When Multi-Instance Makes Sense
 
 Don't scale prematurely. Multi-instance workflows introduce coordination overhead that outweighs benefits for most teams.
@@ -23937,7 +23971,7 @@ Top-level commands run as `claude <subcommand>`:
 | Subcommand | Description |
 |------------|-------------|
 | `claude "query"` | Start REPL with an initial prompt |
-| `claude agents` | List configured agents |
+| `claude agents` | Open Agent View — list all sessions (running / waiting / done) with peek and inline reply (v2.1.139+) |
 | `claude auth login / logout / status` | Manage Claude Code authentication |
 | `claude doctor` | Run diagnostics from the command line |
 | `claude install` | Install or switch Claude Code native builds |
