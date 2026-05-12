@@ -10,13 +10,13 @@ tags: [reference, release]
 > **Full details**: [github.com/anthropics/claude-code/CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 > **Machine-readable**: [claude-code-releases.yaml](../machine-readable/claude-code-releases.yaml)
 
-**Latest**: v2.1.133 | **Updated**: 2026-05-08
+**Latest**: v2.1.139 | **Updated**: 2026-05-12
 
 ---
 
 ## Quick Jump
 
-- [2.1.x Series (January-May 2026)](#21x-series-january-may-2026) — worktree.baseRef setting, effort level in hooks, CLAUDE_CODE_SESSION_ID in Bash env, CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN, MCP memory fix (10GB+ RSS), subagent skills fix, 40+ bug fixes, Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line, --console auth flag, SessionEnd fix, enterprise retry fix, rate_limits statusline field, effort frontmatter for skills, --channels MCP research preview, --bare flag, worktree session resume fix, MCP query collapsing, managed-settings.d/ drop-in, CwdChanged/FileChanged hooks, transcript search, credential scrubbing, PowerShell tool Windows preview, conditional hooks if field, MCP headersHelper multi-server env vars, headless AskUserQuestion hooks, X-Claude-Code-Session-Id header, Jujutsu/Sapling VCS exclusions, @ mention token reduction, Read tool compact format, Cowork Dispatch fix, PermissionDenied hook, thinking summaries off by default, "defer" PreToolUse permission, CLAUDE_CODE_NO_FLICKER, /powerup interactive lessons, PowerShell hardened permissions, SSE linear-time performance, MCP 500K result override, disableSkillShellExecution, plugin bin/ executables, Edit tool shorter anchors, interactive Bedrock wizard, forceRemoteSettingsRefresh, /cost per-model breakdown, interactive /release-notes, Linux sandbox apply-seccomp fix, Bedrock Mantle support, high effort default for API/enterprise users, Bedrock auth fix, NO_FLICKER focus view (Ctrl+O), refreshInterval status line, 30+ bug fixes, Vertex AI wizard, Monitor tool, CLAUDE_CODE_PERFORCE_MODE, Bash security hardening, subprocess PID namespace sandboxing, /team-onboarding command, OS CA cert store trust by default, /ultraplan auto-cloud-environment, 40+ bug fixes, PreCompact hook blocking, EnterWorktree path param, plugin monitors, /proactive alias, WebFetch CSS/JS stripping, /doctor status icons, thinking hints sooner, ENABLE_PROMPT_CACHING_1H, /recap session context, built-in slash commands via Skill tool, /undo alias, rotating extended-thinking indicator, /tui fullscreen command, push notification tool, --resume resurrects scheduled tasks, /focus command, autoScrollEnabled config, session recap for telemetry-disabled, 30+ bug fixes, Opus 4.7 xhigh effort, /ultrareview cloud code review, /less-permission-prompts skill, Auto mode for Max subscribers, plan files named after prompts, read-only bash glob patterns no prompt, interactive /effort slider, many bug fixes, native binary spawning, sandbox.network.deniedDomains, security hardening exec wrappers, crash fix permission dialog, /resume 67% faster, inline thinking progress, sandbox dangerous-path security fix, agent frontmatter hooks via --agent, many terminal and UI bug fixes, default effort high for Pro/Max on Opus 4.6+Sonnet 4.6, native bfs/ugrep on macOS/Linux, /model persistence across restarts, Opus 4.7 1M context fix, 15+ bug fixes, vim visual mode, /usage merged from /cost+/stats, custom named themes, hooks invoke MCP tools, DISABLE_UPDATES env var, wslInheritsWindowsSettings, 15+ bug fixes, /config settings persist to settings.json, --from-pr multi-platform support, agent frontmatter honors tools+permissionMode, blockedMarketplaces security fix, TaskList ordering fix, 30+ bug fixes, Windows no longer requires Git Bash (PowerShell fallback), claude ultrareview CI subcommand, ${CLAUDE_EFFORT} in skills, alwaysLoad MCP option, plugin prune, PostToolUse output replacement for all tools, ANTHROPIC_BEDROCK_SERVICE_TIER, PR URL in /resume search, OAuth 401 hotfix, gateway /v1/models listing in /model picker, claude project purge, OAuth paste code for WSL2/SSH/containers, security fix allowManagedDomainsOnly/allowManagedReadPathsOnly, Windows PowerShell 7 as primary shell, 40+ bug fixes, EnterWorktree branch from local HEAD fix, --plugin-dir .zip support, --channels console auth, /mcp tool count per server, parallel bash tool call fix, sub-agent prompt cache fix, 35+ bug fixes, --plugin-url flag, CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE, Ctrl+R all-projects history restored, skillOverrides fix, 1h cache TTL fix, OAuth refresh race fix, 20+ bug fixes, VS Code Windows activation fix, Mantle auth fix
+- [2.1.x Series (January-May 2026)](#21x-series-january-may-2026) — agent view (Research Preview), /goal command, hook args exec form + continueOnBlock, settings.autoMode.hard_deny, CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL, MCP /clear disappear fix, 40+ UI fixes, worktree.baseRef setting, effort level in hooks, CLAUDE_CODE_SESSION_ID in Bash env, CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN, MCP memory fix (10GB+ RSS), subagent skills fix, 40+ bug fixes, Worktree isolation, background agents, ConfigChange hook, Fast mode Opus 4.6, 1M context, claude.ai MCP connectors, remote-control, auto-memory, /copy command, HTTP hooks, worktree config sharing, ultrathink re-introduced, InstructionsLoaded hook, 4 security fixes, Agent model override restored, 12x SDK token cost reduction, /context actionable suggestions, modelOverrides setting, 1M context Opus 4.6 default for Max/Team/Enterprise, MCP elicitation, PostCompact hook, /effort command, Opus 4.6 64k/128k output tokens, allowRead sandbox setting, /branch command, StopFailure hook, streaming line-by-line, --console auth flag, SessionEnd fix, enterprise retry fix, rate_limits statusline field, effort frontmatter for skills, --channels MCP research preview, --bare flag, worktree session resume fix, MCP query collapsing, managed-settings.d/ drop-in, CwdChanged/FileChanged hooks, transcript search, credential scrubbing, PowerShell tool Windows preview, conditional hooks if field, MCP headersHelper multi-server env vars, headless AskUserQuestion hooks, X-Claude-Code-Session-Id header, Jujutsu/Sapling VCS exclusions, @ mention token reduction, Read tool compact format, Cowork Dispatch fix, PermissionDenied hook, thinking summaries off by default, "defer" PreToolUse permission, CLAUDE_CODE_NO_FLICKER, /powerup interactive lessons, PowerShell hardened permissions, SSE linear-time performance, MCP 500K result override, disableSkillShellExecution, plugin bin/ executables, Edit tool shorter anchors, interactive Bedrock wizard, forceRemoteSettingsRefresh, /cost per-model breakdown, interactive /release-notes, Linux sandbox apply-seccomp fix, Bedrock Mantle support, high effort default for API/enterprise users, Bedrock auth fix, NO_FLICKER focus view (Ctrl+O), refreshInterval status line, 30+ bug fixes, Vertex AI wizard, Monitor tool, CLAUDE_CODE_PERFORCE_MODE, Bash security hardening, subprocess PID namespace sandboxing, /team-onboarding command, OS CA cert store trust by default, /ultraplan auto-cloud-environment, 40+ bug fixes, PreCompact hook blocking, EnterWorktree path param, plugin monitors, /proactive alias, WebFetch CSS/JS stripping, /doctor status icons, thinking hints sooner, ENABLE_PROMPT_CACHING_1H, /recap session context, built-in slash commands via Skill tool, /undo alias, rotating extended-thinking indicator, /tui fullscreen command, push notification tool, --resume resurrects scheduled tasks, /focus command, autoScrollEnabled config, session recap for telemetry-disabled, 30+ bug fixes, Opus 4.7 xhigh effort, /ultrareview cloud code review, /less-permission-prompts skill, Auto mode for Max subscribers, plan files named after prompts, read-only bash glob patterns no prompt, interactive /effort slider, many bug fixes, native binary spawning, sandbox.network.deniedDomains, security hardening exec wrappers, crash fix permission dialog, /resume 67% faster, inline thinking progress, sandbox dangerous-path security fix, agent frontmatter hooks via --agent, many terminal and UI bug fixes, default effort high for Pro/Max on Opus 4.6+Sonnet 4.6, native bfs/ugrep on macOS/Linux, /model persistence across restarts, Opus 4.7 1M context fix, 15+ bug fixes, vim visual mode, /usage merged from /cost+/stats, custom named themes, hooks invoke MCP tools, DISABLE_UPDATES env var, wslInheritsWindowsSettings, 15+ bug fixes, /config settings persist to settings.json, --from-pr multi-platform support, agent frontmatter honors tools+permissionMode, blockedMarketplaces security fix, TaskList ordering fix, 30+ bug fixes, Windows no longer requires Git Bash (PowerShell fallback), claude ultrareview CI subcommand, ${CLAUDE_EFFORT} in skills, alwaysLoad MCP option, plugin prune, PostToolUse output replacement for all tools, ANTHROPIC_BEDROCK_SERVICE_TIER, PR URL in /resume search, OAuth 401 hotfix, gateway /v1/models listing in /model picker, claude project purge, OAuth paste code for WSL2/SSH/containers, security fix allowManagedDomainsOnly/allowManagedReadPathsOnly, Windows PowerShell 7 as primary shell, 40+ bug fixes, EnterWorktree branch from local HEAD fix, --plugin-dir .zip support, --channels console auth, /mcp tool count per server, parallel bash tool call fix, sub-agent prompt cache fix, 35+ bug fixes, --plugin-url flag, CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE, Ctrl+R all-projects history restored, skillOverrides fix, 1h cache TTL fix, OAuth refresh race fix, 20+ bug fixes, VS Code Windows activation fix, Mantle auth fix
 - [2.0.x Series (Nov 2025 - Jan 2026)](#20x-series-november-2025---january-2026) — Opus 4.5, Claude in Chrome, Background agents
 - [Breaking Changes Summary](#breaking-changes-summary)
 - [Milestone Features](#milestone-features)
@@ -24,6 +24,67 @@ tags: [reference, release]
 ---
 
 ## 2.1.x Series (January-May 2026)
+
+### v2.1.139 (2026-05-12)
+
+> Agent view (Research Preview), /goal command, hook exec form + continueOnBlock, 40+ bug fixes.
+
+- **New**: Agent view (Research Preview) — `claude agents` opens a single list of all sessions (running, blocked on you, or done). Each row shows the session status, last response preview, and time since last interaction. Navigate with left arrow from any session or launch directly from the terminal. Select a session to peek at the last turn and reply inline without fully attaching; press Enter to attach. Background any session with `/bg`, or launch directly to the background with `claude --bg [task]`. Available on Pro, Max, Team, Enterprise, and API plans.
+- **New**: `/goal` command — set a completion condition; Claude keeps working across turns until met, with live elapsed/turns/tokens overlay panel
+- **New**: `/scroll-speed` command to tune mouse wheel scroll speed with live preview
+- **New**: `claude plugin details <name>` — shows plugin component inventory and projected per-session token cost
+- **New**: Transcript view navigation: `?` for shortcuts, `{`/`}` to jump between user prompts, `v` to toggle shortcut panel
+- **New**: Hook `args: string[]` field (exec form) — spawns command directly without a shell, path placeholders need no quoting
+- **New**: Hook `continueOnBlock` config option for `PostToolUse` — set `true` to feed rejection reason back to Claude and continue the turn
+- **New**: MCP stdio servers now receive `CLAUDE_PROJECT_DIR` in environment; plugin configs can reference `${CLAUDE_PROJECT_DIR}` in commands
+- **Improved**: Compaction prompt now asks the model to preserve sensitive user instructions
+- **Fixed**: `/mcp` Reconnect picks up `.mcp.json` edits without a restart; shows HTTP status + URL when reconnect fails
+- **Fixed**: Deadlock where expired credentials + `forceRemoteSettingsRefresh` blocked `claude auth login/logout/status`
+- **Fixed**: `autoAllowBashIfSandboxed` not auto-approving commands with shell expansions like `$VAR` and `$(cmd)`
+- **Fixed**: Unbounded MCP SSE memory growth — response bodies now capped at 16 MB per SSE frame
+- **Fixed**: `Skill(name *)` wildcard permission rules now work as prefix match (matching `Bash(ls *)` behavior)
+- **Fixed**: Settings hot-reload not detecting edits to symlinked `~/.claude/settings.json`
+- **Fixed**: 30+ additional fixes: hook terminal corruption, plugin dependency stale count, mouse wheel speed in Cursor/VS Code, MCP resources from disconnected servers in autocomplete, CJK/emoji border overflow, bash history up-arrow, multi-image paste
+
+---
+
+### v2.1.138 (2026-05-11)
+
+> Internal fixes.
+
+- **Fixed**: Internal fixes (no user-visible changes)
+
+---
+
+### v2.1.137 (2026-05-11)
+
+> [VSCode] Fixed extension failing to activate on Windows.
+
+- **Fixed**: VS Code extension failing to activate on Windows
+
+---
+
+### v2.1.136 (2026-05-11)
+
+> settings.autoMode.hard_deny, CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL, MCP /clear disappear fix, 40+ UI/terminal bug fixes.
+
+- **New**: `settings.autoMode.hard_deny` — auto mode classifier rules that block unconditionally regardless of user intent or allow exceptions
+- **New**: `CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL` to re-enable the session quality survey for enterprises capturing responses via OpenTelemetry
+- **Fixed**: MCP servers (`.mcp.json`, plugins, claude.ai connectors) silently disappearing after `/clear` in VS Code extension, JetBrains plugin, and Agent SDK
+- **Fixed**: MCP OAuth refresh tokens lost when multiple servers refresh concurrently — no more daily re-authentication for multi-server setups
+- **Fixed**: Rare login loop where a concurrent credential write could overwrite a freshly-rotated OAuth token and force re-login
+- **Fixed**: API error (400) when extended thinking emitted a redacted thinking block after a tool call
+- **Fixed**: `--resume` / `--continue` not finding sessions when the project path contains underscores
+- **Fixed**: Plan mode not blocking file writes when a matching `Edit(...)` allow rule exists
+- **Fixed**: WSL2: image paste from Windows clipboard now works via PowerShell fallback when xclip/wl-paste cannot read image data
+- **Fixed**: Plugin `Stop`/`UserPromptSubmit` hooks failing when cache cleanup deletes a version still in use
+- **Improved**: Visual consistency across slash command dialogs — standardized footer hints, spacing, arrow-key styling; dialog frame appears immediately during loading
+- **Fixed**: Colors appearing at wrong positions in bash command output and markdown code blocks
+- **Fixed**: ReasonML diffs rendering corrupted "undefined" text artifacts at word-diff boundaries
+- **Fixed**: `@` file picker not matching files created mid-session, and not finding files in directories with 100+ entries
+- **Fixed**: 30+ additional UI/terminal fixes: failed tool calls expand in fullscreen, Backspace/Ctrl+Backspace swap fix, `/usage` weekly reset date display, CJK terminal overflow, `/insights` crash on malformed tool calls, renderer crash on collapsibility change, shell-integration lock files not respecting `CLAUDE_CONFIG_DIR`, trailing whitespace in copied output, plugin uninstall case-insensitivity, `AskUserQuestion` multi-select array fix, `CronList` missing qualifiers, MCP tool results invisible on content-block returns
+
+---
 
 ### v2.1.133 (2026-05-08)
 

@@ -878,6 +878,36 @@ Users working across 5+ parallel features on multiple repos report the following
 
 ---
 
+### Piebald
+
+A cross-platform desktop and web app for agentic AI development. Maintains full compatibility with Claude Code's hooks system and AGENTS.md conventions while adding multi-provider support and a full GUI environment.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [piebald.ai](https://piebald.ai) / [docs.piebald.ai](https://docs.piebald.ai) |
+| **GitHub** | [github.com/Piebald-AI](https://github.com/Piebald-AI) |
+| **Platform** | Windows / macOS / Linux + Web |
+| **Pricing** | Free (Basic) / $20/month (planned) |
+| **Version** | v0.3.1 (May 2026) |
+
+**Key features**:
+
+- **Multi-provider**: Claude Pro/Max, GitHub Copilot, Amazon Bedrock, Google Antigravity, Qwen, and any OpenAI/Anthropic/Google-compatible endpoint — bring your own subscription
+- **Claude Code compatibility**: Explicit support for hooks, AGENTS.md, MCP servers, permission modes, subagents, and chat compaction
+- **Dev environment**: Git worktrees (first-class), integrated terminal, file browser, Git browser, and code editor (Pro)
+- **Chat management**: Branching/forking, message queuing, slash commands, context management, desktop notifications
+- **Configuration**: VS Code theme import, localization (i18n), color/font customization, web mode
+
+**Windows gap**: All other "Alternative UIs" in this section are macOS/Linux only. Piebald is the only GUI option with native Windows support (no WSL required).
+
+**Relation to Piebald-AI org**: The same team maintains [claude-code-system-prompts](https://github.com/Piebald-AI/claude-code-system-prompts) — the most comprehensive public reverse-engineering of Claude Code's internal system prompts, cited throughout this guide.
+
+**Limitations**: Proprietary, not open source. File browser and code editor require Pro tier.
+
+**Note on Agent View**: Since v2.1.139, Claude Code has native multi-session management via `claude agents` (see [§9.17](#917-scaling-patterns-multi-instance-workflows)). Piebald remains the relevant choice for multi-provider workflows, Windows, and users who prefer a full GUI over the CLI.
+
+---
+
 ### Claude Code GUI (VS Code Extension)
 
 A third-party VS Code extension (not Anthropic's official extension) that adds a graphical layer on top of Claude Code.
@@ -909,6 +939,7 @@ This section covers tools for running **multiple Claude Code instances in parall
 | [agent-chat](https://github.com/justinabrahms/agent-chat) | Monitoring UI | Real-time SSE monitoring for Gas Town/multiclaude |
 | [abtop](https://github.com/graykode/abtop) | Fleet TUI monitor | htop-style: tokens, context %, rate limits, ports, subagent tree (584+ stars) |
 | [Conductor](#conductor) | Desktop app | macOS parallel agents (also listed above) |
+| [Piebald](#piebald) | Desktop/web app | Multi-provider + Windows + hooks compat (also listed above) |
 
 ---
 

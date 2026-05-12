@@ -6,7 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Security
+
+- **Threat database updated to v2.17.0** (2026-05-11): +10 new sources, +6 new CVEs, +2 new attack techniques, +1 defensive resource
+  - New CVEs: CVE-2025-66335 (Apache Doris MCP SQL injection), CVE-2025-53107 (Git MCP Server command injection), CVE-2026-22252 (LibreChat STDIO RCE), CVE-2026-22688 (WeKnora STDIO RCE), CVE-2025-54994 (@akoskm/create-mcp-server-stdio RCE), CVE-2026-26030 (Microsoft AI agent framework tool-chaining RCE)
+  - New attack techniques: T028 (Zero-Click RCE via Prompt Injection — Cymulate, Cursor/AWS Kiro/Codex), T029 (AGENTS.md Supply Chain File Injection — NVIDIA research)
+  - New sources: Cymulate Zero-Click RCE research (May 2026), Microsoft "Prompts Become Shells" blog (CVE-2026-26030), NVIDIA AGENTS.md injection, OX Security full STDIO CVE advisory, Forcepoint X-Labs IPI payloads, Stormshield retrospective
+  - New defensive resource: OWASP Agentic AI Skills Top 10 GitHub project
+
 ### Documentation
+
+- **Agent View documented** (§9.17, `guide/ultimate-guide.md`): added native session manager introduced in v2.1.139 — `claude agents`, `/bg`, `claude --bg [task]`, peek + inline reply. Contextualized vs tmux/Conductor/third-party tools. Updated `claude agents` subcommand description in CLI reference.
+
+- **Piebald added** (`guide/ecosystem/third-party-tools.md`): new entry in "Alternative UIs" section — cross-platform (Windows/macOS/Linux/Web), free, multi-provider (Claude/Copilot/Bedrock/Qwen), explicit hooks + AGENTS.md compatibility. Added cross-ref in Multi-Agent Orchestration table. Covers the Windows GUI gap absent from all other listed tools.
+
+- **Claude Code Releases**: Updated tracking to v2.1.139 (2026-05-12)
+  - v2.1.139: Agent view (Research Preview), /goal command, hook args exec form + continueOnBlock, 40+ bug fixes
+  - v2.1.137: [VSCode] Fixed extension failing to activate on Windows
+  - v2.1.136: settings.autoMode.hard_deny for unconditional auto mode blocking rules; CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL for enterprises; fixed MCP servers disappearing after /clear in VS Code/JetBrains/Agent SDK; MCP OAuth concurrent refresh token race fixed; 40+ UI/terminal fixes (plan mode write blocking, extended thinking 400 fix, --resume with underscores, WSL2 image paste fallback)
 
 - **§9.25 Harness Engineering extended**: added §9.25.1 through §9.25.5 covering OpenAI Codex team patterns: AGENTS.md as ~100-line TOC, knowledge boundary principle ("what the agent can't see doesn't exist"), docs/ knowledge base structure with exec plans and doc-gardening agent, ephemeral per-worktree observability stack, taste invariants with agent-readable linter messages, anti-entropy via background cleanup agents with QUALITY_SCORE.md, layered domain architecture enforced by linters (Types→Config→Repo→Service→Runtime→UI), and high-throughput merge philosophy. Source: Ryan Lopopolo, OpenAI Engineering blog, Feb 11, 2026. Resource evaluation: `docs/resource-evaluations/2026-02-11-openai-harness-engineering.md` (score 5/5).
 
