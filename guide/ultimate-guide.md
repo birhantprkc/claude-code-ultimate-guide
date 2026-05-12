@@ -1082,6 +1082,23 @@ Auto mode lets Claude make permission decisions on your behalf during long-runni
 
 Unlike `bypassPermissions` (which approves blindly), auto mode uses a classifier to evaluate each action. `PermissionDenied` hooks fire when the classifier blocks something, giving you visibility into what was declined. Designed for long tasks with fewer interruptions and less risk than skipping all permissions.
 
+**Hard deny rules** (`settings.autoMode.hard_deny`, v2.1.136): Auto mode's classifier can be supplemented with unconditional block rules that fire before the classifier and cannot be overridden by user intent or allow exceptions:
+
+```json
+// .claude/settings.json
+{
+  "autoMode": {
+    "hard_deny": [
+      { "tool": "Bash", "pattern": "rm -rf" },
+      { "tool": "Write", "pathPattern": "/etc/**" },
+      { "tool": "Write", "pathPattern": "**/.env" }
+    ]
+  }
+}
+```
+
+Unlike classifier rules (which weigh user intent), `hard_deny` entries are absolute. Use them for operations that must never be auto-approved regardless of context: production destructive commands, credential files, system config paths.
+
 **Requirements**: Max plan subscription. Available as of v2.1.114.
 
 ### Bypass Permissions Mode (`bypassPermissions`)
