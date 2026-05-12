@@ -8870,6 +8870,8 @@ Slash commands are shortcuts for common workflows.
 | `/setup-bedrock` | Interactive Bedrock configuration wizard |
 | `/setup-vertex` | Interactive Vertex AI configuration wizard |
 | `/ultrareview` | Cloud-based parallel multi-agent code review (Pro/Max) |
+| `/goal [condition]` | Set a completion condition. Claude works autonomously across turns until the condition is met, displaying a live overlay with elapsed time, turn count, and token usage. Example: `/goal all tests pass and build is green` (v2.1.139) |
+| `/scroll-speed` | Interactive slider to tune mouse wheel scroll speed. Changes take effect immediately with live preview. (v2.1.139) |
 | `/exit` | Exit Claude Code |
 
 ### The /btw Command
@@ -19214,6 +19216,25 @@ Before setting up tmux grids or third-party orchestrators, try Agent View — Cl
 - **Status scan**: Status indicators tell you which sessions produced a PR without entering each one
 
 **Relation to third-party tools**: Before Agent View, parallel session management required tmux, multiclaude, or apps like Conductor. Agent View covers the core "what's running and what needs me" use case natively. Conductor and similar tools remain relevant for GitHub CI integration, PR workflows, and multi-repo management beyond what Agent View provides.
+
+### /goal — Autonomous Completion Mode (v2.1.139)
+
+`/goal [condition]` sets a natural-language completion condition. Claude keeps working across turns without waiting for your input, stopping only when it believes the condition is satisfied.
+
+```
+/goal all unit tests pass and no TypeScript errors
+/goal the PR description is written and the branch is pushed
+/goal the migration is complete and smoke tests pass
+```
+
+While `/goal` is active, a status overlay shows:
+- **Elapsed time** — how long the session has been running
+- **Turns used** — number of back-and-forth turns consumed
+- **Tokens used** — running token consumption
+
+**When to use**: Long-running tasks where you want to step away and return to a finished result rather than babysitting the session. Works best with clear, verifiable conditions ("tests pass") rather than vague ones ("looks good").
+
+**Cancel**: Send any message to interrupt before the condition is met.
 
 ---
 
