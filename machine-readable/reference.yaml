@@ -1275,6 +1275,8 @@ commands:
   /ultrareview: "multi-agent cloud code review (v2.1.114)"
   /proactive: "enables proactive suggestions (alias, v2.1.105)"
   /undo: "reverts last action (v2.1.108)"
+  /goal: "set completion condition; Claude works autonomously until met — live overlay shows elapsed time, turns, and token usage (v2.1.139)"
+  /scroll-speed: "tune mouse wheel scroll speed with interactive live-preview slider (v2.1.139)"
 
 # ════════════════════════════════════════════════════════════════
 # SHORTCUTS - see deep_dive.shortcuts_table
@@ -1301,6 +1303,25 @@ cli:
   "--dangerously-skip-permissions": "auto-accept ALL (danger)"
   "--debug": "verbose output"
   "--add-dir": "grant tool access to directories outside CWD"
+  "project purge [path]": "delete all Claude Code state for a project (transcripts, tasks, file history); flags: --dry-run -y -i --all (v2.1.126)"
+  "ultrareview [target]": "run /ultrareview non-interactively from CI/scripts; --json; exits 0 on completion 1 on failure (v2.1.120)"
+  "plugin prune": "remove orphaned auto-installed plugin dependencies; cascade with plugin uninstall --prune (v2.1.121)"
+  "plugin details <name>": "show plugin component inventory (skills, agents, commands, hooks, MCP) and projected per-session token cost (v2.1.139)"
+  "--plugin-url <url>": "fetch plugin .zip from URL and load for current session (v2.1.129)"
+
+# ════════════════════════════════════════════════════════════════
+# ENVIRONMENT VARIABLES
+# ════════════════════════════════════════════════════════════════
+env_vars:
+  CLAUDE_CODE_SESSION_ID: "unique session ID injected into all Bash subprocess envs, matches hook stdin session_id field (v2.1.132)"
+  CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN: "set to 1 to opt out of fullscreen alternate-screen renderer, keeps output in native scrollback (v2.1.132)"
+  CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE: "set to 1 for auto Homebrew/WinGet upgrades in background with restart prompt (v2.1.129)"
+
+# ════════════════════════════════════════════════════════════════
+# WORKTREE SETTINGS
+# ════════════════════════════════════════════════════════════════
+worktree_settings:
+  baseRef: "fresh|head — controls branch base for --worktree/EnterWorktree/agent-isolation; fresh=origin default, head=local HEAD including unpushed commits; BREAKING default changed to fresh in v2.1.133"
 
 # ════════════════════════════════════════════════════════════════
 # CONTEXT MANAGEMENT - see deep_dive.context_management
@@ -1396,6 +1417,8 @@ mcp:
   git_mcp_status: "Early development (API subject to change)"
   git_mcp_advanced_filtering: "ISO 8601 dates, relative dates (2 weeks ago), absolute dates"
   git_mcp_use_cases: "automated commits, log analysis, branch management, token-efficient diffs, multi-repo"
+  alwaysLoad: "when true in MCP server config, all tools skip tool-search deferral and are always available without ToolSearch call (v2.1.121)"
+  CLAUDE_PROJECT_DIR: "auto-injected into stdio MCP server process envs; usable as ${CLAUDE_PROJECT_DIR} in plugin command strings (v2.1.139)"
   ast_grep: "optional plugin for AST-based code search (explicit invocation required)"
   ast_grep_guide: "guide/ultimate-guide.md:9845"
   ast_grep_skill: "examples/skills/ast-grep-patterns.md"
