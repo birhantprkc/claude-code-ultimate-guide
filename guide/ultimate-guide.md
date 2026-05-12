@@ -7550,6 +7550,23 @@ allowed-tools: Bash
 
 **Why it matters**: Effort controls thinking depth, tool call verbosity, and analysis depth — not just tokens. A `low` effort skill runs faster and cheaper. A `high` effort skill reasons deeper without the user having to manually adjust the session setting. This enables automatic cognitive budget allocation per task type: pay for reasoning only where it adds value.
 
+**`${CLAUDE_EFFORT}` in skill content** (v2.1.120): Skill body text can reference `${CLAUDE_EFFORT}` as a variable. Claude substitutes it with the current effort level string (`low`, `medium`, `high`, `xhigh`, `max`) before processing the skill. Use this to branch instructions based on effort:
+
+```markdown
+---
+name: review-code
+effort: medium
+---
+
+Review the changed files for correctness.
+
+${if CLAUDE_EFFORT == "high" or CLAUDE_EFFORT == "xhigh"}
+Also run a full security audit and check all edge cases.
+${end}
+```
+
+This lets one skill serve both quick-scan (low/medium) and thorough (high/xhigh) use cases without maintaining two separate skills.
+
 **`allowed-tools` wildcard scoping** — limit a skill to specific command namespaces rather than opening full Bash access:
 
 ```yaml
