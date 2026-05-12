@@ -13441,6 +13441,7 @@ npm install @microsoft/playwright-mcp
 | `args` | Command arguments |
 | `env` | Environment variables |
 | `cwd` | Working directory |
+| `alwaysLoad` | When `true`, all tools from this server skip tool-search deferral and are always available without a `ToolSearch` call first. Use for servers with 1-5 critical tools needed on every turn. (v2.1.121) |
 
 ### Dynamic Headers for Multiple MCP Servers (v2.1.85+)
 
@@ -13487,8 +13488,11 @@ Reference the script in your MCP server config:
 |----------|------------|
 | `${VAR}` | Environment variable value |
 | `${VAR:-default}` | Environment variable with fallback |
+| `${CLAUDE_PROJECT_DIR}` | Absolute path to the project root (the directory Claude was started from). Auto-injected into `stdio`-type MCP server process environments. Also usable in plugin `command` strings. (v2.1.139) |
 
 > **Warning**: The syntax `${workspaceFolder}` and `${env:VAR_NAME}` are VS Code conventions, not Claude Code. Claude Code uses standard shell-style `${VAR}` and `${VAR:-default}` for environment variable expansion in MCP config.
+
+> **MCP stdio env injection**: All `stdio`-type MCP servers automatically receive `CLAUDE_PROJECT_DIR` as an environment variable — no config needed. This lets MCP servers know which project they're operating in without requiring the client to pass it explicitly.
 
 ### Managing Large MCP Server Sets
 
@@ -13523,6 +13527,21 @@ Claude Code v4 introduced **MCP Tool Search**: instead of loading all MCP tool d
 Model accuracy on tool-selection tasks (measured on Opus 4): 49% → 74% (+25 points) when switching from full preload to lazy-loading. Auto-enables when MCP tools would consume >10% of the context window.
 
 **Practical implication**: you can now connect dozens of MCP servers without the "too many tools" accuracy penalty. The advice to keep global config minimal still applies for unrelated tools, but MCP Tool Search changes the calculus for large project-specific sets.
+
+To opt a specific server out of deferral entirely, set `alwaysLoad: true` in its config. Use this for servers with small tool counts (1-5 tools) that you know you'll need every session:
+
+```json
+// .claude/settings.json
+{
+  "mcpServers": {
+    "my-critical-server": {
+      "command": "npx",
+      "args": ["my-mcp-server"],
+      "alwaysLoad": true
+    }
+  }
+}
+```
 
 **CLI vs MCP — when a shell command beats a server**: Familiar CLI tools (git, grep, jq, curl) are already deeply embedded in Claude's training data. A few usage examples in CLAUDE.md are often more effective than an equivalent MCP server, because the model already knows the tool's behavior, flags, and output format. An MCP server adds tool schema overhead and introduces an unfamiliar interface. Default to CLIs for standard tools; use MCP servers for proprietary systems or APIs the model has no training context for.
 
