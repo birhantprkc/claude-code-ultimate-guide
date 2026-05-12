@@ -24042,7 +24042,8 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 |------|-------|-------------|
 | `--mcp-config <PATH\|JSON>` | | Load MCP servers from JSON file or inline JSON string |
 | `--strict-mcp-config` | | Only use MCP servers from `--mcp-config`, ignore all others |
-| `--plugin-dir <PATH>` | | Load plugins from directory for this session only (repeatable) |
+| `--plugin-dir <PATH>` | | Load plugins from a directory or `.zip` archive for this session only (repeatable). Multiple `--plugin-dir` flags supported. (`.zip` since v2.1.128) |
+| `--plugin-url <url>` | | Fetch a plugin `.zip` archive from a URL and load it for the current session. Useful for CI pipelines sharing plugins via artifact storage. (v2.1.129) |
 
 #### Directory & Workspace
 
@@ -24065,6 +24066,7 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | `--chrome` | | Enable Chrome browser integration for web automation |
 | `--no-chrome` | | Disable Chrome browser integration for this session |
 | `--ide` | | Automatically connect to IDE on startup if exactly one valid IDE is available |
+| `--channels` | | Enable MCP channels (Research Preview). Supports claude.ai OAuth and API key auth. Managed orgs require `channelsEnabled: true` in managed-settings. (v2.1.128) |
 
 #### Initialization & Maintenance
 
@@ -24111,6 +24113,10 @@ Top-level commands run as `claude <subcommand>`:
 | `claude remote-control` | Manage remote control sessions |
 | `claude setup-token` | Create a long-lived token for subscription usage |
 | `claude update` / `claude upgrade` | Update to the latest version |
+| `claude project purge [path]` | Delete all Claude Code state for a project: transcripts, tasks, file history, config entry. Options: `--dry-run`, `-y/--yes`, `-i/--interactive`, `--all`. (v2.1.126) |
+| `claude ultrareview [target]` | Run `/ultrareview` non-interactively from CI/scripts. `target`: PR number, branch, or current branch if omitted. `--json` for machine-readable output. Exits 0 on completion, 1 on failure. (v2.1.120) |
+| `claude plugin prune` | Remove orphaned auto-installed plugin dependencies. Cascade with `claude plugin uninstall --prune`. (v2.1.121) |
+| `claude plugin details <name>` | Show plugin component inventory (skills, agents, commands, hooks, MCP servers) and projected per-session token cost. (v2.1.139) |
 
 ### Startup Environment Variables
 
