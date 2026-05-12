@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.138"
-updated: "2026-05-11"
+latest: "2.1.139"
+updated: "2026-05-12"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,14 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.139"
+    date: "2026-05-12"
+    highlights:
+      - "⭐ Agent view (Research Preview): `claude agents` lists all sessions — running, blocked on you, or done"
+      - "⭐ `/goal` command: set a completion condition; Claude works across turns with live elapsed/turns/tokens overlay"
+      - "Hook `args: string[]` exec form (no shell spawning) + `continueOnBlock` for PostToolUse (feeds rejection reason back to Claude)"
+      - "40+ bug fixes: auth deadlock, autoAllowBashIfSandboxed shell expansion, MCP SSE 16MB cap, Skill wildcard prefix match, symlinked settings.json hot-reload"
 
   - version: "2.1.138"
     date: "2026-05-11"

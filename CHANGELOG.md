@@ -6,10 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Security
+
+- **Threat database updated to v2.17.0** (2026-05-11): +10 new sources, +6 new CVEs, +2 new attack techniques, +1 defensive resource
+  - New CVEs: CVE-2025-66335 (Apache Doris MCP SQL injection), CVE-2025-53107 (Git MCP Server command injection), CVE-2026-22252 (LibreChat STDIO RCE), CVE-2026-22688 (WeKnora STDIO RCE), CVE-2025-54994 (@akoskm/create-mcp-server-stdio RCE), CVE-2026-26030 (Microsoft AI agent framework tool-chaining RCE)
+  - New attack techniques: T028 (Zero-Click RCE via Prompt Injection — Cymulate, Cursor/AWS Kiro/Codex), T029 (AGENTS.md Supply Chain File Injection — NVIDIA research)
+  - New sources: Cymulate Zero-Click RCE research (May 2026), Microsoft "Prompts Become Shells" blog (CVE-2026-26030), NVIDIA AGENTS.md injection, OX Security full STDIO CVE advisory, Forcepoint X-Labs IPI payloads, Stormshield retrospective
+  - New defensive resource: OWASP Agentic AI Skills Top 10 GitHub project
+
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.138 (2026-05-11)
-  - v2.1.138: Internal fixes
+- **Claude Code Releases**: Updated tracking to v2.1.139 (2026-05-12)
+  - v2.1.139: Agent view (Research Preview), /goal command, hook args exec form + continueOnBlock, 40+ bug fixes
   - v2.1.137: [VSCode] Fixed extension failing to activate on Windows
   - v2.1.136: settings.autoMode.hard_deny for unconditional auto mode blocking rules; CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL for enterprises; fixed MCP servers disappearing after /clear in VS Code/JetBrains/Agent SDK; MCP OAuth concurrent refresh token race fixed; 40+ UI/terminal fixes (plan mode write blocking, extended thinking 400 fix, --resume with underscores, WSL2 image paste fallback)
 
