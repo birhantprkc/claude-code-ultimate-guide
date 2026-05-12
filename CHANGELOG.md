@@ -16,6 +16,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **Feature backfill v2.1.120-v2.1.139** (`guide/ultimate-guide.md`, `guide/cheatsheet.md`, `machine-readable/reference.yaml`): documented 21 missing features from 6 weeks of releases:
+  - Hooks: `args[]` exec form, `continueOnBlock` (PostToolUse), `effort.level`/`$CLAUDE_EFFORT` in stdin JSON, `hookSpecificOutput.updatedToolOutput` for all tools (was MCP-only)
+  - Skills: `${CLAUDE_EFFORT}` variable in skill content
+  - Worktrees: `worktree.baseRef` (`fresh`|`head`) with breaking change notice (v2.1.133)
+  - MCP: `alwaysLoad` server config option, `CLAUDE_PROJECT_DIR` env injection
+  - Auto mode: `settings.autoMode.hard_deny` unconditional block rules
+  - CLI: `/goal`, `/scroll-speed` commands; `claude project purge`, `claude ultrareview CI`, `claude plugin prune/details`; `--plugin-url`, `--channels` console auth, `--plugin-dir .zip`
+  - Env vars: `CLAUDE_CODE_SESSION_ID`, `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN`, `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE`
+
 - **Agent View documented** (§9.17, `guide/ultimate-guide.md`): added native session manager introduced in v2.1.139 — `claude agents`, `/bg`, `claude --bg [task]`, peek + inline reply. Contextualized vs tmux/Conductor/third-party tools. Updated `claude agents` subcommand description in CLI reference.
 
 - **Piebald added** (`guide/ecosystem/third-party-tools.md`): new entry in "Alternative UIs" section — cross-platform (Windows/macOS/Linux/Web), free, multi-provider (Claude/Copilot/Bedrock/Qwen), explicit hooks + AGENTS.md compatibility. Added cross-ref in Multi-Agent Orchestration table. Covers the Windows GUI gap absent from all other listed tools.
