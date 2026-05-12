@@ -51,6 +51,8 @@ tags: [cheatsheet, reference]
 | `/stats` | Usage graph, favorite model, streak *(alias for `/usage` since v2.1.118)* |
 | `/usage` | Token + cost usage per model (v2.1.118) |
 | `/ultrareview` | Multi-agent cloud code review (v2.1.114) |
+| `/goal [condition]` | Autonomous multi-turn mode: Claude works until condition is met, live overlay shows elapsed/turns/tokens (v2.1.139) |
+| `/scroll-speed` | Tune mouse wheel scroll speed with interactive live-preview slider (v2.1.139) |
 | `/rename [name]` | Name or rename the current session |
 | `/copy` | Interactive picker to copy a code block or full response |
 | `/debug` | Systematic troubleshooting |
@@ -439,6 +441,16 @@ VERIFY: Empty email shows error, invalid format shows error
 | `--allowedTools "Edit,Read"` | Whitelist tools |
 
 > Full CLI reference (~45 flags): see [cli-reference on code.claude.com](https://docs.anthropic.com/en/docs/claude-code/cli-reference)
+
+## Key CLI Subcommands
+
+| Command | Description |
+|---------|-------------|
+| `claude project purge [path]` | Delete all Claude Code state for a project (transcripts, tasks, config). `--dry-run` for preview. (v2.1.126) |
+| `claude ultrareview [target]` | Non-interactive cloud code review for CI. `--json` output. Exits 0/1. (v2.1.120) |
+| `claude plugin prune` | Remove orphaned auto-installed plugin deps. (v2.1.121) |
+| `claude plugin details <name>` | Show plugin inventory and token cost estimate. (v2.1.139) |
+| `claude --plugin-url <url>` | Load plugin `.zip` from URL for this session. (v2.1.129) |
 
 ---
 
