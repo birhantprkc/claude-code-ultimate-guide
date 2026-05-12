@@ -29,7 +29,7 @@ tags: [reference, release]
 
 > Agent view (Research Preview), /goal command, hook exec form + continueOnBlock, 40+ bug fixes.
 
-- **New**: Agent view (Research Preview) — `claude agents` shows every session (running, blocked, done) in a single list
+- **New**: Agent view (Research Preview) — `claude agents` opens a single list of all sessions (running, blocked on you, or done). Each row shows the session status, last response preview, and time since last interaction. Navigate with left arrow from any session or launch directly from the terminal. Select a session to peek at the last turn and reply inline without fully attaching; press Enter to attach. Background any session with `/bg`, or launch directly to the background with `claude --bg [task]`. Available on Pro, Max, Team, Enterprise, and API plans.
 - **New**: `/goal` command — set a completion condition; Claude keeps working across turns until met, with live elapsed/turns/tokens overlay panel
 - **New**: `/scroll-speed` command to tune mouse wheel scroll speed with live preview
 - **New**: `claude plugin details <name>` — shows plugin component inventory and projected per-session token cost
