@@ -9992,12 +9992,15 @@ gh pr create --title "..." --body "..."
 | `if` | Permission-rule filter controlling when the hook fires (e.g. `Bash(git *)`) — v2.1.85+ |
 | `type` | Hook type: `"command"`, `"http"`, `"prompt"`, or `"agent"` |
 | `command` | Shell command to run (for `command` type) |
+| `args` | `string[]` — exec form: array of strings spawned directly without a shell. Path placeholders need no quoting. When present, `command` is ignored. Use to avoid shell-injection risks. (v2.1.139) |
 | `prompt` | Prompt text for LLM evaluation (for `prompt`/`agent` types). Use `$ARGUMENTS` as placeholder for hook input JSON |
 | `timeout` | Max execution time in seconds (default: 600s command, 30s prompt, 60s agent) |
 | `model` | Model to use for evaluation (for `prompt`/`agent` types). Defaults to a fast model |
 | `async` | If `true`, runs in background without blocking (for `command` type only) |
 | `statusMessage` | Custom spinner message displayed while hook runs |
 | `once` | If `true`, runs only once per session then is removed (skills only) |
+
+> **Exec form (`args`)**: Use `args: ["program", "arg1", "arg2"]` to spawn the command without a shell interpreter. Useful when paths contain spaces or special characters that would require quoting in `command`. Exec form also avoids shell injection risks in automated contexts.
 
 ### Session-Scoped Hooks
 
@@ -10092,6 +10095,15 @@ Hooks receive JSON on stdin with common fields (all events) plus event-specific 
 
 > **Common fields (all events)**: `session_id`, `transcript_path`, `cwd`, `permission_mode`, `hook_event_name`. Event-specific fields (like `tool_name` and `tool_input` for PreToolUse) are added on top.
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `session_id` | string | Unique session identifier |
+| `transcript_path` | string | Path to session transcript file |
+| `cwd` | string | Current working directory |
+| `permission_mode` | string | Active permission mode |
+| `hook_event_name` | string | Event that triggered the hook |
+| `effort.level` | string | Active effort level: `low`, `medium`, `high`, `xhigh`, `max`. Bash-type hooks also receive this as `$CLAUDE_EFFORT` env var. (v2.1.133) |
+
 ### Hook Output
 
 Hooks communicate results through exit codes and optional JSON on stdout. Choose one approach per hook: either exit codes alone, or exit 0 with JSON for structured control. Claude Code only processes JSON on exit 0, so if your hook exits with any other code, stdout and any JSON it contains are silently discarded.
@@ -10111,6 +10123,31 @@ Hooks communicate results through exit codes and optional JSON on stdout. Choose
 - **PostToolUse, Stop, SubagentStop, UserPromptSubmit, ConfigChange**: Uses top-level `decision: "block"` with `reason`
 - **TeammateIdle, TaskCompleted**: Exit code 2 only (no JSON decision control)
 - **PermissionRequest**: Uses `hookSpecificOutput` with `decision.behavior` (allow/deny)
+
+**`continueOnBlock`** (`PostToolUse` only, v2.1.139): When `true`, a `decision: "block"` response feeds the `reason` back to Claude as context and continues the turn instead of halting. Use to give Claude a chance to retry with a compliant approach:
+
+```json
+{
+  "type": "PostToolUse",
+  "matcher": "Write|Edit",
+  "command": "check-file-policy.sh",
+  "continueOnBlock": true
+}
+```
+
+Without `continueOnBlock`, a blocked PostToolUse stops the turn and surfaces an error. With it, Claude receives the rejection reason and can self-correct.
+
+**Output replacement** (`PostToolUse`, v2.1.121): `PostToolUse` hooks can replace what Claude receives as the tool result via `hookSpecificOutput.updatedToolOutput`. Works for all tools: Bash, Read, Write, Edit, MCP tools, etc.:
+
+```json
+{
+  "hookSpecificOutput": {
+    "updatedToolOutput": "redacted: output contained PII, removed by policy hook"
+  }
+}
+```
+
+Use cases: scrub PII from tool outputs before Claude processes them, compress large results, inject metadata or audit trails into every tool response.
 
 **PreToolUse blocking example** (preferred over exit code 2):
 
