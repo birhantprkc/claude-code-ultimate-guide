@@ -17742,6 +17742,26 @@ claude -w
 
 The worktree is created automatically, Claude runs inside it, and it is cleaned up on exit (if no changes were made).
 
+> **Breaking change (v2.1.133)**: `worktree.baseRef` now defaults to `fresh`, reverting the v2.1.128 behavior where `EnterWorktree` branched from local HEAD. If you have unpushed commits you need in the worktree branch, set `worktree.baseRef: "head"` explicitly.
+
+**`worktree.baseRef`** (`fresh` | `head`, default: `fresh`): Controls the base commit for worktrees created via `--worktree`, `EnterWorktree`, and agent-isolation worktrees.
+
+| Value | Behavior |
+|-------|----------|
+| `fresh` | Branch from `origin/<default-branch>` — always a clean remote base |
+| `head` | Branch from local HEAD — includes unpushed commits |
+
+```json
+// .claude/settings.json (or .claude/settings.local.json)
+{
+  "worktree": {
+    "baseRef": "head"
+  }
+}
+```
+
+Use `head` when you're iterating on a feature branch and want the worktree to include your in-progress commits.
+
 #### Declarative isolation in agent definitions
 
 Set `isolation: "worktree"` in an agent's frontmatter to automatically spawn it in a fresh worktree every time (v2.1.50+):
