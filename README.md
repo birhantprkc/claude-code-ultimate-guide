@@ -8,7 +8,7 @@
 <!-- Stats -->
 <p align="center">
   <a href="https://github.com/FlorianBruniaux/claude-code-ultimate-guide/stargazers"><img src="https://img.shields.io/github/stars/FlorianBruniaux/claude-code-ultimate-guide?style=for-the-badge" alt="Stars"/></a>
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-mai_3,_2026_·_v3.40.0-brightgreen?style=for-the-badge" alt="Last Update"/></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-May_12,_2026_·_v3.40.0-brightgreen?style=for-the-badge" alt="Last Update"/></a>
   <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-271_questions-orange?style=for-the-badge" alt="Quiz"/></a>
   <a href="./examples/"><img src="https://img.shields.io/badge/Templates-181-green?style=for-the-badge" alt="Templates"/></a>
 </p>
@@ -934,7 +934,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ---
 
-*Version 3.40.0 | Updated daily · mai 3, 2026 | Crafted with Claude*
+*Version 3.40.0 | Updated daily · May 12, 2026 | Crafted with Claude*
 
 <!-- SEO Keywords -->
 <!-- claude code, claude code tutorial, anthropic cli, ai coding assistant, claude code mcp,
