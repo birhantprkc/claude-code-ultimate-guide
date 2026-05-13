@@ -1082,6 +1082,23 @@ Auto mode lets Claude make permission decisions on your behalf during long-runni
 
 Unlike `bypassPermissions` (which approves blindly), auto mode uses a classifier to evaluate each action. `PermissionDenied` hooks fire when the classifier blocks something, giving you visibility into what was declined. Designed for long tasks with fewer interruptions and less risk than skipping all permissions.
 
+**Hard deny rules** (`settings.autoMode.hard_deny`, v2.1.136): Auto mode's classifier can be supplemented with unconditional block rules that fire before the classifier and cannot be overridden by user intent or allow exceptions:
+
+```json
+// .claude/settings.json
+{
+  "autoMode": {
+    "hard_deny": [
+      { "tool": "Bash", "pattern": "rm -rf" },
+      { "tool": "Write", "pathPattern": "/etc/**" },
+      { "tool": "Write", "pathPattern": "**/.env" }
+    ]
+  }
+}
+```
+
+Unlike classifier rules (which weigh user intent), `hard_deny` entries are absolute. Use them for operations that must never be auto-approved regardless of context: production destructive commands, credential files, system config paths.
+
 **Requirements**: Max plan subscription. Available as of v2.1.114.
 
 ### Bypass Permissions Mode (`bypassPermissions`)
@@ -7550,6 +7567,23 @@ allowed-tools: Bash
 
 **Why it matters**: Effort controls thinking depth, tool call verbosity, and analysis depth — not just tokens. A `low` effort skill runs faster and cheaper. A `high` effort skill reasons deeper without the user having to manually adjust the session setting. This enables automatic cognitive budget allocation per task type: pay for reasoning only where it adds value.
 
+**`${CLAUDE_EFFORT}` in skill content** (v2.1.120): Skill body text can reference `${CLAUDE_EFFORT}` as a variable. Claude substitutes it with the current effort level string (`low`, `medium`, `high`, `xhigh`, `max`) before processing the skill. Use this to branch instructions based on effort:
+
+```markdown
+---
+name: review-code
+effort: medium
+---
+
+Review the changed files for correctness.
+
+${if CLAUDE_EFFORT == "high" or CLAUDE_EFFORT == "xhigh"}
+Also run a full security audit and check all edge cases.
+${end}
+```
+
+This lets one skill serve both quick-scan (low/medium) and thorough (high/xhigh) use cases without maintaining two separate skills.
+
 **`allowed-tools` wildcard scoping** — limit a skill to specific command namespaces rather than opening full Bash access:
 
 ```yaml
@@ -8836,6 +8870,8 @@ Slash commands are shortcuts for common workflows.
 | `/setup-bedrock` | Interactive Bedrock configuration wizard |
 | `/setup-vertex` | Interactive Vertex AI configuration wizard |
 | `/ultrareview` | Cloud-based parallel multi-agent code review (Pro/Max) |
+| `/goal [condition]` | Set a completion condition. Claude works autonomously across turns until the condition is met, displaying a live overlay with elapsed time, turn count, and token usage. Example: `/goal all tests pass and build is green` (v2.1.139) |
+| `/scroll-speed` | Interactive slider to tune mouse wheel scroll speed. Changes take effect immediately with live preview. (v2.1.139) |
 | `/exit` | Exit Claude Code |
 
 ### The /btw Command
@@ -9992,12 +10028,15 @@ gh pr create --title "..." --body "..."
 | `if` | Permission-rule filter controlling when the hook fires (e.g. `Bash(git *)`) — v2.1.85+ |
 | `type` | Hook type: `"command"`, `"http"`, `"prompt"`, or `"agent"` |
 | `command` | Shell command to run (for `command` type) |
+| `args` | `string[]` — exec form: array of strings spawned directly without a shell. Path placeholders need no quoting. When present, `command` is ignored. Use to avoid shell-injection risks. (v2.1.139) |
 | `prompt` | Prompt text for LLM evaluation (for `prompt`/`agent` types). Use `$ARGUMENTS` as placeholder for hook input JSON |
 | `timeout` | Max execution time in seconds (default: 600s command, 30s prompt, 60s agent) |
 | `model` | Model to use for evaluation (for `prompt`/`agent` types). Defaults to a fast model |
 | `async` | If `true`, runs in background without blocking (for `command` type only) |
 | `statusMessage` | Custom spinner message displayed while hook runs |
 | `once` | If `true`, runs only once per session then is removed (skills only) |
+
+> **Exec form (`args`)**: Use `args: ["program", "arg1", "arg2"]` to spawn the command without a shell interpreter. Useful when paths contain spaces or special characters that would require quoting in `command`. Exec form also avoids shell injection risks in automated contexts.
 
 ### Session-Scoped Hooks
 
@@ -10092,6 +10131,15 @@ Hooks receive JSON on stdin with common fields (all events) plus event-specific 
 
 > **Common fields (all events)**: `session_id`, `transcript_path`, `cwd`, `permission_mode`, `hook_event_name`. Event-specific fields (like `tool_name` and `tool_input` for PreToolUse) are added on top.
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `session_id` | string | Unique session identifier |
+| `transcript_path` | string | Path to session transcript file |
+| `cwd` | string | Current working directory |
+| `permission_mode` | string | Active permission mode |
+| `hook_event_name` | string | Event that triggered the hook |
+| `effort.level` | string | Active effort level: `low`, `medium`, `high`, `xhigh`, `max`. Bash-type hooks also receive this as `$CLAUDE_EFFORT` env var. (v2.1.133) |
+
 ### Hook Output
 
 Hooks communicate results through exit codes and optional JSON on stdout. Choose one approach per hook: either exit codes alone, or exit 0 with JSON for structured control. Claude Code only processes JSON on exit 0, so if your hook exits with any other code, stdout and any JSON it contains are silently discarded.
@@ -10111,6 +10159,31 @@ Hooks communicate results through exit codes and optional JSON on stdout. Choose
 - **PostToolUse, Stop, SubagentStop, UserPromptSubmit, ConfigChange**: Uses top-level `decision: "block"` with `reason`
 - **TeammateIdle, TaskCompleted**: Exit code 2 only (no JSON decision control)
 - **PermissionRequest**: Uses `hookSpecificOutput` with `decision.behavior` (allow/deny)
+
+**`continueOnBlock`** (`PostToolUse` only, v2.1.139): When `true`, a `decision: "block"` response feeds the `reason` back to Claude as context and continues the turn instead of halting. Use to give Claude a chance to retry with a compliant approach:
+
+```json
+{
+  "type": "PostToolUse",
+  "matcher": "Write|Edit",
+  "command": "check-file-policy.sh",
+  "continueOnBlock": true
+}
+```
+
+Without `continueOnBlock`, a blocked PostToolUse stops the turn and surfaces an error. With it, Claude receives the rejection reason and can self-correct.
+
+**Output replacement** (`PostToolUse`, v2.1.121): `PostToolUse` hooks can replace what Claude receives as the tool result via `hookSpecificOutput.updatedToolOutput`. Works for all tools: Bash, Read, Write, Edit, MCP tools, etc.:
+
+```json
+{
+  "hookSpecificOutput": {
+    "updatedToolOutput": "redacted: output contained PII, removed by policy hook"
+  }
+}
+```
+
+Use cases: scrub PII from tool outputs before Claude processes them, compress large results, inject metadata or audit trails into every tool response.
 
 **PreToolUse blocking example** (preferred over exit code 2):
 
@@ -13387,6 +13460,7 @@ npm install @microsoft/playwright-mcp
 | `args` | Command arguments |
 | `env` | Environment variables |
 | `cwd` | Working directory |
+| `alwaysLoad` | When `true`, all tools from this server skip tool-search deferral and are always available without a `ToolSearch` call first. Use for servers with 1-5 critical tools needed on every turn. (v2.1.121) |
 
 ### Dynamic Headers for Multiple MCP Servers (v2.1.85+)
 
@@ -13433,8 +13507,11 @@ Reference the script in your MCP server config:
 |----------|------------|
 | `${VAR}` | Environment variable value |
 | `${VAR:-default}` | Environment variable with fallback |
+| `${CLAUDE_PROJECT_DIR}` | Absolute path to the project root (the directory Claude was started from). Auto-injected into `stdio`-type MCP server process environments. Also usable in plugin `command` strings. (v2.1.139) |
 
 > **Warning**: The syntax `${workspaceFolder}` and `${env:VAR_NAME}` are VS Code conventions, not Claude Code. Claude Code uses standard shell-style `${VAR}` and `${VAR:-default}` for environment variable expansion in MCP config.
+
+> **MCP stdio env injection**: All `stdio`-type MCP servers automatically receive `CLAUDE_PROJECT_DIR` as an environment variable — no config needed. This lets MCP servers know which project they're operating in without requiring the client to pass it explicitly.
 
 ### Managing Large MCP Server Sets
 
@@ -13469,6 +13546,21 @@ Claude Code v4 introduced **MCP Tool Search**: instead of loading all MCP tool d
 Model accuracy on tool-selection tasks (measured on Opus 4): 49% → 74% (+25 points) when switching from full preload to lazy-loading. Auto-enables when MCP tools would consume >10% of the context window.
 
 **Practical implication**: you can now connect dozens of MCP servers without the "too many tools" accuracy penalty. The advice to keep global config minimal still applies for unrelated tools, but MCP Tool Search changes the calculus for large project-specific sets.
+
+To opt a specific server out of deferral entirely, set `alwaysLoad: true` in its config. Use this for servers with small tool counts (1-5 tools) that you know you'll need every session:
+
+```json
+// .claude/settings.json
+{
+  "mcpServers": {
+    "my-critical-server": {
+      "command": "npx",
+      "args": ["my-mcp-server"],
+      "alwaysLoad": true
+    }
+  }
+}
+```
 
 **CLI vs MCP — when a shell command beats a server**: Familiar CLI tools (git, grep, jq, curl) are already deeply embedded in Claude's training data. A few usage examples in CLAUDE.md are often more effective than an equivalent MCP server, because the model already knows the tool's behavior, flags, and output format. An MCP server adds tool schema overhead and introduces an unfamiliar interface. Default to CLIs for standard tools; use MCP servers for proprietary systems or APIs the model has no training context for.
 
@@ -17688,6 +17780,26 @@ claude -w
 
 The worktree is created automatically, Claude runs inside it, and it is cleaned up on exit (if no changes were made).
 
+> **Breaking change (v2.1.133)**: `worktree.baseRef` now defaults to `fresh`, reverting the v2.1.128 behavior where `EnterWorktree` branched from local HEAD. If you have unpushed commits you need in the worktree branch, set `worktree.baseRef: "head"` explicitly.
+
+**`worktree.baseRef`** (`fresh` | `head`, default: `fresh`): Controls the base commit for worktrees created via `--worktree`, `EnterWorktree`, and agent-isolation worktrees.
+
+| Value | Behavior |
+|-------|----------|
+| `fresh` | Branch from `origin/<default-branch>` — always a clean remote base |
+| `head` | Branch from local HEAD — includes unpushed commits |
+
+```json
+// .claude/settings.json (or .claude/settings.local.json)
+{
+  "worktree": {
+    "baseRef": "head"
+  }
+}
+```
+
+Use `head` when you're iterating on a feature branch and want the worktree to include your in-progress commits.
+
 #### Declarative isolation in agent definitions
 
 Set `isolation: "worktree"` in an agent's frontmatter to automatically spawn it in a fresh worktree every time (v2.1.50+):
@@ -19104,6 +19216,25 @@ Before setting up tmux grids or third-party orchestrators, try Agent View — Cl
 - **Status scan**: Status indicators tell you which sessions produced a PR without entering each one
 
 **Relation to third-party tools**: Before Agent View, parallel session management required tmux, multiclaude, or apps like Conductor. Agent View covers the core "what's running and what needs me" use case natively. Conductor and similar tools remain relevant for GitHub CI integration, PR workflows, and multi-repo management beyond what Agent View provides.
+
+### /goal — Autonomous Completion Mode (v2.1.139)
+
+`/goal [condition]` sets a natural-language completion condition. Claude keeps working across turns without waiting for your input, stopping only when it believes the condition is satisfied.
+
+```
+/goal all unit tests pass and no TypeScript errors
+/goal the PR description is written and the branch is pushed
+/goal the migration is complete and smoke tests pass
+```
+
+While `/goal` is active, a status overlay shows:
+- **Elapsed time** — how long the session has been running
+- **Turns used** — number of back-and-forth turns consumed
+- **Tokens used** — running token consumption
+
+**When to use**: Long-running tasks where you want to step away and return to a finished result rather than babysitting the session. Works best with clear, verifiable conditions ("tests pass") rather than vague ones ("looks good").
+
+**Cancel**: Send any message to interrupt before the condition is met.
 
 ---
 
@@ -23911,7 +24042,8 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 |------|-------|-------------|
 | `--mcp-config <PATH\|JSON>` | | Load MCP servers from JSON file or inline JSON string |
 | `--strict-mcp-config` | | Only use MCP servers from `--mcp-config`, ignore all others |
-| `--plugin-dir <PATH>` | | Load plugins from directory for this session only (repeatable) |
+| `--plugin-dir <PATH>` | | Load plugins from a directory or `.zip` archive for this session only (repeatable). Multiple `--plugin-dir` flags supported. (`.zip` since v2.1.128) |
+| `--plugin-url <url>` | | Fetch a plugin `.zip` archive from a URL and load it for the current session. Useful for CI pipelines sharing plugins via artifact storage. (v2.1.129) |
 
 #### Directory & Workspace
 
@@ -23934,6 +24066,7 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | `--chrome` | | Enable Chrome browser integration for web automation |
 | `--no-chrome` | | Disable Chrome browser integration for this session |
 | `--ide` | | Automatically connect to IDE on startup if exactly one valid IDE is available |
+| `--channels` | | Enable MCP channels (Research Preview). Supports claude.ai OAuth and API key auth. Managed orgs require `channelsEnabled: true` in managed-settings. (v2.1.128) |
 
 #### Initialization & Maintenance
 
@@ -23980,6 +24113,10 @@ Top-level commands run as `claude <subcommand>`:
 | `claude remote-control` | Manage remote control sessions |
 | `claude setup-token` | Create a long-lived token for subscription usage |
 | `claude update` / `claude upgrade` | Update to the latest version |
+| `claude project purge [path]` | Delete all Claude Code state for a project: transcripts, tasks, file history, config entry. Options: `--dry-run`, `-y/--yes`, `-i/--interactive`, `--all`. (v2.1.126) |
+| `claude ultrareview [target]` | Run `/ultrareview` non-interactively from CI/scripts. `target`: PR number, branch, or current branch if omitted. `--json` for machine-readable output. Exits 0 on completion, 1 on failure. (v2.1.120) |
+| `claude plugin prune` | Remove orphaned auto-installed plugin dependencies. Cascade with `claude plugin uninstall --prune`. (v2.1.121) |
+| `claude plugin details <name>` | Show plugin component inventory (skills, agents, commands, hooks, MCP servers) and projected per-session token cost. (v2.1.139) |
 
 ### Startup Environment Variables
 
@@ -23995,6 +24132,9 @@ Set these in your shell before launching Claude Code (these cannot be configured
 | `USE_BUILTIN_RIPGREP=0` | Use system ripgrep instead of built-in (useful on Alpine Linux) |
 | `CLAUDE_CODE_SIMPLE` | Enable simple mode (Bash + Edit tools only, no agents/hooks/MCP) |
 | `CLAUDE_BASH_NO_LOGIN=1` | Skip login shell invocation for BashTool |
+| `CLAUDE_CODE_SESSION_ID` | Unique identifier for the current Claude Code session. Passed to all Bash tool subprocess environments. Matches `session_id` in hook stdin JSON. Use for correlating tool output with sessions in observability pipelines. (v2.1.132) |
+| `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1` | Opt out of the fullscreen alternate-screen renderer. Terminal output stays in the native scrollback buffer instead of the alternate screen. Use in environments that don't support alternate screen (some log-capture setups, embedded terminals). (v2.1.132) |
+| `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` | When set, Homebrew or WinGet auto-upgrades Claude Code in the background and prompts to restart when a new version is available. (v2.1.129) |
 
 For variables configurable via the `"env"` key in `settings.json` (including `MAX_THINKING_TOKENS`, `CLAUDE_CODE_SHELL`, `CLAUDE_CODE_ENABLE_TASKS`, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, and more), see section 10.3 Configuration Reference.
 
