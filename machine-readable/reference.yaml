@@ -497,6 +497,19 @@ deep_dive:
   subscription_token_budgets: 1948
   subscription_opus_ratio: 1946
   subscription_monitoring: 2113
+  # Programmatic Billing Change (announced 2026-05-13, effective 2026-06-15)
+  programmatic_billing_change: "guide/ultimate-guide.md:18854"
+  programmatic_billing_effective: "2026-06-15"
+  programmatic_billing_announced: "2026-05-13"
+  programmatic_billing_affects: "claude -p, Agent SDK (Python+TS), GitHub Actions, OpenClaw/Hermes/Conductor, custom harnesses, CI/CD pipelines, scheduled automation"
+  programmatic_billing_unaffected: "Claude Code terminal (interactive), IDE integrations, web/desktop/mobile chat, human-in-the-loop workflows"
+  programmatic_billing_credits: "Pro $20/mo | Max 5x $100/mo | Max 20x $200/mo — no rollover, not automatic (requires email activation)"
+  programmatic_billing_overage_sonnet: "$3/MTok input, $15/MTok output (standard API rates)"
+  programmatic_billing_api_key_trap: "guide/ultimate-guide.md:18895"
+  programmatic_billing_audit: "claude /cost (session) + npx ccusage (cross-session history)"
+  programmatic_billing_claim_deadline: "2026-06-15 — credits require activation via Anthropic email sent ~2 weeks prior"
+  programmatic_billing_strategic_context: "Split = Anthropic UX (unlimited interactive) vs your harness (capped programmatic). Related: §9.25 Harness Engineering, §11 AI Ecosystem."
+  programmatic_billing_timeline: "2026-05-06 interactive limits doubled (SpaceX) → 2026-05-13 change announced → 2026-06-15 effective → 2026-07-13 +50% interactive bonus ends"
   plan_mode: 576
   ultraplan: 3003
   rewind: 2566
@@ -638,7 +651,7 @@ deep_dive:
   agentskills_spec: "https://agentskills.io"
   agentskills_spec_repo: "https://github.com/agentskills/agentskills"
   agentskills_spec_stars: "8.2K"
-  agentskills_platforms: "26+ (Claude Code, Cursor, VS Code, GitHub, Codex, Gemini CLI, Goose, Roo Code, Spring AI, Databricks...)"
+  agentskills_platforms: "35+ (Claude Code, Cursor, VS Code, GitHub Copilot, Codex, Gemini CLI, Goose, Roo Code, Spring AI, Databricks Genie Code, OpenHands, Amp, Letta, Junie, Firebender, OpenCode, Mux, Kiro, Snowflake Cortex Code, Ona, Laravel Boost, Emdash, TRAE, fast-agent, nanobot, VT Code, Qodo, Agentman, Mistral Vibe, Google AI Edge Gallery, Workshop, Factory, pi, Piebald, Command Code...)"
   agentskills_ref_cli: "https://github.com/agentskills/agentskills/tree/main/skills-ref"
   agentskills_ref_cli_usage: "skills-ref validate <path> | skills-ref to-prompt <path>"
   anthropics_skills_repo: "https://github.com/anthropics/skills"
