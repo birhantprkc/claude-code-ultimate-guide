@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Claude Code releases updated to v2.1.141** (`machine-readable/claude-code-releases.yaml`, `guide/core/claude-code-releases.md`):
+  - v2.1.141: hook `terminalSequence` output field, `claude agents --cwd`, Rewind "Summarize up to here", `CLAUDE_CODE_PLUGIN_PREFER_HTTPS`, `ANTHROPIC_WORKSPACE_ID`, 50+ bug fixes
+  - v2.1.140: `Agent` tool `subagent_type` case/separator-insensitive matching, plugin folder conflict warnings, 13 bug fixes
+
 ### Security
 
 - **Threat database updated to v2.17.0** (2026-05-11): +10 new sources, +6 new CVEs, +2 new attack techniques, +1 defensive resource
