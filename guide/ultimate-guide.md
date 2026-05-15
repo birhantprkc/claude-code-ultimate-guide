@@ -2165,6 +2165,8 @@ Example output:
 
 ### Cost Awareness & Optimization
 
+> **Note:** If you use `claude -p`, the Agent SDK, GitHub Actions, or any automation harness, a billing model change effective June 15, 2026 introduces a new monthly credit cap on programmatic usage separate from interactive limits. See [§9.13 — The Interactive/Programmatic Billing Split](#the-interactiveprogrammatic-billing-split-effective-june-15-2026) for the full breakdown, affected tools, and audit steps.
+
 Claude Code isn't free - you're using API credits. Understanding costs helps optimize usage.
 
 #### Pricing Model (as of April 2026)
@@ -7599,7 +7601,7 @@ allowed-tools: Read Grep Glob Edit(/docs/**)
 
 This is more secure than granting broad `Bash` access: the skill can only run commands matching the pattern. Ideal for skills wrapping a specific CLI tool.
 
-> **Open standard**: Agent Skills follow the [agentskills.io specification](https://agentskills.io), created by Anthropic and supported by 30+ platforms (Cursor, VS Code, GitHub, Codex, Gemini CLI, Goose, Roo Code, etc.). Skills you create for Claude Code are portable. The `disable-model-invocation` field is a Claude Code extension.
+> **Open standard**: Agent Skills follow the [agentskills.io specification](https://agentskills.io), created by Anthropic and supported by 35+ platforms (Cursor, VS Code, GitHub Copilot, Codex, Gemini CLI, Goose, Roo Code, OpenHands, Amp, Letta, Junie, etc.). Skills you create for Claude Code are portable. The `disable-model-invocation` field is a Claude Code extension.
 
 ### Validating Skills
 
@@ -15086,6 +15088,8 @@ For critical work, combine everything:
 
 > **Code Review (Teams/Enterprise)**: For automated PR review without manual prompting, see [Code Review](./workflows/code-review.md) — Anthropic's multi-agent review feature that posts inline GitHub comments on every PR.
 
+> **Billing (June 15, 2026):** All workflows in this section — headless mode (`claude -p`), GitHub Actions, Agent SDK — fall into the new **programmatic billing bucket** and consume from a monthly credit equal to your subscription price ($20/$100/$200). Once exhausted, usage is billed at API token rates. Audit your CI/CD usage with `ccusage` before the change takes effect. See [§9.13 — The Interactive/Programmatic Billing Split](#the-interactiveprogrammatic-billing-split-effective-june-15-2026) for details and a decision framework.
+
 ### Headless Mode
 
 Run Claude Code without interactive prompts:
@@ -18846,6 +18850,131 @@ Time savings from effective Claude Code usage typically far outweigh API costs f
 - Time-sensitive features
 - Learning and experimentation
 - Complex architectural decisions
+
+### The Interactive/Programmatic Billing Split (Effective June 15, 2026)
+
+> **Note:** This section documents the billing change announced by Anthropic on May 13, 2026, effective June 15, 2026. If you use `claude -p`, the Agent SDK, GitHub Actions, or any third-party automation harness, read this before that date.
+
+#### What changed
+
+Anthropic split subscription usage into two distinct buckets. The first, called interactive usage, covers the Claude Code terminal and IDE, plus the web, desktop, and mobile chat interfaces. Nothing changes for these workflows — existing subscription limits remain as-is.
+
+The second bucket, programmatic usage, is new and capped. It covers `claude -p` (headless mode), the Agent SDK (Python and TypeScript), GitHub Actions with Claude, and third-party harnesses including OpenClaw, Hermes, Conductor, and any custom orchestration pipeline that invokes Claude outside of Anthropic's own interfaces. Each subscription plan receives a monthly credit equal to the subscription price. After that credit is exhausted, usage is billed at standard API token rates with no rollover.
+
+The split is not "human interaction vs automation." The operative distinction is **Anthropic's interface vs your interface**. Running Claude Code interactively in the terminal uses Anthropic's interface — unlimited, unchanged. Running your own harness or orchestrator uses your interface — capped. This reflects where Anthropic is capturing value as LLM models commoditize: at the harness and UX layer, not the model layer.
+
+#### Credit amounts and overage rates
+
+| Plan | Monthly price | Programmatic credit | After credit exhaustion |
+|------|--------------|---------------------|------------------------|
+| Pro | $20 | $20/month | API rates (no rollover) |
+| Max 5x | $100 | $100/month | API rates (no rollover) |
+| Max 20x | $200 | $200/month | API rates (no rollover) |
+
+**Overage rates once credit is exhausted (Sonnet 4.6):**
+- Input: $3.00 per million tokens
+- Output: $15.00 per million tokens
+
+Credits do not carry over to the following month. They are also **not activated automatically** — Anthropic sends an email approximately two weeks before June 15 with activation instructions. If you do not claim your credits before the deadline, limits may apply immediately on June 15. Watch your inbox.
+
+#### What is and is not affected
+
+| Affected (programmatic bucket) | Not affected (interactive bucket) |
+|-------------------------------|----------------------------------|
+| `claude -p` / `claude --print` | Claude Code terminal (interactive sessions) |
+| Agent SDK — Python and TypeScript | Claude Code IDE integrations (VS Code, JetBrains, Xcode) |
+| GitHub Actions using `anthropics/claude-code-action` | Claude.ai web chat |
+| Scheduled automation and cron-triggered jobs | Claude desktop app |
+| Background agent loops | Claude mobile apps |
+| OpenClaw, Hermes, Conductor, custom harnesses | Any workflow with a human reading responses in real time |
+| CI/CD pipelines invoking Claude | `/loop` scheduled tasks triggered interactively |
+| Recursive multi-agent workflows | Routines triggered by GitHub events (counted as interactive) |
+
+> **Note:** Routines (cloud-based scheduled tasks via `claude.ai/code/routines`) run on Anthropic's infrastructure using Anthropic's agent system. Their billing classification was not explicitly confirmed in the May 13 announcement — verify with Anthropic support if your Routines usage is substantial.
+
+#### The ANTHROPIC_API_KEY billing trap
+
+> **Warning:** If `ANTHROPIC_API_KEY` is set in your shell environment or a `.env` file, Claude Code bypasses the subscription entirely and bills every request at API token rates — including your interactive sessions. This is independent of the June 15 change but compounds it. Users have received API bills of $400 or more on top of an active $200 Max plan because of this.
+>
+> **Diagnose:**
+> ```bash
+> echo $ANTHROPIC_API_KEY   # Any output means you are on API billing, not subscription
+> claude /cost              # Shows real-time spend in the current session
+> ```
+>
+> **Fix:** Unset the variable in your shell profile (`~/.zshrc`, `~/.bashrc`) if you want to route usage through your subscription. Only set `ANTHROPIC_API_KEY` when you explicitly intend to use direct API billing.
+
+#### Audit your usage before June 15
+
+Run this audit now to understand where you stand before the change takes effect.
+
+**Step 1 — Check session spend:**
+```bash
+claude /cost    # or /usage since v2.1.118
+```
+
+**Step 2 — Review cross-session history with ccusage:**
+```bash
+npx ccusage     # Breakdown by model and session type
+```
+
+Look for sessions initiated by scripts, CI jobs, or automation — these are your programmatic sessions. Estimate total monthly token spend for those sessions and compare against your plan's credit amount.
+
+**Step 3 — Identify programmatic workflows in your setup:**
+```bash
+# Find all places you invoke claude -p or use headless flags
+grep -r "claude -p\|claude --print\|claude --headless" ~/.claude/ .github/ scripts/ Makefile
+```
+
+**Step 4 — Check your `.env` files for API key presence:**
+```bash
+grep -r "ANTHROPIC_API_KEY" ~/.zshrc ~/.bashrc ~/.env .env* 2>/dev/null
+```
+
+#### Decision framework
+
+Once you have your audit results, apply this framework:
+
+**If your programmatic usage stays within the monthly credit:** No action needed. Continue as-is and monitor with `/cost` or `ccusage`.
+
+**If your programmatic usage exceeds or will exceed the monthly credit**, choose one or more of the following paths:
+
+**Path A — Reduce scope or frequency:**
+- Increase the interval on scheduled jobs
+- Gate CI/CD Claude invocations to run only on PRs that touch specific paths
+- Replace multi-step agentic loops with single focused invocations
+
+**Path B — Migrate to direct API billing with a budget cap:**
+```yaml
+# .github/workflows/claude-review.yml — with spend awareness
+- name: Run Claude analysis
+  env:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  run: |
+    # Set ANTHROPIC_API_KEY explicitly to use API billing
+    # Add a monthly budget alert in the Anthropic Console
+    claude -p "Review changes for security issues" ...
+```
+Direct API billing gives you predictable per-call costs and Console budget alerts. For low-volume CI/CD (occasional PR reviews), per-token API cost is typically lower than dedicating monthly credit to it.
+
+**Path C — Diversify orchestrators:**
+
+| Use case | Alternative | Rationale |
+|----------|-------------|-----------|
+| Unattended background work | OpenAI Codex | Designed for async, unattended execution |
+| Large-document retrieval and search | Gemini 2.0/2.5 | 2M context at lower per-token cost |
+| Synthesis and summarization at volume | Local models (Ollama + Llama/Qwen) | Zero marginal cost if hardware is available |
+| Writing, planning, interactive review | Claude (keep) | Still the strongest model for these tasks |
+
+These are not mutually exclusive. A common pattern: keep Claude for interactive work and writing-quality tasks, route high-volume automated pipelines to whichever provider offers the best cost-performance for that specific workload. See [Section 11 — AI Ecosystem](#11-ai-ecosystem-complementary-tools) for a full tool matrix.
+
+#### Strategic context
+
+The economic driver behind this change is straightforward. Before June 15, a heavy power user running continuous agent automation could extract roughly $2,000 per month in API-equivalent compute for a $200 subscription. Extreme cases reached approximately $5,000 per month. At that ratio, Anthropic was losing around $300 per month on each extreme profile. The massive adoption of agent automation in late 2025 made this unsustainable.
+
+The timeline matters: on May 6, Anthropic doubled interactive rate limits (announced alongside the SpaceX partnership). On May 13, the programmatic billing split was announced. On June 15, it takes effect. On July 13, the temporary +50% interactive bonus ends. These are all parts of the same capacity rebalancing, not isolated changes.
+
+For the majority of Claude Code users who use it interactively in the terminal, the impact is zero. For teams that have built significant automation on top of `claude -p` or the Agent SDK, this is a material change worth planning for before June 15.
 
 ---
 
@@ -24213,6 +24342,7 @@ Use this symptom-based guide for rapid issue identification and resolution:
 | MCP tool not found | Server not running | Check `mcp.json` config |
 | Agent not found | File naming | Check `.claude/agents/` |
 | Command not found | Path error | Check `.claude/commands/` |
+| Unexpected API charges despite active subscription | `ANTHROPIC_API_KEY` set in shell or `.env` bypasses subscription | Run `echo $ANTHROPIC_API_KEY` — if it returns a value, Claude Code is billing at API rates. Unset it from your shell profile to restore subscription billing. Run `claude /cost` to check spend in the current session. |
 
 ### Context Recovery
 
@@ -24239,6 +24369,13 @@ Use this symptom-based guide for rapid issue identification and resolution:
 - Check hook exit code (2 = blocked)
 - Review hook error message
 - Adjust hook rules if needed
+
+**"Unexpected API charges despite subscription"**
+- Run `echo $ANTHROPIC_API_KEY` in your shell — any output means Claude Code is routing via API billing, not your subscription
+- Remove the key from `~/.zshrc`, `~/.bashrc`, or `.env` files if subscription billing is intended
+- Use `claude /cost` (or `/usage` since v2.1.118) to check real-time spend in the current session
+- Use `npx ccusage` to review cross-session historical spend
+- See [§9.13 — The Interactive/Programmatic Billing Split](#the-interactiveprogrammatic-billing-split-effective-june-15-2026) for the full billing model and June 15 changes
 
 ### MCP Server Issues
 

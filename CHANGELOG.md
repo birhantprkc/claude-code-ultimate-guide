@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Anthropic programmatic billing split documented** (`guide/ultimate-guide.md` §9.13, §9.3, §2.2, §10.4; `machine-readable/reference.yaml`): new section covering the June 15, 2026 billing change that separates interactive and programmatic usage into distinct buckets. Documents affected tools (`claude -p`, Agent SDK, GitHub Actions, third-party harnesses), credit amounts per plan, the `ANTHROPIC_API_KEY` billing trap, pre-June-15 audit steps, and decision framework for teams running automated workflows. Cross-references added in §2.2 (Cost Awareness), §9.3 (CI/CD), and §10.4 (Troubleshooting). 13 new entries in `reference.yaml`.
+
+- **Agent Skills open standard — platform count corrected to 35+** (`machine-readable/reference.yaml`, `guide/ultimate-guide.md:7602`): updated from stale "26+" / "30+" counts based on official agentskills.io client showcase verified 2026-05-14 (35 named tools: added OpenHands, Amp, Letta, Junie, Firebender, OpenCode, Mux, Kiro, Snowflake Cortex Code, Ona, Laravel Boost, Emdash, TRAE, fast-agent, nanobot, VT Code, Qodo, Agentman, Mistral Vibe, Workshop, Command Code, pi, Piebald, Google AI Edge Gallery)
+
+- **Claude Code releases updated to v2.1.141** (`machine-readable/claude-code-releases.yaml`, `guide/core/claude-code-releases.md`):
+  - v2.1.141: hook `terminalSequence` output field, `claude agents --cwd`, Rewind "Summarize up to here", `CLAUDE_CODE_PLUGIN_PREFER_HTTPS`, `ANTHROPIC_WORKSPACE_ID`, 50+ bug fixes
+  - v2.1.140: `Agent` tool `subagent_type` case/separator-insensitive matching, plugin folder conflict warnings, 13 bug fixes
+
 ### Security
 
 - **Threat database updated to v2.17.0** (2026-05-11): +10 new sources, +6 new CVEs, +2 new attack techniques, +1 defensive resource

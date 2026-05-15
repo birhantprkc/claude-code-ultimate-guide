@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.139"
-updated: "2026-05-12"
+latest: "2.1.141"
+updated: "2026-05-14"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,22 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.141"
+    date: "2026-05-14"
+    highlights:
+      - "⭐ Hook `terminalSequence` output field — emit desktop notifications, window titles, and bells from hooks without a controlling terminal"
+      - "⭐ `claude agents --cwd <path>` scopes session list to a directory; agents with lingering background shells now move to Completed"
+      - "Rewind 'Summarize up to here' — compress earlier context; `/bg` preserves permission mode; spinner warms amber after 10s"
+      - "50+ bug fixes: Bedrock `awsCredentialExport` cross-account, MCP 403 'needs auth' hint, Remote Control token rotation race, plugin MCP unset config clarity"
+
+  - version: "2.1.140"
+    date: "2026-05-13"
+    highlights:
+      - "Agent tool `subagent_type` matching now case- and separator-insensitive (e.g. `\"Code Reviewer\"` resolves to `code-reviewer`)"
+      - "Plugins warn when a default component folder is silently ignored due to `plugin.json` key conflict (shown in /doctor, plugin list, /plugin)"
+      - "Fixed: `/goal` hang with `disableAllHooks`/`allowManagedHooksOnly`, symlinked settings hot-reload regression, `claude --bg` connection drop"
+      - "Fixed: Windows event-loop stall on missing `gh` executable, `Read` offset validation with whitespace-padded strings"
 
   - version: "2.1.139"
     date: "2026-05-12"
