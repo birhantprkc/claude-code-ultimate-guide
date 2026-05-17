@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.141"
-updated: "2026-05-14"
+latest: "2.1.143"
+updated: "2026-05-16"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,22 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.143"
+    date: "2026-05-16"
+    highlights:
+      - "⭐ Plugin dependency enforcement: `claude plugin disable` refuses when another enabled plugin depends on the target (with copy-pasteable disable-chain hint); `claude plugin enable` force-enables transitive dependencies"
+      - "⭐ Projected context cost (per-turn and per-invocation token estimates) added to the `/plugin` marketplace browse pane"
+      - "`worktree.bgIsolation: \"none\"` setting — lets background sessions edit the working copy directly without `EnterWorktree` (for repos where worktrees are impractical)"
+      - "Bug fixes: stop hook block loop (warns after 8 blocks via `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`), Esc/Ctrl+C cancels pending `/loop` wakeup, background sessions preserve model+effort after idle wake, PowerShell tool passes `-ExecutionPolicy Bypass` by default"
+
+  - version: "2.1.142"
+    date: "2026-05-15"
+    highlights:
+      - "⭐ Fast mode now uses Opus 4.7 by default (was Opus 4.6) — set `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE=1` to pin to 4.6"
+      - "⭐ New `claude agents` flags for dispatching background sessions: `--add-dir`, `--settings`, `--mcp-config`, `--plugin-dir`, `--permission-mode`, `--model`, `--effort`, `--dangerously-skip-permissions`"
+      - "Plugins with a root-level `SKILL.md` and no `skills/` subdirectory are now surfaced as a skill; `/plugin` details pane shows LSP servers a plugin provides"
+      - "Bug fixes: `MCP_TOOL_TIMEOUT` now raises per-request fetch timeout for remote HTTP/SSE servers (was capped at 60s), background sessions recognize pre-existing git worktrees, daemon exits cleanly after binary upgrade (e.g. `brew upgrade`)"
 
   - version: "2.1.141"
     date: "2026-05-14"
