@@ -142,6 +142,28 @@ When RTK is sufficient:
 - Successful runs produce noise you definitively do not need
 - Simplicity and zero infrastructure is preferred
 
+### context-mode
+
+context-mode is an MCP server that operates at the boundary between tools and context, intercepting tool call outputs before they reach the conversation window and applying compression or selective retrieval. It also implements a session tracking layer using SQLite with FTS5 full-text search, enabling semantic retrieval of earlier session content after `/compact` discards raw history.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: mksglu/context-mode](https://github.com/mksglu/context-mode) |
+| **Stars** | ~14,149 (May 2026) |
+| **License** | ELv2 (commercial SaaS planned) |
+| **Platforms** | Claude Code plugin, Gemini CLI, Copilot, Cursor, Kiro, Zed, and 6 others (12 total) |
+| **Claims** | 98% MCP output compression, 65–75% response compression |
+
+**How the MCP output sandbox works**: Instead of routing raw tool call output directly into the conversation, context-mode intercepts the result, applies compression, and injects a summary with a retrieval handle. The full output is accessible on demand if the model requests it, similar in spirit to Headroom's lossless architecture but operating specifically on MCP tool boundaries.
+
+**Session memory after `/compact`**: context-mode uses SQLite + FTS5 to index session history. When `/compact` runs and discards raw conversation history, the SQLite index persists. Subsequent retrieval queries use BM25 ranking to surface relevant earlier context without reloading the full transcript.
+
+**"Think in Code" pattern**: context-mode v1.0.64 documented a pattern where, instead of reading files to answer an exploratory question, the model writes and executes a script that queries or counts, then reads only the result. This is covered in depth as a named technique in the [context engineering guide](./context-engineering.md).
+
+**When to choose context-mode**: If you run Claude Code alongside other platforms (Cursor, Gemini CLI) and want a single context management layer that works across all of them. Also useful when MCP tool outputs are large and structured, and you need post-compact session retrieval beyond what `/compact` alone provides.
+
+**Comparison with RTK and Headroom**: RTK operates at the shell command level (CLI output), Headroom at the structured data/API response level. context-mode operates specifically at the MCP tool boundary and adds session persistence. These tools are complementary.
+
 ---
 
 ## 4. Prompt Compression
@@ -285,21 +307,80 @@ For multi-session and multi-agent workflows, persistent memory systems store inf
 
 See [Third-Party Tools: ICM](./third-party-tools.md) and the memory section in the [ultimate guide](.#memory-hierarchy) for installation and usage details.
 
+**mem0** is a portable memory layer with standardized interfaces that works across multiple LLM providers. Unlike ICM, which is optimized for Claude Code specifically, mem0 is provider-agnostic: the same memory API works whether you are calling Claude, GPT-4, or Gemini.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: mem0ai/mem0](https://github.com/mem0ai/mem0) |
+| **Stars** | ~55,228 (May 2026) |
+
+Key capabilities: deduplication (avoids storing redundant facts), decay-based importance weighting (recent and frequently accessed memories have higher retrieval priority), and multi-provider support via a unified API. Token overhead per turn is approximately 10–15%, which is modest but non-zero.
+
+**ICM vs mem0 decision guide**:
+
+| Factor | Choose ICM | Choose mem0 |
+|--------|-----------|------------|
+| Primary tool | Claude Code | Multi-provider (Claude + others) |
+| Deployment | Local-first | Cloud-portable |
+| Integration | MCP-native | Library API |
+| Stars / maturity | Smaller, CC-focused | ~55K stars, broad ecosystem |
+
+The architectural distinction: ICM's decay mechanism is tuned for Claude Code session patterns (short-term recency, long-term architectural decisions). mem0's decay and deduplication are designed to generalize across provider and use-case types. If you are Claude Code-only, ICM's tighter integration is an advantage. If Claude Code is one of several AI tools in your workflow, mem0's provider independence pays off.
+
 **The RAG-vs-Memory distinction**: RAG is the model's access to external world knowledge (documentation, codebase, web). Memory is its access to user-specific and session-specific knowledge (preferences, past decisions, conversation continuity). Both are retrieval systems, but they serve different parts of the information architecture. A well-designed agent uses both.
 
 ---
 
 ## 8. KV Cache Infrastructure
 
-This section applies to teams deploying or self-hosting LLMs. If you are using Claude via Anthropic's API, Anthropic manages KV cache infrastructure on your behalf — this section covers what that means and the equivalent for other deployment contexts.
+This section has two parts. The first covers Anthropic's prompt caching mechanics as they apply to Claude Code, including how Claude Code structures requests to maximize hit rates. The second covers self-hosted inference infrastructure for teams deploying their own LLMs.
 
 ### What is the KV Cache?
 
-During the prefill phase (processing the input), the transformer computes Key-Value pairs for every token in the context. These pairs are stored in GPU memory. For subsequent requests that share a prefix (e.g., the same system prompt), these values can be reused rather than recomputed. This is KV cache reuse.
+During the prefill phase (processing the input), the transformer computes Key-Value pairs for every token in the context. These pairs are stored in GPU VRAM, not as raw text or token hashes. For a 100K-token prefix on Opus, the KV data occupies approximately 500MB–1GB of VRAM.
 
-Without KV cache reuse, every request processes the full context from scratch — wasteful for long, stable system prompts. With effective caching, only the unique portion of each request (the user message, new tool results) requires fresh computation.
+For subsequent requests that share a prefix (e.g., the same system prompt), these stored KV values can be reused rather than recomputed. This is KV cache reuse. The autoregressive nature of transformers imposes one strict constraint: only prefixes can be cached. If token N changes, the KV entries for tokens N+1 onward must be recomputed. A modification anywhere in the prefix invalidates everything downstream.
 
-Anthropic's prompt caching reduces both latency and cost: cached tokens are billed at a lower rate and the model returns the first token faster. Cache hits require the shared prefix to be long enough (typically 1,024+ tokens) and recent enough (cache expires after ~5 minutes without access, or longer for explicit cache control).
+Without KV cache reuse, every request processes the full context from scratch. With effective caching, only the unique portion of each request (the user message, new tool results) requires fresh computation. Anthropic's prompt caching reduces both latency and cost: cached tokens on Opus are billed at approximately $0.50/M versus $5/M for uncached input tokens. Cache hits require the shared prefix to be long enough (typically 1,024+ tokens) and recent enough (cache expires after approximately 5 minutes without access).
+
+### How Claude Code Uses Prompt Caching
+
+Claude Code structures every request to maximize cache hit rate. The request order matters because of the prefix constraint: items that change most often must appear last.
+
+**Request structure (most stable to least stable)**:
+
+1. **System prompt** — Identical across all Claude Code users on the same version. Shared cache: all users on the same version benefit from the same cached KV entries when Anthropic serves the system prompt from shared GPU memory.
+2. **Tool definitions** — Static per session. Locked at session start. Adding or removing tools mid-session invalidates the entire conversation cache, which is why Claude Code locks the tool list when a session begins.
+3. **Project config / CLAUDE.md** — Injected as message content (via `<system-reminder>` blocks in messages), not in the system prompt.
+4. **Conversation history** — The sliding breakpoint: only new turns require fresh computation.
+
+**Why CLAUDE.md is not in the system prompt**: If CLAUDE.md content were injected into the system prompt, each user's prefix would be unique (different projects, different configs), and the shared caching benefit of the ~30K-token system prompt would disappear. By keeping the system prompt identical for all users and injecting CLAUDE.md as message content, Anthropic can amortize the system prompt computation cost across every concurrent Claude Code session. CLAUDE.md still gets cached once it appears in the conversation history, but the system prompt itself stays universally shared.
+
+**Production hit rates**: In real Claude Code sessions, prompt caching achieves approximately 96% hit rate. The simple reason is that the system prompt, tool definitions, CLAUDE.md content, and prior conversation turns all hit the cache; only the new user turn and the model's response are fresh computation.
+
+### Cache Anti-Patterns
+
+**Timestamps in the system prompt**: Any frequently-changing value in the system prompt prefix breaks caching by making every user's prefix unique. A Hacker News user reported recovering over 20 percentage points of cache hit rate by moving a timestamp field from the system prompt prefix into a message. The fix: move dynamic values (current date, git branch, file modification times) into message content, not the system prompt.
+
+**Adding or removing tools mid-session**: Because tool definitions sit between the system prompt and conversation history in the request prefix, any change to the tool list invalidates the cache for the entire conversation. Claude Code avoids this by locking tool definitions at session start.
+
+### Plan Mode: A Cache-Stable Design Pattern
+
+Plan Mode restricts write access during planning phases. A naive implementation would be to remove write tools from the tool list while in Plan Mode. The problem: removing tools from the list changes the prefix, invalidating the entire session cache.
+
+Claude Code's actual implementation: rather than removing tools, two new tools are added (`EnterPlanMode` and `ExitPlanMode`). The full tool list remains constant across mode switches. Mode behavior is conveyed through instructions in messages, not through changes to the tool definitions. The cache prefix stays identical whether Plan Mode is on or off.
+
+This is a concrete example of a broader design principle: prefer instruction-level mode switching over structural changes to the request prefix.
+
+### Compaction vs `/clear` for Cache Continuity
+
+Compaction (`/compact`) preserves the cache. The compaction request reuses the same system prompt and tool definitions prefix, so cached KV entries from earlier in the session remain valid after compaction runs. Only the conversation history portion is replaced with the summary.
+
+`/clear` followed by more than approximately 5 minutes of inactivity can result in a full cold start. The TTL for cached entries expires during the idle time, so the next request finds no cached KV entries for the system prompt or tool definitions. This is one reason Claude Code defaults to compaction rather than hard resets for long sessions: compaction preserves continuity without triggering cache expiration.
+
+### Self-Hosted KV Cache Infrastructure
+
+The following tools apply to teams deploying their own LLMs rather than using Anthropic's managed API.
 
 ### vLLM (PagedAttention)
 

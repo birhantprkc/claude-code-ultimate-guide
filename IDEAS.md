@@ -44,6 +44,26 @@ Audit of [gstack](https://github.com/garrytan/gstack) (Garry Tan's Claude Code s
 
 ---
 
+### Agent Skills — Documentation Gaps (from agentskills.io official docs, 2026-05-14)
+
+Six factual items confirmed missing from the guide's skills chapter after cross-referencing with the official agentskills.io specification and client implementation guide.
+
+**[HIGH] Cross-client directory convention `.agents/skills/`** — The guide only documents `.claude/skills/` (Claude Code-specific). The open standard defines `.agents/skills/` (project) and `~/.agents/skills/` (user) as the cross-client paths. Skills placed there work across all 35+ compatible clients. This distinction directly affects portability claims. Add to the "Where Skills Live" section.
+
+**[HIGH] 4-level skill loading priority** — The guide doesn't document the full hierarchy: Enterprise → Personal → Project → Plugins. Currently the guide implies only Personal vs Project. Enterprise (managed settings, highest priority) and Plugins (lowest) are missing. Add to the priority hierarchy section.
+
+**[MEDIUM] Progressive disclosure token costs** — The spec gives concrete numbers: ~50-100 tokens/skill for catalog (name + description only), <5000 tokens recommended for full SKILL.md body, on-demand for resources. The guide explains the concept but never gives token figures. Useful for readers deciding how many skills to install.
+
+**[MEDIUM] 500-line SKILL.md body limit** — The spec recommends keeping SKILL.md under 500 lines. Not documented anywhere in the guide. Add as a practical rule of thumb in the structure section.
+
+**[MEDIUM] `name` must match parent directory name** — The spec requires this as a structural constraint. The guide documents character/format rules for `name` but omits this requirement. A mismatch causes `skills-ref validate` to fail.
+
+**[LOW] Eval storage convention** — The spec defines a standard file layout: `evals/evals.json` inside the skill folder + `my-skill-workspace/iteration-N/with_skill|without_skill/` for eval runs. Not documented in the guide's evaluation section. Matters for cross-tool compatibility with the `skill-creator` meta-skill.
+
+**Source**: `claudedocs/anthropic-cert/01-agent-skills/agentskills-io-docs.md` (sections 2, 6, 8)
+
+---
+
 ## Medium Priority
 
 ### CI/CD Workflows Gallery ✅

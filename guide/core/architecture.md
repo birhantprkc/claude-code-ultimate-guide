@@ -187,6 +187,47 @@ The model itself decides when to call tools, which tools to call, and when it's 
 3. **Flexibility**: No rigid pipeline constraining what Claude can do
 4. **Debuggability**: Easy to understand what happened and why
 
+### Agentic Loop API Vocabulary
+
+The master loop diagram above shows the flow conceptually, but the Anthropic API exposes it through concrete `stop_reason` values. Every API response includes a `stop_reason` field — it's how Claude signals what should happen next. Understanding these three values is essential for building custom agents on top of the Anthropic SDK.
+
+| `stop_reason` | Meaning | Loop action |
+|---------------|---------|-------------|
+| `tool_use` | Claude wants to call one or more tools | Execute tools, feed results back, continue loop |
+| `end_turn` | Claude decided it has finished | Exit loop, return the text response |
+| `max_tokens` | Context limit reached before finishing | Rethink context strategy, likely need summarization |
+
+The pseudocode becomes precise with these names:
+
+```python
+messages = [{"role": "user", "content": user_prompt}]
+
+while True:
+    response = client.messages.create(model=model, messages=messages, tools=tools)
+
+    if response.stop_reason == "end_turn":
+        return response.content[0].text  # done
+
+    if response.stop_reason == "tool_use":
+        # Process every tool_use block in the response
+        tool_results = []
+        for block in response.content:
+            if block.type == "tool_use":
+                result = execute_tool(block.name, block.input)
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": result
+                })
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "user", "content": tool_results})
+        # loop continues
+```
+
+The `tool_use` block inside `response.content` has three fields you act on: `id` (to match results back), `name` (which function to call), and `input` (a dict of arguments). The result you send back must reference `tool_use_id` so the model can correlate call and response.
+
+**`fork_session`** is a higher-level concept built on this loop: it creates an independent branch of the current conversation, sharing the same message history up to the fork point. Both branches can explore different approaches or configurations simultaneously, like `git branch` but for agent sessions. Each fork runs its own agentic loop independently — useful for comparing responses under different tool configurations or prompt variants without re-running the full conversation from scratch.
+
 ### Native Capabilities Audit
 
 Use this checklist to verify you understand Claude Code's full surface area. Each capability is documented in detail elsewhere in this guide.
@@ -580,6 +621,59 @@ Claude Code offers specialized sub-agent types via the `subagent_type` parameter
 | Parallel exploration | Multiple searches simultaneously |
 | Risky exploration | Errors don't pollute main context |
 | Specialized analysis | Different "mindset" for different tasks |
+
+### Hub-and-Spoke Orchestration
+
+The dominant multi-agent pattern in production is **hub-and-spoke**: one coordinator agent sits at the center, manages N worker sub-agents, and is the only entity that holds the full picture.
+
+```
+                    ┌─────────────────────┐
+                    │    COORDINATOR      │
+                    │  (Hub / Orchestrator)│
+                    │                     │
+                    │  • Decomposes goal  │
+                    │  • Passes context   │
+                    │  • Aggregates results│
+                    │  • Resolves conflicts│
+                    └──┬──────┬──────┬───┘
+                       │      │      │
+            ┌──────────┘      │      └──────────┐
+            │                 │                 │
+     ┌──────▼──────┐  ┌───────▼─────┐  ┌───────▼─────┐
+     │  WORKER A   │  │  WORKER B   │  │  WORKER C   │
+     │             │  │             │  │             │
+     │  Specific   │  │  Specific   │  │  Specific   │
+     │  task only  │  │  task only  │  │  task only  │
+     └─────────────┘  └─────────────┘  └─────────────┘
+           │                 │                 │
+           └────────────────►│◄────────────────┘
+                     (results flow back to coordinator only)
+```
+
+**The critical rule: context is never inherited automatically.** When the coordinator spawns Worker A to analyze file X, Worker B gets no knowledge of that analysis unless the coordinator explicitly passes it in the task description. Workers are isolated by design — they receive only the task string, nothing else.
+
+This is the most common mistake in multi-agent design: assuming sub-agents share context. They don't.
+
+**Explicit context passing pattern:**
+
+```python
+# Wrong — Worker B won't know about Worker A's findings
+task_a = Task("Analyze auth.py and find the session token logic")
+task_b = Task("Find all callers of the session token logic")  # doesn't know where it is
+
+# Correct — coordinator passes findings explicitly
+result_a = run_task("Analyze auth.py and return the exact function name(s) handling session tokens")
+task_b = Task(f"Find all callers of {result_a} across the codebase")  # explicit context
+```
+
+**Coordinator responsibilities:**
+
+1. **Decompose**: Break the goal into independent subtasks with clear boundaries
+2. **Pass context explicitly**: Each worker task description must be self-contained
+3. **Aggregate**: Collect text results from all workers, combine into coherent output
+4. **Decide cross-cutting questions**: Only the coordinator can make decisions that span workers
+
+Workers should never need to communicate with each other. If they do, that's a sign the decomposition is wrong and the task belongs in the coordinator.
 
 ---
 

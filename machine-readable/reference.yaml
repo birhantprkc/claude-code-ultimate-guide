@@ -412,6 +412,18 @@ deep_dive:
   third_party_codesight_purpose: "Zero-dep CLI: AST-based codebase context map (routes, schema, hot files) + wiki articles + 11 MCP tools. 7-12x token savings on base scan."
   third_party_codesight_when_useful: "TypeScript projects with recognized framework (Express/Hono/tRPC/Fastify/NestJS) and ORM. Useless on Rust. Use --wiki + MCP on large monorepos (>1500 files)."
   third_party_codesight_limitations: "AST precision TS-only; Next.js App Router = 0 routes; CF Workers raw HTTP = 0 routes; Rust = near-empty output; --init overwrites CLAUDE.md"
+  # Context Compression (Added 2026-05-17)
+  third_party_lean_ctx_upstream: "https://github.com/yvgude/lean-ctx"
+  third_party_lean_ctx_purpose: "Local-first context compression for AI agents — Rust CLI, strips noise from LLM input (AST signatures, diff-loading, session cache, shell compression)"
+  third_party_lean_ctx_stars: "1366"
+  third_party_lean_ctx_status: "third_party | breaking_changes_frequent | security_fixes_recent | not_yet_integrated"
+  third_party_lean_ctx_note: "Most direct RTK competitor. 60-95% token reduction claimed. Watch for stabilization before adding a dedicated guide section."
+  # MCP Token Optimization (Added 2026-05-17)
+  third_party_mcp2cli_upstream: "https://github.com/knowsuchagency/mcp2cli"
+  third_party_mcp2cli_purpose: "Universal CLI bridge for MCP/OpenAPI/GraphQL — lazy-loads tool schemas so LLM receives only --list (16 tok/tool) + --help (120 tok) instead of full schemas injected upfront each turn"
+  third_party_mcp2cli_stars: "1900"
+  third_party_mcp2cli_status: "third_party | active | dev_single_tenant | cli_first_pattern | Show_HN_Best_March_2026"
+  third_party_mcp2cli_note: "96-99% schema-token reduction benchmarked independently (Firecrawl, Scalekit, CircleCI). Born from 2026 MCP backlash. Caution: 4+ forks with same name — knowsuchagency is the reference. Not for enterprise multi-tenant OAuth/audit."
   # Configuration Management & Backup (Added 2026-02-02)
   config_management_guide: "guide/ultimate-guide.md:4217"  # Section 3.1 Memory Files
   config_hierarchy: "guide/ultimate-guide.md:4336"  # Global → Project → Local precedence

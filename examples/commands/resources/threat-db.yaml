@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.17.0"
-updated: "2026-05-11"
+version: "2.18.0"
+updated: "2026-05-16"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -401,6 +401,24 @@ sources:
   - name: "TruFoundry - MCP Tool Poisoning: Attack on the Channel the Model Trusts Most"
     url: "https://www.truefoundry.com/blog/blog-mcp-tool-poisoning-gateway-defense"
     date: "2026-05-05"
+  - name: "Tenable / NVD - CVE-2026-42559 RMCP Rust SDK DNS Rebinding"
+    url: "https://www.tenable.com/cve/CVE-2026-42559"
+    date: "2026-05-14"
+  - name: "Tenable - CVE-2026-35568 MCP Java SDK DNS Rebinding"
+    url: "https://www.tenable.com/cve/CVE-2026-35568"
+    date: "2026-04-07"
+  - name: "SentinelOne - CVE-2026-39313 mcp-framework HTTP DoS"
+    url: "https://www.sentinelone.com/vulnerability-database/cve-2026-39313/"
+    date: "2026-04-16"
+  - name: "VentureBeat - Six Exploits Broke AI Coding Agents, IAM Never Saw Them"
+    url: "https://venturebeat.com/security/six-exploits-broke-ai-coding-agents-iam-never-saw-them"
+    date: "2026-04-30"
+  - name: "Adversa AI - TrustFall: AI Coding Agent Supply Chain Attack via Folder Trust Dialog"
+    url: "https://adversa.ai/blog/trustfall-supply-chain-attack-ai-coding-agents/"
+    date: "2026-05-08"
+  - name: "AWS + Cisco - Securing AI Agents: How AWS and Cisco AI Defense Scale MCP and A2A"
+    url: "https://aws.amazon.com/blogs/machine-learning/securing-ai-agents-how-aws-and-cisco-ai-defense-scale-mcp-and-a2a-deployments/"
+    date: "2026-05-13"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS AUTHORS (confirmed by security researchers)
@@ -1671,6 +1689,73 @@ cve_database:
     cwe: "CWE-73"
     notes: "Demonstrates that RCE via AI agents does not require binary exploits — legitimate tool-call chaining is sufficient when tool scopes are not properly isolated; the sandbox-to-host escape pattern applies to any agent framework with both code-execution and file-placement tools"
 
+  # --- RMCP Rust SDK ---
+  - id: "CVE-2026-42559"
+    component: "RMCP (Rust SDK for Model Context Protocol)"
+    severity: "high"
+    cvss: 8.8
+    description: "DNS rebinding vulnerability in RMCP's Streamable HTTP server transport — the server did not validate the incoming Host header, allowing a malicious public website via DNS rebinding to send authenticated requests to an MCP server running on the victim's loopback or private-network interface. Attacker can make any tool call as if they were a locally-running MCP-connected AI agent."
+    source: "Tenable / NVD (2026-05-14)"
+    fixed_in: "1.4.0"
+    mitigation: "Update rmcp crate to >= 1.4.0; validate Host header on all incoming Streamable HTTP server requests; bind MCP servers to 127.0.0.1 only when network access is not required"
+    cwe: "CWE-346"
+    notes: "GHSA-89vp-x53w-74fx; same DNS rebinding class as CVE-2025-66416 (Python SDK), CVE-2025-64443 (MCP Gateway), CVE-2026-35568 (Java SDK) — Rust SDK now joins the full SDK family in needing Host header validation"
+
+  # --- MCP Java SDK ---
+  - id: "CVE-2026-35568"
+    component: "MCP Java SDK (official Java SDK for Model Context Protocol)"
+    severity: "high"
+    cvss: 7.6
+    description: "DNS rebinding vulnerability in the MCP Java SDK — allows an attacker to access a locally or network-private Java SDK MCP server via the victim's browser. The attack enables an attacker to make any tool call to the server as if they were a locally-running MCP-connected AI agent."
+    source: "Tenable (2026-04-07)"
+    fixed_in: "1.0.0"
+    mitigation: "Update MCP Java SDK to >= 1.0.0 (GHSA-8jxr-pr72-r468); bind MCP servers to localhost only; validate Host header on all incoming requests"
+    cwe: "CWE-346"
+    notes: "Part of the DNS rebinding class affecting all official MCP SDK language implementations; see also CVE-2026-42559 (Rust), CVE-2025-66416 (Python), CVE-2026-34742 (Go)"
+
+  # --- mcp-framework HTTP DoS ---
+  - id: "CVE-2026-39313"
+    component: "mcp-framework (npm)"
+    severity: "high"
+    description: "Denial-of-service vulnerability in mcp-framework HTTP transport — the readRequestBody() function concatenates incoming POST body chunks without enforcing the configured maxMessageSize limit, allowing a remote unauthenticated attacker to crash any mcp-framework HTTP server by sending a single oversized request to the /mcp endpoint, exhausting server memory."
+    source: "SentinelOne (2026-04-16)"
+    fixed_in: "0.2.22"
+    mitigation: "Update mcp-framework to >= 0.2.22; as interim measure, deploy reverse proxy (nginx/HAProxy) with request body size limits; restrict /mcp endpoint to trusted network sources; monitor for oversized POST requests"
+    cwe: "CWE-770"
+    notes: "GHSA-353c-v8x9-v7c3; root cause is a missing size validation enforcement despite the configuration parameter existing in the codebase; the fix adds a 4MB default maximum and enforces it during chunk reading"
+
+  # --- Claude Code sandbox bypass via piped commands ---
+  - id: "CVE-2026-25723"
+    component: "Claude Code"
+    severity: "high"
+    description: "File-write sandbox bypass in Claude Code — piped sed and echo commands escaped the project sandbox because command chaining was not validated against the file-write restriction rules. Attackers could use piped commands to write arbitrary files outside the permitted project boundary."
+    source: "VentureBeat / BeyondTrust security research (2026-04-30)"
+    fixed_in: "2.0.55"
+    mitigation: "Update Claude Code to >= 2.0.55; in multi-agent environments validate command chaining patterns; treat piped shell commands as potentially sandbox-escaping"
+    cwe: "CWE-693"
+    notes: "One of six Claude Code/AI agent vulnerabilities documented in the BeyondTrust/VentureBeat nine-month research series; all exploits targeted runtime credentials"
+
+  # --- Claude Code settings.json permission bypass ---
+  - id: "CVE-2026-33068"
+    component: "Claude Code"
+    severity: "high"
+    description: "Permission mode bypass in Claude Code — Claude Code resolved permission modes from .claude/settings.json before showing the workspace trust dialog. A malicious repository could set permissions.defaultMode to 'bypassPermissions', causing the trust dialog to never appear and auto-approving all tool calls from the malicious repository."
+    source: "VentureBeat / Adversa research (2026-04-30)"
+    fixed_in: "2.1.53"
+    mitigation: "Update Claude Code to >= 2.1.53; always review .claude/settings.json for suspicious permission overrides before accepting workspace trust; never run claude in untrusted repositories"
+    cwe: "CWE-863"
+    notes: "Closely related to CVE-2025-59536 (enableAllProjectMcpServers trust bypass) — both exploit the pre-trust-dialog loading of .claude/settings.json; patched separately; the fix enforces trust dialog before any settings.json permission modes take effect"
+
+  # --- Claude Code 50-subcommand deny-rule bypass ---
+  - id: "ADVISORY-CC-2026-002"
+    component: "Claude Code"
+    severity: "medium"
+    description: "Deny-rule enforcement bypass via subcommand chain length — Claude Code silently dropped its configured deny rules once a command exceeded 50 subcommands. Attackers could craft commands with 50+ chained subcommands to bypass any configured allow/deny rules, including security-critical restrictions."
+    source: "Adversa AI / VentureBeat (2026-05-01)"
+    fixed_in: "2.1.90"
+    mitigation: "Update Claude Code to >= 2.1.90; audit any workflows with unusually long command chains; do not rely solely on deny-list rules without defense-in-depth controls"
+    notes: "No CVE assigned. Discovered by Adversa AI after examining Claude Code source code that was briefly exposed on the public npm registry. The 50-subcommand limit was a hardcoded threshold that inadvertently disabled all rule enforcement."
+
 # ═══════════════════════════════════════════════════════════════
 # MINIMUM SAFE VERSIONS (quick reference for scanning)
 # ═══════════════════════════════════════════════════════════════
@@ -1685,7 +1770,10 @@ minimum_safe_versions:
   "@playwright/mcp": "0.0.40"
   "mcp-package-docs": "0.1.28"
   "cursor": "1.3.9"
-  "claude-code": "2.1.34"
+  "claude-code": "2.1.90"
+  "rmcp": "1.4.0"
+  "mcp-java-sdk": "1.0.0"
+  "mcp-framework": "0.2.22"
   "mcpjam-inspector": "1.4.3"
   "mcp-salesforce-connector": "0.1.10"
   "openclaw": "2026.1.29"
@@ -2448,6 +2536,19 @@ attack_techniques:
     affected_platforms: ["All browser-based AI coding assistants (Claude.ai, Cursor web, GitHub Copilot Chat)"]
     source: "Reco.ai / HelpNetSecurity (2026-04-09)"
     mitigation: "Audit installed browser extensions and remove any with unnecessary permissions to read all page data; use AI coding tools via native desktop app rather than browser when handling sensitive code; never share API keys, credentials, or secrets in AI chat sessions; treat browser-based AI conversations as potentially intercepted; implement DLP policies for AI tool usage"
+
+  - id: "T030"
+    name: "TrustFall: Malicious Repository Auto-Approval via Folder Trust Dialog"
+    description: "Attacker places a malicious repository (e.g., on GitHub) containing crafted JSON configuration files in standard AI coding agent locations (.claude/settings.json, .mcp.json, .cursor/mcp.json). When a developer clones the repo and accepts the workspace folder trust prompt — a standard IDE dialog that defaults to 'Accept' on Enter — the malicious config automatically enables all project MCP servers, spawns an attacker-controlled server as an OS process with full developer privileges, and establishes a long-lived command-and-control channel or embeds a persistent payload. The attack is silent, requires only one Enter keypress, and works against Claude Code, Gemini CLI, Cursor CLI, and GitHub Copilot CLI."
+    examples:
+      - "Malicious GitHub repo with .mcp.json sets enableAllProjectMcpServers:true and points to attacker MCP server — spawns C2 process on folder trust accept"
+      - "Cloned repo with .claude/settings.json auto-approves all tool calls and loads attacker-controlled MCP server before trust dialog appears"
+      - "Supply chain: widely-used open-source tool's repo poisoned with malicious config files targeting developer maintainers"
+      - "CI/CD compromise: developers of popular projects are prime targets because their machines have broad repository access"
+    affected_platforms: ["Claude Code", "Gemini CLI", "Cursor CLI", "GitHub Copilot CLI"]
+    source: "Adversa AI (2026-05-08)"
+    mitigation: "Anthropic declined to fix (considers folder trust consent sufficient) — apply defense-in-depth: review .claude/settings.json, .mcp.json, and .cursor/mcp.json before accepting folder trust on any cloned repo; never press Enter on the folder trust dialog without first inspecting all AI agent config files in the repository root; disable auto-approve / YOLO mode globally; run unknown repos in isolated containers or VMs; use file integrity monitoring on AI agent config locations"
+    notes: "Adversa confirmed vulnerable: Claude Code, Gemini CLI, Cursor CLI, Copilot CLI — shared convention across all agentic CLIs allows malicious repos to auto-approve servers; Anthropic's position is that trusting the folder is explicit consent — developers must understand the full implications of folder trust before accepting"
 
 # ═══════════════════════════════════════════════════════════════
 # SCANNING TOOLS

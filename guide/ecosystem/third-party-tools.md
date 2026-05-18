@@ -1,31 +1,33 @@
 ---
 title: "Third-Party Tools for Claude Code"
-description: "Community tools for token tracking, session management, configuration, security scanning, project context bootstrapping, hook utilities, and alternative UIs"
+description: "Community tools for token tracking, context compression, session management, configuration, security scanning, project context bootstrapping, hook utilities, alternative UIs, and knowledge graph generation"
 tags: [reference, integration, plugin, security]
 ---
 
 # Third-Party Tools for Claude Code
 
-> Community tools for token tracking, session management, configuration, hook utilities, and alternative UIs.
+> Community tools for token tracking, context compression, session management, configuration, hook utilities, and alternative UIs.
 >
-> **Last verified**: April 2026
+> **Last verified**: May 2026
 
 ## Table of Contents
 
 1. [About This Page](#about-this-page)
 2. [Token & Cost Tracking](#token--cost-tracking)
-3. [Session Management](#session-management)
-4. [Configuration Management](#configuration-management)
-5. [Security Scanning](#security-scanning)
-6. [Configuration Quality](#configuration-quality)
-7. [Project Context Bootstrapping](#project-context-bootstrapping)
-8. [Engineering Standards Distribution](#engineering-standards-distribution)
-9. [Hook Utilities](#hook-utilities)
-10. [Alternative UIs](#alternative-uis)
-11. [Multi-Agent Orchestration](#multi-agent-orchestration)
-12. [Plugin Ecosystem](#plugin-ecosystem)
-13. [Known Gaps](#known-gaps)
-14. [Recommendations by Persona](#recommendations-by-persona)
+3. [Context Compression](#context-compression)
+4. [Session Management](#session-management)
+5. [Configuration Management](#configuration-management)
+6. [Security Scanning](#security-scanning)
+7. [Configuration Quality](#configuration-quality)
+8. [Project Context Bootstrapping](#project-context-bootstrapping)
+9. [Engineering Standards Distribution](#engineering-standards-distribution)
+10. [Hook Utilities](#hook-utilities)
+11. [Alternative UIs](#alternative-uis)
+12. [Multi-Agent Orchestration](#multi-agent-orchestration)
+13. [Knowledge Graph](#knowledge-graph)
+14. [Plugin Ecosystem](#plugin-ecosystem)
+15. [Known Gaps](#known-gaps)
+16. [Recommendations by Persona](#recommendations-by-persona)
 
 ---
 
@@ -172,6 +174,235 @@ A CLI proxy that filters command outputs **before** they reach Claude's context.
 **Limitations**: Not suitable for interactive commands or very small outputs (<100 chars).
 
 > **Cross-ref**: Full docs at [ultimate-guide.md Section 9](#command-output-optimization-with-rtk)
+
+---
+
+### Claude Code Usage Monitor
+
+Real-time usage monitor with burn-rate predictions and session-level warnings. The highest-starred dedicated monitoring tool for Claude Code as of May 2026, with approximately 7,955 stars.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: Maciek-roboblog/Claude-Code-Usage-Monitor](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor) |
+| **Install** | `npx ccusage@latest` (CLI) or web UI (see GitHub) |
+| **Stars** | ~7,955 (May 2026) |
+
+**Key features**:
+
+- Tracks token consumption, message counts, and cost over 5-hour session billing windows
+- Shows current burn rate and forecasts when the session limit will be reached
+- Displays warnings before limits are hit, not after
+- Works regardless of billing mode: parses local session files on disk rather than intercepting API traffic, so it covers both API key billing and Claude Max/Pro subscriptions equally
+
+**When to choose over ccusage**: If you primarily want real-time warnings and a burn-rate forecast rather than historical reports and aggregated analytics. Both read the same local session files; the difference is the interface and emphasis.
+
+---
+
+### claude-spend
+
+One-shot spend check for Claude Code sessions. The simplest entry point for occasional cost visibility without setting up a full monitoring dashboard.
+
+| Attribute | Details |
+|-----------|---------|
+| **Install** | `npx claude-spend` |
+
+**Key features**:
+
+- Single command: no configuration required
+- Reads local Claude Code session files (same source as ccusage)
+- Shows per-conversation and per-model token consumption
+
+**When to use**: Ad-hoc cost checks without committing to a persistent monitoring setup. For recurring tracking, ccusage provides more depth.
+
+---
+
+### cc-statistics
+
+Cross-agent statistics dashboard that aggregates cost and token data across multiple AI coding tools in a single view.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: androidZzT/cc-statistics](https://github.com/androidZzT/cc-statistics) |
+| **Stars** | ~87 (May 2026) |
+
+**Key features**:
+
+- Covers Claude Code, Gemini CLI, OpenAI Codex, and Cursor in one dashboard
+- Costs, token counts, and efficiency metrics across agents
+- Useful for teams running multiple AI tools who want a unified view
+
+**When to use**: If your workflow spans more than one AI coding assistant and you want to compare cost and usage across them.
+
+---
+
+### claude-context-optimizer
+
+Claude Code plugin focused on surfacing where context budget is actually going, rather than just reporting total spend.
+
+| Attribute | Details |
+|-----------|---------|
+| **Stars** | ~48 (May 2026) |
+
+**Key features**:
+
+- Context heatmaps: visualizes which files and instructions consume the most tokens
+- Wasted context detection: flags instructions that rarely influence model output
+- Git-aware analysis: cross-references file context consumption against edit frequency to identify high-cost, low-edit files
+- ROI reports and budget alerts
+
+**When to use**: When you have a context efficiency problem (context growing too fast, adherence degrading) and need to identify the specific sources, rather than just the total size.
+
+---
+
+### A note on the Layer 4 billing blind spot
+
+API-level gateways (Helicone, Portkey, Langfuse, Bifrost, Compresr) intercept HTTP calls and measure token usage at the API layer. This works well for applications calling the Anthropic API directly. It does not work for Claude Code Max or Pro subscriptions, because Claude Code connects directly to Anthropic servers using subscription credentials rather than an API key. There is no HTTP layer for a gateway to intercept.
+
+All four tools above (Claude Code Usage Monitor, claude-spend, cc-statistics, claude-context-optimizer) work by parsing local session files that Claude Code writes to disk. This approach is billing-mode-agnostic: it works equally on API key billing and on Max/Pro subscriptions. If you are on a Max subscription and your gateway shows zero Claude Code traffic, that is expected behavior, not a misconfiguration.
+
+---
+
+## Context Compression
+
+Tools that reduce tokens entering LLM context through compression, lazy-loading, or intelligent filtering — complementary to the tracking tools above.
+
+### lean-ctx
+
+A local-first context compression CLI and MCP server written in Rust. Installs once globally and activates in every Claude Code project without per-project configuration.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: yvgude/lean-ctx](https://github.com/yvgude/lean-ctx) |
+| **Install** | `curl -fsSL https://raw.githubusercontent.com/yvgude/lean-ctx/main/skills/lean-ctx/scripts/install.sh \| bash && lean-ctx setup` |
+| **Language** | Rust |
+| **Stars** | ~1 366 |
+| **Version** | v3.6.3 |
+
+**How it works**
+
+lean-ctx registers as a global MCP server (`~/.claude.json`) and installs three hooks in `~/.claude/settings.json` that fire on every tool call:
+
+- `PreToolUse hook redirect` — intercepts native Read calls and routes them to `ctx_read` (AST parsing + file cache)
+- `PreToolUse hook rewrite` — routes Bash calls through `ctx_shell` (pattern-based shell compression)
+- `PostToolUse / SessionEnd hook observe` — feeds the CCP cross-session memory
+
+**The 4 compression dimensions**
+
+- **File reads with AST parsing**: tree-sitter parses TypeScript, Python, Rust, and 15 other languages. `signatures` mode returns only type and function signatures (no bodies). `map` mode returns exports and dependencies. A 2364-line `schema.prisma` compresses to ~200 tokens. Unchanged files are served from cache at ~13 tokens on re-read.
+- **Shell output**: 60+ compression patterns specific to git, cargo, npm, docker, and kubectl. `git log -10 --stat` becomes 10 commit lines plus a single summary.
+- **Cross-session memory (CCP — Context Continuity Protocol)**: stores a ~400-token session summary on exit. The next session loads it rather than cold-reading 50,000+ tokens of prior context.
+- **Codebase graph**: SQLite-backed dependency graph built from tree-sitter imports/exports across 18 languages. `ctx_overview` uses it to score files by import centrality and surface the most connected modules first.
+
+**Measured benchmarks (TypeScript/T3 monorepo, 2455 files)**
+
+| Metric | Value |
+|--------|-------|
+| Overall compression rate | 57.8% |
+| ctx_read savings rate | 86% |
+| ctx_search savings rate | 72% |
+| Tokens saved in one day | 1.3M |
+| schema.prisma 2364L in signatures mode | ~200 tokens (99%) |
+| File re-read (cache hit) | 13 tokens |
+
+Results are lower on Markdown-heavy repos — the AST parser finds less structure to compress in documentation files than in TypeScript or Rust source.
+
+**RTK vs lean-ctx: complementary layers**
+
+Both tools reduce token consumption but operate at different points in the pipeline and do not conflict:
+
+| Layer | Tool | What it compresses |
+|-------|------|--------------------|
+| CLI output (shell hook) | RTK | git, cargo, npm, tsc output text |
+| File reads (MCP redirect) | lean-ctx | File content via AST + cache |
+| Cross-session memory | lean-ctx | Session summaries via CCP |
+
+RTK compresses shell output more aggressively (60-90% savings). lean-ctx's savings come almost entirely from file reads (86% of its total savings on measured sessions). Use both together.
+
+**Monitoring**
+
+```bash
+lean-ctx gain           # dashboard: tokens saved, USD, top commands
+lean-ctx gain --daily   # day-by-day breakdown
+lean-ctx cep            # efficiency score /100 (compression, cache hit rate, consistency)
+lean-ctx dashboard      # web UI at localhost:3333
+```
+
+A global `/lean-ctx-audit` slash command (`~/.claude/commands/lean-ctx-audit.md`) runs a full audit from within any session. See [context-engineering.md §12](../core/context-engineering.md#12-token-compression-tools) for the full tool comparison and setup guide.
+
+**When to adopt lean-ctx**
+
+Highest value on TypeScript, Rust, or Python projects where large files are read repeatedly within a session, sessions fill context before the task completes, or cross-session memory matters. Less impactful on documentation repos where most files are Markdown.
+
+> **Note**: lean-ctx releases frequently. Run `lean-ctx setup` after upgrades to refresh hook and MCP registration. For shell output filtering only, RTK is the simpler starting point.
+
+---
+
+### mcp2cli
+
+A universal CLI bridge that converts any MCP server, OpenAPI spec, or GraphQL endpoint into shell commands — without injecting tool schemas into the LLM context. The key insight: most MCP clients push the full schema of every registered tool into context on every turn, whether the agent needs it or not. mcp2cli replaces that with lazy loading.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: knowsuchagency/mcp2cli](https://github.com/knowsuchagency/mcp2cli) |
+| **Install** | `uvx mcp2cli --help` (no-install) or `uv tool install mcp2cli` |
+| **Language** | Python |
+| **Stars** | ~1 900 |
+| **Status** | Active (Show HN Best of March 2026) |
+
+**How the lazy loading works**:
+
+Instead of injecting full tool schemas (~44 000 tokens for a 43-tool GitHub MCP server), the agent:
+
+1. Calls `mcp2cli --mcp <url> --list` → receives ~16 tokens per tool (name + short description)
+2. Calls `mcp2cli --mcp <url> <tool-name> --help` → receives ~120 tokens (full schema, one tool)
+3. Executes the tool with the right arguments
+
+Full schemas never enter LLM context unless explicitly requested.
+
+**Benchmarks** (independently reproduced by Firecrawl, Scalekit, CircleCI):
+
+- GitHub MCP server (43 tools), simple task: 44 026 tokens (MCP native) vs 1 365 tokens (gh CLI / mcp2cli pattern) — 32× reduction
+- Failure rate on the same tasks: MCP native 28%, CLI pattern 0% (context overflow = missed steps)
+- 120 tools, 25 turns: MCP native injects ~362 000 tokens of schemas before any real work starts
+
+**Key features**:
+
+- **Multi-source**: MCP (HTTP/SSE/stdio), OpenAPI specs, GraphQL in one binary
+- **Auth**: OAuth 2.1 with PKCE for interactive use, client credentials for CI/CD pipelines, cached token refresh
+- **Daemon + connection pooling**: MCP connections take 2-5 seconds cold. The daemon keeps them warm for millisecond-latency reuse.
+- **`--toon` format**: token-efficient output encoding that cuts response tokens 40-60% vs plain JSON
+- **Semantic exit codes**: `validation_error`, `auth_failure`, `tool_error`, `connection_error` — shell scripts can branch without text parsing
+
+```bash
+# No-install test
+uvx mcp2cli --mcp https://mcp.example.com/sse --list
+
+# Execute a tool
+mcp2cli --mcp https://mcp.example.com/sse search --query "test"
+
+# Local stdio server
+mcp2cli --mcp-stdio "npx @modelcontextprotocol/server-filesystem /tmp" --list
+
+# OpenAPI spec
+mcp2cli --spec ./openapi.json --base-url https://api.example.com list-pets
+
+# Reusable config (baked alias)
+mcp2cli bake create petstore --spec URL && mcp2cli @petstore --list
+```
+
+**When to use mcp2cli**:
+
+- You use MCP servers with many tools (10+) and see context fill with schemas before any real work starts
+- You want to debug or test an MCP server from the terminal without standing up a full client
+- Your CI/CD pipeline consumes MCP tools programmatically
+
+**When not to use it**:
+
+- Enterprise multi-tenant contexts requiring per-user OAuth and audit logs — native MCP gateways handle this better
+- Agents using well-known native CLIs (gh, git, kubectl): the model knows their interface from training data, no bridge needed
+- Fewer than ~10 tools per server: the gain is real but not urgent
+
+> **Naming caution**: at least four unrelated projects share the name "mcp2cli" on GitHub (Python, Go, Bun, and others). The reference implementation for this use case is [knowsuchagency/mcp2cli](https://github.com/knowsuchagency/mcp2cli). Verify the author before installing.
 
 ---
 
@@ -1081,6 +1312,119 @@ npm install -g mthds
 
 ---
 
+## Knowledge Graph
+
+### Graphify
+
+A CLI tool that maps a codebase (plus any mix of docs, PDFs, images, and videos) into a queryable knowledge graph. Instead of asking Claude Code to re-read files every session to understand structure, you build the graph once and query it. The payoff: far fewer tokens spent on orientation, and surfaced connections that grep and manual browsing miss.
+
+**GitHub**: [github.com/safishamsi/graphify](https://github.com/safishamsi/graphify)
+**PyPI**: `graphifyy` (note the double-y — the single-y package is a different, unrelated project)
+**License**: MIT | **Language**: Python 3.10+
+
+| Attribute | Details |
+|-----------|---------|
+| **Install** | `uv tool install graphifyy` (recommended) or `pipx install graphifyy` |
+| **Platforms** | Claude Code, Cursor, Copilot CLI, Aider, Codex, Gemini CLI, OpenCode, and 8+ more |
+| **Verified** | May 2026 (v0.8.9) |
+
+**Outputs per run:**
+
+| File | Contents |
+|------|---------|
+| `graphify-out/graph.html` | Interactive visualization with clickable nodes and filtering |
+| `graphify-out/GRAPH_REPORT.md` | Key concepts, surprising connections, suggested questions |
+| `graphify-out/graph.json` | Structured graph data reused on every query |
+
+**Under the hood — cache files in `graphify-out/`:**
+
+Beyond the 3 public files, Graphify keeps a cache layer that powers incremental rebuilds. These hidden files appear after the first run:
+
+| File | Role |
+|------|------|
+| `.graphify_ast.json` | Raw AST from tree-sitter — all code, no API call, often 15-20 MB |
+| `.graphify_detect.json` | Output of `collect_files()` — the full file manifest |
+| `.graphify_chunk_XX.json` | Batches of files sent to the AI API for semantic extraction |
+| `.chunk_manifest_XX.json` | Which files belong to each chunk — used by `--update` to isolate changes |
+| `.graphify_semantic.json` | Semantic embeddings after entity deduplication |
+| `.graphify_uncached.txt` | Files not yet cached in the last run |
+| `cache/` | Content hashes per file for change detection |
+
+On `--update`: Graphify compares current content hashes against the cache, identifies which files changed, re-processes only their chunks via the AI API, then reconstructs `graph.json` from unchanged chunks plus the new ones. Files that haven't changed cost zero API tokens.
+
+**Init in a project:**
+
+```bash
+# 1. Build the graph from project root
+graphify .
+
+# 2. Register with Claude Code — installs the /graphify skill
+graphify install --platform claude
+
+# 3. Commit the output so teammates start with a pre-built map
+git add graphify-out/ && git commit -m "chore: add graphify knowledge graph"
+# Or exclude it entirely: echo "graphify-out/" >> .gitignore
+
+# 4. Subsequent runs: --update uses semantic caching by content hash
+#    Only changed files get re-processed — saves API cost on large repos
+graphify . --update
+```
+
+**Querying the graph:**
+
+```bash
+graphify query "what connects auth to the database?"
+graphify path "UserService" "DatabasePool"
+```
+
+Once registered with Claude Code, the installed skill lets Claude read `graph.json` directly instead of crawling files — so queries happen inside the conversation without re-reading source.
+
+**Key analytical features:**
+
+- **God nodes**: highly-connected architectural hubs — the components that everything else depends on
+- **Surprising connections**: cross-module links ranked by an unexpectedness score
+- **Design rationale extraction**: pulls the WHY from inline comments and docstrings, not just the WHAT
+- **Confidence tagging**: every relationship is tagged `EXTRACTED` (explicit import/call), `INFERRED` (deduced from context), or `AMBIGUOUS` (flagged for review)
+
+**File support**: 31 programming languages, Markdown, RST, YAML, HTML, PDFs. Videos and audio: `pip install graphifyy[video]` (local faster-whisper, no external API call). Office documents: `pip install graphifyy[office]`.
+
+**MCP server mode:**
+
+```bash
+# Exposes: query, shortest_path, god_nodes, neighbor_traversal tools
+graphify mcp
+```
+
+For large codebases (graph.json above ~5 MB), MCP mode is significantly more efficient. Without it, Claude loads `GRAPH_REPORT.md` first for orientation, then pulls targeted sections of `graph.json` as needed. With MCP running, Claude calls `god_nodes`, `query "auth flow"`, or `shortest_path` directly and receives only the relevant subgraph — no full graph load into context. A 22 MB `graph.json` loaded in full costs far more tokens than 4-5 targeted MCP tool calls returning the same answer.
+
+**How Claude uses the installed skill:**
+
+After `graphify install --platform claude`, the skill injects a rule: if `graphify-out/` exists in the current project, treat architecture questions as graph queries rather than file reads. The resolution order in practice:
+
+1. Claude reads `GRAPH_REPORT.md` first — compact (typically 150-200 KB), gives orientation on god nodes and surprising connections
+2. For specific queries, Claude consults targeted sections of `graph.json`
+3. With MCP server running: Claude calls `query`, `shortest_path`, `god_nodes`, or `neighbor_traversal` tools directly — far cheaper at scale
+
+Without Graphify: Claude re-reads source files every session to understand structure, burning tokens on orientation. With Graphify: that cost is paid once at build time, then amortized across all sessions.
+
+**Additional exports**: Wikipedia-style wiki with cross-community wikilinks, Obsidian vault with Canvas layouts, D3 collapsible-tree HTML, Mermaid call-flow diagrams with interactive zoom/pan, Neo4j graph push.
+
+**Privacy**: Code files are processed locally via tree-sitter, no API calls for code analysis. Documents and PDFs are sent to your configured AI model API. For fully local inference: `pip install graphifyy[ollama]`.
+
+**Team workflow**: Committing `graphify-out/` to git gives every teammate a shared map on clone. Graphify ships a git merge driver that prevents conflict markers in `graph.json`, and optional git hooks for automatic rebuilds on commit.
+
+**Pipeline:** `detect() → extract() → build_graph() → cluster() → analyze() → report() → export()` — each stage isolated, no shared state. Adding a language requires registering an extractor in `extract.py` plus tree-sitter dependencies.
+
+**Limitations:**
+
+- Package name `graphifyy` (double-y) is the main friction point — `pip install graphify` installs an unrelated tool without any error
+- Doc/PDF extraction makes AI API calls; cost scales with documentation volume, not code size
+- v0.8.x evolves fast; some CLI flags shift between minor versions, check the changelog before upgrading
+
+**When to use**: Large or unfamiliar codebases where Claude Code burns tokens re-reading files just to understand structure. Build the graph once, then query it. High-value for legacy code onboarding, monorepo navigation, and pre-PR architecture review.
+
+---
+
 ## Plugin Ecosystem
 
 Claude Code's plugin system supports community-built extensions. For detailed documentation:
@@ -1124,6 +1468,7 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 | **Python-centric** | ccburn + Claude Chic | Native Python ecosystem tools |
 | **Multi-agent user** | Toad or Conductor | Unified agent management |
 | **Config-heavy setup** | claude-code-config + AIBlueprint + Caliber | TUI config management + scaffolding + drift detection |
+| **Codebase newcomer / monorepo** | Graphify | Build graph once, query structure instead of re-reading files every session |
 
 ---
 

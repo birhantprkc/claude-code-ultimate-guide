@@ -73,6 +73,11 @@ This attack exploits the one-time approval model: once you approve an MCP, updat
 | **CVE-2026-3484** | Medium (6.5) | nmap-mcp-server (PhialsBasement) — command injection in `child_process.exec` Nmap CLI handler; remotely exploitable | Apply patch commit `30a6b9e` |
 | **CVE-2026-33032** | **Critical (9.8)** | nginx-ui MCPwn — missing `AuthRequired()` on `/mcp_message` endpoint allows unauthenticated full nginx takeover in 2 HTTP requests; actively exploited, 2,689+ exposed instances | **Update to nginx-ui >= v2.3.4 immediately** |
 | **ADVISORY-MCP-STDIO-2026-001** | Critical | OX Security: MCP STDIO interface lacks input validation across all SDK languages — enables RCE in any MCP-integrated app that doesn't sanitize inputs; Anthropic considers this by design; 150M+ downloads affected | Sanitize all STDIO inputs; sandbox MCP services; see OX Security advisory |
+| **CVE-2026-25723** | High | Claude Code file-write sandbox bypass — piped sed/echo commands escaped project sandbox because command chaining wasn't validated | Update to v2.0.55+ |
+| **CVE-2026-33068** | High | Claude Code permission mode bypass — settings.json resolved before workspace trust dialog, allowing `bypassPermissions` to silently skip consent | Update to v2.1.53+ |
+| **ADVISORY-CC-2026-002** | Medium | Claude Code deny-rule bypass — all configured deny rules silently dropped when command exceeded 50 subcommands | **Update to v2.1.90+** |
+
+**v2.1.90 Security Fix (May 2026)**: Claude Code v2.1.90 patched the 50-subcommand deny-rule bypass (ADVISORY-CC-2026-002) where all configured deny rules were silently dropped when a command chain exceeded 50 subcommands. **Upgrade immediately** if running v2.1.89 or earlier.
 
 **v2.1.34 Security Fix (Feb 2026)**: Claude Code v2.1.34 patched a sandbox bypass vulnerability where commands excluded from sandboxing could bypass Bash permission enforcement. **Upgrade immediately** if running v2.1.33 or earlier. Note: this is separate from CVE-2026-25725 (a different sandbox escape fixed later).
 

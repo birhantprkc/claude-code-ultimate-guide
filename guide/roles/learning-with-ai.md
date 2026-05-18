@@ -1215,6 +1215,7 @@ Practitioner reports from real-world usage provide empirical validation of theor
 - [Anthropic Prompt Engineering Guide](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Better prompts = better learning
 - [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Timeless principles for deliberate practice
 - [AI for Engineers](https://leerob.com/ai) — AI fundamentals (ML, transformers, tokenization)
+- [Step by Token](https://www.stepbytoken.com/en) — 21-chapter interactive guide explaining how LLMs work mechanically, from tokenization through agents and KV cache. Free, in 8 languages. Pairs well with the prompt engineering and agents sections of this guide.
 
 ---
 

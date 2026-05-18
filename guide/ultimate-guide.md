@@ -7477,6 +7477,31 @@ Is this a repeatable workflow with steps?
 | Architecture knowledge | Skill | architecture-patterns skill |
 | Complex debugging | Agent | debugging-specialist agent |
 
+#### Skills and Subagents
+
+Subagents don't inherit skills automatically — this is a common source of confusion.
+
+| Rule | Details |
+|------|---------|
+| **Built-in agents can't use skills** | Explorer, Plan, and Verify agents have no access to skills |
+| **Custom subagents need explicit wiring** | Skills must be listed in the agent's `skills:` frontmatter field |
+| **Skills load at agent start** | Not on-demand like in the main conversation — all listed skills are loaded upfront |
+| **List only always-relevant skills** | Don't add a skill unless it applies to every single task the subagent performs |
+
+Custom subagent frontmatter with skills (`.claude/agents/my-agent.md`):
+
+```yaml
+---
+name: frontend-reviewer
+description: "Use this agent when reviewing frontend code for accessibility and security"
+tools: Bash, Glob, Grep, Read, WebFetch
+model: sonnet
+skills: accessibility-audit, security-guardian
+---
+```
+
+The skills listed in `skills:` must exist in `.claude/skills/` (project) or `~/.claude/skills/` (personal). Create agents with skills via `/agents` in Claude Code or add the `skills:` field to an existing agent file.
+
 ### Why Skills?
 
 Without skills:
@@ -8340,6 +8365,68 @@ tools: Read, Grep, Bash
 > - **Contribute back** if you find issues or improvements
 
 The skills appear to follow proper ethical hacking guidelines and include appropriate legal prerequisites, but as with any security tooling, verification is essential.
+
+### claude-red: Offensive Security Skill Library
+
+A more comprehensive alternative to the zebbern collection above. claude-red is a curated library of **58 offensive security skills** across 13 attack surface categories, built for authorized red team engagements, bug bounty hunting, and security audits on your own systems.
+
+**Repository**: [SnailSploit/Claude-Red](https://github.com/SnailSploit/Claude-Red) — 1,200+ stars, MIT license, active maintenance (updated May 2026).
+
+**Categories**: Web app (16 skills: SQLi, XSS, SSRF, SSTI, XXE, IDOR, RCE, deserialization, race conditions, request smuggling, WAF bypass, GraphQL…), Auth & Identity (JWT manipulation, OAuth exploitation), Active Directory, Wireless (13 skills), Cloud (AWS/Azure/GCP), Mobile (Android/iOS), IoT & Embedded, Infrastructure & Red Team, Exploit Development (6 skills), Fuzzing & Vulnerability Research, OSINT/Recon, AI Security, and Utility (fast triage checklist, reporting).
+
+Each skill is a structured `SKILL.md` with frontmatter (name, description, trigger phrases), detailed methodology, tool enumeration, and escalation paths — not ready-to-copy exploits, but expert-level operational guidance.
+
+#### One-Shot Usage (No Global Install)
+
+The most important pattern with claude-red is loading skills **without permanently installing them**. This keeps your global `~/.claude/skills/` clean.
+
+**Option 1 — Read directly in session**: Ask Claude to read a skill file and apply its methodology. The context disappears when the session closes.
+
+**Option 2 — `--system-file` at launch**: Load one or more skills at session start via CLI:
+
+```bash
+# Single skill
+claude --system-file path/to/Skills/utility/offensive-fast-checking/SKILL.md
+
+# Multiple skills (concatenated)
+cat Skills/utility/offensive-fast-checking/SKILL.md \
+    Skills/web/offensive-sqli/SKILL.md \
+  | claude --system-file /dev/stdin
+```
+
+**Option 3 — Project-level `.claude/skills/`**: Symlink only the relevant skills into the target repo's `.claude/skills/`, run the audit, then remove the directory. Zero pollution beyond the repo boundary.
+
+#### Targeted Prompt Pattern
+
+Rather than loading all 58 skills, craft a prompt that matches skills to your stack. This is the highest-value pattern: Claude reads only the skills relevant to your attack surface and applies them with your codebase as context.
+
+Example for a Next.js + Prisma + Clerk app:
+
+```
+You are doing a security audit on this Next.js/tRPC/Prisma/Clerk codebase.
+
+Read these skills in order:
+1. Skills/utility/offensive-fast-checking/SKILL.md   — quick wins triage
+2. Skills/web/offensive-idor/SKILL.md               — role-based access flaws
+3. Skills/auth/offensive-jwt/SKILL.md               — Clerk JWT manipulation
+4. Skills/web/offensive-sqli/SKILL.md               — Prisma ORM injection paths
+5. Skills/ai/offensive-ai-security/SKILL.md         — prompt injection on AI endpoints
+
+Priority vectors: IDOR between user roles, JWT algorithm confusion,
+Prisma raw query injection, SSRF via external API integrations.
+
+Codebase: [path to project root]
+
+Start with the fast-checking triage, then dig into IDOR and auth.
+```
+
+Tailor the skill list to your actual stack: a Rust CLI project would load fuzzing and exploit-dev skills instead of web skills; a map application with external tile loading would prioritize SSRF and XSS over SQLi.
+
+#### Ethical & Legal Scope
+
+> Use only on systems you own or have explicit written authorization to test. The repository's [SECURITY.md](https://github.com/SnailSploit/Claude-Red/blob/main/SECURITY.md) details scope: authorized engagements, bug bounty programs, CTF competitions, and internal security research only. Misuse may violate computer-crime statutes (CFAA, Computer Misuse Act).
+
+---
 
 ### Infrastructure as Code Skills
 

@@ -34,6 +34,7 @@ tags: [ai-ecosystem, guide, workflows, integration]
 - [12. Context Packing Tools](#12-context-packing-tools)
 - [14. Claude Managed Agents (Cloud-Hosted Platform)](#14-claude-managed-agents-cloud-hosted-platform)
 - [15. Project Glasswing & Claude Mythos Preview (Defensive Security)](#15-project-glasswing--claude-mythos-preview-defensive-security)
+- [16. Step by Token: How LLMs Work (Interactive Guide)](#16-step-by-token-how-llms-work-interactive-guide)
 - [Appendix: Ready-to-Use Prompts](#appendix-ready-to-use-prompts)
 - [Alternative Providers (Community Workarounds)](#alternative-providers-community-workarounds)
 
@@ -3344,6 +3345,51 @@ Practical notes for enterprise Claude Code users:
 
 - [Anthropic newsroom](https://www.anthropic.com/news) — Project Glasswing announcement
 - [TechCrunch: Claude Mythos AI model preview, security](https://techcrunch.com/2026/04/07/anthropic-mythos-ai-model-preview-security/)
+
+---
+
+## 16. Step by Token: How LLMs Work (Interactive Guide)
+
+[stepbytoken.com](https://www.stepbytoken.com/en) — Dimitri Mérault
+
+21 chapters, 189 minutes of reading, free, in 8 languages. An interactive guide that explains how large language models actually work, from token prediction through multi-agent systems, without requiring equations or prior ML knowledge.
+
+Everything you do with Claude Code, whether writing prompts, managing context windows, or building agent pipelines, makes more sense once you understand the underlying mechanics. Step by Token provides that mechanical intuition efficiently and clearly.
+
+### Structure
+
+The guide is organized into four parts:
+
+**Part I: Model Anatomy** (chapters 1-5) covers how word prediction works at the core, tokenization and Byte Pair Encoding, embeddings as geometric semantic space (the classic "King minus Man plus Woman = Queen" territory), the attention mechanism, and the full Transformer architecture including multi-head attention and residual connections.
+
+**Part II: Training and Alignment** (chapters 6-8) explains loss functions and gradient descent without formulas, sampling parameters like temperature and top-p, and how a raw model becomes an assistant through Supervised Fine-Tuning, RLHF, and Constitutional AI.
+
+**Part III: The Model in Production** (chapters 9-13) covers context windows, Retrieval-Augmented Generation, LLM agents with the ReAct loop, prompt engineering techniques (zero-shot, few-shot, chain-of-thought, self-consistency), and why hallucinations happen.
+
+**Part IV: Advanced Topics** (chapters 14-21) goes into fine-tuning with LoRA and QLoRA, multimodality via patch embeddings and CLIP, evaluation metrics (MMLU, HumanEval), extended reasoning with thinking tokens (o1, o3, DeepSeek-R1), KV cache mechanics, scaling laws (Kaplan, Chinchilla), mechanistic interpretability, and diffusion models.
+
+### Chapters most relevant to Claude Code users
+
+| Chapter | Topic | Why it matters |
+|---------|-------|----------------|
+| **Ch. 9** | Context windows | Why Claude's memory is perfect but bounded, and what you lose at the edges |
+| **Ch. 11** | LLM Agents | Tool use, ReAct loop, MCP as open standard ("USB-C for AI peripherals") |
+| **Ch. 12** | Prompt engineering | Zero-shot vs. few-shot vs. chain-of-thought, when self-consistency is worth the cost |
+| **Ch. 13** | Hallucinations | Why they happen and practical ways to reduce risk |
+| **Ch. 17** | Extended reasoning | What thinking tokens actually do, when extended budgets help vs. waste money |
+| **Ch. 18** | KV cache | Why Time To First Token differs from generation speed, why input tokens cost less than output tokens |
+
+### Approach
+
+Each chapter includes at least one interactive visualization built with D3.js or React Three Fiber, designed to be manipulated rather than watched. The attention chapter lets you observe query-key-value matching live across a sentence. The context window chapter shows what actually happens at the edges of the context. The pedagogy consistently prioritizes intuition over memorization: the site's stated philosophy is "Understand, don't memorize."
+
+The agent chapter (ch. 11) explicitly covers the MCP standard as a vendor-neutral protocol for connecting tools to models, which makes it directly relevant to anyone building with Claude Code's MCP integrations.
+
+### About the author
+
+Dimitri Mérault is an iOS developer who built Step by Token because he wanted a deeper understanding of what he was actually working with, and found that building explanations forced the kind of engagement that creates real comprehension. The guide is free, actively maintained, and available in 8 languages (English, French, Spanish, Italian, Portuguese, German, Chinese, Japanese). A full lexicon of 196 terms ships alongside the chapters.
+
+**Site**: [stepbytoken.com](https://www.stepbytoken.com/en) | **Author contact**: [dimitri.merault@gmail.com](mailto:dimitri.merault@gmail.com) | **LLMs.txt**: [stepbytoken.com/llms.txt](https://www.stepbytoken.com/llms.txt)
 
 ---
 

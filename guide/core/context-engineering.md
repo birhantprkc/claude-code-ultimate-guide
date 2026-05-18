@@ -28,6 +28,8 @@ This guide covers everything from the token math behind context budgets to build
 8. [Context Reduction Techniques](#8-context-reduction-techniques)
 9. [Maturity Assessment](#9-maturity-assessment)
 10. [Token Audit Workflow](#10-token-audit-workflow)
+11. [Research Patterns](#11-research-patterns-what-the-literature-shows)
+12. [Token Compression Tools](#12-token-compression-tools)
 
 ---
 
@@ -212,6 +214,25 @@ When always-on context becomes too large or too noisy, you see predictable failu
 - **Generic outputs**: Instead of applying project-specific patterns, Claude falls back to generic best practices — a sign that project context is not being retained.
 
 When you see these patterns, the diagnostic is: run a context audit (see Section 7), not more instructions.
+
+### MECW: Maximum Effective Context Window
+
+The advertised context window and the effective context window are not the same number. Enterprise context engineering deployments consistently find that meaningful accuracy degradation begins before the stated limit is reached. The commonly cited figure from production experience: approximately 92% of the advertised limit.
+
+For Claude Opus 4 (200K advertised), this puts the practical ceiling at approximately 185K tokens before accuracy measurably degrades on complex reasoning tasks. The mechanism is the n² attention scaling described in Section 1 (Why Context Rot is Structural): as the context grows, attention operations scale quadratically, and mid-window positions receive diminishing effective weight.
+
+Context rot degrades accuracy by 30%+ in mid-window positions under heavy context load. The practical implication: a 128K-token context window with high-quality, well-maintained content outperforms a 1M-token window with stale, accumulated content. The 1M window does not eliminate the problem; it delays it while increasing the cost of each request.
+
+The question "should I just use the 1M context window?" is really a question about signal-to-noise, not capability. A larger window that accumulates tool output noise, expired conversation turns, and redundant instructions is not more powerful than a smaller, curated one. It is just more expensive and slower.
+
+**Practical MECW targets**:
+
+| Window | Advertised | Practical ceiling (92%) | When rot degrades accuracy |
+|--------|-----------|------------------------|--------------------------|
+| Claude Sonnet 4.6 | 200K | ~184K | ~150K+ |
+| Claude Opus 4 | 200K | ~185K | ~150K+ |
+
+These are engineering estimates, not guaranteed values. Treat them as planning figures: if your session regularly approaches 150K tokens, it is time to implement compaction, graduated offloading, or path-scoping before accuracy becomes a problem, not after.
 
 ### Path-Scoping and Budget Efficiency
 
@@ -1447,6 +1468,97 @@ The goal is not to eliminate coverage — it's to ensure that the rules that mat
 
 **Placement matters**: Place your top 20% rules in the first third of CLAUDE.md. Attention weight is not uniform across a long document — early content has higher salience.
 
+### Think in Code
+
+Named by context-mode v1.0.64 and independently described by Contieri in April 2026 as "Ask for the Analyst, Not the Analysis," this pattern addresses a common source of token waste in exploration tasks.
+
+**The problem**: To answer "which files import module X?", a naive agent opens and reads files one by one. With 30 candidate files, that's 30 tool calls and potentially 15,000+ tokens of file content loaded into context, the vast majority irrelevant to the actual question.
+
+**The pattern**: Instead of reading files, instruct the agent to write and run a small script (bash, Python, jq) that queries, counts, or filters, then return only the result. The result is 1 tool call and approximately 50 tokens rather than 30 calls and 15,000 tokens.
+
+**Examples**:
+
+Finding which files import a module:
+```bash
+grep -r "import X" src/ --include="*.ts" | wc -l
+```
+
+Identifying files over a size threshold:
+```bash
+find src/ -name "*.ts" -size +50k | sort
+```
+
+Counting test coverage by directory:
+```bash
+find src/ -name "*.test.ts" | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn
+```
+
+**When to apply it**: Any task that is "explore and report" rather than "edit." Discovery tasks, counting, pattern matching, dependency analysis, and finding files by content are all candidates. If you find yourself writing agent instructions that describe reading many files to gather statistics, the "Think in Code" pattern usually applies.
+
+**Relationship to sub-agents**: Sub-agents execute in isolation with their own context budget. "Think in Code" keeps everything in the main agent but uses scripts as the exploration mechanism. Both approaches avoid loading irrelevant file content into context. For tasks that genuinely require reading file contents (edits, code review, understanding logic), sub-agents are the better fit. For pure discovery tasks that reduce to counts or lists, a single script call is faster and cheaper.
+
+### Graduated Context Offloading
+
+From LangGraph's Deep Agents SDK research into long-running agents, this three-tier cascade addresses context accumulation over time without losing access to the information.
+
+**The problem**: A long-running agent that processes many files, API calls, and tool results accumulates context that grows until it hits window limits or degrades accuracy through context rot. Neither truncation (loses data) nor unlimited accumulation (loses accuracy) is correct.
+
+**The three-tier cascade**:
+
+**Tier 1 — Large tool outputs (threshold: 20K tokens)**: Offload to filesystem. Write the full output to a temp file and inject only the file path and a 10-line preview into context. The agent can request the full content if needed.
+
+**Tier 2 — Accumulated tool call arguments (threshold: context approaching mid-point)**: Offload old tool invocations. Keep only the most recent N tool calls in full; summarize or drop arguments for older calls. Tool results are more valuable than tool call arguments for continuing the task.
+
+**Tier 3 — Message history (threshold: context near limit)**: Lossy summarization of message history. Last resort only — this introduces the risks described in Section 11 (Progressive Summarization Risks). Apply only when Tiers 1 and 2 are exhausted.
+
+**Claude Code equivalent using a PostToolUse hook**:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/offload-large-output.py"
+      }]
+    }]
+  }
+}
+```
+
+```python
+# ~/.claude/hooks/offload-large-output.py
+import json, sys, tempfile, os
+
+data = json.load(sys.stdin)
+output = data.get("tool_result", {}).get("content", "")
+
+THRESHOLD = 20_000  # characters, roughly 5K tokens
+
+if len(output) > THRESHOLD:
+    tmp = tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False,
+        prefix="/tmp/claude-output-"
+    )
+    tmp.write(output)
+    tmp.close()
+    preview = "\n".join(output.splitlines()[:10])
+    print(json.dumps({
+        "tool_result": {
+            "content": (
+                f"[Output too large — saved to {tmp.name}]\n"
+                f"Preview (first 10 lines):\n{preview}\n"
+                f"Use: cat {tmp.name}"
+            )
+        }
+    }))
+else:
+    print(json.dumps(data))
+```
+
+This hook transparently intercepts large bash outputs, writes them to a temp file, and injects the path with a preview. The agent sees a compact summary and knows where to find the full content if it needs it. The same pattern applies to any tool type: MCP tool results, file reads, or API responses can all be offloaded to filesystem and referenced by path.
+
 ### Summary: Reduction Techniques by Impact
 
 | Technique | Context Reduction | Effort | Adherence Impact |
@@ -1457,6 +1569,8 @@ The goal is not to eliminate coverage — it's to ensure that the rules that mat
 | Deduplication | 10-20% | Low | +5-15% |
 | Archive pattern | 10-30% | Low | +5-10% |
 | 80/20 prioritization | 0% (reordering) | Low | +10-20% |
+| Think in Code | 90%+ on exploration tasks | Low | N/A (replaces calls) |
+| Graduated offloading | Variable (tier-dependent) | Medium | Prevents rot |
 
 The highest-leverage sequence for a project with context debt:
 
@@ -1465,6 +1579,7 @@ The highest-leverage sequence for a project with context debt:
 3. Compress (sharpens remaining rules)
 4. Archive (clears obsolete rules safely)
 5. Reorder (prioritizes the rules that matter most)
+6. Graduated offloading (for long-running or multi-step agent workflows)
 
 ---
 
@@ -1698,6 +1813,203 @@ Based on the remaining savings after Step 5, calculate whether RAG would be
 worth it: estimate residual savings, estimate setup cost in hours, and state
 clearly whether the infrastructure investment is justified.
 ```
+
+---
+
+## 11. Research Patterns: What the Literature Shows
+
+Applied context engineering draws from academic research on how language models process long inputs. Four findings have practical implications for how you structure context in production agents.
+
+### The Lost-in-the-Middle Effect
+
+**Source**: Liu et al. (2023), Stanford — "Lost in the Middle: How Language Models Use Long Contexts"
+
+Performance on retrieval and reasoning tasks degrades when relevant information is placed in the middle of a long context window. Models perform best when critical information appears at the beginning (primacy) or end (recency) of the context, and worst when it's buried in the middle.
+
+The effect is consistent across model sizes and context lengths. A 20-document retrieval task can drop from ~70% accuracy when the answer is at position 1 to ~40% when it's at position 10, rising back toward 70% at position 20.
+
+**Practical implications for agents:**
+
+- Put the most decision-critical information at the start or end of your system prompt, not in the middle of a long CLAUDE.md
+- When summarizing multiple sources, lead with the most relevant finding, not the most recent
+- If you have a list of tool results, the first and last results will be recalled more reliably than those in the middle
+- For evaluation tasks where Claude reviews N items, split into smaller batches rather than sending everything at once
+
+The implication isn't that you should make contexts shorter — it's that position within the context window is a design variable, not an accident.
+
+### Progressive Summarization Risks
+
+Summarization pipelines that compress summaries of summaries lose information in ways that are invisible to the model. Each compression pass removes details, but the model's confidence doesn't decrease proportionally. By the third or fourth compression pass, the model can answer questions about the original content fluently, but the answers may no longer be accurate — it's confabulating based on what typically follows the compressed patterns it retained.
+
+**The specific risks:**
+
+- **Transactional facts disappear first**: Specific numbers, dates, names, and conditions get abstracted away in early compression passes while narrative structure is preserved
+- **Confidence stays high**: The model doesn't know it's working from compressed information; it answers with the same certainty as if it had access to the original
+- **No retrieval signal**: Unlike RAG, where a failed retrieval is visible, summarization failures are silent — the model produces fluent text regardless
+
+**Mitigations:**
+
+```markdown
+<!-- In CLAUDE.md for research/summarization agents -->
+## Summarization Rules
+- Always retain exact numbers, dates, and proper nouns in summaries — never paraphrase them
+- Mark summaries with their compression level: [summary-level-1], [summary-level-2]
+- If you cannot find a specific fact in the summary you have access to, say so — do not reconstruct from plausible inference
+```
+
+For multi-step agents that compress context to stay within budget, limit the chain to 2 compression passes before going back to source material.
+
+### Stratified Sampling for Calibration
+
+When evaluating whether a context-engineering setup is working, random sampling misses systematic failures. A random sample from a 100-item test set might show 85% accuracy — but if the 15 failures cluster in a specific difficulty tier (long documents, ambiguous instructions, edge cases), you won't detect the pattern.
+
+Stratified sampling divides the evaluation set into strata by a relevant attribute (document length, instruction ambiguity, source quality) and tests each stratum independently.
+
+**For context engineering specifically:**
+
+| Stratum | Why it matters |
+|---------|----------------|
+| Short context (< 5K tokens) | Baseline — should be near 100% |
+| Medium context (5K–50K) | Where most real work happens |
+| Long context (50K+) | Where degradation first appears |
+| Position-critical (key info in middle) | Tests lost-in-the-middle directly |
+| High-instruction density | Tests the 150-instruction ceiling |
+
+If your accuracy on the long-context stratum is 20 points below the short-context stratum, that's a signal — add position-based structuring or implement chunked processing. Aggregate metrics would have hidden that gap.
+
+### Claim-Source Mapping (Provenance Tracking)
+
+In agents that synthesize information from multiple sources (web search, file reads, tool results), claims in the final output should be traceable to their source. Without provenance tracking, hallucinations are indistinguishable from accurate synthesis, and errors compound across agent steps.
+
+**What claim-source mapping looks like:**
+
+Rather than letting the agent produce a summary with no source attribution, structure the intermediate representation to keep claims linked to their source:
+
+```python
+# Each synthesis step preserves provenance
+claims = [
+    {"claim": "The API rate limit is 1000 req/min", "source": "tool:get_api_docs", "confidence": "direct"},
+    {"claim": "The rate limit was increased in v2.3", "source": "web:release-notes-url", "confidence": "direct"},
+    {"claim": "Rate limits reset every 60 seconds", "source": "inferred", "confidence": "inferred"},
+]
+```
+
+Claims tagged as "inferred" or lacking a source should be flagged as uncertain in the final output, not presented with the same confidence as directly-sourced claims.
+
+**Implementation pattern for multi-step agents:**
+
+```markdown
+<!-- In research agent system prompt -->
+For every factual claim you include in your response:
+- Tag it with the source (tool name, file path, URL, or "inferred")
+- If you cannot identify the source, mark the claim as uncertain
+- Do not present inferred conclusions with the same certainty as directly-observed facts
+```
+
+The difference between claim-source mapping as a QA mechanism vs as a compliance mechanism: compliance tracking asks "did we use authorized sources?", QA tracking asks "is this specific claim accurate?" — both are valuable but for different failure modes. Agents that handle factual queries or generate reports need the QA version.
+
+---
+
+## 12. Token Compression Tools
+
+The previous sections focus on what to put in context. This section covers tooling that compresses what enters context at the pipeline level — reducing token volume before Claude ever processes it. These tools complement CLAUDE.md authorship: good context engineering reduces noise at design time, compression tools reduce volume at runtime.
+
+Two independent tools operate at different layers of the Claude Code tool pipeline.
+
+---
+
+### Layer 1 — CLI Output: RTK
+
+RTK (Rust Token Killer) is a CLI proxy that intercepts shell command output and compresses it before Claude reads it. It operates via a `PreToolUse` hook that rewrites commands like `git log` to `rtk git log`.
+
+**What it compresses**: git, cargo, npm, pnpm, tsc, vitest, playwright, docker, kubectl, and more. Measured savings: 60-90% on supported commands.
+
+**What it does not compress**: file reads, MCP tool results, anything not going through a Bash tool call.
+
+```bash
+brew install rtk-ai/tap/rtk   # or: cargo install rtk
+rtk init --global              # installs PreToolUse hook + settings.json patch
+rtk gain                       # dashboard: tokens saved per command
+```
+
+> **Cross-ref**: Full command reference and TOML filter DSL at [third-party-tools.md §RTK](../ecosystem/third-party-tools.md#rtk-rust-token-killer).
+
+---
+
+### Layer 2 — File Reads and Session Memory: lean-ctx
+
+lean-ctx operates as a global MCP server that intercepts Read calls and Bash calls at the tool level, below RTK's shell hook. It uses tree-sitter AST parsing to extract only the relevant structure of a file rather than sending the full content.
+
+**Installation** (one-time, global):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yvgude/lean-ctx/main/skills/lean-ctx/scripts/install.sh | bash
+lean-ctx setup   # registers MCP server + hooks in ~/.claude.json and ~/.claude/settings.json
+```
+
+No per-project setup required.
+
+**The 10 read modes**
+
+| Mode | What it returns | Best for |
+|------|----------------|----------|
+| `signatures` | Type and function signatures only | Large TypeScript/Rust files read for context |
+| `map` | Exports and import dependencies | Understanding module relationships |
+| `auto` | System selects based on file type and context usage | Default, safe for most cases |
+| `full` | Full file, cached | Files you are about to edit |
+| `diff` | Changed lines only | Re-reading a file after an edit |
+| `lines:N-M` | Specific line range | Targeted inspection |
+| `aggressive` | Maximum compression, syntax-stripped | Large files needed only for reference |
+| `entropy` | High-entropy fragments only | Scanning for anomalies |
+| `task` | Task-relevant lines | Active task set defined |
+
+**Rule**: use `full` for files you will edit. Use `signatures` or `map` for files you are reading for context. The difference on a 2364-line file: `full` costs ~19,000 tokens, `signatures` costs ~200 tokens.
+
+**Cache**: re-reading an unchanged file costs ~13 tokens regardless of file size. The cache is invalidated by file mtime.
+
+**CCP (Context Continuity Protocol)**: on session end, lean-ctx writes a ~400-token summary of what was read, found, and decided. The next session loads it automatically, eliminating the cold-start cost of re-reading prior context.
+
+**Measured benchmarks (TypeScript/T3 monorepo, 2455 files, 7063-node graph)**
+
+| Metric | Value |
+|--------|-------|
+| Overall compression rate | 57.8% |
+| ctx_read savings rate | 86% |
+| Tokens saved in one day | 1.3M |
+| schema.prisma 2364L → signatures | ~200 tokens (99%) |
+| File re-read (cache hit) | 13 tokens |
+
+**Monitoring your efficiency**
+
+```bash
+lean-ctx gain            # overall dashboard
+lean-ctx gain --daily    # day-by-day savings
+lean-ctx cep             # CEP score /100: compression, cache hit rate, consistency, mode diversity
+lean-ctx sessions list   # session history with token counts
+```
+
+The `/lean-ctx-audit` slash command runs all of the above in one pass and synthesizes a report. Add it to `~/.claude/commands/lean-ctx-audit.md` to make it available in every project.
+
+---
+
+### Choosing between the two
+
+RTK and lean-ctx do not overlap meaningfully. Their actual savings distribution from measured sessions:
+
+| Source | Tool | % of total savings |
+|--------|------|--------------------|
+| File reads (AST) | lean-ctx | ~85% |
+| Search results | lean-ctx | ~5% |
+| Shell output | RTK | remainder |
+| Shell output via lean-ctx | lean-ctx | <1% (RTK is better here) |
+
+Install both. RTK handles CLI output; lean-ctx handles file reads and session memory.
+
+**When lean-ctx adds the most value**: TypeScript, Rust, Python projects where large source files are read repeatedly, sessions run long enough that context fills before completion, and cross-session continuity matters.
+
+**When lean-ctx adds less value**: Markdown-heavy documentation repos. The AST parser finds code examples embedded in Markdown rather than source structure. Gains exist but are lower than on code-first projects.
+
+> **Cross-ref**: Full tool profiles at [third-party-tools.md §Context Compression](../ecosystem/third-party-tools.md#context-compression).
 
 ---
 
