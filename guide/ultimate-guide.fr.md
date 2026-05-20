@@ -2021,7 +2021,7 @@ Le modèle par défaut dépend de votre abonnement : les abonnés **Max/Team Pre
 
 **Réalité des coûts** : Une session typique d'une heure coûte **0,10 $ - 0,50 $** selon les habitudes d'utilisation.
 
-> **Dépréciations de modèles (fév. 2026)** : `claude-3-haiku-20240307` (Claude 3 Haiku) a été déprécié le **19 février 2026** avec une **mise hors service prévue au 20 avril 2026**. Si votre CLAUDE.md, vos définitions d'agents ou vos scripts référencent en dur cet identifiant de modèle, migrez vers `claude-haiku-4-5-20251001` (Haiku 4.5) avant avril 2026. Source : [platform.claude.com/docs/model-deprecations](https://platform.claude.com/docs/model-deprecations)
+> **Dépréciations de modèles (fév. 2026)** : `claude-3-haiku-20240307` (Claude 3 Haiku) a été déprécié le **19 février 2026** avec une **mise hors service prévue au 20 avril 2026**. Si votre CLAUDE.md, vos définitions d'agents ou vos scripts référencent en dur cet identifiant de modèle, migrez vers `claude-haiku-4-5-20251001` (Haiku 4.5) avant avril 2026. Source : [platform.claude.com/docs/en/release-notes/model-deprecations](https://platform.claude.com/docs/en/release-notes/model-deprecations)
 
 #### 200K vs 1M de contexte : performance, coût et cas d'usage
 
@@ -2263,7 +2263,7 @@ Deux bugs actifs cassent silencieusement la mise en cache à partir de la v2.1.6
 - **--resume/--continue** provoque une reconstruction complète du cache (0 % de taux de succès) à chaque reprise car le JSONL de session supprime les enregistrements d'outils différés avant l'écriture. Solution : évitez `--resume` jusqu'à correction.
 - **L'en-tête de facturation par session** injecte un hash unique comme premier bloc du prompt système, provoquant un échec de cache froid à chaque démarrage de session et appel de sous-agent. Solution : `"CLAUDE_CODE_ATTRIBUTION_HEADER": "false"` dans `~/.claude/settings.json`.
 
-Voir [Problèmes connus → Bugs du cache de prompts](../core/known-issues.md) et exécuter `/check-cache-bugs` pour un audit complet.
+Voir [Problèmes connus → Bugs du cache de prompts](core/known-issues.md) et exécuter `/check-cache-bugs` pour un audit complet.
 
 > Documentation : [prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
 
@@ -4683,7 +4683,7 @@ Claude Code fonctionne dans une **fenêtre de contexte de 200 000 tokens** (1 mi
 | Résultats des outils | Variable |
 | Réservé pour la réponse | 40-45K tokens |
 
-Lorsque le contexte se remplit (~75 % dans VS Code, ~95 % en CLI), le contenu ancien est automatiquement résumé. Cependant, **des recherches montrent que cela dégrade la qualité** (baisse de performance de 50 à 70 % sur les tâches complexes). Utilisez `/compact` de manière proactive aux points de rupture logiques, ou déclenchez des **transferts de session à 85 %** pour préserver l'intention plutôt que l'historique compressé. Voir [Session Handoffs](line 2140) et [Auto-Compaction Research](../core/architecture.md#auto-compaction).
+Lorsque le contexte se remplit (~75 % dans VS Code, ~95 % en CLI), le contenu ancien est automatiquement résumé. Cependant, **des recherches montrent que cela dégrade la qualité** (baisse de performance de 50 à 70 % sur les tâches complexes). Utilisez `/compact` de manière proactive aux points de rupture logiques, ou déclenchez des **transferts de session à 85 %** pour préserver l'intention plutôt que l'historique compressé. Voir [Session Handoffs](line 2140) et [Auto-Compaction Research](core/architecture.md#auto-compaction).
 
 ### Isolation des sous-agents
 
@@ -5503,7 +5503,7 @@ Backend Express + Prisma.
 - Prisma queries in /repositories
 ```
 
-**Sécurité en production** : Pour les équipes qui déploient Claude Code en production, consultez [les règles de sécurité en production](production-safety.md) pour la stabilité des ports, la sécurité des bases de données et les schémas de verrouillage d'infrastructure.
+**Sécurité en production** : Pour les équipes qui déploient Claude Code en production, consultez [les règles de sécurité en production](security/production-safety.md) pour la stabilité des ports, la sécurité des bases de données et les schémas de verrouillage d'infrastructure.
 
 ### Architecture de contexte modulaire
 
@@ -5824,7 +5824,7 @@ ln -s ~/Dropbox/claude-mcp/settings.json ~/.claude/settings.json
 
 **Bonnes pratiques** :
 1. Utiliser `settings.template.json` avec des espaces réservés → Générer `settings.json` via un script
-2. Exécuter un [hook pre-commit](../../examples/hooks/bash/pre-commit-secrets.sh) pour détecter les secrets
+2. Exécuter un [hook pre-commit](../examples/hooks/bash/pre-commit-secrets.sh) pour détecter les secrets
 3. Pour les secrets MCP, voir la [section 8.3.1 Gestion des secrets MCP](#831-mcp-secrets-management)
 
 #### Reprise sur sinistre
@@ -5861,7 +5861,7 @@ tar -xzf claude-config-YYYY-MM-DD_HH-MM-SS.tar.gz -C ~/
 
 - **[brianlovin/claude-config](https://github.com/brianlovin/claude-config)** : Dépôt public avec script `sync.sh` pour la sauvegarde et la restauration
 - **Approche Martin Ratinaud** : Dépôt Git + liens symboliques + `sync-mcp.sh` pour les secrets (testé sur 504 sessions)
-- **Modèle de script** : Voir [sync-claude-config.sh](../../examples/scripts/sync-claude-config.sh) pour une automatisation complète
+- **Modèle de script** : Voir [sync-claude-config.sh](../examples/scripts/sync-claude-config.sh) pour une automatisation complète
 
 **Ticket GitHub** : [#16204 - Guidance proactive pour les flux de travail de sauvegarde/restauration](https://github.com/anthropics/claude-code/issues/16204)
 
@@ -6098,7 +6098,7 @@ Des témoignages alarmants provenant de r/ClaudeAI incluent :
 
 **Préférez toujours `allowedTools` granulaire plutôt que la désactivation totale des permissions.**
 
-> **Alternative sécurisée** : Pour une exécution autonome, lancez Claude Code dans des [sandboxes Docker](sandbox-isolation.md) ou un environnement isolé similaire. Le sandbox devient la frontière de sécurité, rendant `--dangerously-skip-permissions` sans danger. Consultez le [Guide d'isolation en sandbox](sandbox-isolation.md) pour les instructions de configuration et les alternatives.
+> **Alternative sécurisée** : Pour une exécution autonome, lancez Claude Code dans des [sandboxes Docker](security/sandbox-isolation.md) ou un environnement isolé similaire. Le sandbox devient la frontière de sécurité, rendant `--dangerously-skip-permissions` sans danger. Consultez le [Guide d'isolation en sandbox](security/sandbox-isolation.md) pour les instructions de configuration et les alternatives.
 
 ### Mémoire dynamique (changement de profil)
 
@@ -10503,9 +10503,9 @@ exit 0
 
 **Personnalisation** : Définissez `CLAUDE_IDENTITY_MARKER` dans votre environnement avec une chaîne courte et distinctive issue de la sortie standard de l'agent (par ex. `"LEAD:"`, `"DEVELOPER:"`, `"🔨"`). Si non définie, le hook utilise les 40 premiers caractères du fichier d'identité comme marqueur.
 
-> **Implémentation complète** : [`examples/hooks/bash/identity-reinjection.sh`](../../examples/hooks/bash/identity-reinjection.sh)
+> **Implémentation complète** : [`examples/hooks/bash/identity-reinjection.sh`](../examples/hooks/bash/identity-reinjection.sh)
 >
-> **Origine** : Pattern issu des [flux de travail dev pilotés par hooks](https://nick-tune.me/blog/2026-02-28-hook-driven-dev-workflows-with-claude-code/) de Nick Tune (2026-02-28). L'article complet couvre les workflows de machines à états avec des équipes d'agents — voir [Agent Teams Workflow](../workflows/agent-teams.md) pour le contexte.
+> **Origine** : Pattern issu des [flux de travail dev pilotés par hooks](https://nick-tune.me/blog/2026-02-28-hook-driven-dev-workflows-with-claude-code/) de Nick Tune (2026-02-28). L'article complet couvre les workflows de machines à états avec des équipes d'agents — voir [Agent Teams Workflow](workflows/agent-teams.md) pour le contexte.
 
 ---
 
@@ -11379,7 +11379,7 @@ rg "validateSession" --type ts -A 5
 
 **Résultat** : Compréhension complète + refactorisation sécurisée en 5 commandes
 
-> **📖 Guide complet** : Voir [Search Tools Mastery](../workflows/search-tools-mastery.md) pour des flux de travail détaillés, des scénarios concrets et des combinaisons avancées.
+> **📖 Guide complet** : Voir [Search Tools Mastery](workflows/search-tools-mastery.md) pour des flux de travail détaillés, des scénarios concrets et des combinaisons avancées.
 
 ---
 
@@ -12704,7 +12704,7 @@ envsubst < ~/.claude/mcp-config.template.json > ~/.claude.json
 .env          # Never commit
 ```
 
-**Voir aussi** : [sync-claude-config.sh](../../examples/scripts/sync-claude-config.sh) pour la substitution automatisée de modèles.
+**Voir aussi** : [sync-claude-config.sh](../examples/scripts/sync-claude-config.sh) pour la substitution automatisée de modèles.
 
 ---
 
@@ -12828,7 +12828,7 @@ Planification avec cron :
 
 **Problème** : Les développeurs commitent accidentellement des secrets dans Git malgré `.gitignore` (par ex. en ajoutant `.env` avec `git add -f`).
 
-**Solution** : [Hook pre-commit](../../examples/hooks/bash/pre-commit-secrets.sh) pour bloquer les commits contenant des secrets.
+**Solution** : [Hook pre-commit](../examples/hooks/bash/pre-commit-secrets.sh) pour bloquer les commits contenant des secrets.
 
 ```bash
 # Install hook
@@ -16687,7 +16687,7 @@ neonctl branches delete feature-payments
 
 **Voir aussi :**
 - [Guide de configuration des branches de base de données](../examples/workflows/database-branch-setup.md) - Flux de travail complets par fournisseur
-- [Neon Branching](https://neon.tech/docs/guides/branching) - Documentation officielle Neon
+- [Neon Branching](https://neon.com/docs/introduction/branching) - Documentation officielle Neon
 - [PlanetScale Branching](https://planetscale.com/docs/concepts/branching) - Guide officiel PlanetScale
 
 ### Coordination de Worktrees Parallèles : Dépendances entre Tâches
@@ -23278,7 +23278,7 @@ Une série de 9 livres blancs thématiques couvrant Claude Code en profondeur, d
 | 07 | Guide de référence | Synthèse complète + flux de travail |
 | 08 | Équipes d'agents | Orchestration multi-agents |
 
-→ **[Télécharger tous les livres blancs (FR + EN)](https://www.florian.bruniaux.com/guides)**
+→ **[Télécharger tous les livres blancs (FR + EN)](https://cc.bruniaux.com/whitepapers/)**
 
 ---
 
@@ -23793,7 +23793,7 @@ Idées reçues que nous avons observées :
 **Point de réalité** : Les workflows PM avec Claude Code sont un **domaine émergent** avec une validation communautaire limitée. Nous disposons actuellement d'un seul retour d'expérience de praticien (la source a noté avoir essayé Claude Code sans l'adopter sur le long terme). Si vous êtes PM et utilisez Claude Code avec succès, [partagez votre workflow](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/discussions) pour aider la communauté.
 
 **Voir aussi** :
-- [Guide de l'écosystème IA](ai-ecosystem.md) — Outils complémentaires (Granola, Wispr Flow, ChatPRD, v0)
+- [Guide de l'écosystème IA](ecosystem/ai-ecosystem.md) — Outils complémentaires (Granola, Wispr Flow, ChatPRD, v0)
 - [Cowork Guide](https://github.com/FlorianBruniaux/claude-cowork-guide) — Claude Desktop pour les PMs non techniques
 - [Workflow Design-to-Code](workflows/design-to-code.md#for-product-managers) — Perspective PM sur Figma MCP
 
@@ -23829,7 +23829,7 @@ cd /path/to/target/project && claude --continue
 
 **Automatisation communautaire** : Le skill [claude-migrate-session](https://github.com/jimweller/dotfiles/tree/main/dotfiles/claude-code/skills/claude-migrate-session) de Jim Weller automatise ce processus, mais dispose d'un niveau de test limité (0 étoile/fork au février 2026). L'approche manuelle est plus sûre.
 
-**Guide détaillé** : Voir [Limitations de la reprise de session & migration inter-dossiers](observability.md#session-resume-limitations--cross-folder-migration) pour le workflow complet et les cas particuliers.
+**Guide détaillé** : Voir [Limitations de la reprise de session & migration inter-dossiers](ops/observability.md#session-resume-limitations--cross-folder-migration) pour le workflow complet et les cas particuliers.
 
 **Connexe** : L'issue GitHub [#1516](https://github.com/anthropics/claude-code/issues/1516) suit les demandes de la communauté pour un support natif inter-dossiers.
 

@@ -141,7 +141,7 @@ Logs all Claude operations to JSONL files for monitoring and cost tracking:
 | `CLAUDE_LOG_TOKENS` | `true` | Enable token estimation |
 | `CLAUDE_SESSION_ID` | auto | Custom session ID |
 
-See [Observability Guide](../../guide/observability.md) for full documentation.
+See [Observability Guide](../../guide/ops/observability.md) for full documentation.
 
 ### pre-commit-evaluator.sh
 

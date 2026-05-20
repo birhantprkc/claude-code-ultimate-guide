@@ -10,7 +10,7 @@ tags: [agents, template, testing, performance]
 
 **Use Case**: SQL query generation with quality tracking, performance monitoring, and safety validation
 
-**Related Guide**: [Agent Evaluation](../../../guide/agent-evaluation.md)
+**Related Guide**: [Agent Evaluation](../../../guide/roles/agent-evaluation.md)
 
 ---
 
@@ -236,7 +236,7 @@ export CLAUDE_RESPONSE='{"content":"SELECT * FROM users;"}'
 
 ## Related Resources
 
-- **[Agent Evaluation Guide](../../../guide/agent-evaluation.md)**: Complete evaluation methodology
+- **[Agent Evaluation Guide](../../../guide/roles/agent-evaluation.md)**: Complete evaluation methodology
 - **[Hooks Documentation](../../../guide/ultimate-guide.md#5-hooks)**: Hook system reference
 - **[nao Framework](https://github.com/getnao/nao/)**: Production analytics agent framework (inspiration)
 

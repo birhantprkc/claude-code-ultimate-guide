@@ -306,7 +306,7 @@ psql -U user -d ecommerce -f revenue_by_category.sql
 
 ## Related Resources
 
-- **[Agent Evaluation Guide](../../../guide/agent-evaluation.md)**: Complete methodology
+- **[Agent Evaluation Guide](../../../guide/roles/agent-evaluation.md)**: Complete methodology
 - **[SQL Best Practices](https://www.postgresql.org/docs/current/performance-tips.html)**: PostgreSQL optimization
 - **[nao Framework](https://github.com/getnao/nao/)**: Production analytics agent framework
 

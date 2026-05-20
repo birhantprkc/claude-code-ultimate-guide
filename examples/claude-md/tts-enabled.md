@@ -90,7 +90,7 @@ Quick reference for team members:
 
 New team members should follow:
 
-1. **Installation Guide**: [Agent Vibes Installation](../../integrations/agent-vibes/installation.md)
+1. **Installation Guide**: [Agent Vibes Installation](../integrations/agent-vibes/installation.md)
 2. **Voice Selection**: Use `fr_FR-tom-medium` for consistency
 3. **Configuration**: Copy settings from this file
 
@@ -102,7 +102,7 @@ Common issues:
 - **Wrong voice**: Run `/agent-vibes:switch fr_FR-tom-medium`
 - **Too verbose**: Run `/agent-vibes:verbosity low`
 
-**Full troubleshooting**: [Agent Vibes Troubleshooting](../../integrations/agent-vibes/troubleshooting.md)
+**Full troubleshooting**: [Agent Vibes Troubleshooting](../integrations/agent-vibes/troubleshooting.md)
 
 ## Notes
 
@@ -112,4 +112,4 @@ Common issues:
 
 ---
 
-*For more information about Agent Vibes TTS, see [Integration Guide](../../integrations/agent-vibes/README.md)*
+*For more information about Agent Vibes TTS, see [Integration Guide](../integrations/agent-vibes/README.md)*

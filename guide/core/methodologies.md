@@ -10,7 +10,7 @@ tags: [reference, tdd, design-patterns, workflows]
 >
 > **Last updated**: February 2026
 
-This is a quick reference for 15 structured development methodologies that have emerged for AI-assisted development in 2025-2026. For hands-on practical workflows, see [workflows/](./workflows/).
+This is a quick reference for 15 structured development methodologies that have emerged for AI-assisted development in 2025-2026. For hands-on practical workflows, see [workflows/](../workflows/).
 
 ---
 
@@ -91,7 +91,7 @@ Organized in a 6-tier pyramid from strategic orchestration down to optimization 
 - **When to use**: Complex enterprise projects needing governance
 - **When to avoid**: MVPs, rapid prototyping, evolving requirements — BMAD is brittle when specs change mid-project
 
-**GSD (Get Shit Done)** addresses context rot through systematic 6-phase workflow (Initialize → Discuss → Plan → Execute → Verify → Complete) with fresh 200k-token contexts per task. Core concepts (multi-agent orchestration, fresh context management) overlap significantly with existing patterns like Ralph Loop, Gas Town, and BMAD. See [resource evaluation](../docs/resource-evaluations/gsd-evaluation.md) for detailed comparison.
+**GSD (Get Shit Done)** addresses context rot through systematic 6-phase workflow (Initialize → Discuss → Plan → Execute → Verify → Complete) with fresh 200k-token contexts per task. Core concepts (multi-agent orchestration, fresh context management) overlap significantly with existing patterns like Ralph Loop, Gas Town, and BMAD. See [resource evaluation](../../docs/resource-evaluations/gsd-evaluation.md) for detailed comparison.
 
 > **Emerging**: [Ralph Inferno](https://github.com/sandstream/ralph-inferno) implements autonomous multi-persona workflows (Analyst→PM→UX→Architect→Business) with VM-based execution and self-correcting E2E loops. Experimental but interesting for "vibe coding at scale".
 
@@ -165,7 +165,7 @@ Document your team's plan-first triggers:
 
 **See also**: [Plan Mode documentation](#23-plan-mode) for `/plan` command usage.
 
-> **Advanced pattern**: For an iterative annotation-based approach to plan-driven development, see [Custom Markdown Plans (Boris Tane Pattern)](./workflows/plan-driven.md#advanced-custom-markdown-plans-boris-tane-pattern).
+> **Advanced pattern**: For an iterative annotation-based approach to plan-driven development, see [Custom Markdown Plans (Boris Tane Pattern)](../workflows/plan-driven.md#advanced-custom-markdown-plans-boris-tane-pattern).
 
 ---
 
@@ -601,8 +601,8 @@ Recommended stacks by situation:
 
 ## See Also
 
-- [workflows/tdd-with-claude.md](./workflows/tdd-with-claude.md) — Practical TDD guide
-- [workflows/spec-first.md](./workflows/spec-first.md) — Spec-first development
-- [workflows/plan-driven.md](./workflows/plan-driven.md) — Using /plan mode
-- [workflows/iterative-refinement.md](./workflows/iterative-refinement.md) — Refinement loops
-- [ultimate-guide.md#912](./ultimate-guide.md) — Section 9.12 summary
+- [workflows/tdd-with-claude.md](../workflows/tdd-with-claude.md) — Practical TDD guide
+- [workflows/spec-first.md](../workflows/spec-first.md) — Spec-first development
+- [workflows/plan-driven.md](../workflows/plan-driven.md) — Using /plan mode
+- [workflows/iterative-refinement.md](../workflows/iterative-refinement.md) — Refinement loops
+- [ultimate-guide.md#912](../ultimate-guide.md) — Section 9.12 summary

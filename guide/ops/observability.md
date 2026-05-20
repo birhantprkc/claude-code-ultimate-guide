@@ -119,7 +119,7 @@ claude-search "keyword"
 claude-extract --format markdown
 ```
 
-See [session-search.sh](../examples/scripts/session-search.sh) for the complete script.
+See [session-search.sh](../../examples/scripts/session-search.sh) for the complete script.
 
 ---
 
@@ -976,9 +976,9 @@ For a full governance setup with automatic audit trail logging, see [Enterprise 
 
 ## Related Resources
 
-- [Session Search Script](../examples/scripts/session-search.sh) - Fast session search & resume
-- [Session Logger Hook](../examples/hooks/bash/session-logger.sh)
-- [Stats Analysis Script](../examples/scripts/session-stats.sh)
+- [Session Search Script](../../examples/scripts/session-search.sh) - Fast session search & resume
+- [Session Logger Hook](../../examples/hooks/bash/session-logger.sh)
+- [Stats Analysis Script](../../examples/scripts/session-stats.sh)
 - [Enterprise AI Governance](../security/enterprise-governance.md) - Org-level governance, audit trails, compliance
 - [Third-Party Tools](../ecosystem/third-party-tools.md) - Community GUIs, TUIs, and dashboards (ccusage, ccburn, claude-code-viewer)
 - [Data Privacy Guide](../security/data-privacy.md) - What data leaves your machine

@@ -1,0 +1,76 @@
+---
+title: "Auto-Memories — When and How"
+subtitle: "The automatic memory system vs manual CLAUDE.md"
+card-number: "T08"
+category: "Technical"
+difficulty: "intermediate"
+guide-version: "3.41.0"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+date: "May 2026"
+layout: "two-col"
+lang: en
+format:
+  recap-card-typst: default
+---
+
+## What is it?
+
+Introduced in v2.1.59 (February 2026), auto-memories allow Claude Code to save useful context between sessions without manually editing CLAUDE.md. Claude identifies key decisions during conversations and stores them automatically for future sessions in the same project.
+
+**Do not confuse** with Claude.ai memory (web interface). These are two distinct systems. Claude Code auto-memories are local, per-project, with no connection to your claude.ai account.
+
+## Where memories are stored
+
+```
+~/.claude/projects/<encoded-path>/memory/MEMORY.md
+```
+
+For project-level memories (if you use `.claude/memory/`):
+
+```
+.claude/memory/MEMORY.md
+```
+
+Since v2.1.63, auto-memories are shared across git worktrees of the same repo.
+
+## What gets memorized
+
+```
+Architectural decisions:
+  "This project uses Prisma for database access"
+
+Team preferences:
+  "Functional components are preferred over classes"
+
+Specific patterns:
+  "API routes follow RESTful naming in /api/v1/"
+
+Known issues:
+  "Do not use package X, version conflict with Y"
+```
+
+## CLAUDE.md vs Auto-Memories
+
+| Aspect | CLAUDE.md | Auto-Memories |
+|--------|-----------|---------------|
+| Management | Manual editing | Automatic capture |
+| Source | Explicit documentation | Conversation analysis |
+| Visibility | Git, shared with team | Local user, gitignore |
+| Ideal content | Team conventions | Personal discoveries |
+| Control | Full | Limited |
+
+## Managing memories with /memory
+
+```bash
+# In Claude Code (interactive mode)
+/memory          # View, edit, or delete entries
+```
+
+## When to use which
+
+**Write in CLAUDE.md manually:** team conventions, critical rules everyone must follow, official architectural decisions.
+
+**Let auto-memories work:** personal workflow preferences, patterns discovered mid-session, temporary context tied to a feature in progress.
+
+**Main limitation**: no fine-grained control over what gets memorized automatically. If a captured decision becomes outdated, it must be deleted manually via `/memory`. Auto-memories are not committed to Git, so they remain invisible to other team members.

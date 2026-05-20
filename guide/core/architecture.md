@@ -897,7 +897,7 @@ MCP (Model Context Protocol) servers extend Claude Code with additional tools.
 
 > **💡 Visual Guide**: The following diagram illustrates how MCP creates a secure control layer between LLMs and real systems. The LLM layer has **no direct data access** - the MCP Server enforces security policies before tools can interact with databases, APIs, or files.
 
-![MCP Architecture - 7-Layer Security Model](./images/mcp-architecture-diagram.svg)
+![MCP Architecture - 7-Layer Security Model](../images/mcp-architecture-diagram.svg)
 
 *Figure 1: MCP Architecture showing separation between thinking (LLM), control (MCP Server), and execution (Tools). Design inspired by [Dinesh Kumar's LinkedIn visualization](https://www.linkedin.com/posts/dinesh-kumar-6b0528b4_model-context-protocol-mcp-why-it-came-activity-7419969525795782656-VoFh), recreated under Apache-2.0 license.*
 

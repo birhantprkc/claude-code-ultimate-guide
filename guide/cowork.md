@@ -91,4 +91,4 @@ No official security documentation exists yet. Essential practices:
 
 ---
 
-*Back to [AI Ecosystem Guide](./ai-ecosystem.md) | [Ultimate Guide](./ultimate-guide.md) | [Main README](../README.md)*
+*Back to [AI Ecosystem Guide](ecosystem/ai-ecosystem.md) | [Ultimate Guide](./ultimate-guide.md) | [Main README](../README.md)*

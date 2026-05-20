@@ -61,5 +61,5 @@ Haiku is 60x cheaper than Opus for input tokens. Mechanical tasks — renames, f
 ---
 
 **Sources**:
-- Model Selection Guide: [Section 2.5](../guide/ultimate-guide.md#25-model-selection--thinking-guide)
-- Planner/Implementer pattern: [Section 2.5 Model per Agent Patterns](../guide/ultimate-guide.md#model-per-agent-patterns)
+- Model Selection Guide: [Section 2.5](../../guide/ultimate-guide.md#25-model-selection--thinking-guide)
+- Planner/Implementer pattern: [Section 2.5 Model per Agent Patterns](../../guide/ultimate-guide.md#model-per-agent-patterns)

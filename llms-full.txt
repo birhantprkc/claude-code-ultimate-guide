@@ -10,8 +10,8 @@
 
 - Title: Claude Code Ultimate Guide
 - Author: Florian Bruniaux (Founding Engineer @ Méthode Aristote)
-- Version: 3.40.0
-- Last Updated: May 3, 2026
+- Version: 3.41.0
+- Last Updated: May 18, 2026
 - License: CC BY-SA 4.0
 - Repository: https://github.com/FlorianBruniaux/claude-code-ultimate-guide
 - Landing: https://cc.bruniaux.com
@@ -61,7 +61,7 @@ This guide is the most comprehensive community resource for Claude Code. It cove
 
 ## Full Cheatsheet
 
-**Version**: 3.40.0 | **Last Updated**: May 2026
+**Version**: 3.41.0 | **Last Updated**: May 2026
 
 ---
 
@@ -164,10 +164,11 @@ This guide is the most comprehensive community resource for Claude Code. It cove
 ├── settings.json       # Hooks (committed)
 ├── settings.local.json # Permissions (not committed)
 ├── agents/             # Custom agents
-├── commands/           # Slash commands
+├── skills/             # User-invocable skills (slash commands + knowledge modules)
+│                       # Since CC 2.1.3: commands/ merged here
+│                       # Add disable-model-invocation: true for user-only skills
 ├── hooks/              # Event scripts
-├── rules/              # Auto-loaded rules
-└── skills/             # Knowledge modules
+└── rules/              # Auto-loaded rules
 ```
 
 ---
@@ -232,9 +233,15 @@ tools: Read, Write, Edit, Bash
 # Instructions here
 ```
 
-**Command** (`.claude/commands/my-command.md`):
+**Skill / Command** (`.claude/skills/my-skill.md`, since CC 2.1.3):
+```yaml
+---
+name: my-skill
+disable-model-invocation: true  # user-only skill (replaces .claude/commands/)
+---
+```
 ```markdown
-# Command Name
+# Skill Name
 Instructions for what to do...
 $ARGUMENTS[0] $ARGUMENTS[1] — user args
 ```
@@ -497,9 +504,9 @@ claude-code-ultimate-guide/
 │   └── claude-code-releases.md     # Official release tracking
 ├── examples/                       # 186 production-ready templates
 │   ├── agents/                     # Custom AI personas
-│   ├── commands/                   # Slash commands
+│   ├── commands/                   # Legacy slash commands (pre-CC 2.1.3)
 │   ├── hooks/                      # Event automation (bash + PowerShell)
-│   ├── skills/                     # Knowledge modules
+│   ├── skills/                     # User-invocable skills (unified since CC 2.1.3)
 │   └── scripts/                    # Utility scripts
 ├── machine-readable/               # LLM/AI consumption
 │   ├── reference.yaml              # Machine-optimized index (~2K tokens)

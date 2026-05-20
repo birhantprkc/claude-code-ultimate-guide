@@ -259,7 +259,7 @@ Based on time spent and topics covered:
      - Advanced/Power (30min/60min/120min profiles): [Quiz - Production](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/tree/main/quiz#advanced-categories) - Categories: MCP, production, advanced, learning, ecosystem
      - Security-focused: [Quiz - Security Hardening](https://github.com/FlorianBruniaux/claude-code-ultimate-guide-landing/tree/main/questions/13-security-hardening) - Attack techniques, CVEs, campaigns, scanning tools
    - Cheat sheet: [Printable cheatsheet](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/cheatsheet.md)
-   - Full guide: [Ultimate Guide (22K+ lines)](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md)
+   - Full guide: [Ultimate Guide (25K+ lines)](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md)
 
 4. **Section-specific links**: When referencing specific sections, use GitHub line anchors:
    - Format: `https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#L{line_number}`

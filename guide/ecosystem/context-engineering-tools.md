@@ -8,9 +8,9 @@ tags: [context, tokens, optimization, ecosystem, tools, advanced]
 
 > **Confidence**: Tier 1/2 — Core concepts based on published research and production data. Third-party tool details based on public documentation (March 2026).
 >
-> **Related**: [Context Engineering (configuration guide)](./context-engineering.md) | [Third-Party Tools](./third-party-tools.md) | [MCP Servers Ecosystem](./mcp-servers-ecosystem.md)
+> **Related**: [Context Engineering (configuration guide)](../core/context-engineering.md) | [Third-Party Tools](./third-party-tools.md) | [MCP Servers Ecosystem](./mcp-servers-ecosystem.md)
 
-This page maps the ecosystem of tools that help you manage what enters the context window and what doesn't. It complements the [configuration-focused context engineering guide](./context-engineering.md), which covers CLAUDE.md structure and path-scoping. Here the focus is on the broader tooling landscape: output compression, prompt compression, AI gateways, RAG optimization, observability, and inference infrastructure.
+This page maps the ecosystem of tools that help you manage what enters the context window and what doesn't. It complements the [configuration-focused context engineering guide](../core/context-engineering.md), which covers CLAUDE.md structure and path-scoping. Here the focus is on the broader tooling landscape: output compression, prompt compression, AI gateways, RAG optimization, observability, and inference infrastructure.
 
 ---
 
@@ -51,7 +51,7 @@ MVC is the principle of providing exactly the information needed for the task, n
 - **Under-context**: the model lacks necessary information, hallucinates or produces generic output
 - **Over-context**: the model is overwhelmed with irrelevant information, attention diffuses, adherence degrades
 
-The research on adherence degradation (see [context engineering guide, section 2](./context-engineering.md#2-the-context-budget)) quantifies the over-context failure: a CLAUDE.md over 400 lines typically drops adherence to ~60%. The cause is attention diffusion — too many potentially relevant signals compete for the model's limited attention budget.
+The research on adherence degradation (see [context engineering guide, section 2](../core/context-engineering.md#2-the-context-budget)) quantifies the over-context failure: a CLAUDE.md over 400 lines typically drops adherence to ~60%. The cause is attention diffusion — too many potentially relevant signals compete for the model's limited attention budget.
 
 MVC is not about minimalism for its own sake. It's about precision. A 300-token system prompt that covers exactly what the model needs beats a 3,000-token prompt that buries the critical instruction on page five.
 
@@ -158,7 +158,7 @@ context-mode is an MCP server that operates at the boundary between tools and co
 
 **Session memory after `/compact`**: context-mode uses SQLite + FTS5 to index session history. When `/compact` runs and discards raw conversation history, the SQLite index persists. Subsequent retrieval queries use BM25 ranking to surface relevant earlier context without reloading the full transcript.
 
-**"Think in Code" pattern**: context-mode v1.0.64 documented a pattern where, instead of reading files to answer an exploratory question, the model writes and executes a script that queries or counts, then reads only the result. This is covered in depth as a named technique in the [context engineering guide](./context-engineering.md).
+**"Think in Code" pattern**: context-mode v1.0.64 documented a pattern where, instead of reading files to answer an exploratory question, the model writes and executes a script that queries or counts, then reads only the result. This is covered in depth as a named technique in the [context engineering guide](../core/context-engineering.md).
 
 **When to choose context-mode**: If you run Claude Code alongside other platforms (Cursor, Gemini CLI) and want a single context management layer that works across all of them. Also useful when MCP tool outputs are large and structured, and you need post-compact session retrieval beyond what `/compact` alone provides.
 
@@ -502,7 +502,7 @@ These tools are not mutually exclusive. Langfuse for tracing plus Phoenix for RA
 | Monitoring token spend | ccusage (see [Third-Party Tools](./third-party-tools.md)) |
 | Context growing too long in a session | `/compact` at 70% usage |
 | Forgetting past session decisions | ICM memory system |
-| Claude ignoring rules from long CLAUDE.md | Path-scoping (see [context engineering guide](./context-engineering.md)) |
+| Claude ignoring rules from long CLAUDE.md | Path-scoping (see [context engineering guide](../core/context-engineering.md)) |
 
 ### You are building an AI application
 
@@ -547,7 +547,7 @@ A finding that cuts across multiple research directions: token reduction in gene
 
 > **Cross-references**
 >
-> - [Context Engineering (configuration guide)](./context-engineering.md) — CLAUDE.md hierarchy, path-scoping, budget management
+> - [Context Engineering (configuration guide)](../core/context-engineering.md) — CLAUDE.md hierarchy, path-scoping, budget management
 > - [Third-Party Tools](./third-party-tools.md) — RTK full reference, ccusage, ICM, and other CC-specific tools
 > - [MCP Servers Ecosystem](./mcp-servers-ecosystem.md) — MCP as dynamic context injection
 > - [Observability](../ops/observability.md) — Monitoring Claude Code in production

@@ -7,9 +7,9 @@ tags: [reference, architecture, cheatsheet]
 # Claude Code — Visual Reference
 
 All diagrams in one place. Quick visual overview of Claude Code's key concepts.
-For detailed docs → [Ultimate Guide](./ultimate-guide.md) | [Cheatsheet](./cheatsheet.md)
+For detailed docs → [Ultimate Guide](../ultimate-guide.md) | [Cheatsheet](../cheatsheet.md)
 
-> **Interactive Mermaid diagrams available**: For 40 interactive diagrams covering model selection, agent lifecycle, memory hierarchy, multi-agent patterns, security threats, and more — see **[guide/diagrams/](./diagrams/)**. This file contains ASCII versions of key concepts.
+> **Interactive Mermaid diagrams available**: For 40 interactive diagrams covering model selection, agent lifecycle, memory hierarchy, multi-agent patterns, security threats, and more — see **[guide/diagrams/](../diagrams/)**. This file contains ASCII versions of key concepts.
 
 > **20 diagrams**: 8 new (this file) + 12 from existing guides, all consolidated here.
 
@@ -78,7 +78,7 @@ Context Usage
 - **Orange (70-90%)** — Run `/compact` immediately. Context is degrading.
 - **Red (90%+)** — Run `/clear` and restart. Responses are unreliable.
 
-→ Source: [ultimate-guide.md:1335](./ultimate-guide.md)
+→ Source: [ultimate-guide.md:1335](../ultimate-guide.md)
 
 ---
 
@@ -111,7 +111,7 @@ Cycle through modes with `Shift+Tab`:
 - `/plan` — Enter plan mode directly
 - `/execute` — Exit plan mode
 
-→ Source: [ultimate-guide.md:760](./ultimate-guide.md)
+→ Source: [ultimate-guide.md:760](../ultimate-guide.md)
 
 ---
 
@@ -142,7 +142,7 @@ The recommended workflow for every task:
 - **Step 5**: Read every diff. Never blindly accept.
 - **Step 9**: Compact after each task to stay in the green zone.
 
-→ Source: [ultimate-guide.md:277](./ultimate-guide.md)
+→ Source: [ultimate-guide.md:277](../ultimate-guide.md)
 
 ---
 
@@ -174,7 +174,7 @@ What do you need?
 └─ Team rollout ────────────────→ Read adoption-approaches.md
 ```
 
-→ Source: [reference.yaml](../machine-readable/reference.yaml) (decide section)
+→ Source: [reference.yaml](../../machine-readable/reference.yaml) (decide section)
 
 ---
 
@@ -268,7 +268,7 @@ How hooks intercept Claude Code's execution pipeline:
 └─────────────────────────────────────────────────────────┘
 ```
 
-→ Source: [ultimate-guide.md:6327](./ultimate-guide.md)
+→ Source: [ultimate-guide.md:6327](../ultimate-guide.md)
 
 ---
 
@@ -409,7 +409,7 @@ Found too many results?
 └─ ast-grep → Add constraints to pattern
 ```
 
-→ Source: [search-tools-mastery.md:75](./workflows/search-tools-mastery.md)
+→ Source: [search-tools-mastery.md:75](../workflows/search-tools-mastery.md)
 
 ---
 
@@ -450,7 +450,7 @@ How much to review AI-generated code based on risk level:
 └─────────────────────────────────────────────────────────┘
 ```
 
-→ Source: [ultimate-guide.md:1182](./ultimate-guide.md)
+→ Source: [ultimate-guide.md:1182](../ultimate-guide.md)
 
 ---
 
@@ -546,7 +546,7 @@ Iterative code review pattern where Claude reviews, fixes, and re-reviews:
 └─────────────────────────────────────────┘
 ```
 
-→ Source: [iterative-refinement.md:354](./workflows/iterative-refinement.md)
+→ Source: [iterative-refinement.md:354](../workflows/iterative-refinement.md)
 
 ---
 
@@ -586,7 +586,7 @@ Quarto + Typst stack for generating professional PDFs:
 └─────────────────────────────────────────────────┘
 ```
 
-→ Source: [pdf-generation.md:58](./workflows/pdf-generation.md)
+→ Source: [pdf-generation.md:58](../workflows/pdf-generation.md)
 
 ---
 
@@ -639,7 +639,7 @@ Key rules:
   REPEAT → One feature at a time, always in this order
 ```
 
-> Source: [workflows/tdd-with-claude.md:78](./workflows/tdd-with-claude.md)
+> Source: [workflows/tdd-with-claude.md:78](../workflows/tdd-with-claude.md)
 
 ---
 
@@ -767,4 +767,4 @@ Emergency response when a secret (API key, token, password) is exposed:
 
 ---
 
-*Back to [Guide README](./README.md) | [Cheatsheet](./cheatsheet.md) | [Main README](../README.md)*
+*Back to [Guide README](../README.md) | [Cheatsheet](../cheatsheet.md) | [Main README](../README.md)*

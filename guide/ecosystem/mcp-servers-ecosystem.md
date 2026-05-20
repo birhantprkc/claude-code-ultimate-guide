@@ -722,7 +722,7 @@ assigned:me is:unresolved             # issues assigned to you
 
 **Resources**:
 - **GitHub**: https://github.com/getsentry/sentry-mcp
-- **Sentry MCP Docs**: https://docs.sentry.io/product/integrations/mcp/
+- **Sentry MCP Docs**: https://docs.sentry.io/product/sentry-mcp/
 - **Reference File**: `examples/skills/mcp-integration-reference/references/sentry-mcp.md`
 - **Auth Token Setup**: https://sentry.io/settings/account/api/auth-tokens/
 
@@ -942,7 +942,7 @@ Result: Call graph showing 4 callers across 3 files
 | Native Grep | Instant, exact patterns | No semantic understanding |
 | GitHub Code Search | Cloud-based, cross-repo | Requires GitHub, no call graphs |
 
-**Cross-reference**: See [ultimate-guide.md — MCP Servers: Grepai](./ultimate-guide.md) for detailed usage patterns, prompt strategies, and integration with other MCP servers.
+**Cross-reference**: See [ultimate-guide.md — MCP Servers: Grepai](../ultimate-guide.md) for detailed usage patterns, prompt strategies, and integration with other MCP servers.
 
 **Resources**:
 - **GitHub**: https://github.com/yoanbernabeu/grepai
@@ -1597,4 +1597,4 @@ Servers evaluated but not included in the validated list:
 
 ---
 
-*Back to [main guide](./ultimate-guide.md) | [README](./README.md)*
+*Back to [main guide](../ultimate-guide.md) | [README](../README.md)*

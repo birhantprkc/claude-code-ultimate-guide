@@ -6,7 +6,8 @@
 #   ./install-templates.sh list                          # List all available templates
 #   ./install-templates.sh agent security-reviewer       # Install a specific agent
 #   ./install-templates.sh hook dangerous-actions-blocker # Install a specific hook
-#   ./install-templates.sh command pr                    # Install a specific command
+#   ./install-templates.sh skill pr                      # Install a skill (CC 2.1.3+)
+#   ./install-templates.sh command pr                    # Alias for skill (backward compat)
 
 set -e
 
@@ -57,15 +58,13 @@ list_templates() {
     echo "  notification, auto-format, security-check, session-logger, claudemd-scanner"
     echo ""
 
-    echo -e "${GREEN}Commands:${NC}"
+    echo -e "${GREEN}Skills (unified — includes former commands, CC 2.1.3+):${NC}"
     echo "  pr, release-notes, sonarqube, commit, diagnose, generate-tests,"
-    echo "  review-pr, git-worktree, validate-changes, quiz,"
-    echo "  catchup, security, refactor, explain, optimize, ship"
-    echo ""
-
-    echo -e "${GREEN}Skills:${NC}"
-    echo "  pdf-generator, TDD, backend-architect, security-guardian,"
-    echo "  bilan-hebdo-tech-product, skill-creator, using-git-worktree"
+    echo "  review-pr, git-worktree, validate-changes, learn-quiz, catchup,"
+    echo "  security-check, security-audit, refactor, explain, optimize, ship,"
+    echo "  audit-codebase, autoresearch, ci-all, ci-status, ci-tests, ci-pipeline,"
+    echo "  handoff-create, handoff-resume, handoff-update, scaffold, qa,"
+    echo "  and more — see examples/skills/ in the repo"
     echo ""
 
     echo -e "${GREEN}Memory (CLAUDE.md templates):${NC}"
@@ -123,34 +122,23 @@ install_hook() {
 
 install_command() {
     local name="$1"
-    local dest_dir="${CLAUDE_DIR}/commands"
-    local dest_file="${dest_dir}/${name}.md"
-    local url="${REPO_RAW}/examples/commands/${name}.md"
-
-    ensure_dir "$dest_dir"
-
-    echo -e "${BLUE}Downloading command: ${name}...${NC}"
-    if curl -fsSL "$url" -o "$dest_file" 2>/dev/null; then
-        echo -e "${GREEN}✓ Installed: ${dest_file}${NC}"
-        echo -e "${YELLOW}Use with: /${name} in Claude Code${NC}"
-    else
-        echo -e "${RED}✗ Failed to download command: ${name}${NC}"
-        echo "  Check available commands with: $0 list"
-        exit 1
-    fi
+    echo -e "${YELLOW}Note: Commands were unified into skills in Claude Code 2.1.3.${NC}"
+    echo -e "${YELLOW}Installing '${name}' as a skill instead...${NC}"
+    install_skill "$name"
 }
 
 install_skill() {
     local name="$1"
-    local dest_dir="${CLAUDE_DIR}/skills"
-    local dest_file="${dest_dir}/${name}.md"
-    local url="${REPO_RAW}/examples/skills/${name}.md"
+    local dest_dir="${CLAUDE_DIR}/skills/${name}"
+    local dest_file="${dest_dir}/SKILL.md"
+    local url="${REPO_RAW}/examples/skills/${name}/SKILL.md"
 
     ensure_dir "$dest_dir"
 
     echo -e "${BLUE}Downloading skill: ${name}...${NC}"
     if curl -fsSL "$url" -o "$dest_file" 2>/dev/null; then
         echo -e "${GREEN}✓ Installed: ${dest_file}${NC}"
+        echo -e "${YELLOW}Use with: /${name} in Claude Code${NC}"
     else
         echo -e "${RED}✗ Failed to download skill: ${name}${NC}"
         echo "  Check available skills with: $0 list"

@@ -181,6 +181,8 @@ for cmd in security-check security-audit; do
   found=false
   [ -f "$HOME/.claude/commands/$cmd.md" ] && found=true
   [ -f ".claude/commands/$cmd.md" ] && found=true
+  [ -f "$HOME/.claude/skills/$cmd/SKILL.md" ] && found=true
+  [ -f ".claude/skills/$cmd/SKILL.md" ] && found=true
   $found && echo "  ✅ /$cmd" || echo "  ❌ /$cmd (fallback mode)"
 done
 
@@ -287,20 +289,21 @@ Take the overall score from its report (score/100). Multiply by 0.10 to get pts 
 ```bash
 agents=$(find .claude/agents -name "*.md" 2>/dev/null | wc -l | tr -d " ")
 commands=$(find .claude/commands -name "*.md" 2>/dev/null | wc -l | tr -d " ")
-with_front=$(find .claude/agents .claude/commands -name "*.md" 2>/dev/null | xargs grep -l "^---" 2>/dev/null | wc -l | tr -d " ")
-with_desc=$(find .claude/agents .claude/commands -name "*.md" 2>/dev/null | xargs grep -l "^description:" 2>/dev/null | wc -l | tr -d " ")
-# Check argument-hint where $ARGUMENTS is used
+skills=$(find .claude/skills -name "SKILL.md" 2>/dev/null | wc -l | tr -d " ")
+with_front=$(find .claude/agents .claude/commands .claude/skills -name "*.md" 2>/dev/null | xargs grep -l "^---" 2>/dev/null | wc -l | tr -d " ")
+with_desc=$(find .claude/agents .claude/commands .claude/skills -name "*.md" 2>/dev/null | xargs grep -l "^description:" 2>/dev/null | wc -l | tr -d " ")
+# Check argument-hint on legacy commands still using $ARGUMENTS
 uses_args=$(find .claude/commands -name "*.md" 2>/dev/null | xargs grep -l '\$ARGUMENTS' 2>/dev/null | wc -l | tr -d " ")
 with_hint=$(find .claude/commands -name "*.md" 2>/dev/null | xargs grep -l 'argument-hint' 2>/dev/null | wc -l | tr -d " ")
-echo "Agents: $agents | Commands: $commands | With frontmatter: $with_front | With description: $with_desc"
+echo "Agents: $agents | Commands: $commands | Skills: $skills | With frontmatter: $with_front | With description: $with_desc"
 echo "Commands using \$ARGUMENTS: $uses_args | With argument-hint: $with_hint"
 ```
 
 Fallback scoring (max 8 pts):
-- Has agents or commands: 2 pts
+- Has agents, commands, or skills: 2 pts
 - All have YAML frontmatter: 2 pts
 - All have `description:` field: 2 pts
-- `argument-hint:` present in all commands that use `$ARGUMENTS`: 2 pts
+- `argument-hint:` present in all legacy commands that use `$ARGUMENTS`: 2 pts
 
 ### Dimension 5 — Security Posture (20 pts)
 
@@ -385,20 +388,24 @@ Scoring (max 10 pts):
 ### Dimension 7 — Workflow Commands (10 pts)
 
 ```bash
-echo "=== Core Workflow Commands ==="
+echo "=== Core Workflow Skills/Commands ==="
 for cmd in investigate qa canary land-and-deploy review-pr; do
   found=false
   [ -f ".claude/commands/$cmd.md" ] && found=true
   [ -f "$HOME/.claude/commands/$cmd.md" ] && found=true
+  [ -f ".claude/skills/$cmd/SKILL.md" ] && found=true
+  [ -f "$HOME/.claude/skills/$cmd/SKILL.md" ] && found=true
   $found && echo "  ✅ /$cmd" || echo "  ❌ /$cmd"
 done
 
 echo ""
-echo "=== Additional Debug/Deploy Commands ==="
+echo "=== Additional Debug/Deploy Skills/Commands ==="
 for cmd in ship commit release-notes diagnose; do
   found=false
   [ -f ".claude/commands/$cmd.md" ] && found=true
   [ -f "$HOME/.claude/commands/$cmd.md" ] && found=true
+  [ -f ".claude/skills/$cmd/SKILL.md" ] && found=true
+  [ -f "$HOME/.claude/skills/$cmd/SKILL.md" ] && found=true
   $found && echo "  ✅ /$cmd" || echo "  ❌ /$cmd"
 done
 ```
@@ -424,7 +431,7 @@ grep -rn "disableSkillShellExecution" ~/.claude/settings.json .claude/settings.j
   | sed "s/^/  /" || echo "  disableSkillShellExecution: not set"
 
 echo ""
-echo "=== argument-hint Coverage ==="
+echo "=== argument-hint Coverage (legacy commands) ==="
 missing=0
 for f in $(find .claude/commands -name "*.md" 2>/dev/null); do
   grep -q '\$ARGUMENTS' "$f" && ! grep -q "argument-hint" "$f" && {
@@ -432,7 +439,7 @@ for f in $(find .claude/commands -name "*.md" 2>/dev/null); do
     missing=$(( missing + 1 ))
   }
 done
-[ $missing -eq 0 ] && echo "  ✅ All commands using \$ARGUMENTS have argument-hint"
+[ $missing -eq 0 ] && echo "  ✅ All commands using \$ARGUMENTS have argument-hint (skills use effort: field instead)"
 
 echo ""
 echo "=== Hook Profiles (env vars) ==="
@@ -519,9 +526,9 @@ curl -sL https://raw.githubusercontent.com/FlorianBruniaux/claude-code-ultimate-
   > ~/.claude/skills/audit-agents-skills/SKILL.md
 
 # security-check (Dimension 5 — scans against threat-db, 55 CVEs, 24 techniques)
-mkdir -p ~/.claude/commands
-curl -sL https://raw.githubusercontent.com/FlorianBruniaux/claude-code-ultimate-guide/main/examples/commands/security-check.md \
-  > ~/.claude/commands/security-check.md
+mkdir -p ~/.claude/skills/security-check
+curl -sL https://raw.githubusercontent.com/FlorianBruniaux/claude-code-ultimate-guide/main/examples/skills/security-check/SKILL.md \
+  > ~/.claude/skills/security-check/SKILL.md
 
 # Alternative for Dimension 1 — context-evaluator.ai
 # Zero-install LLM-native audit: 17 AI evaluators for CLAUDE.md/AGENTS.md,
@@ -602,7 +609,7 @@ Top 3 Critical Gaps:
 | **PreToolUse** | Hook that fires BEFORE Claude executes a tool — used for security checks and approval gates |
 | **effort: field** | Skill frontmatter for low/medium/high complexity signal — used by Claude to allocate thinking budget |
 | **argument-hint** | Frontmatter field showing placeholder text in slash command menu for commands using `$ARGUMENTS` |
-| **Threat Database** | `examples/commands/resources/threat-db.yaml` — 55 CVEs, 24 attack techniques, minimum safe versions |
+| **Threat Database** | `examples/skills/update-threat-db/threat-db.yaml` — 55 CVEs, 24 attack techniques, minimum safe versions |
 | **Cache Bug #40524** | Bug 2 (HIGH): `--resume` causes full context re-announcement (87-118K tokens rebuilt per resume) |
 | **Scope Drift** | When a PR changes files outside the stated plan intent. Detected by comparing `~/.claude/plans/` vs `git diff --stat` |
 | **Fix-First Heuristic** | Review pattern: auto-fix mechanical issues, ask for judgment calls on security/design decisions |
@@ -680,7 +687,7 @@ Top 3 Critical Gaps:
 | `/eval-rules` | Rules Hygiene | Same pattern |
 | `/eval-skills` | Skills Quality | Same pattern |
 | `/audit-agents-skills` | Agents/Commands | Same pattern |
-| `/security-check` | Security Posture (quick, ~30s) | `mkdir -p ~/.claude/commands && curl -sL ...` |
+| `/security-check` | Security Posture (quick, ~30s) | `mkdir -p ~/.claude/skills/security-check && curl -sL ...` |
 | `/security-audit` | Security Posture (full, 2-5 min, scored /100) | Same pattern |
 | [`tools/context-audit-prompt.md`](context-audit-prompt.md) | Deep-dive on context engineering | Self-contained prompt, no install needed |
 | [`tools/onboarding-prompt.md`](onboarding-prompt.md) | Setup from scratch | Self-contained prompt, no install needed |
@@ -697,4 +704,4 @@ Top 3 Critical Gaps:
 
 ---
 
-*Version 5.1 (guide v3.39.1+) | Refactored from checklist to orchestrator: 8 weighted dimensions, delegated to eval-skills/eval-rules/token-audit/audit-agents-skills/security-check, inline fallback when skills absent. v5.1: context-evaluator.ai added as Dimension 1 alternative.*
+*Version 5.2 (guide v3.41.0+) | v5.2: skill detection updated for CC 2.1.3 skills-commands unification — Dimension 4/7/8 bash now checks both `.claude/skills/` and `.claude/commands/`; security-check install path fixed to canonical SKILL.md. v5.1: context-evaluator.ai added. v5.0: refactored from checklist to orchestrator with 8 weighted dimensions.*

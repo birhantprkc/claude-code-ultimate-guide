@@ -157,7 +157,7 @@ claude
 ## 📚 Related Resources
 
 - [Session Handoffs (Ultimate Guide)](../../guide/ultimate-guide.md#session-handoffs)
-- [Auto-Compaction Research (Architecture)](../../guide/architecture.md#auto-compaction)
+- [Auto-Compaction Research (Architecture)](../../guide/core/architecture.md#auto-compaction)
 - [Fresh Context Pattern (Ultimate Guide)](../../guide/ultimate-guide.md#fresh-context-pattern)
 - [Lorenz's Original Post](https://www.linkedin.com/posts/robin-lorenz-54055412a_claudecode-contextengineering-aiengineering-activity-7425136701515251713)
 

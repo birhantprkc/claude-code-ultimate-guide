@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.143"
-updated: "2026-05-16"
+latest: "2.1.144"
+updated: "2026-05-19"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,14 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.144"
+    date: "2026-05-19"
+    highlights:
+      - "⭐ `/resume` now lists background sessions started via `--bg` or agent view alongside interactive ones, marked with `bg`"
+      - "⭐ `/model` is now session-only by default — press `d` in the picker to set a default model for new sessions"
+      - "Renamed: 'extra usage' → 'usage credits' across CLI; `/extra-usage` now `/usage-credits` (old name still works)"
+      - "Bug fixes: 75s startup hang on unreachable `api.anthropic.com` (now 15s timeout), terminal rendering corruption, macOS Full Disk Access crash, MCP paginated `tools/list`, 40+ total"
 
   - version: "2.1.143"
     date: "2026-05-16"

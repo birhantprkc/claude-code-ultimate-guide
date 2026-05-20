@@ -1170,7 +1170,7 @@ Text-to-speech adds audio narration to Claude Code responses, enabling:
 
 ### Quick Start
 
-**Installation**: [TTS Setup Workflow](./workflows/tts-setup.md) (18 min)
+**Installation**: [TTS Setup Workflow](../workflows/tts-setup.md) (18 min)
 
 **Basic usage**:
 ```bash
@@ -1201,10 +1201,10 @@ Text-to-speech adds audio narration to Claude Code responses, enabling:
 
 ### Complete Documentation
 
-- **[Agent Vibes Integration Guide](../examples/integrations/agent-vibes/README.md)** - Overview, commands, use cases
-- **[Installation Guide](../examples/integrations/agent-vibes/installation.md)** - 18-minute setup procedure
-- **[Voice Catalog](../examples/integrations/agent-vibes/voice-catalog.md)** - 15 voices with audio samples
-- **[Troubleshooting](../examples/integrations/agent-vibes/troubleshooting.md)** - Common issues & solutions
+- **[Agent Vibes Integration Guide](../../examples/integrations/agent-vibes/README.md)** - Overview, commands, use cases
+- **[Installation Guide](../../examples/integrations/agent-vibes/installation.md)** - 18-minute setup procedure
+- **[Voice Catalog](../../examples/integrations/agent-vibes/voice-catalog.md)** - 15 voices with audio samples
+- **[Troubleshooting](../../examples/integrations/agent-vibes/troubleshooting.md)** - Common issues & solutions
 
 **Resources**:
 - GitHub: https://github.com/paulpreibisch/AgentVibes
@@ -1922,7 +1922,7 @@ Shared context via `~/Shared/CLAUDE.md` file.
 | Platform | macOS only (Windows planned, Linux not announced) |
 | Stability | Research preview |
 
-> **Deep Dive**: For complete security practices, troubleshooting, and detailed use cases, see [guide/cowork.md](./cowork.md).
+> **Deep Dive**: For complete security practices, troubleshooting, and detailed use cases, see [guide/cowork.md](../cowork.md).
 
 ---
 
@@ -2503,7 +2503,7 @@ All frameworks (Claude Code, ADK, LangChain) support the **Model Context Protoco
 **Resources**:
 - [MCP Specification](https://modelcontextprotocol.io)
 - [MCP Servers Ecosystem](https://github.com/modelcontextprotocol/servers)
-- [This guide's MCP coverage](../guide/ultimate-guide.md#mcp-servers) (Section 6)
+- [This guide's MCP coverage](../ultimate-guide.md#mcp-servers) (Section 6)
 
 ---
 

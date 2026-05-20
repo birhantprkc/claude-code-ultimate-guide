@@ -1,0 +1,79 @@
+---
+title: "Context Window : 200K vs 1M"
+subtitle: "Quand passer à la fenêtre de contexte étendue et à quel coût"
+card-number: "T19"
+category: "Technique"
+difficulty: "intermediate"
+guide-version: "3.41.0"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+date: "Mai 2026"
+layout: "two-col"
+lang: fr
+format:
+  recap-card-typst: default
+---
+
+## Les Deux Fenêtres
+
+| Paramètre | 200K standard | 1M GA (Max/Team/Enterprise) |
+|-----------|--------------|---------|
+| Disponibilité | Tous les plans | GA pour les plans Claude Code Max, Team, Enterprise (v2.1.75, mars 2026) |
+| Header requis | Aucun | Aucun (plans CC) · Header API pour accès direct |
+| Prix (input Opus) | $5/MTok | $10/MTok (API directe) · Inclus dans les plans CC sans surcoût |
+| Max output | 128K tokens | 128K tokens |
+
+Au-dessus de 200K tokens en entrée, **tous les tokens du contexte** sont facturés au tarif premium, pas seulement l'excédent. C'est un palier de coût, pas une progression linéaire.
+
+## Précision à l'Échelle (MRCR v2)
+
+| Modèle | À 256K | À 1M |
+|--------|--------|------|
+| Opus 4.6 | 93% | 76% |
+| Sonnet 4.5 | n/a | 18.5% |
+
+Opus 4.6 reste utilisable à 1M (76% de précision), mais la dégradation est mesurable. Sonnet s'effondre et n'est pas recommandé au-delà de 200K pour des tâches précises.
+
+## Coût par Session (Approximatif)
+
+| Type de session | Tokens in | Sonnet 4.6 | Opus 4.6 |
+|-----------------|-----------|-----------|---------|
+| PR review (≤200K) | 50K | ~$0.23 | ~$0.38 |
+| Refactorisation (≤200K) | 150K | ~$0.75 | ~$1.25 |
+| Analyse service (>200K) | 500K | ~$4.13 | ~$6.88 |
+
+## Quand Utiliser 1M
+
+La règle de la communauté : 200K + RAG par défaut, 1M Opus réservé aux cas où charger tout d'un coup est réellement nécessaire. Pour l'API directe, le header reste requis (tier 4+) ; les plans CC Max/Team/Enterprise l'ont inclus sans action supplémentaire.
+
+**Justifié :**
+- Audit complet d'un codebase entier en une seule passe
+- Analyse de documentation massive sans possibilité de chunking
+- Agent Teams sur une architecture multi-services complexe
+
+**Non justifié :**
+- Développement quotidien (même sur de gros projets)
+- Tâches avec feedback loop rapide (tests, debug)
+- Cas où /compact + sessions séquentielles fonctionnent
+
+## Activation (API)
+
+> **Plans Claude Code Max, Team et Enterprise** : le contexte 1M est activé automatiquement depuis v2.1.75 — aucun header nécessaire. La section ci-dessous concerne uniquement l'accès API direct (appels Anthropic hors CLI Claude Code).
+
+```python
+response = client.messages.create(
+    model="claude-opus-4-6",
+    extra_headers={
+        "anthropic-beta": "context-1m-2025-08-07"
+    },
+    messages=[...]
+)
+```
+
+Sans ce header (accès API direct, comptes tier 4+), les requêtes dépassant 200K tokens retournent une erreur.
+
+## Pattern Recommandé
+
+Travailler à 200K avec `/compact` proactif (à 70% de contexte) plutôt que d'activer 1M par défaut. Ouvrir une nouvelle session vers 70-75% d'utilisation : la performance est meilleure et le coût reste prévisible.
+
+Pour la RAG sur gros documents, Gemini 1.5 Pro offre 2M de contexte à $3.50/$10.50 par MTok, soit 2-3x moins cher pour du retrieval pur sans besoin du raisonnement Opus.

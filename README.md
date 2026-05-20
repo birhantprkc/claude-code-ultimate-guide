@@ -216,7 +216,7 @@ graph LR
 ├─ 📋 examples/           181 Production Templates
 │  ├─ CATALOG.md          Auto-generated index by complexity, time, domain
 │  ├─ agents/             23 custom AI personas
-│  ├─ commands/           52 slash commands
+│  ├─ commands/           redirect stubs (migrated to skills/ in CC 2.1.3)
 │  ├─ hooks/              37 hooks (bash + PowerShell)
 │  ├─ skills/             64 skills (9 on SkillHub)
 │  └─ scripts/            Utility scripts (audit, search)
@@ -285,7 +285,7 @@ graph LR
 - **655 malicious skills catalogued** — Unicode injection, hidden instructions, auto-execute patterns
 - **Production hardening workflows** — MCP vetting, injection defense, audit automation
 
-[Threat Database →](./examples/commands/resources/threat-db.yaml) | [Security Guide →](./guide/security/security-hardening.md)
+[Threat Database →](./examples/skills/update-threat-db/threat-db.yaml) | [Security Guide →](./guide/security/security-hardening.md)
 
 **What this means for you**: Vet MCP servers before trusting them, detect attack patterns in configs, comply with security audits.
 
@@ -340,7 +340,7 @@ Complete guides with rationale and examples:
 **Outcome**: Learn patterns, not just configs.
 
 Educational templates with explanations:
-- Agents (23), Commands (52), Hooks (37), Skills (64)
+- Agents (23), Skills (74), Hooks (37)
 - Comments explaining **why** each pattern works (not just what it does)
 - Gradual complexity progression (simple → advanced)
 
@@ -673,7 +673,7 @@ claude plugin install session-summary      # Session analytics dashboard (15 sec
 
 ### Threat Database
 
-**28 CVE-mapped vulnerabilities** and **655 malicious skills** tracked in [`examples/commands/resources/threat-db.yaml`](./examples/commands/resources/threat-db.yaml):
+**28 CVE-mapped vulnerabilities** and **655 malicious skills** tracked in [`examples/skills/update-threat-db/threat-db.yaml`](./examples/skills/update-threat-db/threat-db.yaml):
 
 | Threat Category | Count | Examples |
 |----------------|-------|----------|
@@ -796,7 +796,7 @@ Use this guide critically. Experiment. Share what works for you.
 
 **Agents** (23): [code-reviewer](./examples/agents/code-reviewer.md), [test-writer](./examples/agents/test-writer.md), [security-auditor](./examples/agents/security-auditor.md), [refactoring-specialist](./examples/agents/refactoring-specialist.md), [output-evaluator](./examples/agents/output-evaluator.md), [devops-sre](./examples/agents/devops-sre.md) ⭐
 
-**Slash Commands** (52): [/pr](./examples/commands/pr.md), [/commit](./examples/commands/commit.md), [/release-notes](./examples/commands/release-notes.md), [/diagnose](./examples/commands/diagnose.md), [/security](./examples/commands/security.md), [/security-check](./examples/commands/security-check.md) **, [/security-audit](./examples/commands/security-audit.md) **, [/update-threat-db](./examples/commands/update-threat-db.md) **, [/refactor](./examples/commands/refactor.md), [/explain](./examples/commands/explain.md), [/optimize](./examples/commands/optimize.md), [/ship](./examples/commands/ship.md)...
+**Skills** (74): [/pr](./examples/skills/pr/SKILL.md), [/commit](./examples/skills/commit/SKILL.md), [/release-notes](./examples/skills/release-notes/SKILL.md), [/diagnose](./examples/skills/diagnose/SKILL.md), [/security](./examples/skills/security/SKILL.md), [/security-check](./examples/skills/security-check/SKILL.md) **, [/security-audit](./examples/skills/security-audit/SKILL.md) **, [/update-threat-db](./examples/skills/update-threat-db/SKILL.md) **, [/refactor](./examples/skills/refactor/SKILL.md), [/explain](./examples/skills/explain/SKILL.md), [/optimize](./examples/skills/optimize/SKILL.md), [/ship](./examples/skills/ship/SKILL.md)...
 
 **Security Hooks** (37): [dangerous-actions-blocker](./examples/hooks/bash/dangerous-actions-blocker.sh), [prompt-injection-detector](./examples/hooks/bash/prompt-injection-detector.sh), [unicode-injection-scanner](./examples/hooks/bash/unicode-injection-scanner.sh), [output-secrets-scanner](./examples/hooks/bash/output-secrets-scanner.sh)...
 

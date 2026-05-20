@@ -1,0 +1,94 @@
+---
+title: "Modes de Permission"
+subtitle: "Contrôle des accès outils — du plus sûr au plus permissif"
+card-number: "T03"
+category: "Technique"
+guide-version: "3.41.0"
+difficulty: "beginner"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+wp-version: "1.1.0"
+date: "Mai 2026"
+layout: "two-col"
+lang: fr
+format:
+  recap-card-typst: default
+---
+
+## Modes Disponibles
+
+| Mode | Flag | Usage recommandé |
+|------|------|-----------------|
+| **Default** | _(aucun)_ | Développement quotidien |
+| **Auto-accept edits** | `Shift+Tab` | Revues de code |
+| **Auto-accept all** | `Shift+Tab x2` | Tâches répétitives connues |
+| **Bypass total** | `--dangerously-skip-permissions` | CI/CD headless |
+| **Moins de prompts** | `/less-permission-prompts` | Réduire les confirmations (v2.1.111) |
+
+**Note :** `--dangerously-skip-permissions` skippe aussi le répertoire `.claude/` (v2.1.121). Sur les abonnements Max, le mode Auto réduit automatiquement les confirmations de permissions (v2.1.111).
+
+## Whitelist d'Outils
+
+```bash
+# Autoriser seulement certains outils
+claude --allowedTools "Read,Grep,Glob"
+
+# Bloquer des outils spécifiques
+claude --disallowedTools "Bash,Write"
+
+# Combinaisons utiles
+claude --allowedTools "Read,Edit,Bash(git*)"
+```
+
+## Configuration dans settings.json
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(git log*)",
+      "Bash(npm test*)",
+      "Read",
+      "Edit"
+    ],
+    "deny": [
+      "Bash(rm*)",
+      "Bash(sudo*)"
+    ]
+  }
+}
+```
+
+## Hiérarchie des Permissions
+
+Les permissions se cumulent et s'héritent dans cet ordre :
+
+1. `~/.claude/settings.json` — global user
+2. `.claude/settings.json` — projet (partagé)
+3. `.claude/settings.local.json` — projet (local, gitignored)
+4. Flags CLI — session uniquement
+
+## Glob Patterns pour Bash
+
+```bash
+# Autoriser git seulement
+"Bash(git *)"
+
+# Autoriser npm test et build
+"Bash(npm test*)", "Bash(npm run build*)"
+
+# Autoriser lecture fichiers
+"Bash(cat *)", "Bash(ls *)"
+```
+
+## Bonnes Pratiques
+
+**CI/CD** — Toujours utiliser `--dangerously-skip-permissions` avec un environnement sandboxé (Docker, container éphémère). Ne jamais sur une machine de production partagée.
+
+**Projets sensibles** — Restreindre les outils Bash avec des globs précis dans `.claude/settings.json`. Committer ce fichier pour que toute l'équipe utilise les mêmes contraintes.
+
+**Audit** — Les actions de Claude sont loggées dans `~/.claude/logs/`. Vérifiable à tout moment.
+
+## Threat Intelligence
+
+La base de données des menaces connues (v2.15.0) recense 28+ CVEs et 655 patterns de skills malicieux. Parmi les vulnérabilités actives : CVE-2026-33032 (nginx-ui MCPwn, CVSS 9.8, exploitation active) et CVE-2026-30623 (LiteLLM). Vérifier régulièrement les outils MCP tiers avant intégration.

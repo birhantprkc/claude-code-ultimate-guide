@@ -533,7 +533,7 @@ After installation:
 1. **[Voice Catalog](./voice-catalog.md)** - Explore 15 voices and choose your favorite
 2. **[README](./README.md)** - Learn essential commands and use cases
 3. **[Troubleshooting](./troubleshooting.md)** - Solve common issues
-4. **[AI Ecosystem](../../../guide/ai-ecosystem.md#47-voice-interfaces)** - TTS in broader AI context
+4. **[AI Ecosystem](../../../guide/ecosystem/ai-ecosystem.md#47-voice-interfaces)** - TTS in broader AI context
 
 ---
 

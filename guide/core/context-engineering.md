@@ -682,7 +682,7 @@ stats:
 
 With this file registered as a pointer, Claude answers "how many tRPC routers exist?" in a single lookup rather than walking `src/server/api/routers/` manually. For the implementation task "add a payment router", it immediately knows the correct root, the count, and the architectural constraint — before reading a single source file.
 
-A ready-to-use template is available at [`examples/context-engineering/code-map-template.yaml`](../examples/context-engineering/code-map-template.yaml).
+A ready-to-use template is available at [`examples/context-engineering/code-map-template.yaml`](../../examples/context-engineering/code-map-template.yaml).
 
 ---
 

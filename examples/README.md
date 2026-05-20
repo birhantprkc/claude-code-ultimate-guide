@@ -58,7 +58,7 @@ keywords: [tag1, tag2]
 | [`mcp-configs/`](./mcp-configs/) | MCP server configurations | 1 |
 | [`modes/`](./modes/) | Behavioral modes (SuperClaude) | 1 |
 | [`semantic-anchors/`](./semantic-anchors/) | Precise vocabulary for better LLM outputs | 1 |
-| [`multi-provider/`](./multi-provider/) | Multi-provider bridge → [dedicated repo](https://github.com/FlorianBruniaux/cc-copilot-bridge) | — |
+| [`multi-provider/`](https://github.com/FlorianBruniaux/cc-copilot-bridge) | Multi-provider bridge → dedicated repo | — |
 
 ## Quick Start
 
@@ -262,8 +262,8 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 | [session-naming.md](./claude-md/session-naming.md) | Auto-rename sessions with descriptive titles for parallel work |
 | [design-reference-file.md](./claude-md/design-reference-file.md) | Brand-book and UI kit context for consistent UI generation |
 
-> **See [guide/learning-with-ai.md](../guide/learning-with-ai.md) for learning mode documentation**
-> **See [guide/devops-sre.md](../guide/devops-sre.md) for DevOps/SRE guide**
+> **See [guide/learning-with-ai.md](../guide/roles/learning-with-ai.md) for learning mode documentation**
+> **See [guide/devops-sre.md](../guide/ops/devops-sre.md) for DevOps/SRE guide**
 
 ### Scripts (17)
 
@@ -372,10 +372,10 @@ Security-first: 12 security hooks, 8 productivity hooks, 5 automation hooks, 5 m
 
 | Tool | Purpose |
 |------|---------|
-| [cc-copilot-bridge](./multi-provider/) | Bridge GitHub Copilot to Claude Code CLI for flat-rate access |
+| [cc-copilot-bridge](https://github.com/FlorianBruniaux/cc-copilot-bridge) | Bridge GitHub Copilot to Claude Code CLI for flat-rate access |
 
 > Moved to dedicated repository: [github.com/FlorianBruniaux/cc-copilot-bridge](https://github.com/FlorianBruniaux/cc-copilot-bridge)
 
 ---
 
-*See the [main guide](../guide/ultimate-guide.md) for detailed explanations, or the [architecture guide](../guide/architecture.md) for how Claude Code works internally.*
+*See the [main guide](../guide/ultimate-guide.md) for detailed explanations, or the [architecture guide](../guide/core/architecture.md) for how Claude Code works internally.*

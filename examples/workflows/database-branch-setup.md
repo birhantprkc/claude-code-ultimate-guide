@@ -8,7 +8,7 @@ tags: [workflow, git, devops]
 
 Complete guide for isolated feature development with database branches.
 
-**Source**: Inspired by [Neon database branching](https://neon.tech/docs/guides/branching) and [PlanetScale branching workflows](https://planetscale.com/docs/concepts/branching).
+**Source**: Inspired by [Neon database branching](https://neon.com/docs/introduction/branching) and [PlanetScale branching workflows](https://planetscale.com/docs/concepts/branching).
 
 ---
 
@@ -351,5 +351,5 @@ cd .worktrees/perf-optimize-queries
 
 **Related guides:**
 - [Git Worktree Command Reference](../commands/git-worktree.md)
-- [Neon Branching Docs](https://neon.tech/docs/guides/branching)
+- [Neon Branching Docs](https://neon.com/docs/introduction/branching)
 - [PlanetScale Branching](https://planetscale.com/docs/concepts/branching)

@@ -840,7 +840,7 @@ Claude: [Continues with full context of Day 1 work]
 - **Proactive context management**: Monitor with `/status` and use research-backed thresholds:
   - **< 70%**: Optimal — full reasoning capacity
   - **75%**: Good time to `/compact` manually — before quality degrades
-  - **85%**: Auto-compact territory — Claude Code will compress automatically once remaining context drops below its fixed buffer (~6-7% of window). Manual handoff recommended before this point ([research-backed](../core/architecture.md#auto-compaction))
+  - **85%**: Auto-compact territory — Claude Code will compress automatically once remaining context drops below its fixed buffer (~6-7% of window). Manual handoff recommended before this point ([research-backed](core/architecture.md#auto-compaction))
   - **95%**: Force handoff — severe quality degradation, reset immediately
 - **Session naming**: Use `/rename` to give sessions descriptive names — critical when running multiple sessions in parallel (see [Auto-Rename Pattern](#session-auto-rename) below)
 
@@ -2190,7 +2190,7 @@ The default model depends on your subscription: **Max/Team Premium** subscribers
 
 **Reality check**: A typical 1-hour session costs **$0.10 - $0.50** depending on usage patterns.
 
-> **Model retirement (April 2026)**: `claude-3-haiku-20240307` (Claude 3 Haiku) was retired on **April 20, 2026**. If your CLAUDE.md, agent definitions, or scripts still hardcode this model ID, migrate to `claude-haiku-4-5-20251001` (Haiku 4.5) immediately. Source: [platform.claude.com/docs/model-deprecations](https://platform.claude.com/docs/model-deprecations)
+> **Model retirement (April 2026)**: `claude-3-haiku-20240307` (Claude 3 Haiku) was retired on **April 20, 2026**. If your CLAUDE.md, agent definitions, or scripts still hardcode this model ID, migrate to `claude-haiku-4-5-20251001` (Haiku 4.5) immediately. Source: [platform.claude.com/docs/en/release-notes/model-deprecations](https://platform.claude.com/docs/en/release-notes/model-deprecations)
 
 #### 200K vs 1M Context: Performance, Cost & Use Cases
 
@@ -2432,7 +2432,7 @@ Two active bugs silently break caching on v2.1.69+. Apply these workarounds imme
 - **--resume/--continue** causes a full cache rebuild (0% hit ratio) on every resume because session JSONL strips deferred tool records before write. Workaround: avoid `--resume` until fixed.
 - **Per-session billing header** injects a unique hash as the first system prompt block, causing a cold miss on every session start and subagent call. Workaround: `"CLAUDE_CODE_ATTRIBUTION_HEADER": "false"` in `~/.claude/settings.json`.
 
-See [Known Issues → Prompt Cache Bugs](../core/known-issues.md) and run `/check-cache-bugs` for a full audit.
+See [Known Issues → Prompt Cache Bugs](core/known-issues.md) and run `/check-cache-bugs` for a full audit.
 
 > Docs: [prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
 
@@ -4604,7 +4604,7 @@ Claude Code operates within a **200K token context window** (1M beta available v
 | Tool results | Variable |
 | Reserved for response | 40-45K tokens |
 
-When context fills up (~75% in VS Code, ~95% in CLI), older content is automatically summarized. However, **research shows this degrades quality** (50-70% performance drop on complex tasks). Use `/compact` proactively at logical breakpoints, or trigger **session handoffs at 85%** to preserve intent over compressed history. See [Session Handoffs](line 2140) and [Auto-Compaction Research](../core/architecture.md#auto-compaction).
+When context fills up (~75% in VS Code, ~95% in CLI), older content is automatically summarized. However, **research shows this degrades quality** (50-70% performance drop on complex tasks). Use `/compact` proactively at logical breakpoints, or trigger **session handoffs at 85%** to preserve intent over compressed history. See [Session Handoffs](line 2140) and [Auto-Compaction Research](core/architecture.md#auto-compaction).
 
 ### Sub-Agent Isolation
 
@@ -5423,7 +5423,7 @@ Express + Prisma backend.
 - Prisma queries in /repositories
 ```
 
-**Production Safety**: For teams deploying Claude Code in production, see [Production Safety Rules](production-safety.md) for port stability, database safety, and infrastructure lock patterns.
+**Production Safety**: For teams deploying Claude Code in production, see [Production Safety Rules](security/production-safety.md) for port stability, database safety, and infrastructure lock patterns.
 
 ### Modular Context Architecture
 
@@ -5744,7 +5744,7 @@ ln -s ~/Dropbox/claude-mcp/settings.json ~/.claude/settings.json
 
 **Best practices**:
 1. Use `settings.template.json` with placeholders → Generate `settings.json` via script
-2. Run [pre-commit hook](../../examples/hooks/bash/pre-commit-secrets.sh) to detect secrets
+2. Run [pre-commit hook](../examples/hooks/bash/pre-commit-secrets.sh) to detect secrets
 3. For MCP secrets, see [Section 8.3.1 MCP Secrets Management](#831-mcp-secrets-management)
 
 #### Disaster Recovery
@@ -5781,7 +5781,7 @@ tar -xzf claude-config-YYYY-MM-DD_HH-MM-SS.tar.gz -C ~/
 
 - **[brianlovin/claude-config](https://github.com/brianlovin/claude-config)**: Public repo with `sync.sh` script for backups and restore
 - **Martin Ratinaud approach**: Git repo + symlinks + `sync-mcp.sh` for secrets (504 sessions tested)
-- **Script template**: See [sync-claude-config.sh](../../examples/scripts/sync-claude-config.sh) for full automation
+- **Script template**: See [sync-claude-config.sh](../examples/scripts/sync-claude-config.sh) for full automation
 
 **GitHub Issue**: [#16204 - Proactive migration guidance for backup/restore workflows](https://github.com/anthropics/claude-code/issues/16204)
 
@@ -6018,7 +6018,7 @@ Horror stories from r/ClaudeAI include:
 
 **Always prefer granular `allowedTools` over disabling permissions entirely.**
 
-> **Safe alternative**: For autonomous execution, run Claude Code inside [Docker Sandboxes](sandbox-isolation.md) or a similar isolated environment. The sandbox becomes the security boundary, making `--dangerously-skip-permissions` safe to use. See the [Sandbox Isolation Guide](sandbox-isolation.md) for setup instructions and alternatives.
+> **Safe alternative**: For autonomous execution, run Claude Code inside [Docker Sandboxes](security/sandbox-isolation.md) or a similar isolated environment. The sandbox becomes the security boundary, making `--dangerously-skip-permissions` safe to use. See the [Sandbox Isolation Guide](security/sandbox-isolation.md) for setup instructions and alternatives.
 
 ### Dynamic Memory (Profile Switching)
 
@@ -6146,8 +6146,7 @@ Understanding when each memory method loads is critical for token optimization:
 | `CLAUDE.md` | Session start | Always | Core project context |
 | `.claude/rules/*.md` | Session start (ALL files) | Always | Conventions that always apply |
 | `@path/to/file.md` | On-demand (when referenced) | Only when used | Optional/conditional context |
-| `.claude/commands/*.md` | Invocation only | Only when invoked | Workflow templates |
-| `.claude/skills/*.md` | Invocation only | Only when invoked | Domain knowledge modules |
+| `.claude/skills/*.md` | Invocation only | When invoked (`/name`) or auto-loaded | Workflow templates + knowledge modules |
 
 **Key insight**: `.claude/rules/` is NOT on-demand. Every `.md` file in that directory loads at session start, consuming tokens. Reserve it for always-relevant conventions, not rarely-used guidelines. Skills are invocation-only and may not be triggered reliably—one eval found agents invoked skills in only 56% of cases ([Gao, 2026](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals)). Never rely on skills for critical instructions; use CLAUDE.md or rules instead.
 
@@ -7391,7 +7390,7 @@ _Quick jump:_ [Two Kinds of Skills](#50-two-kinds-of-skills) · [Understanding S
 
 ---
 
-> **Note (January 2026)**: Skills and Commands are being unified. Both now use the same invocation mechanism (`/skill-name` or `/command-name`), share YAML frontmatter syntax, and can be triggered identically. The conceptual distinction (skills = knowledge modules, commands = workflow templates) remains useful for organization, but technically they're converging. Create new ones based on purpose, not mechanism.
+> **CC 2.1.3 (January 2026)**: Skills and Commands are now unified. `.claude/commands/` is merged into `.claude/skills/`. Skills have two invocation modes: user-triggered (`/skill-name`, equivalent to old commands) and model-triggered (auto-loaded by description match). To restrict a skill to user-invocation only, add `disable-model-invocation: true` to its frontmatter. Existing files in `.claude/commands/` remain backward-compatible but all new development belongs in `.claude/skills/`.
 
 ---
 
@@ -7428,19 +7427,19 @@ Skills are knowledge packages that agents can inherit.
 | Concept | Purpose | Invocation |
 |---------|---------|------------|
 | **Agent** | Context isolation tool | Task tool delegation |
-| **Skill** | Knowledge module | `/skill-name` or auto-loaded |
-| **Command** | Process workflow | Slash command |
+| **Skill** | Knowledge module or workflow template | `/skill-name` (user) or auto-loaded (model) |
 
 #### Detailed Comparison
 
-| Aspect | Commands | Skills | Agents |
-|--------|----------|--------|--------|
-| **What it is** | Prompt template | Knowledge module | Context isolation tool |
-| **Location** | `.claude/commands/` | `.claude/skills/` | `.claude/agents/` |
-| **Invocation** | `/command-name` | `/skill-name` or auto-loaded | Task tool delegation |
+| Aspect | Skills (user-invocable) | Skills (model-invocable) | Agents |
+|--------|------------------------|--------------------------|--------|
+| **What it is** | Workflow template | Knowledge module | Context isolation tool |
+| **Location** | `.claude/skills/` | `.claude/skills/` | `.claude/agents/` |
+| **Invocation** | `/skill-name` (user types) | Auto-loaded by model | Task tool delegation |
+| **Frontmatter** | `disable-model-invocation: true` | Default (no flag needed) | n/a |
 | **Execution** | In main conversation | Loaded into context | Separate subprocess |
 | **Context** | Shares main context | Adds to agent context | Isolated context |
-| **Best for** | Repeatable workflows | Reusable knowledge | Scope-limited analysis |
+| **Best for** | Repeatable manual workflows | Reusable knowledge | Scope-limited analysis |
 | **Token cost** | Low (template only) | Medium (knowledge loaded) | High (full agent) |
 | **Examples** | `/commit`, `/pr`, `/ship` | TDD, security-guardian | security-audit, perf-audit |
 
@@ -7448,7 +7447,7 @@ Skills are knowledge packages that agents can inherit.
 
 ```
 Is this a repeatable workflow with steps?
-├─ Yes → Use a COMMAND
+├─ Yes → Use a SKILL (user-invocable, disable-model-invocation: true)
 │        Example: /commit, /release-notes, /ship
 │
 └─ No → Is this specialized knowledge multiple agents need?
@@ -8900,13 +8899,13 @@ cp -r /tmp/agent-skills/react-best-practices .claude/skills/
 
 ---
 
-# 6. Commands
+# 6. Commands (User-Invocable Skills)
 
 _Quick jump:_ [Slash Commands](#61-slash-commands) · [Creating Custom Commands](#62-creating-custom-commands) · [Command Template](#63-command-template) · [Command Examples](#64-command-examples)
 
 ---
 
-> **Note (January 2026)**: Skills and Commands are being unified. Both now use the same invocation mechanism (`/skill-name` or `/command-name`), share YAML frontmatter syntax, and can be triggered identically. The conceptual distinction (skills = knowledge modules, commands = workflow templates) remains useful for organization, but technically they're converging. Create new ones based on purpose, not mechanism.
+> **CC 2.1.3 (January 2026)**: Skills and Commands are now unified. `.claude/commands/` is merged into `.claude/skills/`. Skills have two invocation modes: user-triggered (`/skill-name`, equivalent to old commands) and model-triggered (auto-loaded by description match). To restrict a skill to user-invocation only, add `disable-model-invocation: true` to its frontmatter. Existing files in `.claude/commands/` remain backward-compatible but all new development belongs in `.claude/skills/`.
 
 ---
 
@@ -8916,7 +8915,7 @@ _Quick jump:_ [Slash Commands](#61-slash-commands) · [Creating Custom Commands]
 
 ## 6.1 Slash Commands
 
-Slash commands are shortcuts for common workflows.
+Slash commands are user-invocable skills. Since CC 2.1.3, they live in `.claude/skills/` (not `.claude/commands/`). The `/name` invocation syntax is unchanged. Add `disable-model-invocation: true` to a skill's frontmatter to make it user-only.
 
 ### Built-in Commands
 
@@ -9504,15 +9503,17 @@ This approach runs entirely offline without any Anthropic infrastructure and has
 
 > `/loop` added in v2.1.71. Timestamp markers in loop transcripts added in v2.1.86. Cloud and Desktop Scheduled Tasks launched March 9, 2026. Source: [code.claude.com/docs/en/whats-new](https://code.claude.com/docs/en/whats-new)
 
-### Custom Commands
+### User-Invocable Skills (formerly "Custom Commands")
 
-You can create your own commands in `.claude/commands/`:
+Since CC 2.1.3, user-invocable skills live in `.claude/skills/`:
 
 ```
-/tech:commit    → .claude/commands/tech/commit.md
-/tech:pr        → .claude/commands/tech/pr.md
-/product:scope  → .claude/commands/product/scope.md
+/tech:commit    → .claude/skills/tech/commit/SKILL.md
+/tech:pr        → .claude/skills/tech/pr/SKILL.md
+/product:scope  → .claude/skills/product/scope/SKILL.md
 ```
+
+Add `disable-model-invocation: true` to the frontmatter to prevent the model from auto-loading the skill when not explicitly invoked.
 
 ## 6.2 Creating Custom Commands
 
@@ -9521,14 +9522,14 @@ Commands are markdown files that define a process.
 ### Command File Location
 
 ```
-.claude/commands/
+.claude/skills/
 ├── tech/           # Development workflows
-│   ├── commit.md
-│   └── pr.md
+│   ├── commit/SKILL.md
+│   └── pr/SKILL.md
 ├── product/        # Product workflows
-│   └── problem-framer.md
+│   └── problem-framer/SKILL.md
 └── support/        # Support workflows
-    └── ticket-analyzer.md
+    └── ticket-analyzer/SKILL.md
 ```
 
 ### Command Naming
@@ -11509,9 +11510,9 @@ exit 0
 
 **Customization**: Set `CLAUDE_IDENTITY_MARKER` in your environment to a short, distinctive string from the agent's standard output (e.g. `"LEAD:"`, `"DEVELOPER:"`, `"🔨"`). If not set, the hook uses the first 40 characters of the identity file as the marker.
 
-> **Full implementation**: [`examples/hooks/bash/identity-reinjection.sh`](../../examples/hooks/bash/identity-reinjection.sh)
+> **Full implementation**: [`examples/hooks/bash/identity-reinjection.sh`](../examples/hooks/bash/identity-reinjection.sh)
 >
-> **Origin**: Pattern sourced from Nick Tune's [hook-driven dev workflows](https://nick-tune.me/blog/2026-02-28-hook-driven-dev-workflows-with-claude-code/) (2026-02-28). The broader article covers state machine workflows with agent teams — see [Agent Teams Workflow](../workflows/agent-teams.md) for context.
+> **Origin**: Pattern sourced from Nick Tune's [hook-driven dev workflows](https://nick-tune.me/blog/2026-02-28-hook-driven-dev-workflows-with-claude-code/) (2026-02-28). The broader article covers state machine workflows with agent teams — see [Agent Teams Workflow](workflows/agent-teams.md) for context.
 
 ---
 
@@ -12503,7 +12504,7 @@ rg "validateSession" --type ts -A 5
 
 **Result**: Complete understanding + safe refactoring in 5 commands
 
-> **📖 Complete Guide**: See [Search Tools Mastery](../workflows/search-tools-mastery.md) for detailed workflows, real-world scenarios, and advanced combinations.
+> **📖 Complete Guide**: See [Search Tools Mastery](workflows/search-tools-mastery.md) for detailed workflows, real-world scenarios, and advanced combinations.
 
 ---
 
@@ -13863,7 +13864,7 @@ envsubst < ~/.claude/mcp-config.template.json > ~/.claude.json
 .env          # Never commit
 ```
 
-**See also**: [sync-claude-config.sh](../../examples/scripts/sync-claude-config.sh) for automated template substitution.
+**See also**: [sync-claude-config.sh](../examples/scripts/sync-claude-config.sh) for automated template substitution.
 
 ---
 
@@ -13987,7 +13988,7 @@ Schedule with cron:
 
 **Problem**: Developers accidentally commit secrets to Git despite `.gitignore` (e.g., adding `.env` with `git add -f`).
 
-**Solution**: [Pre-commit hook](../../examples/hooks/bash/pre-commit-secrets.sh) to block commits containing secrets.
+**Solution**: [Pre-commit hook](../examples/hooks/bash/pre-commit-secrets.sh) to block commits containing secrets.
 
 ```bash
 # Install hook
@@ -18118,7 +18119,7 @@ neonctl branches delete feature-payments
 
 **See also:**
 - [Database Branch Setup Guide](../examples/workflows/database-branch-setup.md) - Complete provider-specific workflows
-- [Neon Branching](https://neon.tech/docs/guides/branching) - Official Neon documentation
+- [Neon Branching](https://neon.com/docs/introduction/branching) - Official Neon documentation
 - [PlanetScale Branching](https://planetscale.com/docs/concepts/branching) - Official PlanetScale guide
 
 ### Coordinating Parallel Worktrees: Task Dependencies
@@ -19435,22 +19436,59 @@ Before setting up tmux grids or third-party orchestrators, try Agent View — Cl
 
 ### /goal — Autonomous Completion Mode (v2.1.139)
 
-`/goal [condition]` sets a natural-language completion condition. Claude keeps working across turns without waiting for your input, stopping only when it believes the condition is satisfied.
+`/goal <condition>` sets a completion contract for the current session. Claude keeps working across turns until a separate evaluator model verifies the condition is met — no need to send "continue" after each step.
 
-```
+```bash
 /goal all unit tests pass and no TypeScript errors
 /goal the PR description is written and the branch is pushed
-/goal the migration is complete and smoke tests pass
+/goal migrate all legacy API calls to v2 while preserving existing coverage
 ```
 
-While `/goal` is active, a status overlay shows:
-- **Elapsed time** — how long the session has been running
-- **Turns used** — number of back-and-forth turns consumed
-- **Tokens used** — running token consumption
+**How it works**: After each turn, a small fast model (Haiku by default) reads the conversation and judges: "Is the condition met, based only on evidence already in this conversation?" If not, it generates a concise reason explaining the gap, which drives the next turn. If yes, the loop ends. The evaluator cannot independently run commands — it judges solely against what Claude has already surfaced in the conversation.
 
-**When to use**: Long-running tasks where you want to step away and return to a finished result rather than babysitting the session. Works best with clear, verifiable conditions ("tests pass") rather than vague ones ("looks good").
+A live overlay tracks elapsed time, turn count, and token consumption throughout execution.
 
-**Cancel**: Send any message to interrupt before the condition is met.
+**Manage an active goal**:
+
+| Command | Effect |
+|---------|--------|
+| `/goal <condition>` | Set or replace the current goal |
+| `/goal clear` | Cancel the active goal |
+| `/goal status` | Show condition and evaluator's last reason |
+
+**Three elements of an effective condition**:
+
+1. **Measurable end state** — a specific output, test result, or file state. "All tests in `test/auth` pass" beats "improve the auth system."
+2. **Verification mechanism** — how success is demonstrated. "verified by `npm test auth` exit 0."
+3. **Constraints** — what must stay intact throughout. "no files outside `src/services/auth` modified."
+
+Full example: `/goal all tests in test/auth pass, verified by npm test auth exit 0, no files outside src/services/auth modified`
+
+**`/goal` vs `/loop`**:
+
+| | `/goal` | `/loop` |
+|--|---------|---------|
+| Terminates when | Condition verified by evaluator | Time interval elapses |
+| Evaluator | Separate model (Haiku default) | Primary model self-assesses |
+| Best for | Task with a clear, measurable finish line | Ongoing monitoring without a defined end |
+| Example | "Migrate all API calls, tests pass" | "Check the deploy every 5 minutes" |
+
+**Anti-patterns** — skip `/goal` when:
+- The objective is vague or qualitative ("make the code cleaner")
+- Completion requires human judgment the AI cannot verify
+- Production data is involved and every step needs direct oversight
+- There is no concrete, checkable end state
+
+**Permissions**: `/goal` does not expand the session's permission boundary. If the session requires confirmation before executing shell commands, those confirmations still fire inside a goal loop. Configure permission mode deliberately before activating a goal.
+
+**Context rot on long tasks**: Accuracy can degrade after roughly 20 turns as context fills. For tasks requiring many iterations, the "Orchestrator + `claude -p`" pattern keeps each iteration in a clean context:
+
+```bash
+# Each call runs in a fresh session — no context accumulation
+claude -p "Step N of migration: [specific sub-task with explicit context]"
+```
+
+> Introduced in v2.1.139 (May 12, 2026). Evaluator edge-case fixes (background process detection, `disableAllHooks` handling) in v2.1.143 (May 16, 2026). Official docs: [code.claude.com/docs/en/goal](https://code.claude.com/docs/en/goal)
 
 ---
 
@@ -25511,7 +25549,7 @@ A series of 9 focused whitepapers covering Claude Code topics in depth, availabl
 | 07 | Reference Guide | Complete synthesis + workflows |
 | 08 | Agent Teams | Multi-agent orchestration |
 
-→ **[Download all whitepapers (FR + EN)](https://www.florian.bruniaux.com/guides)**
+→ **[Download all whitepapers (FR + EN)](https://cc.bruniaux.com/whitepapers/)**
 
 ---
 
@@ -26064,7 +26102,7 @@ Common misconceptions we've seen:
 **Reality check**: PM workflows with Claude Code are an **emerging area** with limited community validation. We currently have 1 practitioner report (the source practitioner noted they tried Claude Code but didn't adopt it long-term). If you're a PM using Claude Code successfully, [contribute your workflow](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/discussions) to help the community.
 
 **See also**:
-- [AI Ecosystem Guide](ai-ecosystem.md) — Complementary tools (Granola, Wispr Flow, ChatPRD, v0)
+- [AI Ecosystem Guide](ecosystem/ai-ecosystem.md) — Complementary tools (Granola, Wispr Flow, ChatPRD, v0)
 - [Cowork Guide](https://github.com/FlorianBruniaux/claude-cowork-guide) — Claude Desktop for non-technical PMs
 - [Design-to-Code Workflow](workflows/design-to-code.md#for-product-managers) — PM perspective on Figma MCP
 
@@ -26100,7 +26138,7 @@ cd /path/to/target/project && claude --continue
 
 **Community automation**: The [claude-migrate-session](https://github.com/jimweller/dotfiles/tree/main/dotfiles/claude-code/skills/claude-migrate-session) skill by Jim Weller automates this process, but has limited testing (0 stars/forks as of Feb 2026). Manual approach is safer.
 
-**Detailed guide**: See [Session Resume Limitations & Cross-Folder Migration](observability.md#session-resume-limitations--cross-folder-migration) for complete workflow and edge cases.
+**Detailed guide**: See [Session Resume Limitations & Cross-Folder Migration](ops/observability.md#session-resume-limitations--cross-folder-migration) for complete workflow and edge cases.
 
 **Related**: GitHub issue [#1516](https://github.com/anthropics/claude-code/issues/1516) tracks community requests for native cross-folder support.
 

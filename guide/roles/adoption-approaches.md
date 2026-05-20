@@ -131,7 +131,7 @@ If you prefer understanding before configuring, here's a progressive approach. N
 
 **Goal**: Understand how Claude Code operates before adding config.
 
-1. Read [Section 5: Mental Model](./ultimate-guide.md) (line 1675)
+1. Read [Section 5: Mental Model](../ultimate-guide.md) (line 1675)
 2. Core concept: Claude works in a loop — prompt → plan → execute → verify
 3. **Try it**: Complete a few real tasks with zero config. Notice where friction appears.
 
@@ -139,7 +139,7 @@ If you prefer understanding before configuring, here's a progressive approach. N
 
 **Goal**: Understand the main constraint of the tool.
 
-1. Read [Context Management](./ultimate-guide.md) (line 944)
+1. Read [Context Management](../ultimate-guide.md) (line 944)
 2. The general idea (exact thresholds vary by use case):
    - Low usage: work freely
    - Medium usage: be more selective
@@ -151,7 +151,7 @@ If you prefer understanding before configuring, here's a progressive approach. N
 
 **Goal**: Give Claude project context.
 
-1. Read [Memory Files](./ultimate-guide.md) (line 2218)
+1. Read [Memory Files](../ultimate-guide.md) (line 2218)
 2. Precedence: project `.claude/CLAUDE.md` > global `~/.claude/CLAUDE.md`
 3. **Try it**: Create a minimal CLAUDE.md, test if Claude picks it up.
 
@@ -161,9 +161,9 @@ Add complexity only when you hit real problems:
 
 | Friction | Possible Solution | Reference |
 |----------|-------------------|-----------|
-| Repeating same task often | Consider an agent | [Agent Template](./ultimate-guide.md) line 2793 |
-| Security concern | Consider a hook | [Hook Templates](./ultimate-guide.md) line 4172 |
-| Need external tool access | Consider MCP | [MCP Config](./ultimate-guide.md) line 4771 |
+| Repeating same task often | Consider an agent | [Agent Template](../ultimate-guide.md) line 2793 |
+| Security concern | Consider a hook | [Hook Templates](../ultimate-guide.md) line 4172 |
+| Need external tool access | Consider MCP | [MCP Config](../ultimate-guide.md) line 4771 |
 | AI repeats same mistake | Add a specific rule | Start with one line, not ten |
 
 Whether these solutions are worth the setup cost depends on your context.
@@ -260,7 +260,7 @@ These are starting points, not rules. Team dynamics matter more than headcount.
 | Project conventions | Custom agents |
 | Commit format | Flag defaults |
 
-**Production teams**: Implement [Production Safety Rules](production-safety.md) for port/DB/infrastructure protection via hooks and permission deny rules.
+**Production teams**: Implement [Production Safety Rules](../security/production-safety.md) for port/DB/infrastructure protection via hooks and permission deny rules.
 
 **Watch for**: Conventions that exist on paper but aren't followed.
 
@@ -278,7 +278,7 @@ These are starting points, not rules. Team dynamics matter more than headcount.
 - Documented conventions with rationale
 - Standardized hooks across the team
 - Onboarding that covers basics like `/status`
-- **Production teams**: Enforce [Production Safety Rules](production-safety.md) via hooks and permission deny rules
+- **Production teams**: Enforce [Production Safety Rules](../security/production-safety.md) via hooks and permission deny rules
 
 **Watch for**: Config drift. Without some coordination, setups diverge over time. Whether that matters depends on your team.
 
@@ -419,12 +419,12 @@ Most people start with Sonnet. Adjust based on your experience.
 
 ## Related Resources
 
-- [Personalized Onboarding](../tools/onboarding-prompt.md) — Interactive setup
-- [Setup Audit](../tools/audit-prompt.md) — Diagnose configuration issues
-- [Examples Library](../examples/README.md) — Templates to adapt
-- [Main Guide](./ultimate-guide.md) — Full reference
-- [Reference YAML](../machine-readable/reference.yaml) — Condensed lookup
+- [Personalized Onboarding](../../tools/onboarding-prompt.md) — Interactive setup
+- [Setup Audit](../../tools/audit-prompt.md) — Diagnose configuration issues
+- [Examples Library](../../examples/README.md) — Templates to adapt
+- [Main Guide](../ultimate-guide.md) — Full reference
+- [Reference YAML](../../machine-readable/reference.yaml) — Condensed lookup
 
 ---
 
-*This guide reflects current observations, not proven best practices. The field is young — adapt heavily to your context. Feedback welcome: [CONTRIBUTING.md](../CONTRIBUTING.md)*
+*This guide reflects current observations, not proven best practices. The field is young — adapt heavily to your context. Feedback welcome: [CONTRIBUTING.md](../../CONTRIBUTING.md)*

@@ -1,0 +1,104 @@
+---
+title: "Skills"
+subtitle: "Reusable skill modules with embedded resources"
+card-number: "M10"
+category: "Methodology"
+difficulty: "intermediate"
+guide-version: "3.41.0"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+date: "May 2026"
+layout: "two-col"
+lang: en
+format:
+  recap-card-typst: default
+---
+
+## Skill structure
+
+A skill is a folder in `.claude/skills/` containing a `SKILL.md` file and optionally additional resources (docs, templates, scripts, checklists).
+
+```
+my-skill/
+├── SKILL.md              # Instructions + frontmatter (required)
+├── reference.md          # Reference documentation
+├── checklists/
+│   └── quality.md
+└── examples/
+    └── pattern.ts
+```
+
+## Invocation Modes
+
+| Mode | Frontmatter | Behavior |
+|------|-------------|----------|
+| **User-invocable** | `disable-model-invocation: true` | Triggered by user via `/name` |
+| **Model-invocable** | (no flag) | Auto-loaded by model |
+| **Both** | (no flag) | Invocable either way |
+
+## SKILL.md frontmatter
+
+```yaml
+---
+name: security-guardian
+description: OWASP expertise, auth, and data protection
+allowed-tools: Read Grep Bash
+---
+```
+
+| Field | Role |
+|-------|------|
+| `name` | Kebab-case, 1-64 chars, must match the folder |
+| `description` | Activation trigger (max 1024 chars) |
+| `allowed-tools` | Tool whitelist (supports wildcards) |
+| `disable-model-invocation` | `true` for manual-only invocation |
+
+## Skills vs Commands
+
+| Aspect | Skill | Command |
+|--------|-------|---------|
+| **Resources** | Can embed files | Markdown only |
+| **Scope** | Domain knowledge | Procedural workflow |
+| **Reuse** | Between agents | Direct invocation |
+| **Standard** | agentskills.io (portable) | Claude Code only |
+
+The main difference: a skill can embed a 500-line `reference.md` file that becomes available on invocation. A command cannot.
+
+## Marketplace: npx add-skill
+
+```bash
+# Install the Vercel bundle (3 skills)
+npx add-skill vercel-labs/agent-skills
+
+# Install the Supabase skill
+npx add-skill supabase/agent-skills
+
+# Check installed skills
+ls ~/.claude/skills/
+```
+
+Marketplace skills pass an automatic 3-layer security audit (Socket, Snyk, Gen) before publication. Over 200 skills available.
+
+## Invocation
+
+Skills are triggered like commands, by their name:
+
+```
+/security-guardian          # Direct invocation
+/tdd                        # TDD skill
+/design-patterns detect     # With argument
+```
+
+Agents can preload skills via the `skills:` field in their frontmatter — the content is injected into the agent's context at startup.
+
+## Lifecycle and improvement
+
+Two long-term management patterns:
+
+**Claudeception** — meta-skill that generates new skills from session discoveries. Install: `git clone https://github.com/blader/Claudeception ~/.claude/skills/claudeception`
+
+**Claude Reflect System** — improves existing skills by analyzing corrections detected during sessions. Proposes changes before applying them.
+
+## Important caveat
+
+Skills are only invoked on explicit activation — evals show automatic invocation in only 56% of cases. For critical instructions that must always apply, use `CLAUDE.md` or `.claude/rules/` rather than a skill.

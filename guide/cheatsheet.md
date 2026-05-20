@@ -107,6 +107,7 @@ tags: [cheatsheet, reference]
 | **Voice Mode** | v2.1.x | Native voice input, free transcription, no rate limit impact |
 | **Remote Control** | v2.1.51 | Control local session from phone/browser (Research Preview, Pro/Max) |
 | **`/loop`** | v2.1.71 | Session-scoped recurring scheduler: `/loop 5m check the deploy` (stops when session ends). Min 1 min, max 50 tasks/session |
+| **`/goal`** | v2.1.139 | Autonomous completion loop: set a condition, Claude works across turns until a separate evaluator (Haiku) verifies it's met. Live overlay shows elapsed time, turns, and tokens. Three-element formula: measurable end state + verification mechanism + constraints. |
 | **Cloud Scheduled Tasks** | 2026 | Machine-off scheduling via `/schedule` or `claude.ai/code/scheduled`. Runs on Anthropic infra, clones repo fresh each run, min 1h interval. Pro/Max/Team/Enterprise |
 | **Desktop Scheduled Tasks** | 2026 | Local machine scheduling via Desktop app. Min 1 min, full local file access, no session required |
 | **Skill Evals** | Mar 2026 | Two skill types: Capability Uplift (fills model gap, fades) / Encoded Preference (encodes workflow, stays). Benchmark Mode, A/B testing, Trigger Tuning. |
@@ -158,10 +159,9 @@ tags: [cheatsheet, reference]
 ├── settings.json       # Hooks (committed)
 ├── settings.local.json # Permissions (not committed)
 ├── agents/             # Custom agents
-├── commands/           # Slash commands
 ├── hooks/              # Event scripts
 ├── rules/              # Auto-loaded rules
-└── skills/             # Knowledge modules
+└── skills/             # Slash commands + knowledge modules (unified)
 ```
 
 ---
@@ -359,11 +359,12 @@ tools: Read, Write, Edit, Bash
 # Instructions here
 ```
 
-### Command (`.claude/commands/my-command.md`)
+### Skill — user-invocable (`.claude/skills/my-command/SKILL.md`)
 ```markdown
 ---
 description: Brief description
 argument-hint: "<required_arg> [--flag]"
+disable-model-invocation: true
 ---
 # Command Name
 Instructions for what to do...
@@ -518,7 +519,7 @@ tmux new-session -s dev
 
 **Auto-enable:** `/config` → toggle "Remote Control: auto-enable"
 
-**Full doc**: [§9.22 Remote Control](ultimate-guide.md#922-remote-control-mobile-access) | [Security notes](security-hardening.md#remote-control-security)
+**Full doc**: [§9.22 Remote Control](ultimate-guide.md#922-remote-control-mobile-access) | [Security notes](security/security-hardening.md#remote-control-security)
 
 ---
 
@@ -564,7 +565,7 @@ For `description`/`metadata` → use `TaskGet(taskId)` per task.
 CLAUDE_CODE_ENABLE_TASKS=false claude
 ```
 
-**→ Full workflow**: [guide/workflows/task-management.md](../workflows/task-management.md)
+**→ Full workflow**: [guide/workflows/task-management.md](workflows/task-management.md)
 
 ---
 
@@ -665,7 +666,7 @@ Speed: `rg` (~20ms) → Serena (~100ms) → ast-grep (~200ms) → grepai (~500ms
 - **Official docs**: [docs.anthropic.com/claude-code](https://docs.anthropic.com/en/docs/claude-code)
 - **Advanced guide**: [Claudelog.com](https://claudelog.com/) - Tips & patterns
 - **Full guide**: `ultimate-guide.md` (this repo)
-- **Whitepapers (FR + EN)**: [florian.bruniaux.com/guides](https://www.florian.bruniaux.com/guides) — 9 focused PDFs
+- **Whitepapers (FR + EN)**: [cc.bruniaux.com/whitepapers](https://cc.bruniaux.com/whitepapers/) — 10 focused PDFs
 - **Project memory**: Create `CLAUDE.md` at project root
 - **DeepSeek (cost-effective)**: Configure via `ANTHROPIC_BASE_URL`
 

@@ -126,7 +126,7 @@ Before adding any MCP server, complete this checklist:
 | `browser` (full access) | Risk | Can navigate to malicious sites |
 | `mcp-scan` (Snyk) | Tool | Supply chain scanning for skills/MCPs |
 
-*Last updated: 2026-02-11. [Report new assessments](../../issues)*
+*Last updated: 2026-02-11. [Report new assessments](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/issues)*
 
 #### Secure MCP Configuration Example
 
@@ -280,7 +280,7 @@ jq '.scripts' package.json 2>/dev/null
 grep -rE "#.*[A-Za-z0-9+/]{20,}={0,2}" . --include="*.py" --include="*.js"
 ```
 
-Use the [repo-integrity-scanner.sh](../examples/hooks/bash/repo-integrity-scanner.sh) hook for automated scanning.
+Use the [repo-integrity-scanner.sh](../../examples/hooks/bash/repo-integrity-scanner.sh) hook for automated scanning.
 
 ### 1.5 Malicious Extensions (.claude/ Attack Surface)
 
@@ -374,7 +374,7 @@ Coding assistants are vulnerable to indirect prompt injection through code conte
 
 #### Existing vs New Patterns
 
-The [prompt-injection-detector.sh](../examples/hooks/bash/prompt-injection-detector.sh) hook includes:
+The [prompt-injection-detector.sh](../../examples/hooks/bash/prompt-injection-detector.sh) hook includes:
 
 | Pattern | Status | Location |
 |---------|--------|----------|
@@ -569,7 +569,7 @@ agentshield scan --format json  # CI-friendly output
 
 **Code-level scanning (project source)**
 
-For comprehensive security scanning of your project code, use the [security-auditor agent](../examples/agents/security-auditor.md):
+For comprehensive security scanning of your project code, use the [security-auditor agent](../../examples/agents/security-auditor.md):
 
 ```bash
 # Run OWASP-based security audit
@@ -702,7 +702,7 @@ fi
 
 | Level | Concept | Claude Code Mechanism | When to Use |
 |-------|---------|----------------------|-------------|
-| **1. Scoped Revocation** | Disable specific capabilities | [`dangerous-actions-blocker.sh`](../examples/hooks/bash/dangerous-actions-blocker.sh) hook, `permissions.deny` in settings | Suspicious behavior, restrict scope |
+| **1. Scoped Revocation** | Disable specific capabilities | [`dangerous-actions-blocker.sh`](../../examples/hooks/bash/dangerous-actions-blocker.sh) hook, `permissions.deny` in settings | Suspicious behavior, restrict scope |
 | **2. Velocity Governor** | Rate-limit or threshold triggers | Custom hook tracking command frequency, `--allowedTools` flag to restrict tool set | Agent acting erratically, too many changes |
 | **3. Global Hard Stop** | Kill everything immediately | `Ctrl+C` / `Esc`, `claude config set --disable`, uninstall | Confirmed compromise, emergency |
 
@@ -868,8 +868,8 @@ Beyond securing Claude Code itself, Anthropic offers a dedicated vulnerability s
 
 ### When to use which
 
-- **Now** → Use the [Security Auditor Agent](../examples/agents/security-auditor.md) + [Security Patcher Agent](../examples/agents/security-patcher.md) for full detect-then-patch coverage
-- **Now** → Use the [Security Gate Hook](../examples/hooks/bash/security-gate.sh) to block vulnerable patterns at write time
+- **Now** → Use the [Security Auditor Agent](../../examples/agents/security-auditor.md) + [Security Patcher Agent](../../examples/agents/security-patcher.md) for full detect-then-patch coverage
+- **Now** → Use the [Security Gate Hook](../../examples/hooks/bash/security-gate.sh) to block vulnerable patterns at write time
 - **Waitlist** → Join the preview for deeper semantic analysis once your team needs it
 
 ---
@@ -879,10 +879,10 @@ Beyond securing Claude Code itself, Anthropic offers a dedicated vulnerability s
 - [Enterprise AI Governance](./enterprise-governance.md) — Org-level MCP governance (approval workflow, registry, guardrail tiers). This guide covers individual MCP vetting; that guide covers org-level policy.
 - [Data Privacy Guide](./data-privacy.md) — Retention policies, compliance, what data leaves your machine
 - [AI Traceability](../ops/ai-traceability.md) — PromptPwnd vulnerability, CI/CD security, attribution policies
-- [Security Checklist Skill](../examples/skills/security-checklist.md) — OWASP Top 10 patterns for code review
-- [Security Auditor Agent](../examples/agents/security-auditor.md) — Automated vulnerability detection (read-only)
-- [Security Patcher Agent](../examples/agents/security-patcher.md) — Applies patches from audit findings (human approval required)
-- [Security Gate Hook](../examples/hooks/bash/security-gate.sh) — Blocks vulnerable code patterns at write time (7 patterns)
+- [Security Checklist Skill](../../examples/skills/security-checklist.md) — OWASP Top 10 patterns for code review
+- [Security Auditor Agent](../../examples/agents/security-auditor.md) — Automated vulnerability detection (read-only)
+- [Security Patcher Agent](../../examples/agents/security-patcher.md) — Applies patches from audit findings (human approval required)
+- [Security Gate Hook](../../examples/hooks/bash/security-gate.sh) — Blocks vulnerable code patterns at write time (7 patterns)
 - [MCP Registry Template](../../examples/scripts/mcp-registry-template.yaml) — YAML format for tracking approved MCPs at org level
 - [Ultimate Guide §7.4](#74-security-hooks) — Hook system basics
 - [Ultimate Guide §8.6](#86-mcp-security) — MCP security overview

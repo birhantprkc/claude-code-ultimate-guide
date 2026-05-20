@@ -373,7 +373,7 @@ After I accept generated code, help me verify understanding.
 3. What would break if we removed line X?"
 ```
 
-See [/learn:quiz command](../examples/commands/learn/quiz.md) for a more comprehensive version.
+See [/learn:quiz command](../../examples/commands/learn/quiz.md) for a more comprehensive version.
 
 ---
 
@@ -453,7 +453,7 @@ Create a session-end hook:
 # Prompts for one learning at session end
 ```
 
-See [examples/hooks/bash/learning-capture.sh](../examples/hooks/bash/learning-capture.sh) for implementation.
+See [examples/hooks/bash/learning-capture.sh](../../examples/hooks/bash/learning-capture.sh) for implementation.
 
 The hook asks: "What's ONE thing you learned this session?" and logs it automatically.
 
@@ -496,7 +496,7 @@ Create this in your `CLAUDE.md`:
 3. Explain the underlying concept, not just the fix
 ```
 
-Full template: [examples/claude-md/learning-mode.md](../examples/claude-md/learning-mode.md)
+Full template: [examples/claude-md/learning-mode.md](../../examples/claude-md/learning-mode.md)
 
 ---
 
@@ -534,7 +534,7 @@ Test my understanding of the code I just wrote or accepted.
 $ARGUMENTS (optional: focus area like "error handling" or "performance")
 ```
 
-Full template: [examples/commands/learn/quiz.md](../examples/commands/learn/quiz.md)
+Full template: [examples/commands/learn/quiz.md](../../examples/commands/learn/quiz.md)
 
 ---
 
@@ -1198,17 +1198,17 @@ Practitioner reports from real-world usage provide empirical validation of theor
 
 - [AI Roles & Career Paths](./ai-roles.md) — Map of emerging AI roles (Prompt Engineer → Harness Engineer) with career matrix and salary benchmarks
 - [Methodologies: TDD with Claude](../core/methodologies.md#tier-5-implementation) — Write tests first, then implement
-- [Workflows: Spec-First](./workflows/spec-first.md) — Understand requirements before code
-- [Workflows: Plan-Driven](./workflows/plan-driven.md) — Use /plan mode for complex work
+- [Workflows: Spec-First](../workflows/spec-first.md) — Understand requirements before code
+- [Workflows: Plan-Driven](../workflows/plan-driven.md) — Use /plan mode for complex work
 - [Ultimate Guide: Mental Models](#26-mental-model) — How to think about Claude interactions
 
 ### Templates & Examples
 
-- [Learning Mode CLAUDE.md](../examples/claude-md/learning-mode.md) — Configuration template
-- [/learn:quiz Command](../examples/commands/learn/quiz.md) — Self-testing slash command
-- [/learn:teach Command](../examples/commands/learn/teach.md) — Step-by-step concept explanations
-- [/learn:alternatives Command](../examples/commands/learn/alternatives.md) — Compare different approaches
-- [Learning Capture Hook](../examples/hooks/bash/learning-capture.sh) — Automated insight logging
+- [Learning Mode CLAUDE.md](../../examples/claude-md/learning-mode.md) — Configuration template
+- [/learn:quiz Command](../../examples/commands/learn/quiz.md) — Self-testing slash command
+- [/learn:teach Command](../../examples/commands/learn/teach.md) — Step-by-step concept explanations
+- [/learn:alternatives Command](../../examples/commands/learn/alternatives.md) — Compare different approaches
+- [Learning Capture Hook](../../examples/hooks/bash/learning-capture.sh) — Automated insight logging
 
 ### External Resources
 
@@ -1263,4 +1263,4 @@ Applying known skills: 30% struggle, 70% AI
 
 ---
 
-*This guide is part of the [Claude Code Ultimate Guide](./ultimate-guide.md). For questions or contributions, see the main repository.*
+*This guide is part of the [Claude Code Ultimate Guide](../ultimate-guide.md). For questions or contributions, see the main repository.*

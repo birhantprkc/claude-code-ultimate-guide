@@ -1,0 +1,384 @@
+# Whitepapers CHANGELOG
+
+Suivi des versions des ebooks, indépendamment de la version du guide.
+
+**Convention de version** : `MAJOR.MINOR.PATCH`
+- `MAJOR` : refonte structurelle (nouveau périmètre, nouvelle audience, changement de titre)
+- `MINOR` : enrichissement significatif (nouvelles sections, nouveaux angles, feedback terrain intégré)
+- `PATCH` : corrections, clarifications mineures, données mises à jour
+
+**Relation avec le guide** : chaque entrée de changelog indique la version du guide à laquelle correspond la mise à jour de l'ebook (champ `version` dans le frontmatter).
+
+---
+
+## [2026-05-19] v3.41.0 — Skills-Commands Merger Update (CC 2.1.3)
+
+### Changed
+- **WP02 FR/EN** (Personnalisation/Customization): 3-way Agent/Skill/Command table unified to 2-way Agent/Skill model. Chapter "Commands" renamed to "Skills User-Invocables". All `.claude/commands/` paths updated to `.claude/skills/` with `disable-model-invocation: true`. wp-version bumped to 1.4.0.
+- **WP04 FR/EN** (Architecture): Decision tree updated (`.claude/commands/` → `.claude/skills/` + `disable-model-invocation: true`). Extension comparison row updated with user/model invocation distinction.
+- **WP07 FR/EN** (Guide Référence): Chapter 5 title stripped of ", Commands". Comparison table updated to user-invocable/model-invocable/agent structure. Anatomy section renamed. Directory tree updated.
+- **Recap cards c04 FR/EN**: Full rewrite — title "Skills, Plugins & Agents", 4-row table with Skill (user)/Skill (auto)/Plugin/Agent.
+- **Recap cards m09 FR/EN**: Reframed as "User-Invocable Skills". CC 2.1.3 callout added. `.claude/commands/` → `.claude/skills/`.
+- **Recap cards m10 FR/EN**: "Invocation Modes" table added. Version bumped.
+- **Recap cards 01-commandes-essentielles FR/EN**: Minor path update. Version bumped to 3.41.0.
+
+---
+
+## Fiches Mémo (Recap Cards)
+
+Fiches A4 1-page imprimables. Versionnement global par série (pas par fiche individuelle).
+
+**Sources** : `whitepapers/recap-cards/fr/*.qmd`
+**Extension** : `recap-card-typst` (palette Bold Guy, 2 colonnes, marges 1.2cm)
+
+### Série FR complète
+
+#### v1.1.0 — 2026-04-01 (guide v3.38.1)
+
+Mise à jour de contenu sur 5 fiches prioritaires (FR + EN) :
+
+- **m16** — Nouvelle section "Guardrails (v3.38.0)" : `MAX_ITERATIONS=8`, Dedicated Reviewer (Opus 4.6 read-only, 1:4 ratio), token budget par agent avec pause à 85%
+- **m17** — Nouvelle section "Récupération itérative (v3.38.0)" : pattern WHY/WHAT, budget de 3 cycles max avant escalade à l'orchestrateur
+- **c04** — `effort: low|medium|high` dans le frontmatter Skills (v3.37.3+), `${CLAUDE_PLUGIN_DATA}` dans la section Plugins
+- **t15** — Note `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` (v2.1.78+) : scrub automatique des variables sensibles avant transmission aux sous-processus MCP
+- **t16** — `sandbox.failIfUnavailable: true` (v2.1.78+) dans le bloc JSON de configuration
+
+#### v1.0.0 — 2026-03-17 (guide v3.37.0)
+
+Série FR complète — 57 fiches en 3 séries :
+
+- **Technique (T01-T22)** — 22 fiches : commandes, configuration, outils, MCP, sandbox, tokens
+- **Méthodologie (M01-M22)** — 22 fiches : workflows, agents, hooks, CI/CD, debug, observabilité
+- **Conception (C01-C13)** — 13 fiches : mental models, prompting, sécurité, mémoire, traceability
+
+Toutes les fiches respectent la contrainte 1 page A4 stricte (vérifiée via `pdfinfo`).
+
+---
+
+## Ebooks de la série principale
+
+### Mise à jour campagne — 2026-04-01 (guide v3.38.1)
+
+Tous les ebooks 00-09 mis à jour de v3.27.6 → v3.38.1. Résumé des wp-version après campagne :
+
+| WP | Titre | wp-version |
+|----|-------|-----------|
+| 00 | Intro série | 1.3.0 |
+| 01 | Prompts efficaces | 1.1.0 |
+| 02 | Personnalisation | 1.1.0 |
+| 03 | Sécurité | 1.2.0 |
+| 04 | Architecture | 1.1.0 |
+| 05 | Équipe | 1.3.0 |
+| 06 | Privacy | 1.1.0 |
+| 07 | Guide référence | 1.2.0 |
+| 08 | Agent teams | 1.3.0 |
+| 09 | Apprendre avec l'IA | 1.2.0 |
+| 10 | Budget IA | 1.2.0 (inchangé) |
+
+Détail des changements par ebook : voir `CHANGELOG.md` principal (section [Unreleased]).
+
+---
+
+### 10 — Budget IA / AI Budget
+
+**FR** : `whitepapers/fr/10-budget-ia.qmd`
+**EN** : `whitepapers/en/10-ai-budget.qmd`
+
+#### v1.2.0 — 2026-03-17 (guide v3.36.0)
+
+Retours Marc Sélince (DAF/finance background) — 6 corrections FR+EN :
+
+- **Section DAF/CFO** : placeholder callout remplacé par une vraie section `## Pour le DAF/CFO` avec argument ROI mesurable (bugs prod, onboarding) et framing OpEx/CapEx explicite (pas d'amortissement, déductible immédiatement)
+- **Freins COMEX** : nouvelle section `## Freins COMEX au-delà du coût` dans le Q&A (après Budget & Procurement) — 3 objections non financières avec réponses factuelles : dépendance fournisseurs US, risque IP/espionnage industriel, hausse de prix future (lock-in pricing)
+- **§3.1 Rétention** : reframé "Attraction et rétention des top performers" — le marché est tendu pour les seniors/experts, pas tous les profils ; distinction dev mid vs senior avec 3 offres dans les 48h
+- **§3.2 CTO** : nouveau sous-point "Le ROI des heures d'ingénieur" — LLMs sur le code mécanique (tests, boilerplate, CRUD) libèrent du temps d'ingé pour l'architecture et l'investigation
+- **§4.1 Budget** : option 4 ajoutée (remplacer un outil payant par un équivalent open source pour financer le pilote à coût net zéro) ; "200-500$/mois" retiré du budget discrétionnaire (trop variable selon les orgs)
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Corrections v2 — retours relecteurs (Mat, Marc, Anthony) :
+- Fix ratio Cursor Pro/Claude Max : plage ~1,5-3% (Claude Max) et ~0,15-0,3% (Cursor Pro) au lieu de valeurs ponctuelles — FR+EN
+- Fusion de la courbe d'apprentissage dupliquée en une seule section structurée (Phases 1/2/3)
+- Source BCG 2025 précisée avec titre indicatif
+- Note temporelle ajoutée sur les tarifs ("constatés en mars 2026")
+- "Des équipes de 5-10 personnes... en 2020" → reformulé sans date précise ni chiffre non sourcé
+- Executive summary ajouté (5 indicateurs clés + recommandation pilote)
+- Message clé "augmentation > outil" remonté en tête de document
+- Section "Au-delà des équipes tech" développée avec 3 use cases concrets (analyste, account manager, support L2)
+- Références section 9 (prompt repo) et section 6 (augmentation) ajoutées en entrée
+- Callout placeholder CFO/DAF ajouté (amortissement, OpEx vs CapEx)
+- Callout placeholder change management ajouté
+
+#### v1.0.0 — 2026-03-04 (guide v3.30.0)
+
+Publication initiale avec système de versioning ebook.
+
+**Contenu enrichi dans cette version (par rapport à la version non-versionnée) :**
+
+Round 1 — Feedback terrain (Samuel Retiere, responsable adoption IA 50+ devs) :
+- Piège framing headcount : encadré warning callout sur la comparaison workforce
+- Rétention chiffrée : coût de remplacement d'un dev senior (6-12 mois salaire, calcul explicite)
+- Watch point gains anecdotiques + fatigue mentale post-pic IA
+- "Le ratio qui tue" : Claude Max = ~1,6% du coût mensuel d'un dev chargé
+- Seuils enterprise à anticiper dans le Q&A budget
+- Q&A "on arrive en cours d'année" : 3 approches concrètes (réallocation, budget discrétionnaire, argument de taille)
+- PR merge rate/dev/jour comme métrique directionnelle (avec caveats : seuil 50 devs, PR size variance)
+- Point hebdo du pilote reframé sur frictions techniques, pas ressenti qualitatif
+- Section "Du pilote au déploiement" avec tableau rollout par cohortes (5→15→30)
+- Attribution retour terrain dans les sources
+
+Round 2 — Refonte framing stratégique :
+- Audience map CEO/CTO/CIO selon taille d'organisation (encadré intro)
+- Section CEO restructurée : TTM + données AI-native (BCG 47% vs 13%) + fenêtre stratégique
+- Arguments financiers absorbés dans CEO, section CFO supprimée
+- Nouvelle section "Au-delà des équipes tech" (agents métier, co-développement tech/business)
+- Nouvelle section "L'IA comme augmentation, pas comme outil" (intuition de contextualisation, dev mini-CTO)
+- Courbe d'apprentissage en 3 phases dans CTO (terrain/observationnel, plateau de 10%)
+- Encadré TCO : lock-in vendor, API unbounded, hypothèse ×2 en scénario prudent
+
+---
+
+### 00 — Introduction de la série / Series Introduction
+
+**FR** : `whitepapers/fr/00-introduction-serie.qmd`
+**EN** : `whitepapers/en/00-series-introduction.qmd`
+
+#### v1.2.0 — 2026-03-17 (guide v3.36.0)
+
+Mise à jour contenu guide v3.36.0 :
+- Fenêtre contexte 1M tokens : corrigée "beta" → GA (v2.1.75, mars 2026) — FR+EN
+- Tableau de 7 nouvelles features majeures ajouté : Tasks API (v2.1.16), Auto-memories (v2.1.32), Agent Teams (v2.1.32), LSP Tool (v2.0.74), Remote Control (v2.1.51), MCP Elicitation (v2.1.76), contexte 1M GA — FR+EN
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Corrections v2 — retours relecteurs (Marc, Anthony) :
+- npm : "déprécié" → "non recommandé" — FR+EN
+- EN : installeur natif (`curl | sh`) ajouté comme méthode recommandée principale
+- Fenêtre de contexte clarifiée : 200K par défaut (session standard), 1M par teammate dans les agent teams — FR+EN
+- Tableau "Personnalisable" reformulé en phrase complète — FR
+- `/init` ajouté dans la liste des 8 commandes essentielles — EN
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 01 — Prompts Efficaces / Effective Prompts
+
+**FR** : `whitepapers/fr/01-prompts-efficaces.qmd`
+**EN** : `whitepapers/en/01-effective-prompts.qmd`
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 02 — Personnalisation / Customization
+
+**FR** : `whitepapers/fr/02-personnalisation.qmd`
+**EN** : `whitepapers/en/02-customization.qmd`
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Corrections v2 — retours relecteurs (Edouard, Mat, Nicolas) :
+- Restauration des accents sur ~10 passages — FR
+- Anglicismes : "on-demand" → "à la demande", "per-project" → "par projet", "Memories" → "mémoires", "Feature opt-in" → "fonctionnalité opt-in" — FR
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 03 — Sécurité / Security
+
+**FR** : `whitepapers/fr/03-securite.qmd`
+**EN** : `whitepapers/en/03-security.qmd`
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Mise à jour contenu guide v3.36.0 :
+- Callout warning ajouté : security fix v2.1.77 — hooks `PreToolUse` retournant `"allow"` contournaient les règles enterprise `deny` ; retourner `"continue"` à la place — FR+EN
+- Paramètre sandbox `allowRead` ajouté (v2.1.77) : chemins en lecture seule sans accès écriture — FR+EN
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 04 — Architecture
+
+**FR** : `whitepapers/fr/04-architecture.qmd`
+**EN** : `whitepapers/en/04-architecture.qmd`
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 05 — Équipe / Team
+
+**FR** : `whitepapers/fr/05-equipe.qmd`
+**EN** : `whitepapers/en/05-team.qmd`
+
+#### v1.2.0 — 2026-03-17 (guide v3.36.0)
+
+Mise à jour contenu guide v3.36.0 :
+- Section "Code Review natif" ajoutée (Research Preview, Teams/Enterprise) : architecture multi-agents, 3 modes de déclenchement, `REVIEW.md`, tarification $15-25/PR — FR+EN
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Corrections v2 — retours relecteurs (Nicolas, Marc) :
+- "Multiple Claude instances... codebase partagee" → phrase complète avec sujet et verbe — FR+EN
+- "Turnkey Quickstart" expliqué (démarrage rapide clé en main) — FR+EN
+- "user-level et project-level" → traduction ajoutée entre parenthèses — FR
+- Correction résidu FR ("OUI →") dans le fichier EN
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 06 — Privacy
+
+**FR** : `whitepapers/fr/06-privacy.qmd`
+**EN** : `whitepapers/en/06-privacy.qmd`
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 07 — Guide de Référence / Reference Guide
+
+**FR** : `whitepapers/fr/07-guide-reference.qmd`
+**EN** : `whitepapers/en/07-reference-guide.qmd`
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Mise à jour contenu guide v3.27.6 → v3.36.0 :
+- 12 nouvelles commandes slash ajoutées : `/loop`, `/simplify`, `/batch`, `/stats`, `/rename`, `/copy`, `/effort`, `/branch` (remplace `/fork`), `/btw`, `/voice`, `/remote-control`/`/rc`, `/mobile`, `/fast` — FR+EN
+- 7 nouveaux événements hook : `Elicitation`, `ElicitationResult`, `PostCompact`, `WorktreeCreate`, `WorktreeRemove`, `TeammateIdle`, `TaskCompleted` — FR+EN
+- Flags CLI étendus : `-n`/`--name`, `--worktree`/`-w`, `--tools`, `--max-budget-usd`, `--add-dir`, `worktree.sparsePaths` — FR+EN
+- Fenêtre contexte 1M tokens : corrigée "beta" → GA (v2.1.75, mars 2026) — FR+EN
+- Section Remote Control ajoutée (v2.1.51, Pro/Max, Research Preview) — FR+EN
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 08 — Agent Teams
+
+**FR** : `whitepapers/fr/08-agent-teams.qmd`
+**EN** : `whitepapers/en/08-agent-teams.qmd`
+
+#### v1.2.0 — 2026-03-17 (guide v3.36.0)
+
+Mise à jour contenu guide v3.36.0 :
+- Pattern "dérive d'identité après compaction" ajouté dans la section Context Isolation : hook `UserPromptSubmit` qui ré-injecte `.claude/agent-identity.txt` via `additionalContext` — FR+EN
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Corrections v2 — retours relecteurs (Emmanuel) :
+- Restauration massive des accents sur 977 lignes FR (~200+ corrections)
+- "C'est la seule définition de cette valeur dans ce document" → supprimé (FR+EN)
+- "chez dans une fintech" → "chez une fintech" — FR+EN
+- Clarification que les agent teams diffèrent des sub-agents par la communication bilatérale P2P et les outils de coordination (pas l'isolation de contexte, commune aux deux) — FR+EN
+- Ajout note "Un agent Claude Code solo est un agent autonome complet, pas un chatbot" — FR+EN
+- "~30K lignes de code" → "~30K lignes de code (environ 1M tokens)" — FR+EN
+- "Fusion continue" → reformulé: changes committed, pulled et pushed automatiquement — FR+EN
+- Note ajoutée: tmux est un outil externe, pas une fonctionnalité native Claude Code — FR+EN
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### 09 — Apprendre avec l'IA / Learning with AI
+
+**FR** : `whitepapers/fr/09-apprendre-avec-ia.qmd`
+**EN** : `whitepapers/en/09-learning-with-ai.qmd`
+
+#### v1.1.0 — 2026-03-17 (guide v3.36.0)
+
+Mise à jour contenu guide v3.36.0 :
+- Section "Inversion du bottleneck de review" ajoutée : les juniors génèrent du code plus vite que les seniors ne peuvent l'auditer — FR+EN
+- Section "Exposition réglementaire" ajoutée (tech leads/managers) : EU AI Act (GPAI août 2025, high-risk août 2026) + FDA AI/ML Guidance (jan/juin 2025) — FR+EN
+
+#### v1.0.0 — 2026-03-04 (guide v3.27.6)
+
+Baseline versioning établi.
+
+---
+
+### Cheatsheet
+
+**FR** : `whitepapers/fr/cheatsheet.qmd`
+**EN** : `whitepapers/en/cheatsheet.qmd`
+
+#### v1.0.0 — 2026-03-04 (guide v3.29.2)
+
+Baseline versioning établi.
+
+---
+
+## Ebooks custom / client
+
+> Ces ebooks suivent leur propre cycle de version, indépendant de la série principale.
+
+### StrangeBee
+
+**Whitepaper** : `whitepapers/fr/strangebee-whitepaper.qmd`
+**Cheatsheet** : `whitepapers/fr/strangebee-cheatsheet.qmd`
+
+#### v1.0.0 — 2026-03-04 (guide v3.29.2)
+
+Baseline versioning établi.
+
+---
+
+### Purchasely
+
+**Whitepaper** : `whitepapers/fr/purchasely-whitepaper.qmd`
+**Cheatsheet** : `whitepapers/fr/purchasely-cheatsheet.qmd`
+
+#### v1.0.0 — 2026-03-04 (guide v3.29.2)
+
+Baseline versioning établi.
+
+---
+
+### DevWithAI Cheatsheet
+
+**FR** : `whitepapers/fr/devwithai-cheatsheet.qmd`
+
+#### v1.0 — 2026-03-04
+
+Baseline versioning établi.
+
+---
+
+## Comment mettre à jour ce changelog
+
+Quand tu modifies un ebook :
+
+1. Bumper le `wp-version` dans le frontmatter du fichier `.qmd` concerné
+2. Ajouter une entrée dans ce fichier sous l'ebook concerné
+3. Format de l'entrée :
+
+```markdown
+#### vX.Y.Z — YYYY-MM-DD (guide vX.Y.Z)
+
+Description des changements (bullets si plusieurs).
+```
+
+4. Rebuilder le PDF : `cd whitepapers/fr && quarto render XX-nom.qmd --to whitepaper-typst`

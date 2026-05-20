@@ -1,0 +1,115 @@
+---
+title: "Commandes Essentielles"
+subtitle: "Raccourcis clavier & commandes slash indispensables"
+card-number: "T01"
+category: "Technique"
+guide-version: "3.41.0"
+difficulty: "beginner"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+wp-version: "1.1.0"
+date: "Mai 2026"
+layout: "two-col"
+lang: fr
+format:
+  recap-card-typst: default
+---
+
+## Raccourcis Clavier
+
+| Raccourci | Action |
+|-----------|--------|
+| `Ctrl+J` / `Cmd+J` | Ouvrir Claude Code |
+| `Shift+Tab` | Basculer mode auto-accept |
+| `Shift+Enter` | Nouvelle ligne (multiline) |
+| `Ctrl+C` | Interrompre la génération |
+| `Ctrl+R` | Rechercher historique commandes |
+| `Ctrl+B` | Background tasks |
+| `Alt+T` | Toggle thinking |
+| `Esc` | Annuler l'action en cours |
+| `Esc` × 2 | Rewind (annuler dernier changement) |
+| `↑` / `↓` | Historique des messages |
+| `Tab` | Complétion de chemin |
+
+## Commandes Slash Core
+
+```
+/help           Aide et commandes disponibles
+/powerup        Leçons interactives animées (fonctionnalités CC)
+/clear          Vider le contexte (reset)
+/compact        Compresser l'historique
+/model          Changer de modèle
+/status         Statut du contexte + coûts de session
+/usage          Consommation tokens par modèle (v2.1.118)
+/cost           alias de /usage (v2.1.118)
+/plan           Entrer en Plan Mode (aucune modification)
+/effort xlow/low/default/high/xhigh  Niveau de réflexion (v2.1.111)
+/recap          Résumé de session (v2.1.108)
+/undo           Annuler la dernière action (v2.1.108)
+/ultrareview    Revue de code multi-agent (v2.1.114)
+/branch         Créer une timeline parallèle (v2.1.77)
+/rename [nom]   Nommer la session courante
+/loop [int] [prompt]  Scheduler récurrent (ex: /loop 5m check deploy)
+/voice          Activer saisie vocale
+/fast           Toggle Fast Mode (2.5× vitesse, 6× coût)
+```
+
+## Modes de Permission
+
+```
+claude                    Mode interactif (défaut)
+claude --dangerously-skip-permissions
+                          Bypass total (CI/CD)
+claude --allowedTools "Edit,Read,Bash"
+                          Whitelist d'outils
+```
+
+## Démarrage Rapide
+
+```bash
+# Lancer Claude Code
+claude
+
+# Avec fichier de contexte
+claude --context CLAUDE.md
+
+# Mode non-interactif (scripts)
+claude -p "Analyse ce fichier" < input.txt
+
+# Continuer la dernière session
+claude --continue
+```
+
+## Commandes de Session
+
+```
+/new            Nouvelle session
+/resume         Reprendre session précédente
+/sessions       Lister les sessions
+```
+
+## Navigation Contexte
+
+| Commande | Effet |
+|----------|-------|
+| `/compact` | Résume et libère de l'espace |
+| `/clear` | Réinitialise complètement |
+| `#fichier` | Ajouter fichier au contexte |
+
+## Slash Commands Personnalisées
+
+```
+# Invoquer une commande personnalisée
+/nom-commande [args]
+
+# Définies dans :
+.claude/skills/nom-commande/SKILL.md
+```
+
+## Tips Essentiels
+
+**Contrôle de verbosité** — Utiliser `--no-stream` pour voir la réponse complète d'un coup.
+
+**Multiline** — `Shift+Enter` dans le terminal pour sauter une ligne sans valider.
+
+**Vim mode** — Ajouter `{"vim": true}` dans `~/.claude/settings.json` pour les raccourcis Vim.

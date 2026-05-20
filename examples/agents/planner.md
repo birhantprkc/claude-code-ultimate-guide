@@ -60,5 +60,5 @@ Opus is used here for its reasoning depth during planning. Planning errors compo
 ---
 
 **Sources**:
-- Model Selection Guide: [Section 2.5](../guide/ultimate-guide.md#25-model-selection--thinking-guide)
-- OpusPlan workflow: [Section 2.3](../guide/ultimate-guide.md#23-plan-mode)
+- Model Selection Guide: [Section 2.5](../../guide/ultimate-guide.md#25-model-selection--thinking-guide)
+- OpusPlan workflow: [Section 2.3](../../guide/ultimate-guide.md#23-plan-mode)

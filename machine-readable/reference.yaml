@@ -3,8 +3,8 @@
 # Source: guide/ultimate-guide.md
 # Purpose: Condensed index for LLMs to quickly answer user questions about Claude Code
 
-version: "3.40.0"
-updated: "2026-05-03"
+version: "3.41.0"
+updated: "2026-05-18"
 
 # ════════════════════════════════════════════════════════════════
 # DEEP DIVE - Line numbers in guide/ultimate-guide.md
@@ -28,12 +28,20 @@ deep_dive:
   # Claude Code Releases
   claude_code_releases: "guide/core/claude-code-releases.md"
   claude_code_releases_yaml: "machine-readable/claude-code-releases.yaml"
+  # CC 2.1.3: Skills-Commands Merger
+  skills_commands_merger_version: "2.1.3"
+  skills_commands_merger_date: "2026-01-11"
+  skills_commands_merger_summary: ".claude/commands/ merged into .claude/skills/. Add disable-model-invocation: true for user-only skills."
+  skills_commands_merger_docs: "https://code.claude.com/docs/en/skills"
+  skills_commands_merger_guide: "guide/ultimate-guide.md:8903"
   # Code Review Automation (Pat Cullen, Jan 2026)
-  review_pr_advanced: "examples/commands/review-pr.md:81"
+  review_pr_advanced: "examples/skills/review-pr/SKILL.md"
+  review_pr_advanced_note: "Since CC 2.1.3: equivalent skill uses disable-model-invocation: true in .claude/skills/"
   review_anti_hallucination: "examples/agents/code-reviewer.md:77"
   review_auto_fix_loop: "guide/workflows/iterative-refinement.md:353"
   # Review Plan Command (Garry Tan-inspired, Feb 2026)
-  review_plan_command: "examples/commands/review-plan.md"
+  review_plan_command: "examples/skills/review-plan/SKILL.md"
+  review_plan_command_note: "Since CC 2.1.3: equivalent skill uses disable-model-invocation: true in .claude/skills/"
   # GitHub Actions: Prompt-Based Code Review (Feb 2026)
   github_actions_code_review_workflow: "examples/github-actions/claude-code-review.yml"
   github_actions_code_review_prompt: "examples/github-actions/prompts/code-review.md"
@@ -52,7 +60,8 @@ deep_dive:
   modular_context_architecture: "guide/ultimate-guide.md:4645"  # Pattern #1: CLAUDE.md-as-index + path-scoped rules
   adversarial_plan_review: "examples/agents/plan-challenger.md"  # Pattern #5: +52.8% security, +80% bug detection
   adr_auto_generation: "examples/agents/adr-writer.md"           # Pattern #3: criticality matrix C1/C2/C3
-  codebase_audit_scoring: "examples/commands/audit-codebase.md"  # Pattern #9: 7-category scoring (Variant Systems)
+  codebase_audit_scoring: "examples/skills/audit-codebase/SKILL.md"  # Pattern #9: 7-category scoring (Variant Systems)
+  codebase_audit_scoring_note: "Since CC 2.1.3: equivalent skill uses disable-model-invocation: true in .claude/skills/"
   event_driven_agents: "guide/workflows/event-driven-agents.md"  # Pattern #8: Linear/GitHub/Jira webhook→agent
   worktree_dependency_management: "guide/ultimate-guide.md:15180"  # Pattern #6: manual analysis, no auto-detection
   deployment_automation: "guide/ultimate-guide.md:13172"          # Pattern #10: Vercel + Infisical guardrails
@@ -172,7 +181,7 @@ deep_dive:
   routines_api_trigger: "HTTP POST to per-routine endpoint, bearer token, optional text field for context, returns session_url"
   routines_github_trigger: "17 event types (PR, push, issues, releases, check runs, workflows, discussions...), PR filters (author/label/branch/draft/fork), requires Claude GitHub App"
   routines_research_preview: "true — behavior, limits, API surface may change"
-  routines_discover_command: "examples/commands/routines-discover.md"
+  routines_discover_command: "examples/skills/routines-discover/SKILL.md"
   routines_use_case_angles: "scheduled maintenance / event-driven reactions / alert response / cross-system sync / release automation"
   scheduled_tasks_desktop: "guide/ultimate-guide.md:9004"
   scheduled_tasks_desktop_interval: "1 minute minimum"
@@ -217,8 +226,8 @@ deep_dive:
   gstack_workflow: "guide/workflows/gstack-workflow.md"
   gstack_6_gears: "guide/workflows/gstack-workflow.md:34"  # Table: 6 roles, core questions, when to switch
   gstack_strategic_gate: "guide/workflows/gstack-workflow.md:47"  # Pre-implementation product gate concept
-  gstack_plan_ceo_review: "examples/commands/plan-ceo-review.md"  # Strategic product gate command template
-  gstack_plan_eng_review: "examples/commands/plan-eng-review.md"  # Engineering architecture gate command template
+  gstack_plan_ceo_review: "examples/skills/plan-pipeline/ceo-review/SKILL.md"  # Strategic product gate command template
+  gstack_plan_eng_review: "examples/skills/plan-pipeline/eng-review/SKILL.md"  # Engineering architecture gate command template
   gstack_browse_non_mcp: "guide/workflows/gstack-workflow.md:106"  # /browse native Chromium daemon vs MCP (~100ms)
   gstack_full_cycle: "guide/workflows/gstack-workflow.md:130"  # Full ship cycle demo (plan-ceo → plan-eng → review → ship → browse)
   gstack_when_to_use: "guide/workflows/gstack-workflow.md:198"  # Comparison vs Plan Pipeline and other workflows
@@ -276,9 +285,9 @@ deep_dive:
   session_naming_guide: "guide/ultimate-guide.md:815"
   session_auto_rename: 859
   learning_mode_template: "examples/claude-md/learning-mode.md"
-  learn_quiz_command: "examples/commands/learn/quiz.md"
-  learn_teach_command: "examples/commands/learn/teach.md"
-  learn_alternatives_command: "examples/commands/learn/alternatives.md"
+  learn_quiz_command: "examples/skills/learn-quiz/SKILL.md"
+  learn_teach_command: "examples/skills/learn-teach/SKILL.md"
+  learn_alternatives_command: "examples/skills/learn-alternatives/SKILL.md"
   learning_capture_hook: "examples/hooks/bash/learning-capture.sh"
   # Anti-patterns
   vibe_coding_trap: "guide/roles/learning-with-ai.md:87"
@@ -348,7 +357,7 @@ deep_dive:
   sandbox_native_score: "5/5"
   # Templates (Added 2026-02-02)
   sandbox_native_config_template: "examples/config/sandbox-native.json"
-  sandbox_status_command: "examples/commands/sandbox-status.md"
+  sandbox_status_command: "examples/skills/sandbox-status/SKILL.md"
   sandbox_validation_hook: "examples/hooks/bash/sandbox-validation.sh"
   # Docker Sandboxes (existing)
   sandbox_evaluation: "docs/resource-evaluations/docker-sandboxes-isolation.md"
@@ -772,7 +781,7 @@ deep_dive:
   resource_evaluations_grenier_gap: "No automated quality checks for agents/skills (29.5% deploy without evaluation per LangChain 2026)"
   resource_evaluations_grenier_integration: "Created /audit-agents-skills command + skill + criteria.yaml"
   # Agent/Skill Quality Audit (added 2026-02-07)
-  audit_agents_skills_command: "examples/commands/audit-agents-skills.md"
+  audit_agents_skills_command: "examples/skills/audit-agents-skills/SKILL.md"
   audit_agents_skills_skill: "examples/skills/audit-agents-skills/SKILL.md"
   audit_agents_skills_criteria: "examples/skills/audit-agents-skills/scoring/criteria.yaml"
   audit_agents_skills_framework: "16 criteria (Identity 3x, Prompt 2x, Validation 1x, Design 2x)"
@@ -872,14 +881,14 @@ deep_dive:
   plan_pipeline_claude_md_limit: "120 lines hard limit + pointer strategy for sub-files"
   plan_pipeline_context_reset: "/clear between each command (plan, validate, execute)"
   plan_pipeline_cost: "$2-10 typical Tier 2 feature, compounds down as ADR coverage grows"
-  plan_start_command: "examples/commands/plan-start.md"
+  plan_start_command: "examples/skills/plan-pipeline/start/SKILL.md"
   plan_start_phases: "5 phases: PRD analysis, design analysis, technical decisions, dynamic team, metrics"
   plan_start_tiers: "Tier 0 Solo (0 agents) → Tier 4 Full Spectrum (10+ agents)"
-  plan_validate_command: "examples/commands/plan-validate.md"
+  plan_validate_command: "examples/skills/plan-pipeline/validate/SKILL.md"
   plan_validate_layer1: "structural checks inline: format, deps, file existence, ADR consistency, CLAUDE.md"
   plan_validate_layer2: "0-8 specialist agents triggered by plan content (security Opus, db Opus, integration Opus)"
   plan_validate_autofix: "Bucket A auto-resolve (ADR/PATTERNS/first-principles ~95%) + Bucket B human input"
-  plan_execute_command: "examples/commands/plan-execute.md"
+  plan_execute_command: "examples/skills/plan-pipeline/execute/SKILL.md"
   plan_execute_flow: "worktree → TDD scaffold → parallel level execution → drift detection → quality gate → smoke test → PR merge → cleanup"
   planning_coordinator_agent: "examples/agents/planning-coordinator.md"
   planning_coordinator_role: "Opus synthesis agent: merges multi-agent reports into coherent task graph, resolves conflicts via ADR precedence"
@@ -903,10 +912,10 @@ deep_dive:
   contribution_metrics_availability: "Public beta - Team and Enterprise plans"
   contribution_metrics_stats: "+67% PRs merged/engineer/day, 70-90% AI-assisted code (Anthropic internal)"
   # Git Worktree Commands (Feb 2026)
-  git_worktree_command: "examples/commands/git-worktree.md"
-  git_worktree_status_command: "examples/commands/git-worktree-status.md"
-  git_worktree_remove_command: "examples/commands/git-worktree-remove.md"
-  git_worktree_clean_command: "examples/commands/git-worktree-clean.md"
+  git_worktree_command: "examples/skills/git-worktree/SKILL.md"
+  git_worktree_status_command: "examples/skills/git-worktree-status/SKILL.md"
+  git_worktree_remove_command: "examples/skills/git-worktree-remove/SKILL.md"
+  git_worktree_clean_command: "examples/skills/git-worktree-clean/SKILL.md"
   git_worktrees_multi_instance: 14013
   advanced_worktree_tooling: 15763
   worktree_tooling_self_assessment: 15763
@@ -1184,10 +1193,10 @@ deep_dive:
   security_kill_switch: "guide/security/security-hardening.md:630"  # AI Kill Switch & Containment Architecture (§3.5)
   security_claude_folder_audit: "guide/security/security-hardening.md:228"  # Repository Pre-Scan (§1.4)
   security_toxicskills_evaluation: "docs/resource-evaluations/snyk-toxicskills-evaluation.md"
-  security_check_command: "examples/commands/security-check.md"  # Quick config check vs known threats
-  security_audit_command: "examples/commands/security-audit.md"  # Full 6-phase security audit (score /100)
-  security_threat_db: "examples/commands/resources/threat-db.yaml"  # Threat intelligence database (authors, skills, CVEs, patterns)
-  security_update_threat_db: "examples/commands/update-threat-db.md"  # /update-threat-db — research & update threat database
+  security_check_command: "examples/skills/security-check/SKILL.md"  # Quick config check vs known threats
+  security_audit_command: "examples/skills/security-audit/SKILL.md"  # Full 6-phase security audit (score /100)
+  security_threat_db: "examples/skills/update-threat-db/threat-db.yaml"  # Threat intelligence database (authors, skills, CVEs, patterns)
+  security_update_threat_db: "examples/skills/update-threat-db/SKILL.md"  # /update-threat-db — research & update threat database
   security_cc_scanner: "guide/security/security-hardening.md:780"  # Claude Code Security (research preview) — Anthropic native vuln scanner, adversarial validation, patch suggestions
   security_patcher_agent: "examples/agents/security-patcher.md"  # Agent: applies patches from security-auditor findings, human approval gate, Write/Edit tools
   security_gate_hook: "examples/hooks/bash/security-gate.sh"  # PreToolUse hook: blocks 7 vuln patterns at write time (SQLi, XSS, hardcoded secrets, eval, weak hash, cmd injection, path traversal)
@@ -1211,12 +1220,12 @@ deep_dive:
   skeptical_reviewer_pattern: "guide/ultimate-guide.md#pattern-skeptical-reviewer-sub-agent"
   skeptical_reviewer_principle: "50%+ rejection rate is normal and healthy — forces evidence-based output"
   # Handoff Triad (Packmind-inspired, merge rules per section)
-  handoff_triad_create: "examples/commands/handoff/create-handoff.md"
-  handoff_triad_resume: "examples/commands/handoff/resume-handoff.md"
-  handoff_triad_update: "examples/commands/handoff/update-handoff.md"
+  handoff_triad_create: "examples/skills/handoff-create/SKILL.md"
+  handoff_triad_resume: "examples/skills/handoff-resume/SKILL.md"
+  handoff_triad_update: "examples/skills/handoff-update/SKILL.md"
   handoff_triad_merge_rules: "Files=merge, Discoveries=append, Work Done=append-only, Status=replace, Next Steps=replace"
   # Recipe Template (Context Validation Checkpoints)
-  recipe_template: "examples/commands/recipe-template.md"
+  recipe_template: "examples/skills/recipe-template/SKILL.md"
   recipe_template_key_pattern: "Context Validation Checkpoints — precondition checklist Claude must verify before executing steps"
   # Statusline script (32K output buffer trick)
   statusline_script: "examples/scripts/statusline.py"
@@ -1381,9 +1390,8 @@ folder_structure:
   settings.json: "hooks config (committed)"
   settings.local.json: "permissions (not committed)"
   agents/: "custom AI personas"
-  commands/: "slash commands"
+  skills/: "user-invocable skills in .claude/skills/ (slash commands + knowledge modules; since CC 2.1.3 commands/ merged here — use disable-model-invocation: true for user-only skills)"
   hooks/: "event scripts"
-  skills/: "knowledge modules"
   rules/: "auto-loaded rules"
 
 # ════════════════════════════════════════════════════════════════

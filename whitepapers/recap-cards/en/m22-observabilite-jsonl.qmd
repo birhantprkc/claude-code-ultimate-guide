@@ -1,0 +1,105 @@
+---
+title: "Observability: JSONL & jq"
+subtitle: "Auditing and analyzing Claude Code activity through logs"
+card-number: "M22"
+category: "Methodology"
+difficulty: "advanced"
+guide-version: "3.41.0"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+date: "May 2026"
+layout: "two-col"
+lang: en
+format:
+  recap-card-typst: default
+---
+
+## The JSONL registry: source of truth
+
+Every Claude Code action is recorded in JSONL files (one JSON entry per line) stored in `~/.claude/projects/<project>/`. These files are the source of truth for what the agent actually did: which files it read, which files it modified, which commands it executed.
+
+```bash
+# Locate session files for the current project
+ls ~/.claude/projects/-$(pwd | tr '/' '-')-/
+# → SESSION_ID.jsonl  SESSION_ID2.jsonl ...
+```
+
+Each `assistant` type line contains a `content` array whose `tool_use` entries document each tool call with its input parameters.
+
+## What tools expose
+
+| Tool | Available information |
+|------|-----------------------|
+| `Read` | File path, line range |
+| `Edit` / `Write` | Path, modified content |
+| `Bash` | Full command executed |
+| `WebFetch` | URL called (POST data included) |
+| `Task` | Prompt sent to sub-agent |
+| `Glob` / `Grep` | Search patterns and scope |
+
+## Essential jq queries
+
+```bash
+SESSION=~/.claude/projects/-my-project-/SESSION.jsonl
+
+# Files read in the session
+jq 'select(.type=="assistant") |
+  .message.content[]? |
+  select(.type=="tool_use" and .name=="Read") |
+  .input.file_path' "$SESSION"
+
+# Bash commands executed
+jq 'select(.type=="assistant") |
+  .message.content[]? |
+  select(.type=="tool_use" and .name=="Bash") |
+  .input.command' "$SESSION"
+
+# Count by tool (activity profile)
+jq -r 'select(.type=="assistant") |
+  .message.content[]? |
+  select(.type=="tool_use") | .name' \
+  "$SESSION" | sort | uniq -c | sort -rn
+```
+
+## Sensitive patterns to monitor
+
+These patterns are worth detecting automatically in audits:
+
+| Pattern | Risk | jq filter |
+|---------|------|-----------|
+| Read on `.env`, `*.pem`, `id_rsa` | Credentials access | `test("\\.(env|pem|key)$")` |
+| Bash with `rm -rf` or `--force-push` | Destructive action | `test("rm -rf")` |
+| WebFetch to external URL | Potential exfiltration | select `.name=="WebFetch"` |
+| Write outside project directory | Scope creep | Compare path to current directory |
+
+For teams, synchronize these logs to immutable storage (S3 with versioning, for example) to maintain an unalterable forensic trace.
+
+## Community external tools
+
+| Tool | Type | Primary usage |
+|------|------|--------------|
+| **ccusage** | CLI / TUI | Costs from JSONL, community reference |
+| **claude-code-otel** | OpenTelemetry | Export to Prometheus + Grafana |
+| **ccboard** | TUI + Web | Sessions dashboard, costs, activity |
+| **Akto** | SaaS | Security guardrails at API level |
+| **MLflow Tracing** | CLI + SDK | Exact token counts, LLM evaluation |
+
+```bash
+# Quick install
+npm i -g ccusage          # Costs and statistics
+cargo install ccboard     # Interactive dashboard
+npm i -g claude-code-otel # OpenTelemetry export
+```
+
+## Decision tree
+
+```
+Need costs quickly?        → ccusage (0 config)
+Enterprise audit?          → claude-code-otel + Grafana
+Already on MLflow?         → MLflow tracing integration
+Visual dashboard?          → ccboard
+```
+
+## Cost estimation in JSONL
+
+JSONL logs do not contain Anthropic prices directly. Tools like ccusage apply a heuristic of approximately 4 characters per token, then multiply by model rates. This estimate tends to slightly overestimate; figures are indicative, not billed.

@@ -67,4 +67,4 @@ Stage 5 generates `{slug}-kimi-prompt.md`. To generate slides:
 
 ## Documentation
 
-Full workflow guide: [guide/workflows/talk-pipeline.md](../../guide/workflows/talk-pipeline.md)
+Full workflow guide: [guide/workflows/talk-pipeline.md](../../../guide/workflows/talk-pipeline.md)

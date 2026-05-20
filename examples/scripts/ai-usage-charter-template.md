@@ -53,7 +53,7 @@ All data at [Organization] is classified into four levels. Your use of AI tools 
 
 ### Technical Enforcement
 
-Projects handling CONFIDENTIAL or RESTRICTED data must configure `permissions.deny` in `.claude/settings.json` to block AI access to sensitive files. See the [Standard or Regulated tier config](../security/enterprise-governance.md#4-guardrail-tiers) for ready-to-use configurations.
+Projects handling CONFIDENTIAL or RESTRICTED data must configure `permissions.deny` in `.claude/settings.json` to block AI access to sensitive files. See the [Standard or Regulated tier config](../../guide/security/enterprise-governance.md#4-guardrail-tiers) for ready-to-use configurations.
 
 ---
 

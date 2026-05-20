@@ -38,7 +38,7 @@ GUIDE_FILES = {
     "guide/known-issues.md": None,
     "guide/third-party-tools.md": None,
     "guide/adoption-approaches.md": None,
-    "examples/commands/review-pr.md": None,
+    "examples/skills/review-pr/SKILL.md": None,
     "examples/agents/code-reviewer.md": None,
 }
 

@@ -426,7 +426,7 @@ If issues persist:
 
 1. **Run diagnostic script** (above) and share output
 2. **Check Agent Vibes GitHub Issues**: https://github.com/paulpreibisch/AgentVibes/issues
-3. **Check Claude Code Guide**: [AI Ecosystem](../../../guide/ai-ecosystem.md)
+3. **Check Claude Code Guide**: [AI Ecosystem](../../../guide/ecosystem/ai-ecosystem.md)
 4. **Check logs**: `tail -f ~/.claude/tts-debug.log` (if exists)
 
 ---

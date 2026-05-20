@@ -773,7 +773,7 @@ Assisted-by: Claude (Anthropic)
 
 ### CONTRIBUTING.md Section
 
-See full template: [examples/config/CONTRIBUTING-ai-disclosure.md](../examples/config/CONTRIBUTING-ai-disclosure.md)
+See full template: [examples/config/CONTRIBUTING-ai-disclosure.md](../../examples/config/CONTRIBUTING-ai-disclosure.md)
 
 ```markdown
 ## AI Assistance Disclosure
@@ -794,7 +794,7 @@ in your pull request description.
 
 ### PR Template
 
-See full template: [examples/config/PULL_REQUEST_TEMPLATE-ai.md](../examples/config/PULL_REQUEST_TEMPLATE-ai.md)
+See full template: [examples/config/PULL_REQUEST_TEMPLATE-ai.md](../../examples/config/PULL_REQUEST_TEMPLATE-ai.md)
 
 ```markdown
 ## AI Assistance

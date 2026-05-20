@@ -866,8 +866,8 @@ approval_required:
 
 ## See Also
 
-- **[Agent Template](../examples/agents/devops-sre.md)**: DevOps/SRE agent persona for Claude
-- **[CLAUDE.md Template](../examples/claude-md/devops-sre.md)**: Project configuration for DevOps teams
+- **[Agent Template](../../examples/agents/devops-sre.md)**: DevOps/SRE agent persona for Claude
+- **[CLAUDE.md Template](../../examples/claude-md/devops-sre.md)**: Project configuration for DevOps teams
 - **[Security Hardening Guide](../security/security-hardening.md)**: Additional security practices
 - **[Architecture Guide](../core/architecture.md)**: How Claude Code works internally
 

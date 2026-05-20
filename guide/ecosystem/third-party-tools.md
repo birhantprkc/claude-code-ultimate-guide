@@ -26,8 +26,9 @@ tags: [reference, integration, plugin, security]
 12. [Multi-Agent Orchestration](#multi-agent-orchestration)
 13. [Knowledge Graph](#knowledge-graph)
 14. [Plugin Ecosystem](#plugin-ecosystem)
-15. [Known Gaps](#known-gaps)
-16. [Recommendations by Persona](#recommendations-by-persona)
+15. [Skills Observability](#skills-observability)
+16. [Known Gaps](#known-gaps)
+17. [Recommendations by Persona](#recommendations-by-persona)
 
 ---
 
@@ -68,7 +69,7 @@ The most mature cost tracking tool for Claude Code. Parses local session data to
 
 **Limitations**: Relies on local JSONL parsing; cost estimates may differ from official Anthropic billing. No team aggregation without manual log merging.
 
-> **Cross-ref**: The main guide covers basic ccusage commands at [ultimate-guide.md Section 2.4](./ultimate-guide.md) (cost monitoring).
+> **Cross-ref**: The main guide covers basic ccusage commands at [ultimate-guide.md Section 2.4](../ultimate-guide.md) (cost monitoring).
 > For DIY cost tracking with hooks, see [Observability](../ops/observability.md).
 
 ---
@@ -135,7 +136,7 @@ Your source code, API keys, and conversation content are **not** accessed or tra
 
 Straude is the only tool in this list that is **social** — it uploads your stats to a shared platform. If you want a leaderboard, streak tracking, or to benchmark your usage against other developers, Straude is unique. If you want local-only cost visibility, ccusage or ccburn are better fits and carry no data-sharing implications.
 
-> **Security reminder**: Before running any community CLI tool with `npx`, review its npm page and source for red flags. For Straude, the compiled source is readable and consistent with its stated purpose. See the [resource evaluation](../docs/resource-evaluations/straude-evaluation.md) for the full analysis.
+> **Security reminder**: Before running any community CLI tool with `npx`, review its npm page and source for red flags. For Straude, the compiled source is readable and consistent with its stated purpose. See the [resource evaluation](../../docs/resource-evaluations/straude-evaluation.md) for the full analysis.
 
 ---
 
@@ -429,7 +430,7 @@ A web-based UI for browsing and reading Claude Code conversation history (JSONL 
 
 **Limitations**: Read-only (cannot edit or resume sessions). No cost data. Requires existing `~/.claude/projects/` history.
 
-> **Cross-ref**: For session search from the CLI, see [session-search.sh](../examples/scripts/session-search.sh) in [Observability](../ops/observability.md).
+> **Cross-ref**: For session search from the CLI, see [session-search.sh](../../examples/scripts/session-search.sh) in [Observability](../ops/observability.md).
 
 ---
 
@@ -559,7 +560,7 @@ A CLI that scaffolds pre-configured Claude Code setups with hooks, commands, sta
 
 **Limitations**: Opinionated configuration choices. Some features require a premium tier. Does not read existing config (scaffolds from scratch).
 
-> **Cross-ref**: For manual Claude Code configuration, see [ultimate-guide.md Section 4](./ultimate-guide.md) (CLAUDE.md, settings, hooks, commands).
+> **Cross-ref**: For manual Claude Code configuration, see [ultimate-guide.md Section 4](../ultimate-guide.md) (CLAUDE.md, settings, hooks, commands).
 
 ---
 
@@ -643,7 +644,7 @@ agentshield scan --opus --stream
 - `--opus` mode triggers Opus 4.6 API calls; budget accordingly before enabling in CI
 - Project is 2 months old — API surface may evolve; pin to a specific version in production
 
-> **See also**: [Security Hardening guide](security-hardening.md) for manual hook and permission patterns.
+> **See also**: [Security Hardening guide](../security/security-hardening.md) for manual hook and permission patterns.
 
 ---
 
@@ -1159,7 +1160,7 @@ A third-party VS Code extension (not Anthropic's official extension) that adds a
 This section covers tools for running **multiple Claude Code instances in parallel**. For detailed documentation, see:
 
 - **[AI Ecosystem](./ai-ecosystem.md)** - Gas Town, multiclaude, agent-chat, claude-squad
-- **[Ultimate Guide Section 9](./ultimate-guide.md)** - Multi-instance workflows, git worktrees, orchestration frameworks
+- **[Ultimate Guide Section 9](../ultimate-guide.md)** - Multi-instance workflows, git worktrees, orchestration frameworks
 
 **Quick reference**:
 
@@ -1425,11 +1426,80 @@ Without Graphify: Claude re-reads source files every session to understand struc
 
 ---
 
+## Skills Observability
+
+### Skillsight
+
+The only open-source tool for team-level skills usage analytics. Ingests Claude Code OTEL telemetry and shows which skills are actually invoked — by whom, how often, in which sessions — rather than which skills you think are being used.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub — PackmindHub/skillsight](https://github.com/PackmindHub/skillsight) |
+| **Author** | Cédric Teyton (Packmind) |
+| **License** | Apache 2.0 |
+| **Version** | 0.2.1 (active, 101 commits) |
+| **Stack** | Bun + Hono + PostgreSQL + React 18 (self-hosted Docker) |
+| **Ingestion** | OTLP HTTP push from Claude Code, or Loki pull from Grafana Cloud |
+
+**What it tracks:** skill invocations per user and session, plugin catalog (synced from Git marketplaces), cohort segmentation, audit log, real-time event stream.
+
+**Two ingestion modes:**
+
+*Direct OTLP push* — Claude Code sends telemetry straight to Skillsight. Lower latency, simpler setup:
+
+```json
+// ~/.claude/settings.json
+{
+  "env": {
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT": "http://your-skillsight:4200/api/v0/telemetry/v1/logs",
+    "OTEL_EXPORTER_OTLP_LOGS_HEADERS": "Authorization=Bearer <your-ingestion-token>",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
+    "OTEL_LOG_TOOL_DETAILS": "1",
+    "OTEL_LOGS_EXPORT_INTERVAL": "5000"
+  }
+}
+```
+
+*Loki pull* — Skillsight polls a Grafana Cloud Loki endpoint on a configurable schedule. Useful if you already aggregate logs there.
+
+The ingestion token is created from the Skillsight UI (`/tokens`) and has a separate JWT type from session tokens — it can only write telemetry, not access the admin interface.
+
+**Setup (direct push):**
+
+1. `docker compose up -d` — starts Skillsight on port 4200 + Postgres
+2. Login at `http://localhost:4200` with the initial admin credentials
+3. Navigate to the Onboarding page — it generates a complete settings.json snippet with a pre-created ingestion token
+4. Copy the snippet into `~/.claude/settings.json` or your project `.claude/settings.json`
+5. Run a Claude Code session — events appear in the dashboard within 5 seconds
+
+**Deployment caveats (read before going to production):**
+
+- **Never deploy without overriding `JWT_SECRET` and `ADMIN_PASSWORD_INITIAL`** — the shipped defaults are literal public strings (`change-me-in-production...` and `admin`). No boot-time warning is issued. Any instance reachable from the internet with these defaults is trivially compromised.
+- **Set `PUBLIC_BASE_URL`** in your `.env` — this variable controls both CORS policy and the endpoint shown in the Onboarding snippet. Without it, the CORS is permissive (echoes request origin) and the snippet shows `https://your-domain.com`.
+- **Run Drizzle migrations manually on upgrades** — the container does not run `drizzle-kit migrate` automatically at startup (as of v0.2.1). If upgrading from 0.1.x, run migrations before starting the new container or the app will crash against a stale schema.
+
+These are known issues under active development. The fixes are straightforward; track resolution at the repo.
+
+**Limitations:**
+
+- Self-hosted only — no SaaS offering
+- Marketplace source management is API-only (no UI yet, no curl examples in the docs)
+- Image name mismatch in README (`skills-obs` vs actual `skillsight`) — follow the `docker-compose.yml`, not the README curl snippet
+- v0.2.x — young project, some rough edges in docs; the CLAUDE.md is however genuinely useful for contributors
+
+**When to use:** You want to know which skills your team actually invokes in practice vs which ones you deployed. Useful for skills library ROI, onboarding effectiveness measurement, and identifying dead skills.
+
+> **Related:** [Packmind ContextOps Platform](#engineering-standards-distribution) — the same author's tool for *distributing* standards to AI agents. Skillsight tells you which skills are used; Packmind helps you author and sync them.
+> **Evaluation:** [2026-05-18-skillsight-packmind.md](../../docs/resource-evaluations/2026-05-18-skillsight-packmind.md)
+
+---
+
 ## Plugin Ecosystem
 
 Claude Code's plugin system supports community-built extensions. For detailed documentation:
 
-- **[Ultimate Guide Section 8](./ultimate-guide.md)** - Plugin system, commands, installation
+- **[Ultimate Guide Section 8](../ultimate-guide.md)** - Plugin system, commands, installation
 - **[claude-plugins.dev](https://claude-plugins.dev)** - 11,989 plugins, 63,065 skills indexed
 - **[claudemarketplaces.com](https://claudemarketplaces.com)** - Auto-scan GitHub for marketplace plugins
 - **[agentskills.io](https://agentskills.io)** - Open standard for agent skills (26+ platforms)
@@ -1446,6 +1516,7 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 
 | Gap | Description |
 |-----|-------------|
+| **Skills usage analytics** | ✅ **FILLED**: [Skillsight](https://github.com/PackmindHub/skillsight) (Packmind, launched May 2026) — self-hosted OTEL dashboard showing which skills are actually invoked per user/session. Deploy with caveats (see [Skills Observability](#skills-observability)). |
 | **Visual skills editor** | No GUI for creating/editing `.claude/skills/` — must edit YAML/Markdown manually |
 | **Visual hooks editor** | No GUI for managing hooks in `settings.json` — requires JSON editing |
 | **Unified admin panel** | No single dashboard combining config, sessions, cost, and MCP management |
@@ -1469,6 +1540,7 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 | **Multi-agent user** | Toad or Conductor | Unified agent management |
 | **Config-heavy setup** | claude-code-config + AIBlueprint + Caliber | TUI config management + scaffolding + drift detection |
 | **Codebase newcomer / monorepo** | Graphify | Build graph once, query structure instead of re-reading files every session |
+| **Team skills adoption** | Skillsight | Measure which skills are actually invoked across the team, identify dead skills |
 
 ---
 
@@ -1478,4 +1550,4 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 - [AI Ecosystem](./ai-ecosystem.md) - Complementary AI tools (Perplexity, Gemini, NotebookLM)
 - [MCP Servers Ecosystem](./mcp-servers-ecosystem.md) - Validated community MCP servers
 - [Architecture](../core/architecture.md) - How Claude Code works internally
-- [Ultimate Guide Section 8](./ultimate-guide.md) - Plugin system and marketplaces
+- [Ultimate Guide Section 8](../ultimate-guide.md) - Plugin system and marketplaces

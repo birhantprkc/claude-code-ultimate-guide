@@ -84,6 +84,6 @@ Architecture decisions are expensive to reverse. Opus's reasoning depth is justi
 ---
 
 **Sources**:
-- Model Selection Guide: [Section 2.5](../guide/ultimate-guide.md#25-model-selection--thinking-guide)
+- Model Selection Guide: [Section 2.5](../../guide/ultimate-guide.md#25-model-selection--thinking-guide)
 - Code Reviewer (for style/quality review): [code-reviewer.md](./code-reviewer.md)
 - Security Auditor (for OWASP review): [security-auditor.md](./security-auditor.md)

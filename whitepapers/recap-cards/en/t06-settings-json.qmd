@@ -1,0 +1,92 @@
+---
+title: "Settings.json — Complete Structure"
+subtitle: "All configuration keys and their scope"
+card-number: "T06"
+category: "Technical"
+difficulty: "intermediate"
+guide-version: "3.41.0"
+author: "Florian BRUNIAUX"
+version: "3.41.0"
+date: "May 2026"
+layout: "two-col"
+lang: en
+format:
+  recap-card-typst: default
+---
+
+## File hierarchy
+
+```
+~/.claude/settings.json         (global, all projects)
+        ↓ overridden by
+.claude/settings.json           (project, shared with team)
+        ↓ overridden by
+.claude/settings.local.json     (local machine, gitignore)
+```
+
+`settings.local.json` always takes precedence. It is the ideal place for personal overrides without creating Git conflicts.
+
+## Complete structure
+
+```json
+{
+  "model": "claude-sonnet-4-5",
+  "permissions": {
+    "allow": ["Bash(git *)", "Bash(pnpm *)", "Read"],
+    "deny":  ["Bash(rm -rf *)", "Write(file_path:*.env*)"],
+    "ask":   ["Bash(npm publish)"]
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "LOG_LEVEL": "debug"
+  },
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "hooks": [{ "type": "command",
+                  "command": ".claude/hooks/format.sh" }]
+    }]
+  }
+}
+```
+
+## Available keys
+
+| Key | Role |
+|-----|------|
+| `model` | Default model |
+| `permissions.allow` | Auto-approved tools |
+| `permissions.deny` | Blocked tools |
+| `permissions.ask` | Tools requiring confirmation |
+| `env` | Injected environment variables |
+| `hooks` | Scripts triggered on events |
+| `spinnerVerbs` | Words in the loading spinner |
+| `spinnerTipsOverride` | Tips displayed during processing |
+| `enableAllProjectMcpServers` | Enables all project MCP servers |
+
+## Spinner customization
+
+```json
+{
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": ["Caffeinating…", "Thinking…", "Optimizing…"]
+  },
+  "spinnerTipsOverride": {
+    "tips": ["/compact when context is full"],
+    "excludeDefault": true
+  }
+}
+```
+
+`mode: "add"` extends the default list rather than replacing it. These keys have no functional impact, only cosmetic.
+
+## What should stay in .gitignore
+
+```gitignore
+.claude/settings.local.json   # Local machine overrides
+.claude/CLAUDE.md             # Personal instructions
+.env.local                    # Secrets
+```
+
+Files to commit (`settings.json`, `agents/`, `commands/`, `hooks/`, `rules/`) represent the shared team configuration. Never include API keys or tokens in these files.

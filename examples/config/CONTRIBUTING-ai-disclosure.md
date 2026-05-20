@@ -71,4 +71,4 @@ Based on policies from:
 - [LLVM](https://llvm.org/docs/DeveloperPolicy.html)
 - [Fedora](https://docs.fedoraproject.org/en-US/project/ai-policy/)
 
-For more context, see [AI Traceability Guide](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ai-traceability.md).
+For more context, see [AI Traceability Guide](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ops/ai-traceability.md).
