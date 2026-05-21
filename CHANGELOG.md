@@ -8,13 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.144 (2026-05-19)
-  - /resume now lists background sessions alongside interactive ones, marked with `bg`
-  - /model is now session-only by default; press `d` in picker to set default for new sessions
-  - "extra usage" renamed to "usage credits"; `/extra-usage` → `/usage-credits` (old name still works)
-  - Fixed 75s startup hang on unreachable `api.anthropic.com` (now 15s timeout)
-  - Terminal rendering corruption self-heals; macOS Full Disk Access crash fixed (regression in 2.1.143)
-  - MCP paginated `tools/list` now returns all pages; 40+ additional bug fixes
+- **Claude Code Releases**: Updated tracking to v2.1.146 (2026-05-21)
+  - v2.1.146: `/simplify` renamed to `/code-review` with optional effort level; auto mode no longer suppresses AskUserQuestion; Windows PowerShell regression fix; 15+ bug fixes
+  - v2.1.145: `claude agents --json` for scripting; `/plugin` previews before install; security fix for Bash permission-prompt bypass; MCP paginated resources fix; 20+ bug fixes
+  - v2.1.144: /resume lists background sessions alongside interactive ones; /model session-only by default; "extra usage" → "usage credits"; 75s startup hang fixed; 40+ bug fixes
 
 ### Changed
 

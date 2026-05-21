@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.144"
-updated: "2026-05-19"
+latest: "2.1.146"
+updated: "2026-05-21"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,21 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.146"
+    date: "2026-05-21"
+    highlights:
+      - "⭐ `/simplify` renamed to `/code-review` with optional effort level (e.g. `/code-review high`)"
+      - "Auto mode no longer suppresses `AskUserQuestion` when the user or a skill explicitly relies on it"
+      - "Bug fixes: Windows PowerShell tool 'command line is invalid' regression (2.1.124), MCP paginated resources/prompts, `/background` refusing skill-only commands, backgrounded sessions re-prompting for already-granted permissions, 15+ additional fixes"
+
+  - version: "2.1.145"
+    date: "2026-05-20"
+    highlights:
+      - "⭐ `claude agents --json` — list live sessions as JSON for scripting (tmux-resurrect, status bars, session pickers)"
+      - "⭐ `/plugin` Discover/Browse previews a plugin's commands, agents, skills, hooks, MCP/LSP servers before installation; terminal tab title shows awaiting-input count"
+      - "Security fix: permission-prompt bypass for bare variable assignments to non-allowlisted env vars in Bash — now requires explicit approval"
+      - "Bug fixes: MCP paginated resources/templates/prompts (was dropping past page 1), Read tool truncates instead of hard error, `/review` GraphQL fix, task list ordering, agent team non-ASCII names"
 
   - version: "2.1.144"
     date: "2026-05-19"
