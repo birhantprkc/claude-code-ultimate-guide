@@ -11,6 +11,14 @@ Suivi des versions des ebooks, indépendamment de la version du guide.
 
 ---
 
+## [2026-05-21] v3.41.0 — Whitepaper 12 Agent Engineering (initial release)
+
+### Added
+- **WP12 FR/EN** (Agent Engineering): initial release v1.0.0. 7 sections, ~700 lines FR+EN. Public : tech leads et ingénieurs seniors. Angle : J-curve L2-L3, architecture harness (9 composants, 3 propriétés arXiv 2605.18747), CI/CD agentic productisé (c-CRAB 32.1%, GitHub Agentic Workflows, AWS Bedrock AgentCore, GitLab Duo), spec-driven development (Spec Kit vs Tessl, spec drift), évaluation (CovQValue, TOGLL, creator-neq-verifier), gouvernance HITL (93% Anthropic). Distingue rigoureusement données RCT (METR arXiv 2507.09089, n=16) des estimations practitioner. Attribution L0-L5 : Dan Shapiro/Glowforge/factorydark.com.
+- **Fiche mémo WP12 FR** (`whitepapers/fr/fiches/fiche-12-agent-engineering.qmd`): 5 points + 4 actions. Format Typst `#fiche-recap`. EN non créée (dossier fiches/en inexistant).
+
+---
+
 ## [2026-05-19] v3.41.0 — Skills-Commands Merger Update (CC 2.1.3)
 
 ### Changed
@@ -317,6 +325,28 @@ Mise à jour contenu guide v3.36.0 :
 #### v1.0.0 — 2026-03-04 (guide v3.27.6)
 
 Baseline versioning établi.
+
+---
+
+### 11 — Métriques d'Équipe / Team Metrics
+
+**FR** : `whitepapers/fr/11-team-metrics.qmd`
+**EN** : `whitepapers/en/11-team-metrics.qmd`
+
+#### v1.0.0 — 2026-04-04 (guide v3.38.3)
+
+Publication initiale.
+
+---
+
+### 12 — Ingénierie d'Agents / Agent Engineering
+
+**FR** : `whitepapers/fr/12-agent-engineering.qmd`
+**EN** : `whitepapers/en/12-agent-engineering.qmd`
+
+#### v1.0.0 — 2026-05-21 (guide v3.41.0)
+
+Publication initiale. 7 sections (J-curve L2-L3, harness, CI/CD agentic, SDD, évaluation/observabilité, gouvernance HITL, évolution des rôles). Attribution Shapiro Scale : Dan Shapiro/Glowforge/factorydark.com. Fiche récap FR incluse.
 
 ---
 

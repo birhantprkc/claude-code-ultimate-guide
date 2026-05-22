@@ -15,13 +15,14 @@ tags: [guide, metrics, dora, space, team, observability, ai-augmented]
 3. [DORA in an AI-Augmented Context](#dora-in-an-ai-augmented-context)
 4. [Beyond DORA: The SPACE Framework](#beyond-dora-the-space-framework)
 5. [AI-Specific Metrics](#ai-specific-metrics)
-6. [Product Metrics (the often-missing layer)](#product-metrics-the-often-missing-layer)
-7. [By Team Size](#by-team-size)
-8. [Vanity Metrics to Drop](#vanity-metrics-to-drop)
-9. [The 4-Question Test](#the-4-question-test)
-10. [Tooling](#tooling)
-11. [Implementation Roadmap](#implementation-roadmap)
-12. [See Also](#see-also)
+6. [Agentic Metrics: What DORA Doesn't Measure](#agentic-metrics-what-dora-doesnt-measure)
+7. [Product Metrics (the often-missing layer)](#product-metrics-the-often-missing-layer)
+8. [By Team Size](#by-team-size)
+9. [Vanity Metrics to Drop](#vanity-metrics-to-drop)
+10. [The 4-Question Test](#the-4-question-test)
+11. [Tooling](#tooling)
+12. [Implementation Roadmap](#implementation-roadmap)
+13. [See Also](#see-also)
 
 ---
 
@@ -238,6 +239,61 @@ Track this informally through your code review culture. If reviewers start notic
 A rough proxy for code clarity and maintainability: ask reviewers to self-report how long it took them to understand what a PR does (before they could evaluate whether it was correct). Track the median across your team.
 
 Increasing time-to-understand suggests that code is growing more complex or less well-organized over time, regardless of who wrote it. AI-generated code can inflate this metric by producing syntactically dense implementations that are harder to reason about than simpler, more explicit alternatives.
+
+---
+
+## Agentic Metrics: What DORA Doesn't Measure
+
+DORA and SPACE were designed for deterministic software systems. Agents introduce non-determinism, probabilistic quality, and failure modes that fall through every existing metric category. Three groups of metrics fill that gap.
+
+### Why standard DORA is insufficient for agent workflows
+
+DORA measures pipeline health, not output correctness. A study of 39 agent frameworks and 439 agentic applications (arXiv 2509.19185) found that 70% of test effort concentrates on deterministic components (tools, workflows) while less than 5% covers the LLM Plan Body — the central reasoning component most likely to produce incorrect results. Most DORA tooling has the same blind spot.
+
+A second structural gap: DORA doesn't capture the cost of the verification loop. Agent-generated PRs require at least as much review scrutiny as manually written code, and in practice more, because subtle behavioral errors can appear in syntactically correct code. The standard deployment frequency and lead time metrics look identical whether review is thorough or rubber-stamped.
+
+### Group 1: RCT-verifiable metrics
+
+These replicate what METR and DeputyDev measured. Run them on real tasks, not synthetic benchmarks. They give you numbers calibrated to your own team rather than vendor estimates.
+
+| Metric | What it measures | Published baseline |
+|--------|-----------------|-------------------|
+| Task completion time, AI vs. no AI | Actual speedup or slowdown for your task type | METR Study 1 (July 2025, arXiv 2507.09089): -19% for experienced developers on complex open-source repos. Perception gap: +39 points (developers believed they were 20% faster) |
+| PR cycle time, AI-assisted vs. baseline | Pipeline throughput change | DeputyDev (arXiv 2509.19708): -31.8% PR cycle time (p=0.0018), n=300 engineers, 12 months |
+| Pass rate on PRs with executable tests as oracle | How often agent-generated code actually passes functional validation | c-CRAB (arXiv 2603.23448, March 2026): Claude Code 32.1% pass rate on real PRs. Union of four tools: 41.5%. This is the practical ceiling for current AI code review quality |
+
+The METR -19% figure applies specifically to L1-L2 workflows (Cursor Pro and Claude 3.5/3.7 Sonnet on complex existing repos). It is the only rigorous control-group measurement available for this context. Self-reported figures from McKinsey (20-45%), BCG (64%), and GitHub's own studies are not replicated under controlled conditions and should be treated as aspirational estimates, not planning inputs.
+
+### Group 2: Agentic pipeline metrics
+
+These require instrumentation via Langfuse, Arize Phoenix, or AWS Bedrock AgentCore. They do not replace DORA; they sit alongside it as a layer specific to non-deterministic systems.
+
+| Metric | What it measures | Reference |
+|--------|-----------------|-----------|
+| Spec quality score | Completeness and precision of specs before agent execution. Acts as a leading indicator for output quality | No standard rubric yet; define internally. Factory.ai's pre-implementation validation contracts are the closest documented proxy |
+| Validation contract pass rate | Percentage of agent-generated implementations that pass pre-defined behavioral contracts, measured before human review | Factory.ai Missions pattern: 81 problems detected in a Slack clone from spec alone, generating 34% of implementation work as fix features |
+| Agent task completion rate | Tasks the agent completes without human correction, expressed as a percentage | Instrument via harness logs. Anthropic's internal data shows the 99.9th-percentile task duration grew from 25 to 45 minutes between October 2025 and January 2026, indicating agents are handling more complex tasks |
+| Code review recall | Rate at which agent-generated review comments are acted on by developers | Code Review Bench (Martian, March 2026, 200,000+ open-source PRs): Augment Code 62.8% recall, GitHub Copilot 53.3% recall, Graphite 75% precision but only 8.8% recall |
+| Cost per completed task | Token spend plus human review time per agent task that reaches a mergeable state | No industry benchmark published yet. Track manually: tokens consumed, cost per model call, and human review hours per task completion |
+
+### Group 3: Agent governance metrics
+
+Sourced from Strata Identity Research 2026 and CSA/Zenity 2026. These reflect the state of organizational maturity rather than technical performance.
+
+| Metric | Target state | 2026 baseline for context |
+|--------|-------------|--------------------------|
+| Agents with named human sponsor | Every active agent has an identifiable owner | Only 28% of organizations can link agent actions to a human sponsor in all environments (Strata 2026) |
+| Real-time agent inventory coverage | All active agents appear in a central registry | 21% of organizations maintain a real-time inventory (Strata 2026) |
+| Credential rotation frequency | Agent credentials rotate at least every 90 days | 44% of organizations still use static API keys for agent authentication (Strata 2026) |
+| Permission violations detected | Violations detected as a share of estimated total violations | 53% of organizations have experienced an agent incident in the past 12 months; 58% took more than 5 hours to detect it (CSA/Zenity 2026) |
+
+### The heavy-user review time contradiction
+
+Digital Applied Q1 2026 (n=2,847 developers) found that heavy AI tool users spend 14-16 hours per week reviewing AI-generated code, compared to 11.4 hours per week for average users. This directly contradicts the narrative that AI reduces review burden. The most likely explanation: per-review unit efficiency may improve, but the volume of generated code grows faster than review capacity. Before committing to time-savings projections, measure your team's actual review time distribution across AI-generated and manually written PRs.
+
+### pass^k for non-deterministic tests
+
+Standard pass@1 is insufficient for agent-generated code. A test that passes once may fail on the next run because the output is non-deterministic. Promptfoo and LangChain both document the pass^k pattern: run critical tests k times consecutively, typically 3 to 5. A test passes only if it passes all k runs. This is not flaky-test detection — it is a deliberate quality gate for probabilistic systems. Apply it specifically to agent-generated suites, not to the full regression suite where the overhead would be prohibitive.
 
 ---
 
