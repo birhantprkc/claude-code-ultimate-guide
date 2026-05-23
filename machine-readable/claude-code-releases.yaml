@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.146"
-updated: "2026-05-21"
+latest: "2.1.148"
+updated: "2026-05-22"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,19 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.148"
+    date: "2026-05-22"
+    highlights:
+      - "Hotfix: Bash tool returning exit code 127 on every command (regression introduced in 2.1.147)"
+
+  - version: "2.1.147"
+    date: "2026-05-22"
+    highlights:
+      - "⭐ Pinned background sessions (`Ctrl+T` in `claude agents`) — stay alive when idle, auto-restart to apply CC updates, shed under memory pressure only after non-pinned sessions"
+      - "`/code-review --comment` — post findings as inline GitHub PR comments"
+      - "Improved auto-updater: retries transient network failures, reports specific error categories and OS error codes, shows current version on failure"
+      - "Bug fixes: prompt history no consecutive duplicates, PowerShell hook `if` conditions like `PowerShell(git push*)` never matching, pasted text delivered as `[Pasted text #N]` placeholder, plugin component counts doubled, slash commands + tab/newline treated as unknown, 25+ additional fixes"
 
   - version: "2.1.146"
     date: "2026-05-21"

@@ -6,7 +6,7 @@ tags: [mcp, cli, tokens, architecture, decision]
 
 # MCP vs CLI — Decision Guide
 
-**Last updated**: March 2026
+**Last updated**: May 2026
 
 > Interactive version with guidance table and practitioner quotes: [cc.bruniaux.com/ecosystem/mcp-vs-cli/](https://cc.bruniaux.com/ecosystem/mcp-vs-cli/)
 
@@ -178,9 +178,43 @@ The old worst-case claim of "500-2,000 tokens per server" described eager loadin
 |------|-------------|--------|
 | **RTK** (Rust Token Killer) | Filters CLI output before it reaches Claude's context — reduces response verbosity, not schema overhead | Production-ready, actively maintained |
 | **MCPorter** (steipete) | TypeScript runtime for calling MCP servers from scripts, generating CLI wrappers, and emitting typed TS clients. Useful for testing MCP servers and writing hooks that need MCP access. | 3K stars, MIT, 2+ weeks, ready to use |
-| **mcp2cli** (knowsuchagency) | Converts MCP/OpenAPI/GraphQL to runtime CLI, eliminating schema injection. Claims 96-99% token savings. | 1.2K stars, 8 days old — watch list, not production-ready yet |
+| **mcp2cli** (knowsuchagency) | Converts MCP/OpenAPI/GraphQL to runtime CLI, eliminating schema injection. Benchmarked at 32× token reduction on the 43-tool GitHub MCP server (44K → 1.4K tokens). | ~1.9K stars, Show HN Best of March 2026 — production-viable for remote MCP servers with 10+ tools. See [full breakdown](./third-party-tools.md#mcp2cli). |
 
-Note on mcp2cli: the core claim (eliminate schema injection by converting MCP to CLI) is architecturally valid. But Claude Code manages MCP connections internally, so the token savings don't apply directly to the standard Claude Code workflow. The Claude Code skill integration (`npx skills add knowsuchagency/mcp2cli --skill mcp2cli`) is the practical entry point.
+Note on mcp2cli: the token savings are real for direct API use, remote MCP servers, and CI/CD pipelines — benchmarked independently by Firecrawl, Scalekit, and CircleCI. For standard Claude Code sessions where lazy loading (v2.1.7+) already defers most schemas, the gain is smaller. mcp2cli applies most clearly when you drive MCP tools from scripts or agents that don't have deferred loading built in.
+
+---
+
+## MCP vs Skills
+
+Skills (`.claude/skills/*.md`) are a third integration paradigm — distinct from both MCP servers and CLI tools. Conflating them with CLIs is the most common framing error in this space.
+
+**What each layer does:**
+
+- **Skills** encode *how the agent should behave* — step-by-step workflows, decision trees, and SOPs written in markdown. They are loaded on demand into the agent's context and guide its reasoning without injecting external tool schemas.
+- **MCP servers** provide *structured access to external systems* — APIs, databases, file systems — with typed tool interfaces the agent calls directly.
+- **CLI tools** provide *command-line access to external systems* — the agent constructs shell commands and parses text output.
+
+Skills and MCP address different layers, not the same problem. A skill can describe when and how to invoke an MCP tool (check this field, then call that tool) while the MCP server handles the actual connection. Asking "should I write a skill or an MCP server?" usually means the layers are being conflated.
+
+### The OAuth boundary
+
+This is MCP's clearest structural advantage over skills, and it's not a matter of convenience.
+
+A skill can instruct an agent to "authenticate with Google Drive before proceeding." What it cannot do is hold a refresh token, complete a browser redirect, or manage a PKCE exchange. Those operations require server-side state, which a markdown file does not have.
+
+Enterprise SaaS APIs — Google Workspace, Salesforce, Slack, GitHub — require OAuth 2.1 with refresh token rotation. When that is the authentication mechanism, MCP is not just more convenient: it is the only option that works without asking the user to paste credentials manually at the start of every session.
+
+Practical test: if the service authenticates via an API key in a header, a skill or CLI can handle it. If it requires a browser redirect or server-held refresh token, that belongs in MCP.
+
+### Community consensus (2026)
+
+The debate has largely settled on a three-layer model rather than a binary choice:
+
+- **Skills** handle *what to do and when* — workflow orchestration, decision guidance, reproducible agent behavior
+- **MCP** handles *connectivity and auth* — external systems that require structured interfaces, OAuth, or enterprise observability
+- **CLI** handles *deterministic local operations* — git, file ops, test runners, anything the model can drive directly from training knowledge
+
+The convergence is now part of the spec: SEP-2640 ("Skills Over MCP") proposes distributing skills as MCP resources, so users install workflows the same way they install tool servers. The two paradigms are being unified rather than forced to compete.
 
 ---
 

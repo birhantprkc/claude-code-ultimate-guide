@@ -6,7 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **MCP vs CLI guide updated (`guide/ecosystem/mcp-vs-cli.md`)**: Added "MCP vs Skills" section clarifying that skills (markdown workflow instructions) and MCP (execution/auth connectivity) address different layers and are not alternatives. Added OAuth 2.1 subsection explaining why MCP is the only viable option for enterprise SaaS APIs that require browser redirects or server-held refresh tokens — skills cannot originate or manage token flows. Updated mcp2cli Tooling table entry from watch-list status (1.2K stars, 8 days old) to current state (~1.9K stars, Show HN Best of March 2026, independently benchmarked by Firecrawl/Scalekit/CircleCI). Updated "Last updated" date. Added `mcp-vs-cli.md` pointer block to `machine-readable/reference.yaml` (8 new entries).
+
+- **Claude Code Releases**: Updated tracking to v2.1.148
+  - v2.1.147: Pinned background sessions (Ctrl+T in claude agents), /code-review --comment for inline GitHub PR comments, improved auto-updater with retry/error reporting, 30+ bug fixes (prompt history duplicates, PowerShell hook if-conditions, pasted text placeholder, plugin component counts doubled)
+  - v2.1.148: Hotfix for Bash tool returning exit code 127 regression from 2.1.147
+
 ### Added
+
+- **Pinning Opus 4.6 (Community Hack)** (`guide/ultimate-guide.md`): Added subsection in the OpusPlan Mode area documenting three ways to force Opus 4.6 instead of 4.7 (settings.json direct, OpusPlan hybrid via `ANTHROPIC_DEFAULT_OPUS_MODEL`, per-session `/model`). Documents the trade-offs: losing `xhigh`/`max` effort levels and the newer knowledge cutoff. Added cross-reference from the pricing section.
 
 - **Copilot instructions file** (`.github/copilot-instructions.md`): Points Copilot users to `/CLAUDE.md` as the source of truth and reminds contributors to update `CHANGELOG.md`.
 - **YouTube Skills for Claude Code** (`README.md`, `guide/ultimate-guide.md`): Added [youtube-skills](https://github.com/ZeroPointRepo/youtube-skills) to the community resources and Awesome Lists sections — 12 skills for YouTube search, transcripts, chapters, and content analysis.

@@ -2173,7 +2173,7 @@ Claude Code isn't free - you're using API credits. Understanding costs helps opt
 
 The default model depends on your subscription: **Max/Team Premium** subscribers get **Opus 4.7** by default, while **Pro/Team Standard** subscribers get **Sonnet 4.6**. If Opus usage hits the plan threshold, it auto-falls back to Sonnet.
 
-> **Model lineup (April 2026)**: Claude Opus 4.7 is the standard production Opus model (`claude-opus-4-7`). Claude Mythos Preview is more capable but remains in limited release. Opus 4.7 is the recommended upgrade path from Opus 4.6.
+> **Model lineup (April 2026)**: Claude Opus 4.7 is the standard production Opus model (`claude-opus-4-7`). Claude Mythos Preview is more capable but remains in limited release. Opus 4.7 is the recommended upgrade path from Opus 4.6. For workflows where Opus 4.6's lower token footprint outweighs 4.7's newer features, see [Pinning Opus 4.6](#pinning-opus-46-community-hack) in the OpusPlan section.
 
 | Model | Input (per 1M tokens) | Output (per 1M tokens) | Context Window | Notes |
 |-------|----------------------|------------------------|----------------|-------|
@@ -3023,6 +3023,52 @@ With `sonnetplan`, `/model opusplan` routes:
 - **Act Mode** → Haiku 4.5 (via remapped `sonnet` alias)
 
 > **Caveat**: The model's self-report (`what model are you?`) is unreliable — models don't always know their own identity. Trust the status bar (`Model: Sonnet 4.6` in plan mode) or verify via billing dashboard. GitHub issue [#9749](https://github.com/anthropics/claude-code/issues/9749) tracks native support.
+
+**Pinning Opus 4.6 (Community Hack)**
+
+Opus 4.7 ships with a new tokenizer that maps the same input to roughly 1.0-1.35x more tokens depending on content type, and at higher effort levels it produces more output tokens (more reasoning steps). For workflows where that extra spend doesn't translate into better results, pinning to Opus 4.6 cuts cost without changing behavior.
+
+**Option A — Opus 4.6 everywhere (simplest)**
+
+```json
+// ~/.claude/settings.json
+{
+  "model": "claude-opus-4-6"
+}
+```
+
+All sessions use Opus 4.6. No hybrid. Add `[1M]` if you need the 1M context window: `"claude-opus-4-6[1M]"`.
+
+**Option B — Keep OpusPlan, pin only the Opus side (recommended)**
+
+```json
+// ~/.claude/settings.json
+{
+  "model": "opusplan",
+  "env": {
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6"
+  }
+}
+```
+
+`opusplan` still switches between Plan and Act modes, but Plan Mode now routes to Opus 4.6 instead of 4.7. Sonnet stays unchanged in Act Mode.
+
+Shell variant (non-persistent, useful for testing):
+```bash
+ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-4-6 claude
+```
+
+**Option C — Per-session switch (no config change)**
+
+```
+/model claude-opus-4-6
+```
+
+Resets on the next session. Useful before committing to a config change.
+
+**Verification**: check the status bar in Plan Mode. It should show `Model: Opus 4.6`, not `Opus 4.7`. The billing dashboard confirms which model was charged.
+
+> **Trade-offs**: Opus 4.6 loses the `xhigh` effort level (the default for Opus 4.7 in Claude Code) and the `max` effort level (`max` returns an error on Opus 4.6). Knowledge cutoff is also older: May 2025 vs. unpublished for 4.7. If you rely on `max` effort or need post-May-2025 knowledge baked in, stay on 4.7.
 
 ### Rev the Engine
 

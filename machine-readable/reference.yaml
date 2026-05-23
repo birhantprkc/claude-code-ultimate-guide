@@ -470,6 +470,17 @@ deep_dive:
   third_party_mcp2cli_stars: "1900"
   third_party_mcp2cli_status: "third_party | active | dev_single_tenant | cli_first_pattern | Show_HN_Best_March_2026"
   third_party_mcp2cli_note: "96-99% schema-token reduction benchmarked independently (Firecrawl, Scalekit, CircleCI). Born from 2026 MCP backlash. Caution: 4+ forks with same name — knowsuchagency is the reference. Not for enterprise multi-tenant OAuth/audit."
+  third_party_mcp2cli_evaluation: "docs/resource-evaluations/2026-03-17-mcp2cli-token-optimization.md"
+  third_party_mcp2cli_score: "3/5"
+  # MCP vs CLI vs Skills Decision Guide (Added 2026-05-22)
+  mcp_vs_cli_guide: "guide/ecosystem/mcp-vs-cli.md"
+  mcp_vs_cli_tradeoffs: "guide/ecosystem/mcp-vs-cli.md#tradeoffs"
+  mcp_vs_cli_decision_dimensions: "guide/ecosystem/mcp-vs-cli.md#the-four-decision-dimensions"
+  mcp_vs_cli_situation_table: "guide/ecosystem/mcp-vs-cli.md#guidance-by-situation"
+  mcp_vs_cli_token_cost: "guide/ecosystem/mcp-vs-cli.md#token-cost-of-mcp-schemas--what-the-numbers-look-like"
+  mcp_vs_skills: "guide/ecosystem/mcp-vs-cli.md#mcp-vs-skills"
+  mcp_vs_skills_oauth_boundary: "guide/ecosystem/mcp-vs-cli.md#the-oauth-boundary"
+  mcp_vs_skills_note: "Skills (markdown workflows) and MCP (execution/auth) address different layers — not alternatives. OAuth 2.1 is MCP's structural advantage: skills cannot hold refresh tokens or complete PKCE flows."
   # Configuration Management & Backup (Added 2026-02-02)
   config_management_guide: "guide/ultimate-guide.md:4217"  # Section 3.1 Memory Files
   config_hierarchy: "guide/ultimate-guide.md:4336"  # Global → Project → Local precedence
