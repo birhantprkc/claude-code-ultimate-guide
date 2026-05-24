@@ -72,6 +72,30 @@ This page compares two integration patterns for giving Claude Code access to ext
 
 ---
 
+## The API wrapper pattern
+
+Most production MCP servers for SaaS tools sit on top of existing REST or GraphQL APIs. The server translates tool calls into HTTP requests against those APIs, processes responses, and returns structured output to the agent. It does not add backend capabilities that the underlying API lacks.
+
+Official documentation from four major providers confirms this directly:
+
+- **Notion**: "converted MCP tool calls into HTTP API calls to Notion's public API" (Notion engineering blog)
+- **Sentry**: "middleware to the upstream Sentry API, optimized for coding assistants like Cursor and Claude Code" (sentry-mcp README)
+- **Slack**: "a wrapper around an external API, like Slack" (Slack developer docs)
+- **GitHub**: "integrates with GitHub, allowing LLMs to interact with repositories via the GitHub API" (github-mcp-server README)
+
+The practical consequence: a CLI script calling the same REST or GraphQL API has the same capabilities. MCP and CLI reach the same backend, with the same credentials, triggering the same operations. The difference is the interface layer, not what the backend can do.
+
+What MCP adds that a CLI cannot replicate:
+
+- **OAuth token management**: server-held auth with browser redirect flows (Slack, Google Drive, Figma, hosted Notion). A CLI can hold an API key in an env var, but not a refresh token or a PKCE exchange, which require server-side state.
+- **LLM-tuned schemas**: curated tool selection, not the full API surface, with parameter types and descriptions calibrated for agent reasoning.
+- **Centralized hosting**: one deployment serves many clients; CLIs require per-machine installation and per-user credential configuration.
+- **Usage attribution**: remote MCP servers associate each tool call with a user and session, feeding observability dashboards. Local CLI calls on developer machines are invisible.
+
+This sharpens the decision criterion. If a service authenticates via API key or environment token, a CLI calling the same API is functionally equivalent to an MCP server. The question becomes whether you need OAuth, centralized observability, or cross-client standardization. If none of those apply, the CLI avoids the schema overhead and reaches the same backend.
+
+---
+
 ## The four decision dimensions
 
 Before asking "MCP or CLI?", answer these four questions. They rank from most to least constraining.
@@ -121,6 +145,37 @@ Quick reference — not rules, but directional defaults.
 | Browser automation (frontier model, Claude Code) | **CLI + skill** | playwright-cli + skill reported faster and more efficient in practice |
 | GitLab / GitHub access | **CLI** (glab, gh) | Official CLIs are richer than most MCP wrappers |
 | Documentation lookup (Context7) | **MCP** | No CLI equivalent; structured doc retrieval has no shell analog |
+
+---
+
+## Per-server recommendation
+
+The table below applies the four decision dimensions to the 18 most commonly discussed MCP servers. "Verdict" is the default for a developer using a frontier model on a local machine. Your context (non-technical users, enterprise observability, or a smaller model) may shift any row toward MCP.
+
+| MCP Server | Verdict | CLI Alternative | Reason |
+|------------|---------|-----------------|--------|
+| GitHub MCP | **Use CLI** | `gh` | `gh` covers the full API surface; model knows it from training; official GitHub MCP was archived |
+| GitLab MCP | **Use CLI** | `glab` | Official CLI is richer than the MCP wrapper; practitioner consensus confirms |
+| Git MCP (Anthropic) | **Use CLI** | `git` | Git is the CLI the model knows best; MCP schema adds cost without structural benefit on frontier models |
+| Filesystem MCP | **Use CLI** | `cat`, `ls`, `find` | Shell commands are universal; no benefit from schema overhead |
+| Docker MCP | **Use CLI** | `docker` | Docker CLI is universally known; no widely adopted MCP adds comparable value |
+| AWS MCP | **Use CLI** | `aws-cli` | aws-cli v2 covers the full surface; model drives it natively from training knowledge |
+| Terraform MCP | **Use CLI** | `terraform` | Deterministic plan/apply workflow; CLI output is structured and auditable |
+| Semgrep MCP | **Use CLI** | `semgrep` | Mature CLI, well-documented; MCP adds value mainly in CI/CD observability contexts |
+| Playwright MCP | **Depends** | `playwright-cli` + skill | Frontier model: CLI + skill is faster. Smaller model: MCP structures browser interaction reliably |
+| Kubernetes MCP | **Depends** | `kubectl` | Auth complexity and multi-cluster setups favor MCP; simple operations favor kubectl |
+| Vercel MCP | **Depends** | `vercel` CLI | CLI for deploy, env, and domains; MCP for dashboard integration and team workflow comments |
+| Sentry MCP | **Use MCP** | `sentry-cli` (CI/CD scoped) | `sentry-cli` handles releases, source map uploads, and CI/CD ops, but has no equivalent for interactive issue querying. MCP provides structured error triage for coding agents. |
+| Slack MCP | **Use MCP** | none | OAuth required; no practical CLI for workspace access from an agent |
+| Notion MCP | **Use MCP** | none | OAuth required; API-key access is limited to integrations, not user-scoped workspace access |
+| Google Drive MCP | **Use MCP** | none | OAuth 2.1 with refresh token rotation; cannot be replicated by a skill or CLI |
+| Figma MCP | **Use MCP** | none | OAuth required; design file access has no CLI equivalent |
+| Linear MCP | **Use MCP** | none | MCP handles GraphQL complexity; structured project management without raw API calls |
+| Context7 MCP | **Use MCP** | none | No CLI equivalent for curated, version-specific doc retrieval |
+
+The pattern: if the service has a mature CLI the model knows from training, use the CLI. If the service requires OAuth or has no CLI, use MCP. "Depends" means the decision hinges on model capability or specific workflow needs.
+
+> Take the interactive quiz (6 questions, under 1 minute): [cc.bruniaux.com/mcp-or-cli/](https://cc.bruniaux.com/mcp-or-cli/)
 
 ---
 

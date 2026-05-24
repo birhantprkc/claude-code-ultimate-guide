@@ -413,3 +413,27 @@ This teaches you how to create focused AI personas instead of using one general 
 ---
 
 **Completed Module 03?** → Ready for Module 04: Agents & Specialization
+
+---
+
+## Going Further: Cross-Session and Team Memory
+
+The sections above cover the foundational CLAUDE.md patterns. When you're ready to go deeper, the ecosystem has more:
+
+**Auto Memory and Auto Dream (native, v2.1.59+)**
+
+Claude Code can write its own MEMORY.md between sessions (Auto Memory) and consolidate it in the background (Auto Dream). Both work out-of-the-box with `/memory` to manage stored entries. See [Memory Systems: Auto Memory](../core/memory-systems.md#22-auto-memory-v21594) and [Auto Dream](../core/memory-systems.md#23-auto-dream-background-consolidation).
+
+**Cross-session tools for individual developers**
+
+- **claude-mem** (26.5K stars) — automatic session compression via hooks, no manual calls needed. Install: `/plugin marketplace add thedotmack/claude-mem`
+- **agentmemory** (16K stars) — BM25 + vector + graph hybrid retrieval, 12 auto-wired hooks, 95.2% R@5 on LongMemEval-S
+- **ICM** (Rust binary) — episodic decay + permanent knowledge graph, `brew install icm`, 14 IDE clients
+
+**Team sharing**
+
+- The Trinity pattern: CLAUDE.md + `.mcp.json` + `/skills` all committed to the repo — zero infra, zero cost
+- **Mem0 Cloud MCP** — shared memory pool via `npx mcp-add --url https://mcp.mem0.ai/mcp`, free tier
+- **doobidoo** — semantic search across 13+ IDEs, local SQLite or Cloudflare D1 backend
+
+Full coverage of all tools, architecture patterns, risks, and a decision flowchart: [Memory Systems guide](../core/memory-systems.md).

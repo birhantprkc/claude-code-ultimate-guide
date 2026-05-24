@@ -129,6 +129,36 @@ deep_dive:
   context_ace_pipeline: "guide/core/context-engineering.md#6-context-lifecycle"
   context_path_scoping: "guide/core/context-engineering.md#4-modular-architecture"
   context_maturity_model: "guide/core/context-engineering.md#7-quality-measurement"
+  # Memory Systems (canonical consolidated reference — guide/core/memory-systems.md)
+  memory_systems_guide: "guide/core/memory-systems.md"
+  memory_systems_guide_description: "Canonical reference for all memory patterns: native stack, cross-session tools, team sharing, multi-agent, architecture patterns, risks, decision frameworks, benchmarks."
+  memory_systems_tldr: "guide/core/memory-systems.md#1-tldr-the-three-track-model"
+  memory_systems_native_stack: "guide/core/memory-systems.md#2-native-claude-code-memory-stack"
+  memory_systems_claudemd: "guide/core/memory-systems.md#21-claudemd-three-levels"
+  memory_systems_auto_memory: "guide/core/memory-systems.md#22-auto-memory-v21594"
+  memory_systems_auto_dream: "guide/core/memory-systems.md#23-auto-dream-background-consolidation"
+  memory_systems_agent_memory: "guide/core/memory-systems.md#24-agent-memory-frontmatter"
+  memory_systems_cross_session: "guide/core/memory-systems.md#3-cross-session-tools-single-user"
+  memory_systems_claude_mem: "guide/core/memory-systems.md#31-claude-mem"
+  memory_systems_agentmemory: "guide/core/memory-systems.md#32-agentmemory"
+  memory_systems_icm: "guide/core/memory-systems.md#33-icm-infinite-context-memory"
+  memory_systems_kairn: "guide/core/memory-systems.md#34-kairn"
+  memory_systems_doobidoo: "guide/core/memory-systems.md#35-doobidoo-mcp-memory-service"
+  memory_systems_openMemory: "guide/core/memory-systems.md#36-openmemory-mcp-mem0ai"
+  memory_systems_tool_comparison: "guide/core/memory-systems.md#38-master-comparison-table"
+  memory_systems_team_sharing: "guide/core/memory-systems.md#4-team-sharing"
+  memory_systems_trinity: "guide/core/memory-systems.md#41-the-trinity-claudemd--mcpjson--skills"
+  memory_systems_mem0_cloud: "guide/core/memory-systems.md#43-mem0-cloud-mcp"
+  memory_systems_zep: "guide/core/memory-systems.md#44-zep--graphiti"
+  memory_systems_team_gap: "guide/core/memory-systems.md#47-the-structural-team-memory-gap"
+  memory_systems_multi_agent: "guide/core/memory-systems.md#5-multi-agent-shared-memory"
+  memory_systems_architecture_patterns: "guide/core/memory-systems.md#6-architecture-patterns"
+  memory_systems_risks: "guide/core/memory-systems.md#7-risks-and-security"
+  memory_systems_memory_poisoning: "guide/core/memory-systems.md#71-memory-poisoning-prompt-injection"
+  memory_systems_decision: "guide/core/memory-systems.md#8-decision-frameworks"
+  memory_systems_decision_flowchart: "guide/core/memory-systems.md#81-decision-flowchart"
+  memory_systems_benchmarks: "guide/core/memory-systems.md#9-benchmarks-and-evaluation"
+  memory_systems_open_problems: "guide/core/memory-systems.md#10-open-problems"
   # Team Configuration at Scale (Profile-Based Module Assembly)
   team_ai_instructions_section: "guide/ultimate-guide.md#35-team-configuration-at-scale"
   team_ai_instructions_workflow: "guide/workflows/team-ai-instructions.md"
@@ -1842,7 +1872,7 @@ ecosystem:
       - "Cross-links modified → Update all 4 repos"
     history:
       - date: "2026-01-20"
-        event: "Code Landing sync v3.40.0, 66 templates, cross-links"
+        event: "Code Landing sync v3.41.0, 66 templates, cross-links"
         commit: "5b5ce62"
       - date: "2026-01-20"
         event: "Cowork Landing fix (paths, README, UI badges)"
@@ -1854,7 +1884,7 @@ ecosystem:
 onboarding_matrix_meta:
   version: "2.1.0"
   last_updated: "2026-03-09"
-  aligned_with_guide: "3.40.0"
+  aligned_with_guide: "3.41.0"
   changelog:
     - version: "2.1.0"
       date: "2026-03-09"
@@ -1885,7 +1915,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, commands]
       time_budget: "5 min"
       topics_max: 3
-      note: "SECURITY FIRST - sandbox before commands (v3.40.0 critical fix)"
+      note: "SECURITY FIRST - sandbox before commands (v3.41.0 critical fix)"
 
     beginner_15min:
       core: [rules, sandbox_native_guide, workflow, essential_commands]
@@ -1974,7 +2004,7 @@ onboarding_matrix:
         - default: agent_validation_checklist
       time_budget: "60 min"
       topics_max: 6
-      note: "Dual-instance pattern for quality workflows (v3.40.0)"
+      note: "Dual-instance pattern for quality workflows (v3.41.0)"
 
   learn_security:
     intermediate_30min:
@@ -1985,7 +2015,7 @@ onboarding_matrix:
         - default: permission_modes
       time_budget: "30 min"
       topics_max: 4
-      note: "NEW goal (v3.40.0) - Security-focused learning path"
+      note: "NEW goal (v3.41.0) - Security-focused learning path"
 
     power_60min:
       core: [sandbox_native_guide, mcp_secrets_management, security_hardening]
@@ -2010,7 +2040,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, workflow, essential_commands, context_management, plan_mode]
       time_budget: "60 min"
       topics_max: 6
-      note: "Security foundation + core workflow (v3.40.0 sandbox added)"
+      note: "Security foundation + core workflow (v3.41.0 sandbox added)"
 
     intermediate_120min:
       core: [plan_mode, agents, skills, config_hierarchy, git_mcp_guide, hooks, mcp_servers]

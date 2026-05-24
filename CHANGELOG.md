@@ -6,15 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Memory Systems canonical reference page** (`guide/core/memory-systems.md`, ~2,500 lines): Consolidates all memory content previously scattered across 15+ locations in 6+ files. Covers three tracks: Native Stack (CLAUDE.md, Auto Memory v2.1.59+, Auto Dream, Agent Memory frontmatter, session vs persistent), Cross-Session Tools (claude-mem, agentmemory, ICM, Kairn, doobidoo, OpenMemory MCP, 7 others with master comparison table), and Team Sharing (Trinity pattern, Mem0 Cloud MCP, Zep/Graphiti, Notion MCP approach, structural gap analysis). Adds net-new content not previously in the guide: agentmemory BM25+vector+graph RRF architecture, five architecture patterns, multi-agent coordination patterns (MCP blackboard, leases+signals, A2A), memory poisoning/prompt injection risk (Section 7.1), SAMEP protocol, decision flowchart (Mermaid), 18-row decision matrix, LongMemEval benchmarks, ACT-R decay model, 6 open problems.
+  - `machine-readable/reference.yaml`: 30 new entries under `deep_dive:` (memory_systems_guide through memory_systems_open_problems)
+  - `guide/README.md`: New row in Core Reference table
+  - `guide/learning-path/03-memory.md`: New "Going Further" section (~30 lines) covering Auto Memory, cross-session tools, and team sharing with links
+  - `guide/ecosystem/context-engineering-tools.md`: Section 7 updated to point to canonical page, adds three-tier model summary
+  - `guide/diagrams/02-context-and-sessions.md`: Memory Hierarchy diagram click URLs updated to memory-systems.md
+  - `guide/ultimate-guide.md`: Seven sections reduced to summaries with cross-references (CLAUDE.md memory, Auto Memory + Auto Dream, claude-mem, doobidoo, Kairn, ICM, MCP Memory Stack patterns); two sections (Agent Memory, Session vs Persistent) received "See also" links
+
 ### Documentation
 
-- **MCP vs CLI guide updated (`guide/ecosystem/mcp-vs-cli.md`)**: Added "MCP vs Skills" section clarifying that skills (markdown workflow instructions) and MCP (execution/auth connectivity) address different layers and are not alternatives. Added OAuth 2.1 subsection explaining why MCP is the only viable option for enterprise SaaS APIs that require browser redirects or server-held refresh tokens — skills cannot originate or manage token flows. Updated mcp2cli Tooling table entry from watch-list status (1.2K stars, 8 days old) to current state (~1.9K stars, Show HN Best of March 2026, independently benchmarked by Firecrawl/Scalekit/CircleCI). Updated "Last updated" date. Added `mcp-vs-cli.md` pointer block to `machine-readable/reference.yaml` (8 new entries).
+- **MCP vs CLI guide updated (`guide/ecosystem/mcp-vs-cli.md`)**: Three additions. (1) "Per-server recommendation" table: 18 popular MCP servers each with a concrete verdict (Use MCP / Use CLI / Depends), the named CLI alternative, and a one-line reason. Services with mature CLIs the model knows from training (GitHub, GitLab, git, docker, aws-cli, terraform, semgrep, filesystem) lean CLI. Services requiring OAuth or with no CLI (Sentry, Slack, Notion, Google Drive, Figma, Linear, Context7) lean MCP. Playwright and Kubernetes are context-dependent. Includes a callout linking to the interactive quiz at cc.bruniaux.com/mcp-or-cli/. (2) "MCP vs Skills" section clarifying that skills (markdown workflow instructions) and MCP (execution/auth connectivity) address different layers, not alternatives. OAuth 2.1 subsection explains why MCP is the only option for enterprise SaaS APIs that require browser redirects or server-held refresh tokens. (3) Updated mcp2cli Tooling table entry from watch-list status (1.2K stars, 8 days old) to current state (~1.9K stars, Show HN Best of March 2026, independently benchmarked by Firecrawl/Scalekit/CircleCI). Updated "Last updated" date. Added `mcp-vs-cli.md` pointer block to `machine-readable/reference.yaml` (8 new entries). Added `third_party_mcp2cli_evaluation` and `third_party_mcp2cli_score` to `reference.yaml` (2 previously missing entries).
 
-- **Claude Code Releases**: Updated tracking to v2.1.148
-  - v2.1.147: Pinned background sessions (Ctrl+T in claude agents), /code-review --comment for inline GitHub PR comments, improved auto-updater with retry/error reporting, 30+ bug fixes (prompt history duplicates, PowerShell hook if-conditions, pasted text placeholder, plugin component counts doubled)
-  - v2.1.148: Hotfix for Bash tool returning exit code 127 regression from 2.1.147
+- **Claude Code Releases**: Updated tracking to v2.1.150
+  - v2.1.149: `/usage` per-category breakdown (skills, subagents, plugins, per-MCP-server cost), GFM task list checkboxes render natively, Enterprise `allowAllClaudeAiMcps` setting, two security fixes (PowerShell `cd` permission bypass, sandbox worktree write allowlist), 20+ bug fixes (`/diff` keyboard scrolling, transcript view freeze, slash-command arg hints, `/config` phantom changes, `/insights` crash, otelHeadersHelper path-with-spaces)
+  - v2.1.150: Internal infrastructure improvements (no user-facing changes)
 
 ### Added
+
+- **Auto mode documentation expanded across 4 files**: Comprehensive update covering two-layer architecture (input probe + Sonnet 4.6 transcript classifier), three classifier categories (scope escalation, untrusted infrastructure, prompt injection), Anthropic's production numbers (94% detection, 17% FNR), independent stress-test findings (arXiv 2604.04978: 81% FNR on adversarial workloads, 92.9% FNR gap on file edits exempt from classification), escalation mechanism (3 consecutive or 20 total blocks), red spinner signal, `autoMode.allow/soft_deny/environment` with `"$defaults"` sentinel, and when-to-use taxonomy.
+  - `guide/ultimate-guide.md`: Section rewritten from ~30 to ~80 lines
+  - `guide/cheatsheet.md`: Auto mode row added to permission modes table
+  - `whitepapers/fr/03-securite.qmd`: New "Mode Auto: délégation et limites réelles" subsection; sandbox Modes bullet fixed (was conflating sandbox auto-allow with auto mode permission feature); PermissionDenied hook updated
+  - `whitepapers/en/03-security.qmd`: Same changes in English
 
 - **Pinning Opus 4.6 (Community Hack)** (`guide/ultimate-guide.md`): Added subsection in the OpusPlan Mode area documenting three ways to force Opus 4.6 instead of 4.7 (settings.json direct, OpusPlan hybrid via `ANTHROPIC_DEFAULT_OPUS_MODEL`, per-session `/model`). Documents the trade-offs: losing `xhigh`/`max` effort levels and the newer knowledge cutoff. Added cross-reference from the pricing section.
 

@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.148"
-updated: "2026-05-22"
+latest: "2.1.150"
+updated: "2026-05-23"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,19 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.150"
+    date: "2026-05-23"
+    highlights:
+      - "Internal infrastructure improvements (no user-facing changes)"
+
+  - version: "2.1.149"
+    date: "2026-05-23"
+    highlights:
+      - "⭐ `/usage` per-category breakdown showing skills, subagents, plugins, and per-MCP-server cost"
+      - "Markdown GFM task list checkboxes (`- [ ]`/`- [x]`) now render natively instead of plain bullets"
+      - "Security: PowerShell permission bypass (`cd..`/`cd\\`/`cd~`) + sandbox worktree write allowlist corrected (was covering entire main repo root)"
+      - "Enterprise: `allowAllClaudeAiMcps` managed setting; 20+ bug fixes: `/diff` keyboard scrolling, transcript view freezing, slash-command argument hints, editing states"
 
   - version: "2.1.148"
     date: "2026-05-22"

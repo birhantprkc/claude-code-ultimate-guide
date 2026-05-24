@@ -292,42 +292,23 @@ Long-running agents face a variant of the context rot problem: session history g
 
 For Claude Code specifically, two mechanisms handle session-level memory:
 
-**`/compact`** summarizes the conversation history, replacing the raw exchange with a dense summary. The model retains continuity but the token count resets substantially. Use at 70% context usage, not 90% — waiting until the context is nearly full leaves insufficient headroom for the compaction itself to work well.
+**`/compact`** summarizes the conversation history, replacing the raw exchange with a dense summary. The model retains continuity but the token count resets substantially. Use at 70% context usage, not 90%.
 
-**Structured note-taking via hooks** is the agentic version: a PostToolUse hook writes key decisions, discovered facts, and task state to a notes file. The agent loads this file at the start of the next session. This sidesteps context rot entirely for multi-session work, because the notes file is always at the start of the context (maximum attention) and contains only curated information.
+**Structured note-taking via hooks** is the agentic version: a PostToolUse hook writes key decisions, discovered facts, and task state to a notes file. The agent loads this file at the start of the next session. This sidesteps context rot entirely for multi-session work — the notes file sits at the start of the context (maximum attention) and contains only curated information.
+
+**Auto Memory (v2.1.59+)** and **Auto Dream** provide native CC alternatives: Claude writes its own `MEMORY.md` between sessions, and a background sub-agent consolidates it after ≥5 sessions and ≥24 hours. See [Memory Systems: Auto Memory](../core/memory-systems.md#22-auto-memory-v21594).
 
 ### Long-Term: External Memory Systems
 
-For multi-session and multi-agent workflows, persistent memory systems store information outside the context window and retrieve it selectively.
+For multi-session and multi-agent workflows, persistent memory systems store information outside the context window and retrieve it selectively. The CC ecosystem has a three-tier model:
 
-**ICM (Infinite Context Memory)** implements this as a Rust binary with a dual architecture:
+**Individual (no team)**: claude-mem (26.5K stars, hooks-based auto-capture), agentmemory (16K stars, BM25+vector+graph fusion, 95.2% R@5), ICM (Rust binary, dual decay+graph architecture, `brew install icm`).
 
-- **Short-term layer**: recency-weighted, decays over time (recent sessions have higher weight)
-- **Long-term layer**: importance-weighted, persists indefinitely (architectural decisions, resolved bugs)
+**Team sharing**: CLAUDE.md + `.mcp.json` + skills committed to the repo (the Trinity, zero infra). Mem0 Cloud MCP for pooled team memory. Zep/Graphiti for temporal knowledge graphs.
 
-See [Third-Party Tools: ICM](./third-party-tools.md) and the memory section in the [ultimate guide](.#memory-hierarchy) for installation and usage details.
+**The RAG-vs-Memory distinction**: RAG is the model's access to external world knowledge (docs, codebase, web). Memory is its access to user-specific and session-specific knowledge (preferences, past decisions, continuity). Both are retrieval systems serving different parts of the information architecture. A well-designed agent uses both.
 
-**mem0** is a portable memory layer with standardized interfaces that works across multiple LLM providers. Unlike ICM, which is optimized for Claude Code specifically, mem0 is provider-agnostic: the same memory API works whether you are calling Claude, GPT-4, or Gemini.
-
-| Attribute | Details |
-|-----------|---------|
-| **Source** | [GitHub: mem0ai/mem0](https://github.com/mem0ai/mem0) |
-| **Stars** | ~55,228 (May 2026) |
-
-Key capabilities: deduplication (avoids storing redundant facts), decay-based importance weighting (recent and frequently accessed memories have higher retrieval priority), and multi-provider support via a unified API. Token overhead per turn is approximately 10–15%, which is modest but non-zero.
-
-**ICM vs mem0 decision guide**:
-
-| Factor | Choose ICM | Choose mem0 |
-|--------|-----------|------------|
-| Primary tool | Claude Code | Multi-provider (Claude + others) |
-| Deployment | Local-first | Cloud-portable |
-| Integration | MCP-native | Library API |
-| Stars / maturity | Smaller, CC-focused | ~55K stars, broad ecosystem |
-
-The architectural distinction: ICM's decay mechanism is tuned for Claude Code session patterns (short-term recency, long-term architectural decisions). mem0's decay and deduplication are designed to generalize across provider and use-case types. If you are Claude Code-only, ICM's tighter integration is an advantage. If Claude Code is one of several AI tools in your workflow, mem0's provider independence pays off.
-
-**The RAG-vs-Memory distinction**: RAG is the model's access to external world knowledge (documentation, codebase, web). Memory is its access to user-specific and session-specific knowledge (preferences, past decisions, conversation continuity). Both are retrieval systems, but they serve different parts of the information architecture. A well-designed agent uses both.
+> **Canonical reference**: [Memory Systems guide](../core/memory-systems.md) — 20-tool comparison table, architecture patterns, risk matrix, decision flowchart, and benchmarks.
 
 ---
 

@@ -12,7 +12,7 @@ tags: [cheatsheet, reference]
 
 **Written with**: Claude (Anthropic)
 
-**Version**: 3.40.0 | **Last Updated**: May 2026
+**Version**: 3.41.0 | **Last Updated**: May 2026
 
 ---
 
@@ -126,6 +126,7 @@ tags: [cheatsheet, reference]
 | Default | Asks | Asks |
 | acceptEdits | Auto | Asks |
 | Plan Mode | ❌ | ❌ |
+| auto | Classifier decides | Classifier decides |
 | dontAsk | Only if in allow rules | Only if in allow rules |
 | bypassPermissions | Auto | Auto (CI/CD only) |
 
@@ -674,4 +675,4 @@ Speed: `rg` (~20ms) → Serena (~100ms) → ast-grep (~200ms) → grepai (~500ms
 
 **Author**: Florian BRUNIAUX | [@Méthode Aristote](https://methode-aristote.fr) | Written with Claude
 
-*Last updated: May 2026 | Version 3.40.0*
+*Last updated: May 2026 | Version 3.41.0*
