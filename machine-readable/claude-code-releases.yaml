@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.150"
-updated: "2026-05-23"
+latest: "2.1.152"
+updated: "2026-05-27"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,14 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.152"
+    date: "2026-05-27"
+    highlights:
+      - "⭐ `/code-review --fix` applies review findings to working tree after review; `/simplify` now invokes `/code-review --fix`"
+      - "⭐ Skills/commands can set `disallowed-tools` frontmatter to remove tools while the skill is active; `/reload-skills` re-scans skill directories"
+      - "⭐ New `MessageDisplay` hook event — hooks can transform or hide assistant message text"
+      - "Auto mode no longer requires opt-in; `--fallback-model` session-level fallback; `SessionStart` can set session title + `reloadSkills`; Vim `/` = reverse history search; 35+ bug fixes"
 
   - version: "2.1.150"
     date: "2026-05-23"

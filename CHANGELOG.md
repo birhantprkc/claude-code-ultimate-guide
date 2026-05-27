@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Claude Code Releases**: Updated tracking from v2.1.150 to v2.1.152 (2026-05-27)
+  - `/code-review --fix` applies review findings to working tree; `/simplify` now invokes it
+  - `disallowed-tools` frontmatter for skills/commands; `/reload-skills` command
+  - `MessageDisplay` hook event for transforming/hiding assistant message text
+  - Auto mode no longer requires opt-in; `--fallback-model` session-level fallback
+  - 35+ bug fixes
+
 ### Added
 
 - **Section 2.10 Prompt Engineering Patterns** (`guide/ultimate-guide.md`, new `## 2.10`): Four techniques for closing the gap between well-structured prompts and reliably accurate outputs. Few-shot prompting: message-pair format for tool-use tasks, null-handling example strategy, false-positive calibration with near-miss examples, limits of few-shot vs schema constraints. Validation retry loop: three-attempt budget with per-field error feedback, hallucination cycle detection (`is_hallucination_cycle`), graceful degradation to human review queue. Self-review contamination: 15-30% self-preference bias, independent review instance pattern for high-stakes extraction. Inline reasoning for triage: `reasoning` field in output schema as verification handle, vague reasoning as escalation signal.
