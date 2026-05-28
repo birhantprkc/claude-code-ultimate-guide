@@ -1190,6 +1190,7 @@ This section covers tools for running **multiple Claude Code instances in parall
 
 - **[AI Ecosystem](./ai-ecosystem.md)** - Gas Town, multiclaude, agent-chat, claude-squad
 - **[Ultimate Guide Section 9](../ultimate-guide.md)** - Multi-instance workflows, git worktrees, orchestration frameworks
+- **[Agent Tools: Beyond Claude Code](./agentic-tools.md)** - Hermes Agent, Codex CLI, Devin, CrewAI, LangGraph, and other tools that are not Claude-Code-specific
 
 **Quick reference**:
 

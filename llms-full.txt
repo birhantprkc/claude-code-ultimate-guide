@@ -11,13 +11,13 @@
 - Title: Claude Code Ultimate Guide
 - Author: Florian Bruniaux (Founding Engineer @ Méthode Aristote)
 - Version: 3.41.0
-- Last Updated: May 21, 2026
+- Last Updated: May 27, 2026
 - License: CC BY-SA 4.0
 - Repository: https://github.com/FlorianBruniaux/claude-code-ultimate-guide
 - Landing: https://cc.bruniaux.com
-- Lines of Documentation: 26,349
-- Production Templates: 335
-- Quiz Questions: 306
+- Lines of Documentation: 26,058
+- Production Templates: 314
+- Quiz Questions: 334
 - Whitepapers: 11 titles (FR + EN)
 
 ---
@@ -331,7 +331,7 @@ Deep analysis     → Use Opus (thinking on by default)
 
 ---
 
-## Template Library (186 templates)
+## Template Library (314 templates)
 
 ### Agents (23 files)
 - `adr-writer.md` — Architecture Decision Records
@@ -442,7 +442,7 @@ Deep analysis     → Use Opus (thinking on by default)
 ## FAQ
 
 **Q: What is the Claude Code Ultimate Guide?**
-A: The most comprehensive community guide for Claude Code (Anthropic's CLI). 25,368 lines of documentation, 186 production-ready templates, 271-question quiz, and security threat database. Free and open-source (CC BY-SA 4.0).
+A: The most comprehensive community guide for Claude Code (Anthropic's CLI). 26,058 lines of documentation, 314 production-ready templates, 334-question quiz, and security threat database. Free and open-source (CC BY-SA 4.0).
 
 **Q: Is this guide free?**
 A: Yes, completely free. The guide is CC BY-SA 4.0 (share and adapt with attribution). Templates are CC0 (copy-paste freely, no attribution needed). No paywall, no login required.
@@ -502,7 +502,7 @@ claude-code-ultimate-guide/
 │   ├── security-hardening.md       # Security best practices
 │   ├── data-privacy.md             # What data is sent to Anthropic
 │   └── claude-code-releases.md     # Official release tracking
-├── examples/                       # 186 production-ready templates
+├── examples/                       # 314 production-ready templates
 │   ├── agents/                     # Custom AI personas
 │   ├── commands/                   # Legacy slash commands (pre-CC 2.1.3)
 │   ├── hooks/                      # Event automation (bash + PowerShell)
@@ -512,7 +512,7 @@ claude-code-ultimate-guide/
 │   ├── reference.yaml              # Machine-optimized index (~2K tokens)
 │   └── llms.txt                    # Short version
 ├── whitepapers/                    # 9 focused PDFs (FR + EN)
-└── quiz/                           # 271-question interactive quiz
+└── quiz/                           # 334-question interactive quiz
 ```
 
 ---

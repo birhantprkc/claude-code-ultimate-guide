@@ -1,16 +1,16 @@
 ---
-title: "Search Tools Mastery: Combining rg, grepai, Serena & ast-grep"
-description: "Master code search by combining the right tools for maximum efficiency"
+title: "Search Tools Mastery: Combining rg, grepai, Serena, ast-grep, scip-search & lilmd"
+description: "Master code search and documentation navigation by combining the right tools for maximum efficiency"
 tags: [workflow, search, guide, mcp]
 ---
 
-# Search Tools Mastery: Combining rg, grepai, Serena & ast-grep
+# Search Tools Mastery: Combining rg, grepai, Serena, ast-grep, scip-search & lilmd
 
-> **Master the art of code search by combining the right tools for maximum efficiency**
+> **Master code search and documentation navigation by combining the right tools for maximum efficiency**
 
 **Author**: Florian BRUNIAUX | Contributions from Claude (Anthropic)
-**Reading time**: ~20 minutes
-**Last updated**: January 2026
+**Reading time**: ~25 minutes
+**Last updated**: May 2026
 
 ---
 
@@ -23,6 +23,7 @@ tags: [workflow, search, guide, mcp]
 5. [Real-World Scenarios](#real-world-scenarios)
 6. [Performance Optimization](#performance-optimization)
 7. [Common Pitfalls](#common-pitfalls)
+8. [Extended Toolkit: scip-search & lilmd](#extended-toolkit-scip-search--lilmd)
 
 ---
 
@@ -38,6 +39,8 @@ tags: [workflow, search, guide, mcp]
 | Get file structure | `Serena` | `serena get_symbols_overview` |
 | Refactor across files | `Serena + ast-grep` | Combined workflow |
 | Explore unknown codebase | `grepai → Serena` | Discovery pattern |
+| Find symbol refs without MCP (worktree-safe) | `scip-search` | `scip-search refs AuthService.login` |
+| Navigate a large Markdown document | `lilmd` | `lilmd read docs/arch.md "Authentication"` |
 
 ---
 
@@ -71,6 +74,15 @@ tags: [workflow, search, guide, mcp]
 | **ast-grep** | AST pattern | ~1500 | Structural matches |
 
 **Key insight**: rg is 4x more token-efficient but 10x less intelligent than semantic tools.
+
+### Extended Tool Reference
+
+Two tools that address gaps in the core stack, covered in depth in [§ Extended Toolkit](#extended-toolkit-scip-search--lilmd):
+
+| Tool | Category | vs existing stack |
+|------|----------|-------------------|
+| **scip-search** | Symbol index search (SCIP) | Like Serena but stateless, no MCP, worktree-safe |
+| **lilmd** | Markdown section navigation | No equivalent in the stack (targets docs, not code) |
 
 ---
 
@@ -109,6 +121,17 @@ What's your search intent?
 └─ "Understand DEPENDENCIES"
    → Use grepai trace
    └─ Example: grepai trace callers "validatePayment"
+```
+
+### Level 2 (Worktree / No MCP)
+
+When running in a CI environment, a git worktree, or any context where MCP servers are unavailable:
+
+```
+Known symbol name, no MCP available?
+│
+└─ Use scip-search (pre-built SCIP index, millisecond cold start)
+   └─ scip-search refs "AuthService.login" --format json
 ```
 
 ### Level 3: Optimization
@@ -618,6 +641,76 @@ rg "TODO" --type ts
 
 ---
 
+## Extended Toolkit: scip-search & lilmd
+
+Two CLI tools that address gaps in the rg/grepai/Serena stack.
+
+### scip-search
+
+scip-search queries pre-built SCIP (Sourcegraph Code Intelligence Protocol) symbol indexes. Where grepai searches by semantic meaning and Serena requires a live MCP connection, scip-search operates against a static binary index with millisecond cold starts.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [github.com/liza-mas/scip-search](https://github.com/liza-mas/scip-search) |
+| **Install** | `curl -fsSL https://raw.githubusercontent.com/liza-mas/scip-search/main/install.sh \| bash` |
+| **Index format** | SCIP (Go, TypeScript, Python, Java, Rust, and others) |
+| **Output** | One-line text, JSON, or location-only |
+
+**Workflow**: scip-search replaces the 5-10 rg/read round-trips typical for symbol discovery.
+
+```bash
+# Step 1: generate SCIP index once per language
+scip-typescript index --output index.scip
+
+# Step 2: find a symbol definition
+scip-search find AuthService
+
+# Step 3: get all references with line numbers
+scip-search refs AuthService.login --format json
+
+# Step 4: read only the returned line ranges
+```
+
+**vs Serena**: Serena connects to a language server and has session memory. scip-search is stateless and works against a snapshot: no MCP, no persistent process. This makes it reliable in worktrees and ephemeral CI environments where Serena's LSP backend may not be available.
+
+**vs grepai**: grepai finds by semantic intent ("payment validation logic"). scip-search finds by exact or near-exact symbol identifier. They work in sequence: grepai discovers the concept, scip-search confirms the symbol.
+
+**Worktree compatibility**: indexes are per-repository files with no shared state. Running `scip-typescript index` inside a worktree produces a local index for that worktree.
+
+---
+
+### lilmd
+
+lilmd treats Markdown files as databases. It returns a table of contents with line ranges and enables targeted section reads. An agent reading a 2,000-line guide fetches one section in a single call instead of reading the full file.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [github.com/molefrog/lilmd](https://github.com/molefrog/lilmd) |
+| **Install** | `npm install -g lilmd` |
+| **Runtime** | Node or Bun |
+
+**Key commands**:
+
+```bash
+# TOC with line ranges (inclusive, 1-indexed)
+lilmd docs/architecture.md
+
+# Read a section by name (fuzzy match by default)
+lilmd read docs/architecture.md "Authentication"
+
+# Read a nested section
+lilmd read docs/architecture.md "Security > JWT"
+
+# Exact match (prefix with =)
+lilmd read docs/architecture.md "=Authentication Flow"
+```
+
+**Agent-specific value**: the TOC output contains line ranges for each heading. An agent parses these and requests only the relevant section rather than loading the full file. The natural pipeline is: `rg` (find which file) then `lilmd` (get TOC with ranges) then `Read lines:N-M` (load the specific section). This also works for CHANGELOG.md, large README files, and knowledge base documents.
+
+**Worktree compatibility**: stateless, no index, runs per file. Works anywhere.
+
+---
+
 ## Setup Priority
 
 **Recommended Setup Order**:
@@ -625,13 +718,15 @@ rg "TODO" --type ts
 1. **Start**: rg (already built-in with Grep tool) ✅
 2. **Next**: Serena MCP (symbol awareness, session memory)
 3. **Then**: grepai (semantic search + call graph)
-4. **Finally**: ast-grep (structural patterns, large refactoring)
+4. **If worktrees are part of your workflow**: scip-search (stateless symbol lookup, no MCP required)
+5. **For large documentation**: lilmd (targeted Markdown section reads, no setup)
+6. **Finally**: ast-grep (structural patterns, large refactoring)
 
-**Rationale**: 90% of searches work with rg + Serena. Add grepai for semantic needs. Only add ast-grep if doing large-scale refactoring/migration.
+**Rationale**: 90% of searches work with rg + Serena. Add grepai for semantic needs. Add scip-search for worktree or CI environments where MCP is unavailable. Add ast-grep only for large-scale refactoring.
 
 ---
 
-## Summary: The 4-Tool Symphony
+## Summary: The 6-Tool Toolkit
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -640,24 +735,32 @@ rg "TODO" --type ts
 │                                                         │
 │  rg (ripgrep)     →  Fast, exact text matching         │
 │  ├─ Use: 90% of searches                               │
-│  └─ Speed: ⚡ ~20ms                                     │
+│  └─ Speed: ~20ms                                        │
 │                                                         │
 │  grepai           →  Semantic + Call graph             │
 │  ├─ Use: Concept discovery, dependency tracing         │
-│  └─ Speed: 🐢 ~500ms (but finds what rg can't)        │
+│  └─ Speed: ~500ms (finds what rg cannot)               │
 │                                                         │
 │  Serena           →  Symbol-aware + Session memory     │
 │  ├─ Use: Refactoring, structure understanding          │
-│  └─ Speed: ⚡ ~100ms                                    │
+│  └─ Speed: ~100ms                                       │
 │                                                         │
 │  ast-grep         →  AST structural patterns           │
 │  ├─ Use: Large migrations, complex patterns            │
-│  └─ Speed: 🕐 ~200ms                                   │
+│  └─ Speed: ~200ms                                       │
+│                                                         │
+│  scip-search      →  Symbol index (stateless, SCIP)   │
+│  ├─ Use: CI / worktrees / no MCP environments          │
+│  └─ Speed: ~5ms cold start                             │
+│                                                         │
+│  lilmd            →  Markdown section navigation       │
+│  ├─ Use: Large docs, TOC + line ranges per section     │
+│  └─ Speed: instant, no index                           │
 │                                                         │
 │  ═══════════════════════════════════════════════════   │
 │                                                         │
 │  Master the combination, not individual tools.          │
-│  Each tool has a sweet spot — use the right one.       │
+│  Each tool has a sweet spot. Use the right one.        │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -670,8 +773,10 @@ rg "TODO" --type ts
 - [grepai Documentation](#grepai-recommended-semantic-search)
 - [ast-grep Patterns Skill](../../examples/skills/ast-grep-patterns.md)
 - [Architecture: Grep vs RAG History](../core/architecture.md#search-strategy-evolution)
+- [scip-search GitHub](https://github.com/liza-mas/scip-search)
+- [lilmd GitHub](https://github.com/molefrog/lilmd)
 
 ---
 
-**Last updated**: January 2026
+**Last updated**: May 2026
 **Compatible with**: Claude Code 2.1.7+

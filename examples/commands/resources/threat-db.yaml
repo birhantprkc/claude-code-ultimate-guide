@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.18.0"
-updated: "2026-05-16"
+version: "2.19.0"
+updated: "2026-05-27"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -419,6 +419,27 @@ sources:
   - name: "AWS + Cisco - Securing AI Agents: How AWS and Cisco AI Defense Scale MCP and A2A"
     url: "https://aws.amazon.com/blogs/machine-learning/securing-ai-agents-how-aws-and-cisco-ai-defense-scale-mcp-and-a2a-deployments/"
     date: "2026-05-13"
+  - name: "THN - Four OpenClaw Flaws Enable Data Theft, Privilege Escalation, and Persistence (Claw Chain)"
+    url: "https://thehackernews.com/2026/05/four-openclaw-flaws-enable-data-theft.html"
+    date: "2026-05"
+  - name: "SentinelOne - CVE-2026-20205 Splunk MCP Server Information Disclosure"
+    url: "https://www.sentinelone.com/vulnerability-database/cve-2026-20205/"
+    date: "2026-04-15"
+  - name: "Splunk Advisory SVD-2026-0407 - Sensitive Information Disclosure in _internal index"
+    url: "https://advisory.splunk.com/advisories/SVD-2026-0407"
+    date: "2026-04-15"
+  - name: "THN - Claude Code Source Leaked via npm Packaging Error"
+    url: "https://thehackernews.com/2026/04/claude-code-tleaked-via-npm-packaging.html"
+    date: "2026-04"
+  - name: "The Register - Anthropic accidentally exposes Claude Code source code"
+    url: "https://www.theregister.com/2026/03/31/anthropic_claude_code_source_code/"
+    date: "2026-03-31"
+  - name: "SecurityWeek - MS-Agent AI Framework Vulnerability Allows Full System Compromise (CVE-2026-2256)"
+    url: "https://www.securityweek.com/vulnerability-in-ms-agent-ai-framework-can-allow-full-system-compromise/"
+    date: "2026-02"
+  - name: "Adversa AI - Top MCP security resources May 2026"
+    url: "https://adversa.ai/blog/top-mcp-security-resources-may-2026/"
+    date: "2026-05"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS AUTHORS (confirmed by security researchers)
@@ -1756,6 +1777,73 @@ cve_database:
     mitigation: "Update Claude Code to >= 2.1.90; audit any workflows with unusually long command chains; do not rely solely on deny-list rules without defense-in-depth controls"
     notes: "No CVE assigned. Discovered by Adversa AI after examining Claude Code source code that was briefly exposed on the public npm registry. The 50-subcommand limit was a hardcoded threshold that inadvertently disabled all rule enforcement."
 
+  # --- Splunk MCP Server (information disclosure) ---
+  - id: "CVE-2026-20205"
+    component: "Splunk MCP Server app (below 1.0.3)"
+    severity: "high"
+    cvss: 7.2
+    description: "Session and authorization tokens written to log files in clear text in Splunk MCP Server app versions below 1.0.3 — a user with access to the Splunk _internal index or the mcp_tool_admin capability can read authentication tokens in plain text, enabling session hijacking, privilege escalation, or unauthorized access to protected Splunk resources"
+    source: "Splunk Advisory SVD-2026-0407 / SentinelOne / NVD (2026-04-15)"
+    fixed_in: "1.0.3"
+    mitigation: "Update Splunk MCP Server app to >= 1.0.3; restrict _internal index access to administrator roles only; rotate any tokens that may have been exposed; audit mcp_tool_admin capability assignments"
+    cwe: "CWE-532"
+    notes: "Splunk rates this High CVSS 7.2 (AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H); attack requires existing privileged access — but this is exactly the account an attacker who compromises a Splunk admin would use to pivot"
+
+  # --- MS-Agent (ModelScope) shell command injection ---
+  - id: "CVE-2026-2256"
+    component: "MS-Agent v1.5.2 (ModelScope, Alibaba)"
+    severity: "critical"
+    description: "Shell command injection in the MS-Agent Shell tool — six validation layers exist but all are bypassable via regex blacklist evasion; attacker injects crafted content into any data source consumed by the agent (prompts, documents, logs, research inputs) to execute arbitrary OS commands; no direct shell access or operator misuse required. Enables reading secrets (API keys, tokens, config files), dropping payloads, modifying workspace state, establishing persistence, and pivoting to adjacent services."
+    source: "SecurityWeek / Itamar Yochpaz (Medium) / CyberSecurityNews (2026-02)"
+    fixed_in: "check upstream MS-Agent releases post-1.5.2"
+    mitigation: "Update MS-Agent beyond v1.5.2; replace regex-based command blacklisting with a strict allowlist of permitted operations; never pass untrusted external content (documents, web pages, user input) directly to agent shell tools without sanitization; isolate MS-Agent execution in sandboxes"
+    cwe: "CWE-78"
+    notes: "Classic regex blacklist bypass: trusted interpreters (python -c, node -e, perl -e) are not blocked but allow arbitrary execution; tokenization bypass via shell parsing semantics sidesteps individual keyword filters"
+
+  # --- OpenClaw Claw Chain (four chained sandbox/privilege CVEs) ---
+  - id: "CVE-2026-44112"
+    component: "OpenClaw (OpenShell managed sandbox backend)"
+    severity: "critical"
+    cvss: 9.6
+    description: "TOCTOU race condition in the OpenShell managed sandbox backend — attacker redirects writes outside the intended sandbox boundary; can be used to modify configuration files, plant backdoors, and establish persistence on the host system. Most severe link in the Claw Chain exploit chain."
+    source: "Cyera Research / The Hacker News (2026-05)"
+    fixed_in: "OpenClaw 2026.4.22"
+    mitigation: "Update OpenClaw to >= 2026.4.22 immediately; apply OS-level file integrity monitoring on OpenClaw configuration directories; restrict OpenClaw sandbox backend write permissions at the OS level as defense-in-depth"
+    cwe: "CWE-367"
+    notes: "Part of the Claw Chain exploit chain (CVE-2026-44112 + CVE-2026-44113 + CVE-2026-44115 + CVE-2026-44118); an estimated 65,000 to 180,000 public OpenClaw servers were exposed when Cyera disclosed in May 2026; all four CVEs are patched in 2026.4.22"
+
+  - id: "CVE-2026-44113"
+    component: "OpenClaw (OpenShell managed sandbox backend)"
+    severity: "high"
+    cvss: 7.7
+    description: "TOCTOU race condition enabling file reads outside the sandbox intended boundaries — attacker can exfiltrate sensitive system files, credentials, and internal artifacts by exploiting the race window during sandbox file access validation; first step in the Claw Chain attack: attacker uses this to expose credentials before chaining to CVE-2026-44118 for privilege escalation"
+    source: "Cyera Research / The Hacker News (2026-05)"
+    fixed_in: "OpenClaw 2026.4.22"
+    mitigation: "Update OpenClaw to >= 2026.4.22; see CVE-2026-44112 for chain context"
+    cwe: "CWE-367"
+    notes: "Part of the Claw Chain (see CVE-2026-44112); chained with CVE-2026-44115 to read sensitive files and expose credentials, then CVE-2026-44118 for owner-level control, then CVE-2026-44112 for backdoor persistence"
+
+  - id: "CVE-2026-44115"
+    component: "OpenClaw (shell allowlist validation)"
+    severity: "high"
+    cvss: 8.8
+    description: "Incomplete list of disallowed inputs in the OpenClaw shell allowlist validation logic — attacker bypasses the allowlist to execute commands or access files that should be blocked; used as a stepping stone in the Claw Chain to expand the initial sandbox compromise"
+    source: "Cyera Research / The Hacker News (2026-05)"
+    fixed_in: "OpenClaw 2026.4.22"
+    mitigation: "Update OpenClaw to >= 2026.4.22; see CVE-2026-44112 for chain context"
+    cwe: "CWE-184"
+    notes: "Part of the Claw Chain (see CVE-2026-44112); allowlist-based validation is inherently incomplete for shell inputs — update to 2026.4.22 replaces the blocklist/allowlist approach with a stricter execution model"
+
+  - id: "CVE-2026-44118"
+    component: "OpenClaw (privilege model)"
+    severity: "critical"
+    description: "Privilege escalation to owner-level control in OpenClaw — exploited in step 3 of the Claw Chain (after credential exposure via CVE-2026-44113 + CVE-2026-44115), allowing an attacker with initial plugin/prompt access to obtain full owner-level permissions on the OpenClaw instance; enables unrestricted configuration modification and backdoor installation in the final step (CVE-2026-44112)"
+    source: "Cyera Research / Rescana / The Hacker News (2026-05)"
+    fixed_in: "OpenClaw 2026.4.22"
+    mitigation: "Update OpenClaw to >= 2026.4.22; apply principle of least privilege on OpenClaw instances; do not expose OpenClaw admin interfaces to untrusted networks"
+    cwe: "CWE-269"
+    notes: "Part of the Claw Chain (see CVE-2026-44112); the full exploit chain: compromised plugin/injection (initial) + CVE-2026-44113 + CVE-2026-44115 (credential theft) + CVE-2026-44118 (owner escalation) + CVE-2026-44112 (backdoor persistence)"
+
 # ═══════════════════════════════════════════════════════════════
 # MINIMUM SAFE VERSIONS (quick reference for scanning)
 # ═══════════════════════════════════════════════════════════════
@@ -1776,7 +1864,7 @@ minimum_safe_versions:
   "mcp-framework": "0.2.22"
   "mcpjam-inspector": "1.4.3"
   "mcp-salesforce-connector": "0.1.10"
-  "openclaw": "2026.1.29"
+  "openclaw": "2026.4.22"
   "azure-mcp-server": "March 2026 Patch Tuesday (2026-03-10)"
   "apollo-mcp-server": "1.7.0"
   "runzero-platform": "4.0.260202.0"
@@ -2218,6 +2306,19 @@ campaigns:
     sources:
       - "https://www.securityweek.com/hugging-face-clawhub-abused-for-malware-distribution/"
       - "https://www.acronis.com/en/tru/posts/poisoning-the-well-ai-supply-chain-attacks-on-hugging-face-and-openclaw/"
+
+  - name: "Claw Chain"
+    source: "Cyera Research / The Hacker News (2026-05)"
+    date: "2026-05"
+    platform: "OpenClaw"
+    cves: ["CVE-2026-44112", "CVE-2026-44113", "CVE-2026-44115", "CVE-2026-44118"]
+    technique: "Four chained vulnerabilities (TOCTOU sandbox write escape, TOCTOU sandbox file read, shell allowlist bypass, and owner-level privilege escalation) that can be combined to achieve stealthy full-host compromise starting from a single malicious plugin or prompt injection inside the OpenClaw sandbox. Chain: (1) initial foothold via malicious plugin or prompt injection; (2) CVE-2026-44113 + CVE-2026-44115 to read sensitive credentials and files outside the sandbox; (3) CVE-2026-44118 to escalate to owner-level control; (4) CVE-2026-44112 to write backdoors and establish persistence outside the sandbox."
+    exposure: "65,000 to 180,000 publicly accessible OpenClaw servers at time of disclosure"
+    fixed_in: "OpenClaw 2026.4.22"
+    notes: "All four CVEs patched in a single OpenClaw release (2026.4.22). Discovered by Cyera Research. Full attack chain is 'stealthy' in that no obvious malware binary is deployed — all exploitation uses legitimate OpenShell sandbox mechanisms."
+    sources:
+      - "https://thehackernews.com/2026/05/four-openclaw-flaws-enable-data-theft.html"
+      - "https://www.rescana.com/post/claw-chain-critical-openclaw-vulnerabilities-cve-2026-44112-44113-44115-44118-enable-data-theft-privilege-escalation-and/"
 
   - name: "ClawHub Wave 2 (71 Skills)"
     source: "Oasis Security / The Hacker News"
@@ -2999,6 +3100,39 @@ scanning_tools:
       - "Commercial SaaS platform — not open-source"
       - "Runtime enforcement focus — does not scan ClawHub/skills.sh skill marketplace directly"
     notes: "Available April 2026; enterprise-grade three-component platform addressing discovery, red-teaming, and runtime defense for MCP ecosystems"
+
+  - name: "Aguara"
+    vendor: "garagon (open-source)"
+    type: "cli"
+    command: "aguara scan ."
+    url: "https://aguarascan.com/"
+    capabilities:
+      - "189 detection rules across 14 categories: prompt injection, data exfiltration, credential leaks, supply-chain attacks, MCP threats, command execution, SSRF, unicode attacks, and more"
+      - "4-layer analysis engine: pattern matching, NLP analysis, taint tracking, and rug-pull detection"
+      - "Runs 100% locally with no API keys, no cloud, no LLM dependency"
+      - "Scans installed Python environments for compromised packages, malicious .pth files, and persistence artifacts"
+      - "MCP server variant (garagon/mcp-aguara) gives AI agents security scanning as a first-class tool"
+      - "Auto-discovers 17 MCP clients (Claude, Cursor, Windsurf, VS Code, and more)"
+      - "Deterministic static analysis — reproducible results, no false positive drift from LLM temperature"
+    limitations:
+      - "Static analysis only — cannot detect runtime-only payloads (complement with SandyClaw)"
+      - "No central vulnerability DB updates; rules are versioned in the repo"
+    notes: "Open-source; built in response to the litellm supply chain attack (March 2026); GitHub: garagon/aguara; also see garagon/aguara-observatory for continuous registry scanning"
+
+  - name: "SkillRisk"
+    vendor: "SkillRisk (community)"
+    type: "browser"
+    url: "https://skillrisk.org/"
+    capabilities:
+      - "Free AI agent skill security scanner running 100% in the browser — no data leaves the device"
+      - "Detects ClawHavoc malware patterns, SSRF vulnerabilities, and supply chain attacks"
+      - "Supports OpenClaw, Claude Code, Cursor, and Windsurf skill formats"
+      - "Free online check at skillrisk.org/free-check/ for quick pre-install validation"
+    limitations:
+      - "Browser-based only — no CLI or CI/CD integration"
+      - "Coverage depth not independently verified; newer community tool"
+      - "No API or programmable interface for automation"
+    notes: "Useful for quick pre-install checks in browser without installing any CLI tooling; complements mcp-scan and Aguara for users who prefer no-install verification"
 
 # ═══════════════════════════════════════════════════════════════
 # DEFENSIVE FRAMEWORKS & BLOCKLISTS

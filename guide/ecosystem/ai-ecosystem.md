@@ -2100,6 +2100,8 @@ An **interactive comparison matrix** of 23 AI coding agents across 11 technical 
 
 **Positioning**: Matrix complements this guide by helping you **choose** the right agent. Once you choose Claude Code, this guide teaches you how to **master** it.
 
+> **See also**: [Agent Tools: Beyond Claude Code](./agentic-tools.md) for full writeups on Hermes Agent, Codex CLI, Aider, Devin, SWE-agent, CrewAI, LangGraph, and AutoGen, plus a decision framework by use case.
+
 ---
 
 ## 11.1 Goose: Open-Source Alternative (Block)
@@ -2504,6 +2506,7 @@ All frameworks (Claude Code, ADK, LangChain) support the **Model Context Protoco
 - [MCP Specification](https://modelcontextprotocol.io)
 - [MCP Servers Ecosystem](https://github.com/modelcontextprotocol/servers)
 - [This guide's MCP coverage](../ultimate-guide.md#mcp-servers) (Section 6)
+- [Agent Tools: Beyond Claude Code](./agentic-tools.md#section-5-decision-framework): full decision framework with situation-to-tool guide
 
 ---
 

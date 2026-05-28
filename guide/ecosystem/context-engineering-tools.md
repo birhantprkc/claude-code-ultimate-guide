@@ -18,7 +18,7 @@ This page maps the ecosystem of tools that help you manage what enters the conte
 
 1. [The Mental Model](#1-the-mental-model)
 2. [Core Concepts](#2-core-concepts)
-3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output)
+3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, context-mode, stacklit)
 4. [Prompt Compression](#4-prompt-compression)
 5. [AI Gateways](#5-ai-gateways)
 6. [RAG Optimization](#6-rag-optimization)
@@ -163,6 +163,33 @@ context-mode is an MCP server that operates at the boundary between tools and co
 **When to choose context-mode**: If you run Claude Code alongside other platforms (Cursor, Gemini CLI) and want a single context management layer that works across all of them. Also useful when MCP tool outputs are large and structured, and you need post-compact session retrieval beyond what `/compact` alone provides.
 
 **Comparison with RTK and Headroom**: RTK operates at the shell command level (CLI output), Headroom at the structured data/API response level. context-mode operates specifically at the MCP tool boundary and adds session persistence. These tools are complementary.
+
+### stacklit
+
+stacklit generates a machine-readable index of a repository's package structure, exported symbols, and dependencies. An agent reads this index in a single call (~250 tokens) instead of spending 50,000+ tokens exploring files to understand the codebase structure.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: glincker/stacklit](https://github.com/glincker/stacklit) |
+| **Install** | `npm install -g stacklit` |
+| **Integration** | Auto-configures Claude Code, Cursor, and Aider via `stacklit setup` |
+| **Claimed reduction** | 50,000+ tokens of exploration compressed to ~250 tokens |
+
+**How it works**: `stacklit generate-json` scans the repository and writes `stacklit.json`, a structured map of packages, exports with type signatures, dependency graph, git activity heatmap, and framework hints. `stacklit setup` injects a compact codebase map into agent configuration files automatically. `stacklit diff` detects when the index is stale after file additions or deletions.
+
+```bash
+# One-time setup per repository
+stacklit generate-json    # create the index
+stacklit setup            # inject into Claude Code / Cursor / Aider config
+
+# Maintenance
+stacklit diff             # check if index is stale
+stacklit generate-json    # re-index after structure changes
+```
+
+**Worktree compatibility**: generates per-repository indexes with no centralized state. Unlike grepai (which requires a local embedding index) or Serena (which connects to a language server), stacklit produces a static JSON file that works in git worktrees and ephemeral CI environments without additional setup.
+
+**Comparison with RTK and context-mode**: RTK intercepts CLI output during a session. context-mode intercepts MCP tool output in real time. stacklit eliminates exploration-phase token spend before the session starts, by making the repo structure known from the first message. The three tools target different moments in a session's lifecycle and are complementary.
 
 ---
 

@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Real-world token benchmarks in context-engineering.md** (`guide/core/context-engineering.md`, 2026-05-27): New "Real-World Session Benchmarks" subsection in Section 15 with practitioner-sourced data. Per-turn ranges by task type (10-30K simple question, 100-300K feature, 300K-1M+ heavy investigation) and per-session ranges (100-300K quick fix, 500K-2M complete PR, 5M-20M+ long session with compaction). Sourced from community discussion (May 2026, Max 200 / Opus 4.7 at high effort).
+- **`claude-crusts` added to observability.md** (`guide/ops/observability.md`, 2026-05-27): Added to external monitoring tools table and decision guide. One-command context pollution scanner by Abinesh-L.
+- **`tokens/feature` KPI added to team-metrics.md** (`guide/ops/team-metrics.md`, 2026-05-27): New metric row in AI-specific metrics table. Average tokens consumed per merged feature, crossed with ticket boundaries. Complements tokens/request for team-level reporting.
+
+- **Whitepapers WP12 expanded** (`whitepapers/fr/12-agent-engineering.qmd` and `whitepapers/en/12-agent-engineering.qmd`, 2026-05-27): New section "L'Écosystème des Agents en 2026" / "The Agent Ecosystem in 2026" added to both FR and EN versions. Covers terminal coding agents (Codex CLI, Hermes Agent, Aider), autonomous agents (Devin, SWE-agent, claude -p), multi-agent frameworks (CrewAI, LangGraph, AutoGen/MAF), and a decision matrix with situation-to-tool mapping. Fiche récap updated with a sixth bullet. Cross-ref to guide/ecosystem/agentic-tools.md.
+
+- **New page: Agent Tools Beyond Claude Code** (`guide/ecosystem/agentic-tools.md`, 2026-05-27): Comprehensive coverage of the agent tool field, organized in five sections. Section 1 covers terminal coding agents (Codex CLI at 86K stars, Hermes Agent formerly OpenClaw at 170K stars, Aider at 45K stars, Goose cross-ref). Section 2 covers autonomous coding agents (Devin with cloud sandbox and ACU billing, SWE-agent Princeton NeurIPS 2024, Claude Code headless cross-ref). Section 3 covers multi-agent frameworks (CrewAI 52K stars, LangGraph 33K stars, AutoGen/Microsoft Agent Framework). Section 4 covers orchestration tooling (Conductor Gemini methodology, Conductor Microsoft YAML CLI, Hermes Control Room community template). Section 5 is a decision framework with a full comparison matrix (10 tools across 7 dimensions) and a situation-to-tool guide. Cross-refs added to ai-ecosystem.md (Section 11, Section 11.3), third-party-tools.md (Multi-Agent Orchestration), and guide/README.md navigation.
+
+### Security
+
+- **New section 1.6 in security-hardening.md**: Third-Party Command Wrappers & Shell Interceptors. Covers the attack surface of token-saving wrappers (RTK and similar), shell function overrides (oh-my-zsh plugins), completion frameworks (Fig, Warp), and how to audit each. Includes supply chain hygiene for CLI tools (`brew pin`, `cargo --locked`, checksum verification), minimal shell setup for sensitive sessions, and context separation (no production credentials in agent sessions).
+
+---
+
+## [3.41.0] - 2026-05-27
+
+### Security
+
+- **Threat Database v2.19.0** (`examples/commands/resources/threat-db.yaml`, 2026-05-27): 6 new CVEs, 1 new campaign, 2 new scanning tools
+  - CVE-2026-44112/44113/44115/44118 (OpenClaw "Claw Chain": TOCTOU sandbox escape chain, CVSS up to 9.6, fixed in OpenClaw 2026.4.22; 65K-180K servers exposed)
+  - CVE-2026-20205 (Splunk MCP Server token disclosure in _internal index logs, CVSS 7.2, fixed in 1.0.3)
+  - CVE-2026-2256 (MS-Agent v1.5.2 by ModelScope, regex blacklist bypass in Shell tool enables critical RCE via prompt injection)
+  - New campaign: Claw Chain (four chained OpenClaw CVEs for data theft + privilege escalation + persistence)
+  - New scanning tools: Aguara (189-rule 100% offline static scanner, GitHub garagon/aguara) and SkillRisk (free browser-based scanner)
+  - Updated `minimum_safe_versions`: openclaw bumped from 2026.1.29 to 2026.4.22
+  - 8 new sources added
+
 ### Documentation
 
 - **Claude Code Releases**: Updated tracking from v2.1.150 to v2.1.152 (2026-05-27)
@@ -16,6 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - 35+ bug fixes
 
 ### Added
+
+- **stacklit, scip-search, lilmd** (`guide/ecosystem/context-engineering-tools.md`, `guide/workflows/search-tools-mastery.md`, 2026-05-27): Three community CLI tools added to the guide. stacklit generates a machine-readable repo index (~250 tokens vs 50K+ for manual exploration) and auto-configures Claude Code/Cursor/Aider; documented in context-engineering-tools.md section 3 alongside RTK/context-mode. scip-search queries pre-built SCIP symbol indexes with millisecond cold starts, no MCP required, worktree-compatible; positioned as a stateless alternative to Serena for CI and ephemeral environments. lilmd provides Markdown TOC with inclusive line ranges for targeted section reads, filling a gap in documentation navigation. Both scip-search and lilmd added to search-tools-mastery.md with decision tree, setup priority, and a new Extended Toolkit section; title updated from "4-Tool Symphony" to "6-Tool Toolkit".
 
 - **Section 2.10 Prompt Engineering Patterns** (`guide/ultimate-guide.md`, new `## 2.10`): Four techniques for closing the gap between well-structured prompts and reliably accurate outputs. Few-shot prompting: message-pair format for tool-use tasks, null-handling example strategy, false-positive calibration with near-miss examples, limits of few-shot vs schema constraints. Validation retry loop: three-attempt budget with per-field error feedback, hallucination cycle detection (`is_hallucination_cycle`), graceful degradation to human review queue. Self-review contamination: 15-30% self-preference bias, independent review instance pattern for high-stakes extraction. Inline reasoning for triage: `reasoning` field in output schema as verification handle, vague reasoning as escalation signal.
 
