@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Broken URLs corrected across 11 files**: `florian.bruniaux.com/guides` replaced with `cc.bruniaux.com/whitepapers/` in `docs/for-cto.md`, `llms.txt`, `machine-readable/llms.txt`, `machine-readable/reference.yaml`, `mcp-server/content/llms.txt`, `mcp-server/content/reference.yaml`, `CLAUDE.md`, `AGENTS.md`. Also fixed `quiz.html` → `/quiz/` and `cheatsheet.html` → `/cheatsheet/` in all three `llms.txt` files (no Vercel redirect existed for those `.html` paths).
+
+### Documentation
+
+- **Claude Code Releases**: Updated tracking to v2.1.154 (2026-05-28)
+  - Opus 4.8 with high effort default and fast mode at 2x rate / 2.5x speed
+  - Dynamic workflows: Claude orchestrates tens to hundreds of background agents in one session
+  - Lean system prompt now default for all models except Haiku/Sonnet/Opus 4.7+
+  - Breaking: `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE` deprecated (removed 2026-06-01)
+  - Breaking: `/simplify` reworked to cleanup-only review
+- **Claude Code Releases**: Updated tracking to v2.1.153 (2026-05-28)
+  - `/model` now saves as default for new sessions (IDE parity); `s` in picker = current session only
+  - `skipLfs` for plugin marketplace git sources; status line commands get `COLUMNS`/`LINES` env vars
+  - `claude agents` autocomplete includes built-in skills + slash commands; PR column improvements
+  - Breaking: `modelPicker:setAsDefault` keybinding renamed to `modelPicker:thisSessionOnly`
+  - 25+ bug fixes including stateful MCP reconnect loop, API gateway credential leak, Agent tool worktree output discard
+
 ### Added
 
 - **Real-world token benchmarks in context-engineering.md** (`guide/core/context-engineering.md`, 2026-05-27): New "Real-World Session Benchmarks" subsection in Section 15 with practitioner-sourced data. Per-turn ranges by task type (10-30K simple question, 100-300K feature, 300K-1M+ heavy investigation) and per-session ranges (100-300K quick fix, 500K-2M complete PR, 5M-20M+ long session with compaction). Sourced from community discussion (May 2026, Max 200 / Opus 4.7 at high effort).
