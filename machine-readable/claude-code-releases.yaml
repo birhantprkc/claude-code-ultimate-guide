@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.154"
-updated: "2026-05-28"
+latest: "2.1.158"
+updated: "2026-05-30"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,23 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-May 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.158"
+    date: "2026-05-30"
+    highlights:
+      - "⭐ Auto mode now available on Bedrock, Vertex, and Foundry for Opus 4.7 and Opus 4.8; opt in with `CLAUDE_CODE_ENABLE_AUTO_MODE=1`"
+
+  - version: "2.1.157"
+    date: "2026-05-29"
+    highlights:
+      - "⭐ Plugins in `.claude/skills` directories auto-load without marketplace required; `claude plugin init <name>` scaffolds new plugins in `.claude/skills`"
+      - "Autocomplete for `/plugin` arguments; `agent` field in `settings.json` honored for dispatched sessions with `--agent <name>` override; `EnterWorktree` switches between Claude-managed worktrees mid-session; `tool_parameters` in telemetry with `OTEL_LOG_TOOL_DETAILS=1`"
+      - "20+ bug fixes: corrupted images no longer crash requests, sandbox network prompts fixed in desktop/IDE/SDK auto mode, worktree orphan fix, sleep/wake date bug, tmux clipboard fix, `--resume` improvements, WSL image paste fixes, right-click paste duplicate, `/terminal-setup` disables GPU accel in VS Code/Cursor/Windsurf, long conversation performance improved"
+
+  - version: "2.1.156"
+    date: "2026-05-28"
+    highlights:
+      - "Fixed Opus 4.8 thinking blocks being modified, which was causing API errors"
 
   - version: "2.1.154"
     date: "2026-05-28"

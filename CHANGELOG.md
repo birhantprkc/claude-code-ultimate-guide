@@ -12,12 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.154 (2026-05-28)
-  - Opus 4.8 with high effort default and fast mode at 2x rate / 2.5x speed
-  - Dynamic workflows: Claude orchestrates tens to hundreds of background agents in one session
-  - Lean system prompt now default for all models except Haiku/Sonnet/Opus 4.7+
-  - Breaking: `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE` deprecated (removed 2026-06-01)
-  - Breaking: `/simplify` reworked to cleanup-only review
+- **Claude Code Releases**: Updated tracking to v2.1.158 (2026-05-30)
+  - v2.1.158: Auto mode on Bedrock, Vertex, Foundry for Opus 4.7/4.8 (`CLAUDE_CODE_ENABLE_AUTO_MODE=1`)
+  - v2.1.157: Plugin auto-loading from `.claude/skills`, `claude plugin init`, mid-session worktree switching, 20+ bug fixes
+  - v2.1.156: Opus 4.8 thinking-blocks crash fix (hotfix)
+  - v2.1.154: Opus 4.8 with high effort default and fast mode at 2x rate / 2.5x speed
+  - v2.1.154: Dynamic workflows — Claude orchestrates tens to hundreds of background agents in one session
+  - v2.1.154: Lean system prompt now default for all models except Haiku/Sonnet/Opus 4.7+
+  - Breaking (2.1.154): `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE` deprecated (removed 2026-06-01)
+  - Breaking (2.1.154): `/simplify` reworked to cleanup-only review
 - **Claude Code Releases**: Updated tracking to v2.1.153 (2026-05-28)
   - `/model` now saves as default for new sessions (IDE parity); `s` in picker = current session only
   - `skipLfs` for plugin marketplace git sources; status line commands get `COLUMNS`/`LINES` env vars
