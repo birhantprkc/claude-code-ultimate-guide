@@ -1,6 +1,6 @@
 # Claude Code Settings Reference
 
-> Complete reference for `settings.json` configuration and environment variables. Covers all confirmed settings as of Claude Code v2.1.81.
+> Complete reference for `settings.json` configuration and environment variables. Covers all confirmed settings as of Claude Code v2.1.162.
 
 **Sources:** [Official settings docs](https://code.claude.com/docs/en/settings) · [Official env-vars docs](https://code.claude.com/docs/en/env-vars) · [JSON Schema](https://json.schemastore.org/claude-code-settings.json)
 
@@ -362,7 +362,7 @@ Rules follow the format `Tool` or `Tool(specifier)`. Evaluation order: deny firs
 **Scope:** all
 **Default:** none
 
-Configure custom commands to run at lifecycle events. See the [hooks documentation](https://code.claude.com/docs/en/hooks) for full format, all 19 events, exit codes, and environment variables.
+Configure custom commands to run at lifecycle events. See the [hooks documentation](https://code.claude.com/docs/en/hooks) and [§7.1 of the guide](../ultimate-guide.md#71-the-event-system) for the full set of 30 hook events, exit codes, and environment variables.
 
 #### `disableAllHooks`
 **Type:** boolean
@@ -1008,21 +1008,22 @@ Keys confirmed in the JSON schema not covered in the sections above:
 
 ## Environment Variables
 
-Set in your shell before launching `claude`, or configure under the `env` key in `settings.json` to apply to every session.
+Set in your shell before launching `claude`, or configure under the `env` key in `settings.json` to apply to every session. When an env var and an equivalent settings field both apply, the env var takes precedence (e.g. `ANTHROPIC_MODEL` overrides the `model` setting). Changes take effect on the next `claude` launch.
 
 ### Authentication
 
 | Variable | Description |
 |----------|-------------|
-| `ANTHROPIC_API_KEY` | API key for direct Anthropic API access |
-| `ANTHROPIC_AUTH_TOKEN` | OAuth token (alternative to API key) |
-| `ANTHROPIC_BASE_URL` | Custom API endpoint (for proxies or private deployments) |
-| `ANTHROPIC_CUSTOM_HEADERS` | Custom headers for API requests. Format: `Name: Value`, newline-separated for multiple |
-| `CLAUDE_CODE_USER_EMAIL` | Provide user email synchronously for authentication |
-| `CLAUDE_CODE_ORGANIZATION_UUID` | Provide organization UUID synchronously for authentication |
-| `CLAUDE_CODE_ACCOUNT_UUID` | Override account UUID for authentication |
-| `CLAUDE_CONFIG_DIR` | Custom config directory path (overrides default `~/.claude`) |
-| `CLAUDE_ENV_FILE` | Custom environment file path |
+| `ANTHROPIC_API_KEY` | API key for Anthropic API access. When set, used instead of your Claude subscription even if logged in |
+| `ANTHROPIC_AUTH_TOKEN` | Custom `Authorization` header value (prefixed with `Bearer `) |
+| `ANTHROPIC_BASE_URL` | Custom API endpoint for proxies or LLM gateways |
+| `ANTHROPIC_CUSTOM_HEADERS` | Custom headers added to API requests. Format: `Name: Value`, newline-separated for multiple |
+| `ANTHROPIC_BETAS` | Comma-separated extra `anthropic-beta` header values. Works with all auth methods including Claude.ai subscription |
+| `ANTHROPIC_WORKSPACE_ID` | Workspace ID for workload identity federation when a federation rule covers more than one workspace |
+| `CLAUDE_CODE_OAUTH_TOKEN` | OAuth access token for Claude.ai authentication. Alternative to `/login` for SDK and automated environments |
+| `CLAUDE_CODE_OAUTH_REFRESH_TOKEN` | OAuth refresh token for headless auth. `claude auth login` exchanges this directly instead of opening a browser. Requires `CLAUDE_CODE_OAUTH_SCOPES` |
+| `CLAUDE_CODE_OAUTH_SCOPES` | Space-separated OAuth scopes the refresh token was issued with. Required when `CLAUDE_CODE_OAUTH_REFRESH_TOKEN` is set |
+| `CLAUDE_CONFIG_DIR` | Override the configuration directory (default: `~/.claude`) |
 
 ### Model Selection
 
@@ -1037,129 +1038,256 @@ Set in your shell before launching `claude`, or configure under the `env` key in
 | `ANTHROPIC_DEFAULT_SONNET_MODEL_NAME` | Display name for the Sonnet model override |
 | `ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION` | Description for the Sonnet model override |
 | `ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES` | Capabilities for the Sonnet model override |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Override the Opus model alias (e.g., `claude-opus-4-6[1m]`) |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Override the Opus model alias (e.g. `claude-opus-4-6[1m]`) |
 | `ANTHROPIC_DEFAULT_OPUS_MODEL_NAME` | Display name for the Opus model override |
 | `ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION` | Description for the Opus model override |
 | `ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES` | Capabilities for the Opus model override |
 | `ANTHROPIC_CUSTOM_MODEL_OPTION` | Model ID to add as a custom entry in the `/model` picker |
 | `ANTHROPIC_CUSTOM_MODEL_OPTION_NAME` | Display name for the custom model entry |
 | `ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION` | Display description for the custom model entry |
-| `ANTHROPIC_SMALL_FAST_MODEL` | **DEPRECATED** — use `ANTHROPIC_DEFAULT_HAIKU_MODEL` instead |
-| `ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION` | AWS region for the deprecated Haiku-class model override |
-| `CLAUDE_CODE_SUBAGENT_MODEL` | Override model for subagents (e.g., `haiku`) |
-| `CLAUDE_CODE_EFFORT_LEVEL` | Set effort level: `low`, `medium`, `high`, `max` (Opus 4.6 only), or `auto`. Takes precedence over `/effort` and the `effortLevel` setting |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION_SUPPORTED_CAPABILITIES` | Capabilities for the custom model entry |
+| `ANTHROPIC_SMALL_FAST_MODEL` | **DEPRECATED.** Use `ANTHROPIC_DEFAULT_HAIKU_MODEL` instead |
+| `ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION` | AWS region for the Haiku-class model on Bedrock when `ANTHROPIC_DEFAULT_HAIKU_MODEL` is also set |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Override model for subagents (e.g. `haiku`) |
+| `CLAUDE_CODE_EFFORT_LEVEL` | Effort level: `low`, `medium`, `high`, `xhigh`, `max`, or `auto`. Takes precedence over `/effort` and the `effortLevel` setting |
+| `FALLBACK_FOR_ALL_PRIMARY_MODELS` | Any non-empty value triggers fallback to `--fallback-model` after repeated overload errors on any primary model, not just Opus |
+| `CLAUDE_CODE_DISABLE_LEGACY_MODEL_REMAP` | Set to `1` to prevent automatic remapping of Opus 4.0 and 4.1 to the current Opus version on the Anthropic API |
 
-### Cloud Providers (Bedrock, Vertex, Foundry)
+### Cloud Providers
+
+#### Amazon Bedrock
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_CODE_USE_BEDROCK` | Use AWS Bedrock (`1` to enable) |
-| `CLAUDE_CODE_USE_VERTEX` | Use Google Vertex AI (`1` to enable) |
-| `CLAUDE_CODE_USE_FOUNDRY` | Use Microsoft Foundry (`1` to enable) |
+| `CLAUDE_CODE_USE_BEDROCK` | Use Amazon Bedrock (`1` to enable) |
 | `AWS_BEARER_TOKEN_BEDROCK` | Bedrock API key for authentication |
-| `CLAUDE_CODE_SKIP_BEDROCK_AUTH` | Skip AWS auth for Bedrock (`1` to skip) |
-| `CLAUDE_CODE_SKIP_FOUNDRY_AUTH` | Skip Azure auth for Foundry (`1` to skip) |
-| `CLAUDE_CODE_SKIP_VERTEX_AUTH` | Skip Google auth for Vertex (`1` to skip) |
+| `ANTHROPIC_BEDROCK_BASE_URL` | Override the Bedrock endpoint URL. Use for custom regions or when routing through an LLM gateway |
+| `ANTHROPIC_BEDROCK_SERVICE_TIER` | Bedrock service tier: `default`, `flex`, or `priority`. Sent as `X-Amzn-Bedrock-Service-Tier` |
+| `CLAUDE_CODE_SKIP_BEDROCK_AUTH` | Skip AWS auth for Bedrock (e.g. when using an LLM gateway) |
+| `CLAUDE_ENABLE_BYTE_WATCHDOG_BEDROCK` | Set to `1` to enable byte-level streaming idle watchdog on Bedrock |
+
+#### Bedrock Mantle
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_USE_MANTLE` | Use the Bedrock Mantle endpoint |
+| `ANTHROPIC_BEDROCK_MANTLE_BASE_URL` | Override the Bedrock Mantle endpoint URL |
+| `CLAUDE_CODE_SKIP_MANTLE_AUTH` | Skip AWS auth for Bedrock Mantle |
+
+#### Google Vertex AI
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_USE_VERTEX` | Use Google Vertex AI (`1` to enable) |
+| `ANTHROPIC_VERTEX_BASE_URL` | Override the Vertex AI endpoint URL |
+| `ANTHROPIC_VERTEX_PROJECT_ID` | GCP project ID for Vertex AI requests (overridden by `GCLOUD_PROJECT` or `GOOGLE_CLOUD_PROJECT`) |
+| `CLAUDE_CODE_SKIP_VERTEX_AUTH` | Skip Google auth for Vertex |
+| `VERTEX_REGION_CLAUDE_3_5_HAIKU` | Region override for Claude 3.5 Haiku on Vertex AI |
+| `VERTEX_REGION_CLAUDE_3_5_SONNET` | Region override for Claude 3.5 Sonnet on Vertex AI |
+| `VERTEX_REGION_CLAUDE_3_7_SONNET` | Region override for Claude 3.7 Sonnet on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_0_OPUS` | Region override for Claude 4.0 Opus on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_0_SONNET` | Region override for Claude 4.0 Sonnet on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_1_OPUS` | Region override for Claude 4.1 Opus on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_5_OPUS` | Region override for Claude Opus 4.5 on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_5_SONNET` | Region override for Claude Sonnet 4.5 on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_6_OPUS` | Region override for Claude Opus 4.6 on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_6_SONNET` | Region override for Claude Sonnet 4.6 on Vertex AI |
+| `VERTEX_REGION_CLAUDE_4_7_OPUS` | Region override for Claude Opus 4.7 on Vertex AI. Added in v2.1.111 |
+| `VERTEX_REGION_CLAUDE_HAIKU_4_5` | Region override for Claude Haiku 4.5 on Vertex AI |
+
+#### Microsoft Foundry
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_USE_FOUNDRY` | Use Microsoft Foundry (`1` to enable) |
 | `ANTHROPIC_FOUNDRY_API_KEY` | API key for Microsoft Foundry authentication |
-| `ANTHROPIC_FOUNDRY_BASE_URL` | Base URL for the Foundry resource |
-| `ANTHROPIC_FOUNDRY_RESOURCE` | Foundry resource name |
-| `VERTEX_REGION_CLAUDE_3_5_HAIKU` | Vertex AI region override for Claude 3.5 Haiku |
-| `VERTEX_REGION_CLAUDE_3_7_SONNET` | Vertex AI region override for Claude 3.7 Sonnet |
-| `VERTEX_REGION_CLAUDE_4_0_OPUS` | Vertex AI region override for Claude 4.0 Opus |
-| `VERTEX_REGION_CLAUDE_4_0_SONNET` | Vertex AI region override for Claude 4.0 Sonnet |
-| `VERTEX_REGION_CLAUDE_4_1_OPUS` | Vertex AI region override for Claude 4.1 Opus |
+| `ANTHROPIC_FOUNDRY_BASE_URL` | Full base URL for the Foundry resource (alternative to `ANTHROPIC_FOUNDRY_RESOURCE`) |
+| `ANTHROPIC_FOUNDRY_RESOURCE` | Foundry resource name. Required if `ANTHROPIC_FOUNDRY_BASE_URL` is not set |
+| `CLAUDE_CODE_SKIP_FOUNDRY_AUTH` | Skip Azure auth for Foundry |
+
+#### Claude Platform on AWS
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_USE_ANTHROPIC_AWS` | Use Claude Platform on AWS |
+| `ANTHROPIC_AWS_API_KEY` | Workspace API key for Claude Platform on AWS, generated in the AWS Console |
+| `ANTHROPIC_AWS_BASE_URL` | Override the Claude Platform on AWS endpoint URL |
+| `ANTHROPIC_AWS_WORKSPACE_ID` | Required workspace ID. Sent as the `anthropic-workspace-id` header on every request |
+| `CLAUDE_CODE_SKIP_ANTHROPIC_AWS_AUTH` | Skip client-side authentication for Claude Platform on AWS |
+
+#### Multi-cloud
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_ENABLE_AUTO_MODE` | Set to `1` to make auto mode available on Bedrock, Vertex AI, and Foundry. Added in v2.1.158. No effect on Anthropic API |
+| `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST` | Set by host platforms managing model provider routing. When set, provider-selection and auth variables in settings files are ignored |
 
 ### Timeouts and Limits
 
 | Variable | Description |
 |----------|-------------|
-| `BASH_DEFAULT_TIMEOUT_MS` | Default bash command timeout in milliseconds |
-| `BASH_MAX_TIMEOUT_MS` | Maximum bash command timeout in milliseconds |
-| `BASH_MAX_OUTPUT_LENGTH` | Maximum bash output length |
-| `MAX_THINKING_TOKENS` | Maximum extended thinking tokens per response |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | Max output tokens per response. Default: 32,000 (64,000 for Opus 4.6 as of v2.1.77). Upper bound: 128,000 for Opus 4.6 and Sonnet 4.6 |
+| `API_TIMEOUT_MS` | API request timeout in milliseconds (default: 600000). Maximum: 2147483647 |
+| `BASH_DEFAULT_TIMEOUT_MS` | Default bash command timeout in milliseconds (default: 120000) |
+| `BASH_MAX_TIMEOUT_MS` | Maximum bash command timeout in milliseconds (default: 600000) |
+| `BASH_MAX_OUTPUT_LENGTH` | Maximum characters in bash output before saving to a file and sending the path |
+| `MAX_THINKING_TOKENS` | Extended thinking token budget. Set to `0` to disable. Ignored on models with adaptive reasoning unless `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` is set |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | Max output tokens per response (default: 32,000; up to 128,000 on Opus 4.6 and Sonnet 4.6) |
 | `CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS` | Override default file read token limit |
-| `CLAUDE_CODE_EXIT_AFTER_STOP_DELAY` | Auto-exit SDK mode after this idle duration (ms) |
-| `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` | SessionEnd hook timeout in ms (replaces hard 1.5s limit) |
+| `CLAUDE_CODE_MAX_CONTEXT_TOKENS` | Override context window size Claude Code assumes for the active model. Only takes effect when `DISABLE_COMPACT` is also set |
+| `CLAUDE_CODE_MAX_TURNS` | Cap the number of agentic turns per session. Equivalent to `--max-turns` (the flag takes precedence when both are set) |
+| `CLAUDE_CODE_MAX_RETRIES` | Override the number of retries for failed API requests (default: 10) |
+| `CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY` | Maximum read-only tools and subagents executing in parallel (default: 10) |
+| `CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS` | Stall timeout in milliseconds for background subagents (default: 600000) |
+| `TASK_MAX_OUTPUT_LENGTH` | Maximum characters in subagent output before truncation (default: 32000, max: 160000) |
+| `MAX_STRUCTURED_OUTPUT_RETRIES` | Retries when model response fails `--json-schema` validation in non-interactive mode (default: 5) |
+| `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` | Maximum consecutive times a Stop hook may block the turn from ending before Claude Code overrides it (default: 8) |
+| `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` | SessionEnd hook time budget in ms. Default: 1.5s, raised to the highest configured per-hook timeout up to 60s |
 | `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` | Credential refresh interval in ms for `apiKeyHelper` |
-| `CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS` | Plugin marketplace git clone timeout in ms (default: 120000) |
-| `CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS` | Debounce interval in ms for OTel headers helper script |
-| `MCP_TIMEOUT` | MCP server startup timeout in ms |
-| `MCP_TOOL_TIMEOUT` | MCP tool execution timeout in ms |
+| `MCP_TIMEOUT` | MCP server startup timeout in ms (default: 30000) |
+| `MCP_TOOL_TIMEOUT` | MCP tool execution timeout in ms (default: 100000000) |
 
 ### Behavior Control
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDECODE` | Set to `1` in shell environments Claude Code spawns (Bash tool, tmux). Not set in hooks or status line commands. Use to detect when a script runs inside Claude Code |
+| `CLAUDECODE` | Set to `1` in subprocesses Claude Code spawns (Bash/PowerShell tools, tmux sessions, hook commands, status line commands, stdio MCP subprocesses). Use to detect when a script runs inside Claude Code |
+| `DEBUG` | Set to `1` (or `true`/`yes`/`on`) to enable debug mode. Logs written to `~/.claude/debug/<session-id>.txt`. Namespace patterns like `DEBUG=express:*` do not trigger it |
+| `CLAUDE_CODE_DEBUG_LOGS_DIR` | Override the debug log file path (file path, not a directory). Requires debug mode enabled separately |
+| `CLAUDE_CODE_DEBUG_LOG_LEVEL` | Minimum log level for the debug file: `verbose`, `debug` (default), `info`, `warn`, `error` |
 | `CLAUDE_CODE_SHELL` | Override automatic shell detection |
-| `CLAUDE_CODE_SHELL_PREFIX` | Command prefix prepended to all bash commands |
-| `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR` | Keep working directory between bash calls (`1` to enable) |
-| `CLAUDE_CODE_NEW_INIT` | Set to `true` to make `/init` run an interactive setup flow asking which files to generate |
-| `CLAUDE_CODE_PLAN_MODE_REQUIRED` | Require plan mode for sessions |
-| `CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS` | Set to `1` to allow fast mode when org status check fails due to network error (useful with corporate proxies) |
-| `CLAUDE_CODE_SIMPLE` | Enable simple/minimal UI mode |
-| `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | Environment variables to scrub from subprocess environments |
-| `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD` | Additional directories to load CLAUDE.md files from |
-| `CLAUDE_CODE_TMPDIR` | Custom temporary directory for Claude Code operations |
-| `USE_BUILTIN_RIPGREP` | Use the built-in ripgrep binary instead of system ripgrep |
+| `CLAUDE_CODE_SHELL_PREFIX` | Command prefix prepended to all shell commands Claude Code spawns |
+| `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR` | Return to the original working directory after each Bash command in the main session (`1` to enable) |
+| `CLAUDE_CODE_NEW_INIT` | Set to `1` to make `/init` run an interactive setup flow asking which files to generate |
+| `CLAUDE_CODE_SIMPLE` | Run with minimal system prompt and only Bash, file read, and file edit tools. Equivalent to `--bare` |
+| `CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT` | Set to `1` to use a shorter system prompt and abbreviated tool descriptions. Set to `0`/`false`/`no`/`off` to opt out |
+| `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | Set to `1` to strip Anthropic and cloud provider credentials from subprocess environments (Bash, hooks, MCP stdio servers) |
+| `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD` | Set to `1` to load CLAUDE.md files from directories specified with `--add-dir` |
+| `CLAUDE_CODE_TMPDIR` | Override the temp directory used for internal temp files |
+| `CLAUDE_CODE_GIT_BASH_PATH` | Windows only: path to Git Bash executable when not in PATH |
+| `CLAUDE_CODE_GLOB_HIDDEN` | Set to `false` to exclude dotfiles from Glob tool results (dotfiles included by default) |
+| `CLAUDE_CODE_GLOB_NO_IGNORE` | Set to `false` to make the Glob tool respect `.gitignore` patterns |
+| `CLAUDE_CODE_GLOB_TIMEOUT_SECONDS` | Glob tool file discovery timeout in seconds (default: 20, 60 on WSL) |
+| `CLAUDE_CODE_USE_NATIVE_FILE_SEARCH` | Set to `1` to discover commands/subagents using Node.js file APIs instead of ripgrep |
+| `CLAUDE_CODE_PERFORCE_MODE` | Set to `1` to enable Perforce-aware write protection (edits fail on files lacking owner-write bit) |
+| `CLAUDE_CODE_POWERSHELL_RESPECT_EXECUTION_POLICY` | Set to `1` to stop Claude Code from passing `-ExecutionPolicy Bypass` when spawning PowerShell |
+| `CLAUDE_CODE_FORK_SUBAGENT` | Set to `1` to make forked subagents the default: spawned agents inherit full conversation context instead of starting fresh |
+| `CLAUDE_CODE_AUTO_BACKGROUND_TASKS` | Set to `1` to force-enable automatic backgrounding of long-running agent tasks |
+| `CLAUDE_CODE_REMOTE` | Set automatically to `true` when running as a cloud session |
+| `CLAUDE_CODE_REMOTE_SESSION_ID` | Set automatically in cloud sessions to the current session ID |
+| `CLAUDE_CODE_SESSION_ID` | Set automatically to the current session ID in Bash/PowerShell subprocesses, hook commands, and MCP stdio subprocesses |
+| `CLAUDE_EFFORT` | Set automatically in Bash/hook subprocesses to the active effort level: `low`, `medium`, `high`, `xhigh`, or `max` |
+| `CLAUDE_ENV_FILE` | Path to a shell script run before each Bash command. Also populated dynamically by SessionStart, Setup, CwdChanged, and FileChanged hooks |
+| `USE_BUILTIN_RIPGREP` | Set to `0` to use system-installed `rg` instead of the one bundled with Claude Code |
 
 ### Context Window and Compaction
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold percentage (1–100). Default ~95%. Lower values (e.g., `50`) trigger compaction earlier. Values above 95% have no effect |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW` | Context capacity in tokens used for compaction calculations. Defaults to model's context window (200K standard, 1M for extended). A lower value (e.g., `500000`) on a 1M model treats it as 500K for compaction purposes |
-| `CLAUDE_CODE_DISABLE_1M_CONTEXT` | Disable 1M token context window (`1` to disable) |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact trigger threshold as a percentage (1-100). Default ~95%. Lower values trigger compaction earlier |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW` | Context capacity in tokens used for compaction calculations. Defaults to model's context window (200K standard, 1M for extended). Lower value on a 1M model treats it as smaller for compaction purposes |
+| `CLAUDE_CODE_DISABLE_1M_CONTEXT` | Set to `1` to disable 1M token context window support |
+| `DISABLE_AUTO_COMPACT` | Set to `1` to disable automatic compaction when approaching the context limit. Manual `/compact` remains available |
+| `DISABLE_COMPACT` | Set to `1` to disable all compaction, including manual `/compact` |
+| `CLAUDE_CODE_DISABLE_THINKING` | Set to `1` to force-disable extended thinking regardless of model support |
+| `DISABLE_INTERLEAVED_THINKING` | Set to `1` to prevent sending the interleaved-thinking beta header. Use when your gateway does not support it |
 
 ### Telemetry and Observability
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_CODE_ENABLE_TELEMETRY` | Enable telemetry (`1` to enable) |
+| `CLAUDE_CODE_ENABLE_TELEMETRY` | Enable OpenTelemetry data collection (`1` to enable). Required before configuring OTel exporters |
 | `DISABLE_TELEMETRY` | Disable telemetry (`1` to disable) |
-| `DISABLE_ERROR_REPORTING` | Disable error reporting (`1` to disable) |
-| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | Equivalent of setting `DISABLE_AUTOUPDATER`, `DISABLE_FEEDBACK_COMMAND`, `DISABLE_ERROR_REPORTING`, and `DISABLE_TELEMETRY` together |
+| `DO_NOT_TRACK` | Set to `1` to opt out of telemetry. Equivalent to `DISABLE_TELEMETRY` |
+| `DISABLE_ERROR_REPORTING` | Disable Sentry error reporting (`1` to disable) |
+| `DISABLE_GROWTHBOOK` | Set to `1` to disable GrowthBook feature-flag fetching and use code defaults for every flag |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | Equivalent to setting `DISABLE_AUTOUPDATER`, `DISABLE_FEEDBACK_COMMAND`, `DISABLE_ERROR_REPORTING`, and `DISABLE_TELEMETRY` |
+
+### OpenTelemetry
+
+Standard OTEL exporter variables (`OTEL_METRICS_EXPORTER`, `OTEL_LOGS_EXPORTER`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_METRIC_EXPORT_INTERVAL`, `OTEL_RESOURCE_ATTRIBUTES`, and signal-specific variants) are supported. `CLAUDE_CODE_ENABLE_TELEMETRY=1` is required to activate OTel collection.
+
+| Variable | Description |
+|----------|-------------|
+| `OTEL_LOG_RAW_API_BODIES` | Emit API request/response JSON as log events. Set to `1` for inline bodies (truncated at 60 KB), or `file:<dir>` to write full bodies to disk |
+| `OTEL_LOG_TOOL_CONTENT` | Set to `1` to include tool input/output content in OTel span events. Disabled by default |
+| `OTEL_LOG_TOOL_DETAILS` | Set to `1` to include tool input arguments, MCP server names, and raw error strings in OTel traces. Disabled by default |
+| `OTEL_LOG_USER_PROMPTS` | Set to `1` to include user prompt text in OTel traces. Disabled by default |
+| `OTEL_METRICS_INCLUDE_ACCOUNT_UUID` | Set to `false` to exclude account UUID from metrics attributes (default: included) |
+| `OTEL_METRICS_INCLUDE_ENTRYPOINT` | Set to `true` to include session entrypoint in metrics attributes (default: excluded). Added in v2.1.152 |
+| `OTEL_METRICS_INCLUDE_RESOURCE_ATTRIBUTES` | Set to `false` to exclude `OTEL_RESOURCE_ATTRIBUTES` keys from metric datapoint labels (default: included). Added in v2.1.161 |
+| `OTEL_METRICS_INCLUDE_SESSION_ID` | Set to `false` to exclude session ID from metrics attributes (default: included) |
+| `OTEL_METRICS_INCLUDE_VERSION` | Set to `true` to include Claude Code version in metrics attributes (default: excluded) |
+| `CLAUDE_CODE_OTEL_FLUSH_TIMEOUT_MS` | Timeout in ms for flushing pending OTel spans on shutdown (default: 5000) |
+| `CLAUDE_CODE_OTEL_SHUTDOWN_TIMEOUT_MS` | Timeout in ms for the OTel exporter to finish on exit (default: 2000) |
+| `CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS` | Refresh interval in ms for dynamic OTel headers (default: 1740000, 29 minutes) |
+| `CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL` | Set to `1` to route session quality survey ratings to your OTel collector instead of Anthropic |
+| `CLAUDE_CODE_PROPAGATE_TRACEPARENT` | Set to `1` to propagate W3C trace context when `ANTHROPIC_BASE_URL` points at a custom proxy. Added in v2.1.152 |
 
 ### Feature Toggles
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` | Disable adaptive thinking (`1` to disable) |
-| `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` | Disable experimental beta features (`1` to disable) |
-| `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | Disable background tasks (`1` to disable) |
-| `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | Disable auto-memory (`1` to disable) |
+| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` | Disable adaptive reasoning on supported models (`1` to disable). No effect on Opus 4.7 and later |
+| `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` | Strip `anthropic-beta` request headers and beta tool-schema fields. Use when a proxy rejects unknown beta headers |
+| `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | Disable all background task functionality including `run_in_background`, auto-backgrounding, and Ctrl+B |
+| `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | Set to `1` to disable auto memory. Set to `0` to force it on when `--bare` mode would disable it |
 | `CLAUDE_CODE_DISABLE_FAST_MODE` | Disable fast mode entirely (`1` to disable) |
 | `CLAUDE_CODE_DISABLE_CRON` | Disable scheduled/cron tasks (`1` to disable) |
-| `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS` | Disable git-related system prompt instructions. Takes precedence over `includeGitInstructions` setting |
+| `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS` | Remove built-in commit/PR instructions from system prompt. Takes precedence over `includeGitInstructions` |
 | `CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK` | Disable the non-streaming fallback for failed streaming requests |
-| `CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY` | Disable feedback survey prompts (`1` to disable) |
-| `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` | Disable terminal title updates (`1` to disable) |
-| `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION` | Enable prompt suggestions |
-| `CLAUDE_CODE_ENABLE_TASKS` | Set to `true` to enable task tracking in non-interactive mode (`-p` flag). Tasks are on by default in interactive mode |
-| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | Enable experimental agent teams feature |
-| `ENABLE_CLAUDEAI_MCP_SERVERS` | Enable Claude.ai MCP servers |
-| `CLAUDE_CODE_USE_POWERSHELL_TOOL` | Enable the PowerShell tool on Windows (requires `defaultShell: "powershell"` in settings) |
-| `FORCE_AUTOUPDATE_PLUGINS` | Force plugin auto-updates (`1` to enable) |
-| `IS_DEMO` | Enable demo mode |
+| `CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY` | Disable session quality survey prompts (`1` to disable) |
+| `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` | Disable automatic terminal title updates and background title-generation requests |
+| `CLAUDE_CODE_DISABLE_AGENT_VIEW` | Set to `1` to disable background agents and agent view (`claude agents`, `--bg`, `/background`) |
+| `CLAUDE_CODE_DISABLE_WORKFLOWS` | Set to `1` to disable workflows |
+| `CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING` | Set to `1` to disable file checkpointing. `/rewind` will not restore code changes |
+| `CLAUDE_CODE_DISABLE_CLAUDE_MDS` | Set to `1` to prevent loading any CLAUDE.md memory files, including auto-memory |
+| `CLAUDE_CODE_DISABLE_ATTACHMENTS` | Set to `1` to disable attachment processing. `@` file mentions sent as plain text |
+| `CLAUDE_CODE_DISABLE_POLICY_SKILLS` | Set to `1` to skip loading skills from the system-wide managed skills directory |
+| `CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL` | Set to `1` to skip automatic addition of the official plugin marketplace on first run |
+| `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION` | Set to `false` to disable prompt suggestions in the input area |
+| `CLAUDE_CODE_ENABLE_TASKS` | As of v2.1.142, Task tools are the default. Set to `0` to revert to `TodoWrite` |
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | Enable experimental agent teams feature (`1` to enable) |
+| `ENABLE_CLAUDEAI_MCP_SERVERS` | Set to `false` to disable Claude.ai MCP servers (enabled by default for logged-in users) |
+| `CLAUDE_CODE_USE_POWERSHELL_TOOL` | Control the PowerShell tool. Auto-enabled on Windows without Git Bash. Set `0` to disable, `1` to opt in |
+| `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` | Override session recap availability: `0` to force off, `1` to force on |
+| `CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING` | Control streaming of tool call inputs. Set `0` to opt out, `1` to force on via proxy |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | Set to `1` to populate the `/model` picker from your gateway's `/v1/models` endpoint |
+| `DISABLE_DOCTOR_COMMAND` | Set to `1` to hide the `/doctor` command |
+| `DISABLE_LOGIN_COMMAND` | Set to `1` to hide the `/login` command |
+| `DISABLE_LOGOUT_COMMAND` | Set to `1` to hide the `/logout` command |
+| `DISABLE_UPGRADE_COMMAND` | Set to `1` to hide the `/upgrade` command |
+| `DISABLE_EXTRA_USAGE_COMMAND` | Set to `1` to hide the `/usage-credits` command |
+| `DISABLE_INSTALL_GITHUB_APP_COMMAND` | Set to `1` to hide the `/install-github-app` command |
+| `DISABLE_UPDATES` | Set to `1` to block all updates including manual `claude update` and `claude install` |
+| `IS_DEMO` | Enable demo mode: hides email/org info, skips onboarding. Useful when screensharing |
 
 ### Prompt Caching
 
 | Variable | Description |
 |----------|-------------|
-| `DISABLE_PROMPT_CACHING` | Disable all prompt caching (`1` to disable) |
+| `DISABLE_PROMPT_CACHING` | Disable all prompt caching (`1` to disable, takes precedence over per-model settings) |
 | `DISABLE_PROMPT_CACHING_HAIKU` | Disable prompt caching for Haiku model requests |
 | `DISABLE_PROMPT_CACHING_SONNET` | Disable prompt caching for Sonnet model requests |
 | `DISABLE_PROMPT_CACHING_OPUS` | Disable prompt caching for Opus model requests |
+| `ENABLE_PROMPT_CACHING_1H` | Set to `1` to request a 1-hour prompt cache TTL instead of the default 5 minutes |
+| `ENABLE_PROMPT_CACHING_1H_BEDROCK` | **DEPRECATED.** Use `ENABLE_PROMPT_CACHING_1H` instead |
+| `FORCE_PROMPT_CACHING_5M` | Set to `1` to force the 5-minute cache TTL even when 1-hour TTL would otherwise apply |
+| `CLAUDE_CODE_ATTRIBUTION_HEADER` | Set to `0` to omit the attribution block from the system prompt. Improves prompt-cache hit rates through LLM gateways |
 
 ### MCP Configuration
 
 | Variable | Description |
 |----------|-------------|
-| `MAX_MCP_OUTPUT_TOKENS` | Max MCP output tokens per call (default: 25000). A warning is shown when output exceeds 10,000 tokens |
-| `ENABLE_TOOL_SEARCH` | MCP tool search threshold (e.g., `auto:5` — activates tool search when there are more than 5 MCP tools) |
-| `MCP_CLIENT_SECRET` | MCP OAuth client secret |
-| `MCP_OAUTH_CALLBACK_PORT` | MCP OAuth callback port |
+| `MAX_MCP_OUTPUT_TOKENS` | Max MCP output tokens per call (default: 25000). Warning shown when output exceeds 10,000 tokens |
+| `ENABLE_TOOL_SEARCH` | MCP tool search mode: `auto:N` activates when tool count exceeds N% of context, `true` always defers, `false` loads all upfront |
+| `MCP_CLIENT_SECRET` | MCP OAuth client secret. Avoids the interactive prompt when adding a server with `--client-secret` |
+| `MCP_OAUTH_CALLBACK_PORT` | Fixed port for the MCP OAuth redirect callback |
+| `MCP_CONNECTION_NONBLOCKING` | As of v2.1.142, MCP startup is non-blocking by default. Set to `0` to restore the blocking 5-second wait |
+| `MCP_CONNECT_TIMEOUT_MS` | How long blocking MCP startup waits before snapshotting the tool list (default: 5000) |
+| `MCP_SERVER_CONNECTION_BATCH_SIZE` | Maximum stdio MCP servers connected in parallel during startup (default: 3) |
+| `MCP_REMOTE_SERVER_CONNECTION_BATCH_SIZE` | Maximum remote (HTTP/SSE) MCP servers connected in parallel during startup (default: 20) |
+| `CLAUDE_CODE_MCP_ALLOWLIST_ENV` | Set to `1` to spawn stdio MCP servers with only a safe baseline environment plus the server's configured `env` |
+| `CLAUDE_AGENT_SDK_MCP_NO_PREFIX` | Set to `1` to skip the `mcp__<server>__` prefix on tool names from SDK-created MCP servers |
 
 ### Proxy and Network
 
@@ -1167,29 +1295,78 @@ Set in your shell before launching `claude`, or configure under the `env` key in
 |----------|-------------|
 | `HTTP_PROXY` | HTTP proxy URL for network requests |
 | `HTTPS_PROXY` | HTTPS proxy URL for network requests |
-| `NO_PROXY` | Comma-separated list of hosts that bypass the proxy |
-| `CLAUDE_CODE_PROXY_RESOLVES_HOSTS` | Allow the proxy to perform DNS resolution |
+| `NO_PROXY` | Comma-separated hosts that bypass the proxy |
+| `CLAUDE_CODE_PROXY_RESOLVES_HOSTS` | Allow the proxy to perform DNS resolution (`1` to enable) |
+| `CLAUDE_CODE_CERT_STORE` | Comma-separated CA certificate sources: `bundled` (Mozilla CA set) and/or `system` (OS trust store). Default: `bundled,system` |
 | `CLAUDE_CODE_CLIENT_CERT` | Client certificate path for mTLS |
 | `CLAUDE_CODE_CLIENT_KEY` | Client private key path for mTLS |
 | `CLAUDE_CODE_CLIENT_KEY_PASSPHRASE` | Passphrase for an encrypted mTLS key |
+| `CLAUDE_CODE_EXTRA_BODY` | JSON object merged into the top level of every API request body. Useful for provider-specific parameters |
+| `CLAUDE_ENABLE_STREAM_WATCHDOG` | Set to `1` to enable event-level streaming idle watchdog. Off by default |
+| `CLAUDE_ENABLE_BYTE_WATCHDOG` | Force-enable byte-level streaming idle watchdog. Default on for Anthropic API connections. Set `0` to disable |
+| `CLAUDE_STREAM_IDLE_TIMEOUT_MS` | Timeout in ms before the streaming watchdog closes a stalled connection (default minimum: 300000) |
 
 ### UI and Display
 
 | Variable | Description |
 |----------|-------------|
+| `CLAUDE_CODE_NO_FLICKER` | Set to `1` to enable fullscreen rendering (reduces flicker, keeps memory flat in long conversations). Equivalent to the `tui` setting |
+| `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN` | Set to `1` to disable fullscreen rendering and use the classic main-screen renderer |
+| `CLAUDE_CODE_ALT_SCREEN_FULL_REPAINT` | Set to `1` to repaint the entire screen on every frame instead of incremental updates. Use if fullscreen mode shows stale text |
+| `CLAUDE_CODE_DISABLE_VIRTUAL_SCROLL` | Set to `1` to disable virtual scrolling in fullscreen mode. Use if scrolling shows blank regions |
+| `CLAUDE_CODE_DISABLE_MOUSE` | Set to `1` to disable mouse tracking in fullscreen mode. Keeps terminal native copy-on-select behavior |
+| `CLAUDE_CODE_SCROLL_SPEED` | Mouse wheel scroll multiplier in fullscreen mode (1-20) |
+| `CLAUDE_CODE_NATIVE_CURSOR` | Set to `1` to show the terminal's own cursor at the input caret instead of a drawn block |
+| `CLAUDE_CODE_ACCESSIBILITY` | Set to `1` to keep the native terminal cursor visible and disable the inverted-text cursor indicator |
+| `CLAUDE_CODE_HIDE_CWD` | Set to `1` to hide the working directory in the startup logo |
+| `CLAUDE_CODE_TMUX_TRUECOLOR` | Set to `1` to allow 24-bit truecolor output inside tmux |
+| `CLAUDE_CODE_FORCE_SYNC_OUTPUT` | Set to `1` to force-enable synchronized output (DEC private mode 2026) when your terminal supports it but is not auto-detected |
+| `CLAUDE_CODE_SYNTAX_HIGHLIGHT` | Set to `false` to disable syntax highlighting in diff output |
+| `CLAUDE_CODE_AUTO_CONNECT_IDE` | Override automatic IDE connection. Set to `false` to prevent it, `true` to force a connection attempt |
+| `CLAUDE_CODE_IDE_HOST_OVERRIDE` | Override the host address used to connect to the IDE extension |
+| `CLAUDE_CODE_IDE_SKIP_VALID_CHECK` | Set to `1` to skip validation of IDE lockfile entries during connection |
 | `DISABLE_COST_WARNINGS` | Disable cost warning messages |
 | `DISABLE_INSTALLATION_CHECKS` | Disable installation warnings |
-| `DISABLE_AUTOUPDATER` | Disable the auto-updater |
-| `DISABLE_FEEDBACK_COMMAND` | Disable the `/feedback` command. The older name `DISABLE_BUG_COMMAND` is also accepted |
-| `CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL` | Skip automatic IDE extension installation (`1` to skip). Also configurable via `autoInstallIdeExtension` in `~/.claude.json` |
-| `SLASH_COMMAND_TOOL_CHAR_BUDGET` | Character budget for slash command tool output |
+| `DISABLE_AUTOUPDATER` | Disable the auto-updater. Manual `claude update` still works |
+| `DISABLE_FEEDBACK_COMMAND` | Disable the `/feedback` command. Also accepted as `DISABLE_BUG_COMMAND` |
+| `CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL` | Skip automatic IDE extension installation (`1` to skip) |
+| `SLASH_COMMAND_TOOL_CHAR_BUDGET` | Character budget for skill metadata shown to the Skill tool. Scales dynamically at 1% of the context window |
+
+### Plugins
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_PLUGIN_CACHE_DIR` | Override the plugins root directory (default: `~/.claude/plugins`) |
+| `CLAUDE_CODE_PLUGIN_SEED_DIR` | Path(s) to read-only plugin seed directories, separated by `:` on Unix or `;` on Windows. Use to bundle plugins into container images |
+| `CLAUDE_CODE_PLUGIN_PREFER_HTTPS` | Set to `1` to clone GitHub `owner/repo` sources over HTTPS instead of SSH |
+| `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` | Set to `1` to keep existing marketplace cache when a `git pull` fails. Useful in offline environments |
+| `CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS` | Timeout in ms for git operations during plugin install/update (default: 120000) |
+| `CLAUDE_CODE_SYNC_PLUGIN_INSTALL` | Set to `1` in non-interactive mode (`-p` flag) to wait for plugin installation before the first query |
+| `CLAUDE_CODE_SYNC_PLUGIN_INSTALL_TIMEOUT_MS` | Timeout in ms for synchronous plugin installation. No default (waits until complete without this var) |
+| `CLAUDE_CODE_ENABLE_BACKGROUND_PLUGIN_REFRESH` | Set to `1` to refresh plugin state at turn boundaries in non-interactive mode after a background install |
+| `FORCE_AUTOUPDATE_PLUGINS` | Set to `1` to force plugin auto-updates even when the main auto-updater is disabled |
+
+### SDK and Headless
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS` | Set to `1` to disable all built-in subagent types (Explore, Plan) in non-interactive mode only |
+| `CLAUDE_CODE_EXIT_AFTER_STOP_DELAY` | Time in ms to wait after the query loop becomes idle before automatically exiting. Useful for SDK/scripted sessions |
+| `CLAUDE_CODE_RESUME_INTERRUPTED_TURN` | Set to `1` to automatically resume if the previous session ended mid-turn. For SDK use |
+| `CLAUDE_CODE_RESUME_PROMPT` | Override the continuation message injected when resuming a mid-turn session (default: `Continue from where you left off.`) |
+| `CLAUDE_CODE_SKIP_PROMPT_HISTORY` | Set to `1` to skip writing prompt history and session transcripts to disk |
+| `CLAUDE_CODE_SYNC_SKILLS` | Set to `1` to download enabled Claude.ai skills before the first query and resync every 10 minutes. Non-interactive mode only |
+| `CLAUDE_CODE_SYNC_SKILLS_WAIT_TIMEOUT_MS` | Timeout in ms for initial skills sync when `CLAUDE_CODE_SYNC_SKILLS` is set (default: 5000) |
+| `CLAUDE_CODE_SCRIPT_CAPS` | JSON object limiting invocations of specific scripts per session when `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is set |
+| `CCR_FORCE_BUNDLE` | Set to `1` to force `claude --remote` to bundle and upload the local repo even when GitHub access is available |
+| `CLAUDE_REMOTE_CONTROL_SESSION_NAME_PREFIX` | Prefix for auto-generated Remote Control session names. Defaults to machine hostname |
 
 ### Agent Teams and Tasks
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_CODE_TEAM_NAME` | Team name for agent teams |
-| `CLAUDE_CODE_TASK_LIST_ID` | Task list ID for task integration |
+| `CLAUDE_CODE_TEAM_NAME` | Team name for agent teams. Set automatically on agent team members |
+| `CLAUDE_CODE_TASK_LIST_ID` | Share a task list across sessions. Set the same ID in multiple Claude Code instances to coordinate on a shared task list |
 
 ### Unverified Variables
 
@@ -1197,7 +1374,11 @@ These appear in community sources or older documentation but are not confirmed i
 
 | Variable | Description |
 |----------|-------------|
-| `CLAUDE_CODE_MAX_TURNS` `⚠️ Unverified` | Maximum agentic turns before stopping |
+| `CLAUDE_CODE_USER_EMAIL` `⚠️ Unverified` | Provide user email synchronously for authentication |
+| `CLAUDE_CODE_ORGANIZATION_UUID` `⚠️ Unverified` | Provide organization UUID synchronously for authentication |
+| `CLAUDE_CODE_ACCOUNT_UUID` `⚠️ Unverified` | Override account UUID for authentication |
+| `CLAUDE_CODE_PLAN_MODE_REQUIRED` `⚠️ Unverified` | Require plan mode for sessions |
+| `CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS` `⚠️ Unverified` | Allow fast mode when org status check fails due to network error |
 | `CLAUDE_CODE_SKIP_SETTINGS_SETUP` `⚠️ Unverified` | Skip first-run settings setup flow |
 | `CLAUDE_CODE_DISABLE_TOOLS` `⚠️ Unverified` | Comma-separated list of tools to disable |
 | `CLAUDE_CODE_DISABLE_MCP` `⚠️ Unverified` | Disable all MCP servers (`1` to disable) |

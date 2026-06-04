@@ -619,7 +619,7 @@ A web dashboard and MCP server for organizing Claude Code configs across the ful
 
 ## Security Scanning
 
-Tools that audit Claude Code configurations for vulnerabilities — secrets, permission misconfigs, hook injection, MCP server risks, and prompt injection vectors.
+Two complementary layers: tools that audit your Claude Code configuration for misconfigs, hook injection, and MCP risks; and agent-powered scanners that find logic-level vulnerabilities in the application code itself.
 
 ### AgentShield
 
@@ -674,6 +674,53 @@ agentshield scan --opus --stream
 - Project is 2 months old — API surface may evolve; pin to a specific version in production
 
 > **See also**: [Security Hardening guide](../security/security-hardening.md) for manual hook and permission patterns.
+
+### DeepSec
+
+An agent-powered vulnerability scanner from Vercel Labs that finds logic-level security bugs in application code — the kind that regex-based SAST tools miss. Where AgentShield above audits your Claude Code configuration, DeepSec audits the application itself.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: vercel-labs/deepsec](https://github.com/vercel-labs/deepsec) |
+| **Install** | `npx deepsec init` (bootstraps a `.deepsec/` directory at repo root) |
+| **Language** | TypeScript |
+| **License** | Apache 2.0 |
+| **Status** | Vercel Labs — experimental, not production-ready |
+
+**How it works**: DeepSec runs a 5-step pipeline. First a fast regex scan identifies sensitive zones (auth flows, crypto calls, user inputs). Then AI agents trace data flows through each candidate file and produce findings. A second agent pass revalidates those findings and consults git history to filter already-patched issues. Final output is structured Markdown or JSON, ready to paste into tickets.
+
+**AI models used**: Claude Opus 4 with extended thinking (default) and GPT-5.5, via your existing Anthropic or OpenAI subscription. Vercel AI Gateway is recommended for production scans.
+
+**False positive rate**: roughly 10–20% after the revalidation step.
+
+```bash
+# Initialize at repo root
+npx deepsec init
+cd .deepsec && pnpm install
+
+# Run the full pipeline
+pnpm deepsec scan       # fast regex pass
+pnpm deepsec process    # AI agent investigation (slow, costs tokens)
+pnpm deepsec triage     # P0/P1/P2 classification
+pnpm deepsec revalidate # reduce false positives
+pnpm deepsec export --format md-dir --out ./findings
+
+# PR mode: scan only changed files (much cheaper)
+pnpm deepsec process --diff
+
+# Distributed mode for large monorepos (Vercel Sandboxes)
+pnpm deepsec sandbox process --sandboxes 10 --concurrency 4
+```
+
+**When to use it**: DeepSec finds edge cases in authentication conditions and subtle data-flow issues that pattern-based tools won't surface. It's well-suited for a periodic deep audit on critical services or as a `--diff` gate on security-sensitive PRs — not as a per-commit scanner.
+
+**Cost warning**: a full scan on a 50K-line codebase can cost $10–50 in Claude Opus tokens. Large monorepos can reach thousands of dollars. Run `--diff` mode for routine use; reserve full scans for targeted audits.
+
+**Configuration**: create `.deepsec/INFO.md` (50–100 lines) documenting project-specific auth patterns and sensitive zones. Without it, agents reason without context and produce more false positives. A plugin system allows custom regex matchers aligned to your architecture.
+
+**Security posture**: DeepSec has full shell access — treat it like a coding agent. Vercel recommends deploying in Sandbox microVMs (Firecracker) so API keys cannot be exfiltrated from worker processes.
+
+> **See also**: [Vercel blog announcement](https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base) for architecture details and real-world examples.
 
 ---
 
@@ -1267,29 +1314,45 @@ tmux new -s work
 
 ### Ruflo (formerly claude-flow)
 
-**GitHub**: [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) — 18.9k stars (as of March 2026)
-**npm**: `claude-flow` | **License**: MIT
+**GitHub**: [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) (18.9k+ stars as of March 2026)
+**npm**: `ruflo` (formerly `claude-flow`) | **License**: MIT
 
-The most adopted external orchestration framework for Claude Code. Transforms it into a multi-agent platform with hierarchical swarms (queen + workers), specialized agent pools (60+ agents: coders, testers, reviewers, architects...), and persistent memory via SQLite.
+The most adopted external orchestration framework for Claude Code. Transforms it into a multi-agent platform with hierarchical swarms (queen + workers), 98 specialized agents (coders, testers, reviewers, architects, security auditors), and persistent memory via SQLite (AgentDB).
+
+**Two install paths** (very different surface areas):
+
+| | Plugin path | CLI path |
+|---|---|---|
+| What you get | Slash commands + agent definitions per plugin | Full loop: 98 agents, 30 skills, MCP server, hooks, daemon |
+| Files in workspace | Zero | `.claude/`, `.claude-flow/`, `CLAUDE.md`, helpers, settings |
+| MCP server registered | No | Yes (`memory_store`, `swarm_init`, `agent_spawn`, etc.) |
+| Best for | Trying a single plugin without committing | Production use |
+
+```bash
+# Plugin path
+/plugin marketplace add ruvnet/ruflo
+/plugin install ruflo-core@ruflo    # or any of the 33 available plugins
+
+# CLI path (full install — inspect source first)
+npx ruflo@latest init wizard
+# Do NOT use the curl|bash variant: it pulls from the old repo name (claude-flow) and bypasses package manager security
+```
 
 **Core features**:
 - Q-Learning router directing tasks to the right agent based on past patterns
-- 42+ built-in skills, 17 hooks integrating natively with Claude Code
-- MCP server support for tool extension
-- SQLite-backed session persistence with cross-agent memory sharing
+- 30+ built-in skills, 27 hooks integrating natively with Claude Code
+- MCP server with 314 tools (CLI path only)
+- SQLite-backed session persistence with cross-agent memory sharing (AgentDB)
+- **Agent federation**: zero-trust cross-machine collaboration via mTLS and ed25519 identity, with PII stripped before egress and behavioral trust scoring per peer. Unlike LangGraph or CrewAI (single-instance by default), Ruflo agents can coordinate across machines and organizations without sharing raw data. Controlled via 9 MCP tools and 10 CLI commands.
+- 33 native plugins at the Claude Code marketplace (swarm, RAG memory, security, browser testing, IoT, and more)
+- Optional web UI at [flo.ruv.io](https://flo.ruv.io/) and a GOAP goal planner at [goal.ruv.io](https://goal.ruv.io/)
 - Non-interactive CI/CD mode
 
-**Install** (inspect source before running):
-```bash
-npx ruflo@latest init --wizard
-# Do NOT use the curl|bash variant — it pulls from the old repo name (claude-flow) and bypasses package manager security
-```
+> **Note on claims**: The project publishes performance metrics (SWE-Bench scores, speed multipliers, 22M+ ecosystem downloads) without fully independent methodology. A SOTA benchmark gist comparing against LangGraph, AutoGen, and CrewAI exists but independent reproduction is not confirmed. Treat all figures as unverified.
 
-> **Note on claims**: The project publishes performance metrics (SWE-Bench scores, speed multipliers) without published methodology. Treat as unverified until independently benchmarked.
+> **Note on maturity**: Rebranded from claude-flow in early 2026. The npm package is now `ruflo` (confirmed). Inspect the source before deploying in production.
 
-> **Note on maturity**: Rebranded from claude-flow in early 2026. The transition is ongoing — verify npm package name and repo continuity before adopting in production.
-
-**When to use**: When Claude Code's native Task tool and sub-agents are insufficient for your use case — typically complex multi-step pipelines requiring persistent state across many sessions, or workflows needing true parallel agent coordination beyond what `--dangerously-skip-permissions` + tmux achieves.
+**When to use**: When Claude Code's native Task tool and sub-agents are insufficient, typically for complex multi-step pipelines requiring persistent state across many sessions, or for teams needing agents to coordinate across machines via federation.
 
 ---
 

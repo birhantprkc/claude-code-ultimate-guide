@@ -3,7 +3,7 @@
 # Source: guide/ultimate-guide.md
 # Purpose: Condensed index for LLMs to quickly answer user questions about Claude Code
 
-version: "3.41.0"
+version: "3.41.1"
 updated: "2026-05-24"
 
 # ════════════════════════════════════════════════════════════════
@@ -69,7 +69,7 @@ deep_dive:
   agent_teams_large_justified: "guide/workflows/agent-teams.md:120"  # Pattern #4: when >5 agents are justified
   # Settings Reference (comprehensive settings.json + env vars)
   settings_reference: "guide/core/settings-reference.md"
-  settings_reference_description: "60+ settings.json keys organized into 13 sections (Core, Permissions, MCP, Sandbox, Plugins, Model, Display/UX, Auth, Attribution, Worktrees, AWS/Cloud) + 100+ environment variables across 13 categories. Unverified entries marked ⚠️; schema-only keys marked 📋."
+  settings_reference_description: "60+ settings.json keys organized into 13 sections (Core, Permissions, MCP, Sandbox, Plugins, Model, Display/UX, Auth, Attribution, Worktrees, AWS/Cloud) + 190+ environment variables across 17 categories (Auth, Model, Cloud Providers, Timeouts, Behavior, Context, Telemetry, OpenTelemetry, Feature Toggles, Prompt Caching, MCP, Proxy/Network, UI/Display, Plugins, SDK/Headless, Agent Teams). Synced to v2.1.162. Unverified entries marked ⚠️; schema-only keys marked 📋."
   # Glossary (alphabetical term reference)
   glossary: "guide/core/glossary.md"
   glossary_description: "120+ terms: Claude Code-specific, community-coined patterns, AI engineering concepts. Alphabetical table with Category + Subcategory. Excludes standard CS/DevOps terms."
@@ -1662,7 +1662,7 @@ mcp:
 # ════════════════════════════════════════════════════════════════
 architecture:
   master_loop: "while(tool_call) - no DAG, no classifier, no RAG"
-  core_tools: "Bash, Read, Edit, Write, Grep, Glob, Task, TodoWrite"
+  core_tools: "8 daily-use tools: Bash, Read, Edit, Write, Grep, Glob, Agent, TodoWrite — ~40 built-in total: guide/core/tools-reference.md"
   context_budget: "~200K tokens, auto-compact at 75-92%"
   subagents: "Task tool spawns isolated agents (depth=1 max)"
   teammatetool: "Experimental multi-agent coordination (v3294)"
@@ -1762,6 +1762,25 @@ agent_frontmatter_memory_scopes:
   local: ".claude/memory/<agent-name>.local.md — gitignored"
 agent_frontmatter_guide_line: 5639  # Official fields table in ultimate-guide.md
 
+# Skill frontmatter — all fields (agentskills.io spec + Claude Code extensions)
+# Note: .claude/commands/ was merged into .claude/skills/ in CC 2.1.3 — use disable-model-invocation instead
+skill_frontmatter_fields:
+  # agentskills.io spec fields
+  name: "lowercase, 1-64 chars, hyphens only, must match directory name"
+  description: "when to use this skill (max 1024 chars) — also controls auto-activation trigger"
+  allowed-tools: "space-delimited pre-approved tools; supports wildcard scoping: Bash(npm run *)"
+  license: "license name or reference to bundled file"
+  compatibility: "environment requirements (max 500 chars)"
+  metadata: "arbitrary key-value pairs (author, version, etc.)"
+  # Claude Code extension fields
+  effort: "low|medium|high — overrides session effort level while this skill runs (v2.1.80+)"
+  model: "haiku|sonnet|opus|full-model-id — overrides session model while this skill runs"
+  argument-hint: "placeholder shown in slash menu when skill accepts $ARGUMENTS"
+  disable-model-invocation: "true = user-invocable only (replaces .claude/commands/ pattern)"
+  context: "fork = run skill in isolated subagent; fork ignored when called via Skill tool"
+  hooks: "lifecycle hooks active during this skill's session (same format as settings.json hooks)"
+skill_frontmatter_guide_line: 7840  # Frontmatter table in §5.2
+
 # ════════════════════════════════════════════════════════════════
 # HOOK EVENTS - see deep_dive.hooks
 # ════════════════════════════════════════════════════════════════
@@ -1769,13 +1788,14 @@ hook_events:
   # Lifecycle
   SessionStart: "session opened"
   SessionEnd: "session closed"
-  Setup: "initialization phase"
+  Setup: "only fires with --init-only, --init, or --maintenance in -p mode (not on normal startup)"
   # Agent actions
   Stop: "agent stopped naturally"
   StopFailure: "agent stopped with error"
   PreToolUse: "before tool call (exit 2 to block, return JSON to approve/modify)"
   PostToolUse: "after tool completes"
   PostToolUseFailure: "after tool fails"
+  PostToolBatch: "after a full batch of parallel tool calls resolves, before next model call (can block)"
   # Permissions
   PermissionDenied: "permission refused"
   PermissionRequest: "permission being requested (can return decision)"
@@ -1798,19 +1818,21 @@ hook_events:
   WorktreeRemove: "git worktree removed"
   # User interaction
   UserPromptSubmit: "before prompt sent to model (can inject additionalContext)"
+  UserPromptExpansion: "slash command expands into a prompt, before it reaches Claude (can block)"
   Notification: "UI notification triggered"
+  MessageDisplay: "while assistant text is displayed on screen (display-only, cannot block; hookSpecificOutput.displayContent replaces rendered text)"
   Elicitation: "model requesting additional info"
   ElicitationResult: "user responded to elicitation"
-  # Total: 27 events (updated 2026-04-02, source: source code analysis)
+  # Total: 30 events (updated 2026-06-03, source: official hooks reference)
 
 # Hook Execution Model (v2.1.0+)
-hooks_execution_model: 7969  # Section in ultimate-guide.md
-hooks_session_scoped: 9507   # Session-scoped hooks (ephemeral, no settings.json, skills use this)
-hooks_async_support: "v2.1.0+ - add 'async: true' for non-blocking execution"
+hooks_execution_model: 10264  # Section in ultimate-guide.md
+hooks_session_scoped: 10428   # Session-scoped hooks (ephemeral, no settings.json, skills use this)
+hooks_async_support: "v2.1.0+ - add 'async: true' for non-blocking execution; 'asyncRewake: true' for background with exit-2 wakeup"
 hooks_async_use_cases: "logging, notifications, formatting, metrics (no feedback needed)"
 hooks_sync_use_cases: "validation, type checking, security (feedback required)"
-hooks_decision_matrix: 6091  # Decision matrix table
-hooks_async_limitations: "no exit code feedback, no additionalContext, no blocking"
+hooks_decision_matrix: 10309  # Decision matrix table
+hooks_async_limitations: "no exit code feedback for blocking (exit 2 ignored), no real-time systemMessage, no guaranteed execution order. Note: additionalContext IS delivered on the next conversation turn after the background process exits."
 hooks_async_bug_fix: "v2.1.23 - fixed cancellation in headless streaming"
 
 # ════════════════════════════════════════════════════════════════
@@ -1972,7 +1994,7 @@ ecosystem:
       - "Cross-links modified → Update all 4 repos"
     history:
       - date: "2026-01-20"
-        event: "Code Landing sync v3.41.0, 66 templates, cross-links"
+        event: "Code Landing sync v3.41.1, 66 templates, cross-links"
         commit: "5b5ce62"
       - date: "2026-01-20"
         event: "Cowork Landing fix (paths, README, UI badges)"
@@ -1984,7 +2006,7 @@ ecosystem:
 onboarding_matrix_meta:
   version: "2.1.0"
   last_updated: "2026-03-09"
-  aligned_with_guide: "3.41.0"
+  aligned_with_guide: "3.41.1"
   changelog:
     - version: "2.1.0"
       date: "2026-03-09"
@@ -2015,7 +2037,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, commands]
       time_budget: "5 min"
       topics_max: 3
-      note: "SECURITY FIRST - sandbox before commands (v3.41.0 critical fix)"
+      note: "SECURITY FIRST - sandbox before commands (v3.41.1 critical fix)"
 
     beginner_15min:
       core: [rules, sandbox_native_guide, workflow, essential_commands]
@@ -2104,7 +2126,7 @@ onboarding_matrix:
         - default: agent_validation_checklist
       time_budget: "60 min"
       topics_max: 6
-      note: "Dual-instance pattern for quality workflows (v3.41.0)"
+      note: "Dual-instance pattern for quality workflows (v3.41.1)"
 
   learn_security:
     intermediate_30min:
@@ -2115,7 +2137,7 @@ onboarding_matrix:
         - default: permission_modes
       time_budget: "30 min"
       topics_max: 4
-      note: "NEW goal (v3.41.0) - Security-focused learning path"
+      note: "NEW goal (v3.41.1) - Security-focused learning path"
 
     power_60min:
       core: [sandbox_native_guide, mcp_secrets_management, security_hardening]
@@ -2140,7 +2162,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, workflow, essential_commands, context_management, plan_mode]
       time_budget: "60 min"
       topics_max: 6
-      note: "Security foundation + core workflow (v3.41.0 sandbox added)"
+      note: "Security foundation + core workflow (v3.41.1 sandbox added)"
 
     intermediate_120min:
       core: [plan_mode, agents, skills, config_hierarchy, git_mcp_guide, hooks, mcp_servers]

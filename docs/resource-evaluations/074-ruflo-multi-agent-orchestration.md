@@ -1,11 +1,32 @@
-# Resource Evaluation #074 — Ruflo: Multi-Agent Orchestration Platform for Claude Code
+# Resource Evaluation #074: Ruflo, Multi-Agent Orchestration Platform for Claude Code
 
 **Source:** [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)
 **npm package:** `claude-flow` (ancien nom du projet, npm non encore migre)
-**Type:** Open source (MIT) — framework d'orchestration multi-agent pour Claude Code
+**Type:** Open source (MIT), framework d'orchestration multi-agent pour Claude Code
 **Author:** ruvnet
 **Evaluated:** 2026-03-05
 **Traction:** 18,839 stars, 2,096 forks, 452 PRs, 5,900+ commits
+
+---
+
+## Update (2026-06-01)
+
+*This block documents changes since the March 2026 evaluation. The original French body is preserved below.*
+
+**Status changes since March 2026:**
+
+- **npm migration: resolved.** The package is now published as `ruflo` on npm (confirmed via README badges: `npmjs.com/package/ruflo`). The old `claude-flow` package name is deprecated. The `curl|bash` warning remains valid: the CDN URL still references the old repo name.
+- **Rebrand: stable.** `github.com/ruvnet/ruflo` is the active repo. The transition flagged in the March eval as "ongoing" is now complete.
+- **Agent federation: shipped.** This is the most significant new capability. Ruflo now supports zero-trust cross-machine agent collaboration via mTLS and ed25519 identity verification, with a 14-type PII detection pipeline stripping sensitive data before any outbound message. Behavioral trust scoring updates per peer continuously. 9 MCP tools and 10 CLI commands manage the full lifecycle. This capability has no equivalent in LangGraph, AutoGen, or CrewAI (all single-instance by default). It was **absent from the entire guide** before this update.
+- **Plugin marketplace: shipped.** 33 native Claude Code plugins covering swarm, RAG memory, security, browser testing, IoT, trading, and more. Two install paths now clearly documented (plugin-lite vs full CLI), which resolves the earlier "complexity for new users" risk by letting beginners start with zero workspace files.
+- **Scale updates:** 98 specialized agents (up from 60+), 30 skills (up from 42+ earlier claim), 314 MCP tools (CLI path).
+- **Web surfaces:** Optional hosted web UI at flo.ruv.io and a GOAP goal planner at goal.ruv.io. Neither is required for CLI use.
+
+**Score revision: 3/5 → 4/5**
+
+The March 2026 score of 3/5 was justified by an unstable rebrand and unverifiable npm name. Both are now resolved. The addition of agent federation as a genuinely distinctive capability (not present in competing frameworks) pushes the evaluation to 4/5. The guide entry has been updated in `guide/ecosystem/third-party-tools.md` to reflect the federation capability and dual install paths.
+
+Performance figures (84.8% SWE-Bench, 352x, 32.3%, SONA <0.05ms) remain flagged as author claims without independent reproduction. A SOTA benchmark gist now exists comparing against LangGraph, AutoGen, and CrewAI on darwin-arm64 and linux-x64, but independent repro is not confirmed. None of these figures appear in the guide entry.
 
 ---
 

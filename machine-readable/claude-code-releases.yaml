@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.158"
-updated: "2026-05-30"
+latest: "2.1.162"
+updated: "2026-06-04"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -12,8 +12,39 @@ updated: "2026-05-30"
 releases:
 
   # ─────────────────────────────────────────────────────────────
-  # 2.1.x Series (January-May 2026)
+  # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.162"
+    date: "2026-06-03"
+    highlights:
+      - "`claude agents --json` now includes `waitingFor` showing what a waiting session is blocked on (e.g. permission prompt)"
+      - "Clicking a slash command fills it into the prompt instead of running immediately; press Enter to run"
+      - "Remote Control shows as a persistent footer pill; Windsurf renamed to Devin Desktop in `/ide`, `/terminal-setup`, `/scroll-speed`"
+      - "Quieter startup: notices group by severity, session info and announcements share a single line; 25+ bug fixes"
+
+  - version: "2.1.161"
+    date: "2026-06-02"
+    highlights:
+      - "`OTEL_RESOURCE_ATTRIBUTES` values included as labels on metric datapoints for custom dimensions (team, repo)"
+      - "`claude agents` rows show `done/total` for fanned-out work; `/mcp` collapses unused claude.ai connectors"
+      - "Parallel tool calls: failed Bash command no longer cancels other calls in the same batch"
+      - "20+ bug fixes: managed-settings policies fix for third-party providers, MCP secrets no longer printed to terminal, `isolation: worktree` in background sessions fixed, rendering performance improved"
+
+  - version: "2.1.160"
+    date: "2026-06-01"
+    highlights:
+      - "⭐ Renamed dynamic-workflow trigger keyword from `workflow` to `ultracode` (violet shimmer in prompt); asking in your own words still works"
+      - "Security: added prompt before writing to shell startup files (`.zshenv`, `.zlogin`, `.bash_login`) and `~/.config/git/`; `acceptEdits` mode prompts before build-tool config files"
+      - "Edit no longer requires separate Read after single-file `grep`/`egrep`/`fgrep`"
+      - "Removed `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE` (deprecated in 2.1.154, now no-op); JetBrains plugin suggestion removed from startup; 20+ bug fixes"
+    breaking:
+      - "`workflow` keyword no longer triggers dynamic workflows; use `ultracode` instead, or ask in your own words"
+
+  - version: "2.1.159"
+    date: "2026-05-31"
+    highlights:
+      - "Internal infrastructure improvements (no user-facing changes)"
 
   - version: "2.1.158"
     date: "2026-05-30"
@@ -1296,6 +1327,7 @@ breaking_summary:
   behavior:
     - "ultrathink/think keywords now cosmetic only — thinking default with Opus 4.5 (v2.0.67)"
     - "ultrathink keyword re-introduced — now enables high effort for next turn (v2.1.68)"
+    - "Dynamic workflow trigger keyword renamed `workflow` → `ultracode` (v2.1.160)"
   syntax:
     - "Indexed argument syntax changed: $ARGUMENTS.0 → $ARGUMENTS[0] (v2.1.19)"
 

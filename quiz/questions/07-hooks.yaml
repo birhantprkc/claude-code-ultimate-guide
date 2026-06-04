@@ -40,17 +40,17 @@ questions:
     explanation: |
       The `PreToolUse` event fires before any tool runs.
 
-      Claude Code supports 27 hook events, organized in 7 groups:
-      - **Lifecycle**: SessionStart, SessionEnd, Setup, Stop
-      - **Agent actions**: PreToolUse (security), PostToolUse (formatting), PostToolUseFailure (error logging)
+      Claude Code supports 30 hook events, organized in 8 groups:
+      - **Lifecycle**: SessionStart, Setup, SessionEnd
+      - **Agent actions**: Stop, StopFailure, PreToolUse, PostToolUse, PostToolUseFailure, PostToolBatch
       - **Permissions**: PermissionRequest, PermissionDenied
       - **Compaction**: PreCompact, PostCompact
-      - **Multi-agent**: SubagentStart, SubagentStop, TeammateIdle, TaskCompleted, TaskCreated
-      - **Configuration**: ConfigChange, InstructionsLoaded, CwdChanged
-      - **File system**: WorktreeCreate, WorktreeRemove, FileChanged
-      - **User interaction**: UserPromptSubmit, Notification, Elicitation, ElicitationResult
+      - **Multi-agent**: SubagentStart, SubagentStop, TeammateIdle, TaskCreated, TaskCompleted
+      - **Configuration**: ConfigChange, InstructionsLoaded
+      - **File system**: CwdChanged, FileChanged, WorktreeCreate, WorktreeRemove
+      - **User interaction**: UserPromptSubmit, UserPromptExpansion, Notification, MessageDisplay, Elicitation, ElicitationResult
 
-      Hooks can also be registered session-scoped at runtime (without modifying settings.json) — this is how skills register temporary callbacks during their invocation.
+      Hooks can also be registered session-scoped at runtime (without modifying settings.json), which is how skills register temporary callbacks during their invocation.
     doc_reference:
       file: "guide/ultimate-guide.md"
       section: "7.1 The Event System"

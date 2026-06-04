@@ -49,25 +49,77 @@ Hooks are scripts that execute automatically on Claude Code events. They enable 
 
 ## Hook Events
 
+30 events in 8 groups. Events marked **[B]** can block (exit 2 or `decision: "block"`).
+
+**Lifecycle**
+
 | Event | When | Typical Use Cases |
 |-------|------|-------------------|
 | `SessionStart` | Session begins or resumes | Initialization, environment setup, config scanning |
-| `UserPromptSubmit` | User sends a message | Context enrichment, preprocessing |
-| `PreToolUse` | Before a tool executes | Validation, blocking dangerous operations |
-| `PermissionRequest` | Permission dialog appears | Custom approval logic |
+| `Setup` | One-time init via `--init-only` or `--init`/`--maintenance` in `-p` mode | Install deps, validate prerequisites |
+| `SessionEnd` | Session terminates | Cleanup, session summary |
+
+**Agent actions**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `Stop` **[B]** | Claude finishes responding | Post-response quality gates, continue loops |
+| `StopFailure` | Turn ends due to API error | Alert on rate limits, observability |
+| `PreToolUse` **[B]** | Before a tool executes | Validation, blocking dangerous operations |
 | `PostToolUse` | After a tool succeeds | Formatting, logging, cleanup |
 | `PostToolUseFailure` | After a tool fails | Error logging, recovery actions |
+| `PostToolBatch` **[B]** | After a full batch of parallel tool calls, before next model call | Batch-level context injection, policy enforcement |
+
+**Permissions**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `PermissionRequest` **[B]** | Permission dialog appears | Custom approval logic, auto-approve safe ops |
+| `PermissionDenied` | Tool call denied by auto mode | Audit classifier denials, optionally signal retry |
+
+**Compaction**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `PreCompact` **[B]** | Before context compaction | Block unwanted auto-compact, save state |
+| `PostCompact` | After compaction completes | Restore context, log compaction summary |
+
+**Multi-agent**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `SubagentStart` | Sub-agent spawns | Inject context into subagent |
+| `SubagentStop` **[B]** | Sub-agent finishes | Cleanup, quality gate before subagent exits |
+| `TeammateIdle` **[B]** | Agent teammate about to go idle | Team coordination, quality gates |
+| `TaskCreated` **[B]** | Task created via TaskCreate | Enforce naming conventions, audit |
+| `TaskCompleted` **[B]** | Task marked completed | Enforce completion criteria (tests, lint) |
+
+**Configuration**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `ConfigChange` **[B]** | Config file changes during session | Enterprise audit, block unauthorized changes |
+| `InstructionsLoaded` | CLAUDE.md or rules file loaded | Audit which instruction files are active |
+
+**File system**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `CwdChanged` | Working directory changes | direnv reload, toolchain switching |
+| `FileChanged` | A watched file changes on disk | Reload env, trigger watchers |
+| `WorktreeCreate` **[B]** | Worktree being created | Custom VCS setup (SVN, Perforce) |
+| `WorktreeRemove` | Worktree being removed | Clean up VCS state, credentials |
+
+**User interaction**
+
+| Event | When | Typical Use Cases |
+|-------|------|-------------------|
+| `UserPromptSubmit` **[B]** | User sends a message | Context enrichment, prompt validation |
+| `UserPromptExpansion` **[B]** | Slash command expands to a prompt | Block a command, inject skill context |
 | `Notification` | Claude sends a notification | Sound alerts, external notifications |
-| `SubagentStart` | Sub-agent spawns | Subagent initialization |
-| `SubagentStop` | Sub-agent finishes | Subagent cleanup |
-| `Stop` | Claude finishes responding | Post-response actions, state saving |
-| `TeammateIdle` | Agent teammate goes idle | Team coordination |
-| `TaskCompleted` | Task marked completed | Workflow triggers |
-| `ConfigChange` | Config file changes during session | Enterprise audit, block unauthorized changes |
-| `WorktreeCreate` | Agent worktree created | Set up DB branch, install deps |
-| `WorktreeRemove` | Agent worktree torn down | Clean up DB branch, temp credentials |
-| `PreCompact` | Before context compaction | Save state before compaction |
-| `SessionEnd` | Session terminates | Cleanup, session summary |
+| `MessageDisplay` | While assistant text is displayed | Strip markdown on screen, redact secrets |
+| `Elicitation` **[B]** | MCP server requests user input | Pre-answer in headless automation |
+| `ElicitationResult` **[B]** | User responds to an elicitation | Audit or modify responses before they go to MCP |
 
 ## Advanced Guardrails (NEW in v3.3.0)
 

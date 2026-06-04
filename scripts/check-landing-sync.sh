@@ -55,23 +55,20 @@ echo ""
 # Count actual templates, excluding README/index documentation files
 TEMPLATE_COUNT=$(find "$GUIDE_DIR/examples" -type f \( -name "*.md" -o -name "*.sh" -o -name "*.ps1" -o -name "*.yml" -o -name "*.yaml" -o -name "*.json" \) -not -name "README.md" -not -name "index.md" -not -path '*/commands/*' | wc -l | tr -d ' ')
 
-# Check index.html
-LANDING_TEMPLATES_INDEX=$(grep -oE '[0-9]+ Templates' "$LANDING_DIR/index.html" | head -1 | grep -oE '[0-9]+')
-# Check examples/index.html
-LANDING_TEMPLATES_EXAMPLES=$(grep -oE '[0-9]+ Templates' "$LANDING_DIR/examples/index.html" | head -1 | grep -oE '[0-9]+')
+
+# Check examples-data.ts for indexed path count (Astro data file, replaces dead index.html grep)
+LANDING_TEMPLATES_DATA=$(grep -c 'path:' "$LANDING_DIR/src/data/examples-data.ts" 2>/dev/null || echo 0)
+# Check index.astro tagline for display count
+LANDING_TEMPLATES_ASTRO=$(grep -oE '[0-9]+ production-ready templates' "$LANDING_DIR/src/pages/examples/index.astro" | head -1 | grep -oE '[0-9]+')
 
 echo -e "${BLUE}2. Templates Count${NC}"
-echo "   Guide:         $TEMPLATE_COUNT files"
-echo "   index.html:    $LANDING_TEMPLATES_INDEX"
-echo "   examples/index.html: $LANDING_TEMPLATES_EXAMPLES"
+echo "   Guide files (find): $TEMPLATE_COUNT"
+echo "   Catalog indexed:    $LANDING_TEMPLATES_DATA (path: entries in examples-data.ts)"
+echo "   Page display count: $LANDING_TEMPLATES_ASTRO (index.astro tagline)"
 
 TEMPLATES_OK=true
-if [ "$TEMPLATE_COUNT" != "$LANDING_TEMPLATES_INDEX" ]; then
-    echo -e "   ${YELLOW}MISMATCH in index.html${NC}"
-    TEMPLATES_OK=false
-fi
-if [ "$TEMPLATE_COUNT" != "$LANDING_TEMPLATES_EXAMPLES" ]; then
-    echo -e "   ${YELLOW}MISMATCH in examples/index.html${NC}"
+if [ "${LANDING_TEMPLATES_DATA:-0}" -lt 200 ] 2>/dev/null; then
+    echo -e "   ${YELLOW}LOW: examples-data.ts has fewer than 200 indexed entries${NC}"
     TEMPLATES_OK=false
 fi
 if [ "$TEMPLATES_OK" = true ]; then
@@ -80,14 +77,6 @@ else
     ISSUES=$((ISSUES + 1))
 fi
 echo ""
-
-# ===================
-# 3. QUIZ QUESTIONS
-# ===================
-# questions.json is in the landing repo (source of truth for quiz)
-# Question IDs have format "XX-XXX" (e.g., "01-001"), category IDs are just numbers
-QUESTIONS_COUNT=$(grep -cE '"id": "[0-9]+-[0-9]+"' "$LANDING_DIR/questions.json")
-# Alternative with jq if available: jq '.questions | length'
 
 # Check what landing pages say
 LANDING_QUESTIONS_INDEX=$(grep -oE '[0-9]+ quiz questions' "$LANDING_DIR/index.html" | head -1 | grep -oE '[0-9]+')

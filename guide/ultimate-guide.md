@@ -16,7 +16,7 @@ tags: [guide, reference, workflows, agents, hooks, mcp, security]
 
 **Last updated**: January 2026
 
-**Version**: 3.41.0
+**Version**: 3.41.1
 
 ---
 
@@ -5826,7 +5826,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.41.0 Version Control & Backup
+### 3.41.1 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -7700,7 +7700,9 @@ Not all skills age the same way. The type you're building determines how you wri
 
 Skills are knowledge packages that agents can inherit.
 
-### Skills vs Agents vs Commands
+### Skills vs Agents
+
+> **Commands are deprecated.** The `.claude/commands/` directory no longer exists as a separate concept. Everything is now a skill in `.claude/skills/`. User-invocable workflows that previously lived in `.claude/commands/` are now skills with `disable-model-invocation: true`. If you have existing commands, move them to `.claude/skills/` and add that frontmatter field.
 
 | Concept | Purpose | Invocation |
 |---------|---------|------------|
@@ -7747,11 +7749,11 @@ Is this a repeatable workflow with steps?
 
 | Need | Solution | Example |
 |------|----------|---------|
-| Run tests before commit | Command | `/commit` with test step |
+| Run tests before commit | Skill (user-invocable) | `/commit` with test step |
 | Security review knowledge | Skill + Agent | security-guardian skill → security-audit agent |
 | Parallel code review | Multiple scope-focused agents | Launch 3 review agents with isolated scopes |
-| Quick git workflow | Command | `/pr`, `/ship` |
-| Architecture knowledge | Skill | architecture-patterns skill |
+| Quick git workflow | Skill (user-invocable) | `/pr`, `/ship` |
+| Architecture knowledge | Skill (model-invocable) | architecture-patterns skill |
 | Complex debugging | Agent | debugging-specialist agent |
 
 #### Skills and Subagents
@@ -7845,12 +7847,43 @@ allowed-tools: Read Grep Bash
 | `license` | [agentskills.io](https://agentskills.io) | License name or reference to bundled file |
 | `compatibility` | [agentskills.io](https://agentskills.io) | Environment requirements (max 500 chars) |
 | `metadata` | [agentskills.io](https://agentskills.io) | Arbitrary key-value pairs (author, version, etc.) |
-| `effort` | **CC only** (v2.1.80+) | `low\|medium\|high` — overrides the session effort level when this skill is invoked. Set `low` for mechanical tasks (commit, format, scaffold), `high` for analysis or architectural reasoning. |
+| `effort` | **CC only** (v2.1.80+) | `low\|medium\|high`: overrides the session effort level when this skill is invoked. Set `low` for mechanical tasks (commit, format, scaffold), `high` for analysis or architectural reasoning. |
+| `model` | **CC only** | Model to use when this skill runs: `haiku`, `sonnet`, `opus`, or a full model ID. Overrides the session model for this skill's execution. Useful for fast mechanical skills (`haiku`) or deep analysis skills (`opus`). |
 | `argument-hint` | **CC only** | Placeholder shown in the slash command menu when the skill accepts `$ARGUMENTS`. Format: `"[--flag] [positional_arg]"`. Example: `"[--verbose] [--max N] <branch>"`. |
-| `disable-model-invocation` | **CC only** | `true` to make skill manual-only (workflow with side effects) |
+| `disable-model-invocation` | **CC only** | `true` to make skill manual-only (workflow with side effects). This is what replaced `.claude/commands/`: user-invocable workflows now live in `.claude/skills/` with this flag. |
 | `context` | **CC only** | `fork` runs the skill in an isolated subagent. The subagent receives only the inputs passed to it; only its final response returns to the main conversation. File reads, tool calls, and intermediate reasoning inside the forked context do not appear in the parent context window. **Known limitation**: `context: fork` is ignored when the skill is invoked via the `Skill` tool in agent code. Fork behavior only activates when the skill is called as a slash command (e.g., `/my-skill`). |
+| `hooks` | **CC only** | Event hooks scoped to this skill's lifetime. Same format as `settings.json` hooks. Hooks are registered when the skill is invoked and removed when the session ends. `Stop` hooks in skills are automatically converted to `SubagentStop`. The `once: true` field on a hook handler is honoured here (fires once per session then removes itself); it is ignored in settings files. |
 
-**`effort` per skill** (v2.1.80+) — override the session effort level for a specific skill invocation. Independent of `effortLevel` in settings.json: the skill's value takes precedence only while that skill runs, then reverts.
+**`model` per skill**: overrides the model for this skill's execution. The session model is restored after the skill completes.
+
+```yaml
+---
+name: quick-format
+description: Run Prettier on the current file
+model: haiku          # Fast and cheap for mechanical tasks
+effort: low
+allowed-tools: Bash
+disable-model-invocation: true
+---
+```
+
+**`hooks` in skill frontmatter**: registers event hooks that are active only while this skill runs. Hooks are cleaned up when the session ends.
+
+```yaml
+---
+name: secure-ops
+description: Perform operations with pre-execution security checks
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/security-check.sh"
+          once: true    # Fires once per session then removes itself
+---
+```
+
+**`effort` per skill** (v2.1.80+): overrides the session effort level for a specific skill invocation. Independent of `effortLevel` in settings.json: the skill's value takes precedence only while that skill runs, then reverts.
 
 ```yaml
 ---
@@ -10155,7 +10188,7 @@ Hooks are scripts that run automatically when specific events occur.
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
 | `SessionStart` | Session begins or resumes | No | Initialization, load dev context |
-| `Setup` | Environment setup phase at session start | No | Install tools, validate prerequisites |
+| `Setup` | Only fires with `--init-only`, `--init`, or `--maintenance` in `-p` mode (not on normal startup) | No | One-time dependency install, scheduled CI cleanup |
 | `SessionEnd` | Session terminates | No | Cleanup, logging |
 
 **Agent actions** (tool execution pipeline):
@@ -10167,19 +10200,20 @@ Hooks are scripts that run automatically when specific events occur.
 | `PreToolUse` | Before a tool call executes | Yes | Security validation, input modification |
 | `PostToolUse` | After a tool completes successfully | No | Formatting, logging |
 | `PostToolUseFailure` | After a tool call fails | No | Error logging, recovery actions |
+| `PostToolBatch` | After a full batch of parallel tool calls resolves, before next model call | Yes | Inject batch-level context, enforce batch policies |
 
 **Permissions** (approval flow):
 
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
 | `PermissionRequest` | Permission dialog appears | Yes | Custom approval logic |
-| `PermissionDenied` | A permission is denied | No | Audit denied operations, alert |
+| `PermissionDenied` | A tool call is denied by the auto mode classifier (only fires in auto mode, not on manual user denials) | No | Audit classifier denials, return `retry: true` to let model retry |
 
 **Compaction** (context management):
 
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
-| `PreCompact` | Before context compaction | No | Save state before compaction |
+| `PreCompact` | Before context compaction | Yes | Block unwanted auto-compact, save state |
 | `PostCompact` | After context compaction completes | No | Restore state, log compaction |
 
 **Multi-agent** (orchestration):
@@ -10189,7 +10223,7 @@ Hooks are scripts that run automatically when specific events occur.
 | `SubagentStart` | Sub-agent spawned | No | Subagent initialization |
 | `SubagentStop` | Sub-agent finishes | Yes | Subagent cleanup |
 | `TeammateIdle` | Agent team member about to go idle | Yes | Team coordination, quality gates |
-| `TaskCreated` | Task created via TaskCreate | No | Task monitoring, audit logging |
+| `TaskCreated` | Task created via TaskCreate | Yes | Enforce naming, block disallowed tasks |
 | `TaskCompleted` | Task being marked as completed | Yes | Enforce completion criteria |
 
 **Configuration** (settings & instructions):
@@ -10197,27 +10231,29 @@ Hooks are scripts that run automatically when specific events occur.
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
 | `ConfigChange` | Config file changes during session | Yes (except policy) | Enterprise audit, block unauthorized changes |
-| `InstructionsLoaded` | CLAUDE.md or instructions file loaded | No | Audit which instruction files are active |
+| `InstructionsLoaded` | A `CLAUDE.md` or `.claude/rules/*.md` file is loaded into context (at session start and when files are lazily loaded mid-session) | No | Audit which instruction files are active, compliance tracking |
 
 **File system** (workspace changes):
 
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
-| `CwdChanged` | Working directory changes during session | No | direnv reload, toolchain switching |
-| `FileChanged` | A file is modified during session | No | Reload config, trigger watchers |
-| `WorktreeCreate` | Worktree being created | Yes (non-zero exit) | Custom VCS setup |
-| `WorktreeRemove` | Worktree being removed | No | Clean up VCS state |
+| `CwdChanged` | Working directory changes (e.g. when Claude executes `cd`). Useful with direnv | No | Reload env vars, activate toolchains |
+| `FileChanged` | A watched file changes on disk; `matcher` specifies which filenames to watch | No | Reload config, trigger watchers |
+| `WorktreeCreate` | A worktree is being created via `--worktree` or `isolation: "worktree"`. Replaces default git behavior | Yes (non-zero exit) | Custom VCS setup (SVN, Perforce) |
+| `WorktreeRemove` | A worktree is being removed (at session exit or when a subagent finishes) | No | Clean up VCS state |
 
 **User interaction** (prompts & notifications):
 
 | Event | When It Fires | Can Block? | Use Case |
 |-------|---------------|------------|----------|
 | `UserPromptSubmit` | User submits prompt, before Claude processes it | Yes | Context enrichment, prompt validation |
+| `UserPromptExpansion` | A slash command expands into a prompt, before it reaches Claude | Yes | Block a command from running, inject skill context |
 | `Notification` | Claude sends notification | No | Sound alerts, custom notifications |
-| `Elicitation` | Claude requests information from user (headless) | Yes | Intercept and pre-answer questions in automation |
-| `ElicitationResult` | Response to an elicitation is received | No | Log or audit user responses to Claude's questions |
+| `MessageDisplay` | While assistant message text is displayed (display-only) | No | Strip markdown on screen, redact secrets before rendering |
+| `Elicitation` | An MCP server requests user input during a tool call | Yes | Respond programmatically, skip the interactive dialog |
+| `ElicitationResult` | User responds to an MCP elicitation, before the response is sent back to the server | Yes | Audit or override responses before they reach the MCP server |
 
-> **`Stop` and `SubagentStop` — `last_assistant_message` field (v2.1.47+)**: These events now include a `last_assistant_message` field in their JSON input, giving direct access to Claude's final response without parsing transcript files. Useful for orchestration pipelines that need to inspect or log the last output.
+> **`Stop` and `SubagentStop`: `last_assistant_message` field (v2.1.47+)**: These events include a `last_assistant_message` field in their JSON input, giving direct access to Claude's final response without parsing transcript files. Useful for orchestration pipelines that need to inspect or log the last output.
 >
 > ```bash
 > # In your Stop hook script
@@ -10326,12 +10362,27 @@ Claude Code supports two execution models for hooks:
 #### Limitations of Async Hooks
 
 ⚠️ Async hooks cannot:
-- Block Claude on errors (exit code 2 ignored)
+- Block Claude on errors (exit code 2 is ignored for blocking decisions)
 - Provide real-time feedback via stdout or `systemMessage`
 - Guarantee execution order with other hooks
-- Return `additionalContext` that Claude can use
+
+Async hooks CAN return `additionalContext` via JSON output. If the hook produces `hookSpecificOutput.additionalContext`, that content is delivered to Claude as context on the next conversation turn (after the background process exits). It is not real-time, but it does reach Claude.
 
 Use async only when the hook's completion is truly independent of Claude's workflow.
+
+#### `asyncRewake`
+
+For hooks that run long background work and need to surface a failure back to Claude, use `asyncRewake: true` instead of `async: true`. Like async, the hook runs in the background without blocking. Unlike async, if the hook exits with code 2, Claude Code wakes the session immediately and shows the hook's stderr as a system reminder so Claude can react to the failure even if the session was otherwise idle.
+
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/deploy-watcher.sh",
+  "asyncRewake": true
+}
+```
+
+Use this for background monitoring tasks (deploy pipelines, CI status) where a failure should interrupt Claude rather than silently disappear into the log.
 
 #### When Async Was Introduced
 
@@ -10395,13 +10446,14 @@ gh pr create --title "..." --body "..."
 |-------|-------------|
 | `matcher` | Regex pattern filtering when hooks fire (tool name, session start reason, etc.) |
 | `if` | Permission-rule filter controlling when the hook fires (e.g. `Bash(git *)`) — v2.1.85+ |
-| `type` | Hook type: `"command"`, `"http"`, `"prompt"`, or `"agent"` |
+| `type` | Hook type: `"command"`, `"http"`, `"mcp_tool"`, `"prompt"`, or `"agent"` |
 | `command` | Shell command to run (for `command` type) |
 | `args` | `string[]` — exec form: array of strings spawned directly without a shell. Path placeholders need no quoting. When present, `command` is ignored. Use to avoid shell-injection risks. (v2.1.139) |
 | `prompt` | Prompt text for LLM evaluation (for `prompt`/`agent` types). Use `$ARGUMENTS` as placeholder for hook input JSON |
 | `timeout` | Max execution time in seconds (default: 600s command, 30s prompt, 60s agent) |
 | `model` | Model to use for evaluation (for `prompt`/`agent` types). Defaults to a fast model |
 | `async` | If `true`, runs in background without blocking (for `command` type only) |
+| `asyncRewake` | If `true`, runs in background but wakes Claude on exit code 2 (implies `async`). Use for background monitoring tasks that need to interrupt Claude on failure |
 | `statusMessage` | Custom spinner message displayed while hook runs |
 | `once` | If `true`, runs only once per session then is removed (skills only) |
 
@@ -10420,10 +10472,15 @@ This is the mechanism skills use internally: when you invoke a skill, it can reg
 
 Session-scoped hooks follow the same JSON schema as `settings.json` hooks (same event names, matchers, types, and output format) and can be registered through the programmatic API or by skills at invocation time.
 
+### The `/hooks` Menu
+
+Type `/hooks` in Claude Code to open a read-only browser for all configured hooks. The menu groups hooks by event, shows the matcher and handler details for each, and labels the source of every hook: `[User]` (`~/.claude/settings.json`), `[Project]` (`.claude/settings.json`), `[Local]` (`.claude/settings.local.json`), `[Plugin]`, or `[Session]` (runtime-registered). Use it to verify that a hook is actually registered, check which settings file it came from, or inspect the full command or URL without digging through JSON. The menu is read-only: edit the settings JSON directly (or ask Claude) to make changes.
+
 **Hook types:**
 
 - **`command`**: Runs a shell command. Receives JSON on stdin, returns JSON on stdout. Most common type.
 - **`http`** *(v2.1.63+)*: POSTs JSON to a URL and reads JSON response. Useful for CI/CD webhooks and stateless backend integrations without shell dependencies. Configure with `url` and optional `allowedEnvVars` for header interpolation.
+- **`mcp_tool`**: Calls a tool on an already-connected MCP server. Configure with `server` (server name) and `tool` (tool name); the tool's text output is treated like command stdout. The server must already be connected before the hook fires.
 - **`prompt`**: Sends prompt + hook input to a Claude model (Haiku by default) for single-turn evaluation. Returns `{ok: true/false, reason: "..."}`. Configure model via `model` field.
 - **`agent`**: Spawns a subagent with tool access (Read, Grep, Glob, etc.) for multi-turn verification. Returns same `{ok: true/false}` format. Up to 50 tool-use turns.
 
@@ -10508,6 +10565,8 @@ Hooks receive JSON on stdin with common fields (all events) plus event-specific 
 | `permission_mode` | string | Active permission mode |
 | `hook_event_name` | string | Event that triggered the hook |
 | `effort.level` | string | Active effort level: `low`, `medium`, `high`, `xhigh`, `max`. Bash-type hooks also receive this as `$CLAUDE_EFFORT` env var. (v2.1.133) |
+| `agent_id` | string | Unique identifier for the subagent. Present only when the hook fires inside a subagent call. |
+| `agent_type` | string | Agent name (`"Explore"`, `"security-reviewer"`, etc.). Present when the hook fires inside a subagent or when the session uses `--agent`. |
 
 ### Hook Output
 
@@ -10521,6 +10580,7 @@ Hooks communicate results through exit codes and optional JSON on stdout. Choose
 | `stopReason` | none | Message shown to user when `continue` is `false` |
 | `suppressOutput` | `false` | If `true`, hides stdout from verbose mode |
 | `systemMessage` | none | Warning message shown to user |
+| `terminalSequence` | none | Allowlisted terminal escape string to emit (OSC 0/1/2/9/99/777 or BEL). Use for desktop notifications or window titles instead of writing to `/dev/tty`, which hooks cannot access. Requires v2.1.141+. |
 
 **Event-specific decision control** varies by event type:
 
@@ -10639,7 +10699,63 @@ exit 2
 
 This asymmetry (silence on success, signal on failure) prevents successful build logs, test output, and lint reports from accumulating as "context noise" in long sessions. The agent only sees what requires action.
 
-> Source: Pattern formalized by [HumanLayer — Harness Engineering for Coding Agents](https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents) (March 2026). Also validated by RTK's design philosophy: suppress successful command output, surface errors only.
+> Source: Pattern formalized by [HumanLayer: Harness Engineering for Coding Agents](https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents) (March 2026). Also validated by RTK's design philosophy: suppress successful command output, surface errors only.
+
+### `CLAUDE_ENV_FILE` (SessionStart, Setup, CwdChanged, FileChanged)
+
+These four hook events have access to a `CLAUDE_ENV_FILE` environment variable, which provides a path to a file where you can persist environment variables for subsequent Bash commands in the session. Write `export` statements to it (use append `>>` to preserve variables set by other hooks):
+
+```bash
+#!/bin/bash
+if [ -n "$CLAUDE_ENV_FILE" ]; then
+  echo 'export NODE_ENV=production' >> "$CLAUDE_ENV_FILE"
+  echo 'export PATH="$PATH:./node_modules/.bin"' >> "$CLAUDE_ENV_FILE"
+fi
+exit 0
+```
+
+Variables written here are available to all subsequent Bash tool calls Claude makes in that session. This is the standard way to inject environment configuration (e.g., activating nvm, sourcing direnv) without modifying the system environment permanently.
+
+### Per-Event Input/Output Reference
+
+Key event-specific fields not listed in the common input table:
+
+| Event | Extra Input Fields | Notable Output Fields |
+|-------|-------------------|----------------------|
+| `SessionStart` | `source` (startup/resume/clear/compact), `model`, `session_title` | `sessionTitle` (sets session title), `reloadSkills` (bool, rescans skills after hook), `watchPaths` (array, registers files for FileChanged), `additionalContext`, `initialUserMessage` |
+| `Setup` | `trigger` (init/maintenance) | `additionalContext` |
+| `UserPromptSubmit` | `prompt` | `decision: "block"`, `reason`, `additionalContext`, `sessionTitle`, `suppressOriginalPrompt` |
+| `UserPromptExpansion` | `expansion_type`, `command_name`, `command_args`, `command_source`, `prompt` | `decision: "block"`, `reason`, `additionalContext` |
+| `PreToolUse` | `tool_name`, `tool_input`, `tool_use_id` | `hookSpecificOutput.permissionDecision` (allow/deny/ask/defer), `permissionDecisionReason`, `updatedInput`, `additionalContext` |
+| `PermissionRequest` | `tool_name`, `tool_input`, `permission_suggestions` | `hookSpecificOutput.decision.behavior` (allow/deny), `updatedInput`, `updatedPermissions`, `message`, `interrupt` |
+| `PermissionDenied` | `tool_name`, `tool_input`, `tool_use_id`, `reason` | `hookSpecificOutput.retry: true` (tells model it may retry). Only fires in auto mode. |
+| `PostToolUse` | `tool_name`, `tool_input`, `tool_response`, `tool_use_id`, `duration_ms` | `decision: "block"`, `reason`, `additionalContext`, `updatedToolOutput`, `updatedMCPToolOutput` |
+| `PostToolUseFailure` | `tool_name`, `tool_input`, `tool_use_id`, `error`, `is_interrupt`, `duration_ms` | `additionalContext` |
+| `PostToolBatch` | `tool_calls` (array with `tool_name`, `tool_input`, `tool_use_id`, `tool_response`) | `decision: "block"`, `reason`, `additionalContext` |
+| `Stop` | `stop_hook_active`, `last_assistant_message`, `background_tasks` (array), `session_crons` (array) | `decision: "block"`, `reason` |
+| `SubagentStop` | `stop_hook_active`, `agent_id`, `agent_type`, `agent_transcript_path`, `last_assistant_message`, `background_tasks`, `session_crons` | same as Stop |
+| `SubagentStart` | `agent_id`, `agent_type` | `additionalContext` |
+| `TeammateIdle` | `teammate_name`, `team_name` | Exit 2 (keeps working) or `{"continue": false, "stopReason": "..."}` (stops entirely) |
+| `TaskCreated` | `task_id`, `task_subject`, `task_description`, `teammate_name`, `team_name` | Exit 2 (blocks creation) or `{"continue": false, "stopReason": "..."}` |
+| `TaskCompleted` | `task_id`, `task_subject`, `task_description`, `teammate_name`, `team_name` | Exit 2 (blocks completion) or `{"continue": false, "stopReason": "..."}` |
+| `StopFailure` | `error` (rate_limit/overloaded/authentication_failed/oauth_org_not_allowed/billing_error/invalid_request/model_not_found/server_error/max_output_tokens/unknown), `error_details`, `last_assistant_message` | None (observability only) |
+| `ConfigChange` | `source` (user_settings/project_settings/local_settings/policy_settings/skills), `file_path` | `decision: "block"`, `reason`. Note: `policy_settings` cannot be blocked. |
+| `InstructionsLoaded` | `file_path`, `memory_type` (User/Project/Local/Managed), `load_reason` (session_start/nested_traversal/path_glob_match/include/compact), `globs`, `trigger_file_path`, `parent_file_path` | None (observability only) |
+| `CwdChanged` | `old_cwd`, `new_cwd` | `watchPaths` (replaces dynamic file watch list) |
+| `FileChanged` | `file_path`, `event` (change/add/unlink) | `watchPaths` (updates dynamic file watch list). The `matcher` field serves a dual role: it both registers filenames in the watch list AND filters which handler groups run. |
+| `WorktreeCreate` | `name` (slug identifier) | stdout prints absolute path to created worktree (or HTTP: `hookSpecificOutput.worktreePath`). Non-zero exit fails creation. |
+| `WorktreeRemove` | `worktree_path` | None (cleanup side effects only) |
+| `PreCompact` | `trigger` (manual/auto), `custom_instructions` | `decision: "block"`, `reason` |
+| `PostCompact` | `trigger` (manual/auto), `compact_summary` | None |
+| `SessionEnd` | `reason` (clear/resume/logout/prompt_input_exit/bypass_permissions_disabled/other) | None. Default timeout: 1.5s (raise with per-hook `timeout`; env var `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` overrides budget up to 60s). |
+| `Elicitation` | `mcp_server_name`, `message`, `mode` (form/url), `url`, `elicitation_id`, `requested_schema` | `hookSpecificOutput.action` (accept/decline/cancel), `content` |
+| `ElicitationResult` | `mcp_server_name`, `action`, `content`, `mode`, `elicitation_id` | `hookSpecificOutput.action`, `content` (overrides user response) |
+| `MessageDisplay` | `turn_id`, `message_id`, `index` (0-based batch), `final` (bool, last batch), `delta` (new lines) | `hookSpecificOutput.displayContent` (replaces rendered text on screen, transcript unchanged). Default timeout: 10s. |
+| `Notification` | `message`, `title`, `notification_type` | None (side effects only) |
+
+**`background_tasks` and `session_crons`** are available in Stop/SubagentStop since v2.1.145. Each entry in `background_tasks` has `id`, `type` (shell/subagent/monitor/workflow/teammate/cloud session/MCP task), `status`, `description`, and type-specific fields. Each entry in `session_crons` has `id`, `schedule`, `recurring` (bool), `prompt`. Use these to distinguish "session done" from "session waiting for background work".
+
+**`additionalContext`** is injected into Claude's context window as a system reminder at the point where the hook fired. For `PostToolUse` and `PostToolBatch`, it appears next to the tool result. For `UserPromptSubmit`, it appears alongside the submitted prompt. Multiple hooks returning `additionalContext` for the same event are all delivered. Values are capped at 10,000 characters.
 
 ## 7.3 Hook Templates
 
@@ -23947,8 +24063,11 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | `--fork-session` | | Create a new session ID when resuming (use with `--resume` or `--continue`) |
 | `--session-id <UUID>` | | Use a specific session UUID |
 | `--no-session-persistence` | | Disable session persistence (print mode only) |
+| `--name <NAME>` | `-n` | Set a display name for the session, shown in `/resume` and the terminal title |
 | `--remote` | | Create a new web session on claude.ai |
 | `--teleport` | | Resume a web session in your local terminal |
+| `--bg` | | Start the session as a background agent and return immediately. Prints session ID and management commands |
+| `--exec <CMD>` | | Run a shell command as a PTY-backed background job instead of starting a Claude session. Use with `--bg` |
 
 #### Model & Configuration
 
@@ -23956,6 +24075,7 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 |------|-------|-------------|
 | `--model <NAME>` | | Set model with alias (`sonnet`, `opus`, `haiku`) or full model ID |
 | `--fallback-model <NAME>` | | Auto-fallback model when default is overloaded (print mode only) |
+| `--effort <LEVEL>` | | Set effort level: `low`, `medium`, `high`, `xhigh`, `max`. Available levels depend on the model |
 | `--betas <LIST>` | | Beta headers to include in API requests (API key users only) |
 
 #### Output & Format
@@ -23967,13 +24087,16 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | `--input-format <FORMAT>` | | Input format: `text`, `stream-json` |
 | `--json-schema <SCHEMA>` | | Get validated JSON matching schema (print mode only) |
 | `--include-partial-messages` | | Include partial streaming events (requires `--print` and `stream-json`) |
+| `--include-hook-events` | | Include hook lifecycle events in output stream. Requires `--output-format stream-json` |
+| `--prompt-suggestions` | | Emit a predicted next prompt after each turn. Requires `--print`, `--output-format stream-json`, `--verbose` |
+| `--replay-user-messages` | | Re-emit user messages from stdin back on stdout for acknowledgment. Requires `--input-format stream-json` and `--output-format stream-json` |
 | `--verbose` | | Enable verbose logging with full turn-by-turn output |
 
 #### Permissions & Security
 
 | Flag | Short | Description |
 |------|-------|-------------|
-| `--dangerously-skip-permissions` | | Skip ALL permission prompts — use with extreme caution |
+| `--dangerously-skip-permissions` | | Skip ALL permission prompts (use with extreme caution) |
 | `--allow-dangerously-skip-permissions` | | Enable permission bypassing as an option without activating it |
 | `--permission-mode <MODE>` | | Begin in specified mode: `default`, `plan`, `acceptEdits`, `bypassPermissions` |
 | `--allowedTools <TOOLS>` | | Tools that execute without prompting (permission rule syntax) |
@@ -23989,6 +24112,7 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | `--system-prompt-file <PATH>` | | Load system prompt from file, replacing default (print mode only) |
 | `--append-system-prompt <TEXT>` | | Append custom text to default system prompt |
 | `--append-system-prompt-file <PATH>` | | Append file contents to default prompt (print mode only) |
+| `--exclude-dynamic-system-prompt-sections` | | Move per-machine sections (working dir, env info, memory paths) into the first user message. Improves prompt-cache reuse across different users running the same task. Use with `-p` for scripted multi-user workloads |
 
 #### Agent & Subagent
 
@@ -24013,6 +24137,7 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 |------|-------|-------------|
 | `--add-dir <PATH>` | | Add additional working directories for Claude to access |
 | `--worktree` | `-w` | Start Claude in an isolated git worktree (branched from HEAD) |
+| `--tmux` | | Create a tmux session for the worktree. Requires `--worktree`. Pass `--tmux=classic` for traditional tmux |
 
 #### Budget & Limits
 
@@ -24029,6 +24154,8 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | `--no-chrome` | | Disable Chrome browser integration for this session |
 | `--ide` | | Automatically connect to IDE on startup if exactly one valid IDE is available |
 | `--channels` | | Enable MCP channels (Research Preview). Supports claude.ai OAuth and API key auth. Managed orgs require `channelsEnabled: true` in managed-settings. (v2.1.128) |
+| `--remote-control` | `--rc` | Start an interactive session with Remote Control enabled so you can also control it from claude.ai or the Claude app |
+| `--remote-control-session-name-prefix <PREFIX>` | | Prefix for auto-generated Remote Control session names. Defaults to machine hostname |
 
 #### Initialization & Maintenance
 
@@ -24043,11 +24170,14 @@ Complete reference for all Claude Code command-line flags, subcommands, and star
 | Flag | Short | Description |
 |------|-------|-------------|
 | `--debug <CATEGORIES>` | | Enable debug mode with optional category filtering (e.g., `"api,hooks"`) |
+| `--debug-file <PATH>` | | Write debug logs to a specific file path. Implicitly enables debug mode. Takes precedence over `CLAUDE_CODE_DEBUG_LOGS_DIR` |
+| `--dangerously-load-development-channels` | | Enable channels not on the approved allowlist, for local development. Requires confirmation |
 
 #### Settings Override
 
 | Flag | Short | Description |
 |------|-------|-------------|
+| `--bare` | | Minimal mode: skip auto-discovery of hooks, skills, plugins, MCP servers, auto memory, and CLAUDE.md. Scripted calls start faster. Sets `CLAUDE_CODE_SIMPLE` |
 | `--settings <PATH\|JSON>` | | Path to settings JSON file or inline JSON string to load |
 | `--setting-sources <LIST>` | | Comma-separated sources to load: `user`, `project`, `local` |
 | `--disable-slash-commands` | | Disable all skills and slash commands for this session |
@@ -24066,14 +24196,22 @@ Top-level commands run as `claude <subcommand>`:
 | Subcommand | Description |
 |------------|-------------|
 | `claude "query"` | Start REPL with an initial prompt |
-| `claude agents` | Open Agent View — list all sessions (running / waiting / done) with peek and inline reply (v2.1.139+) |
+| `claude agents` | Open Agent View: lists all sessions (running / waiting / done) with peek and inline reply (v2.1.139+) |
+| `claude attach <ID>` | Attach to a background session in the current terminal |
+| `claude auto-mode defaults` | Print the built-in auto mode classifier rules as JSON. Use `claude auto-mode config` to see effective config with settings applied |
 | `claude auth login / logout / status` | Manage Claude Code authentication |
+| `claude daemon status` | Print the background-session supervisor state, version, socket directory, and worker count. Exits 1 if supervisor is not running |
+| `claude daemon stop --any` | Stop the background-session supervisor and the sessions it hosts. Pass `--keep-workers` to leave background sessions running |
 | `claude doctor` | Run diagnostics from the command line |
 | `claude install` | Install or switch Claude Code native builds |
+| `claude logs <ID>` | Print recent output from a background session |
 | `claude mcp add / remove / list / get / enable` | Configure MCP servers |
 | `claude plugin` | Manage Claude Code plugins |
-| `claude remote-control` | Manage remote control sessions |
+| `claude remote-control` | Start a Remote Control server to control Claude Code from claude.ai or the Claude app |
+| `claude respawn <ID>` | Restart a background session (running or stopped) with its conversation intact. Use `--all` to restart all running sessions |
+| `claude rm <ID>` | Remove a background session from the list. The conversation transcript stays on disk for `/resume` |
 | `claude setup-token` | Create a long-lived token for subscription usage |
+| `claude stop <ID>` | Stop a background session (alias: `claude kill`) |
 | `claude update` / `claude upgrade` | Update to the latest version |
 | `claude project purge [path]` | Delete all Claude Code state for a project: transcripts, tasks, file history, config entry. Options: `--dry-run`, `-y/--yes`, `-i/--interactive`, `--all`. (v2.1.126) |
 | `claude ultrareview [target]` | Run `/ultrareview` non-interactively from CI/scripts. `target`: PR number, branch, or current branch if omitted. `--json` for machine-readable output. Exits 0 on completion, 1 on failure. (v2.1.120) |
@@ -24098,7 +24236,7 @@ Set these in your shell before launching Claude Code (these cannot be configured
 | `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1` | Opt out of the fullscreen alternate-screen renderer. Terminal output stays in the native scrollback buffer instead of the alternate screen. Use in environments that don't support alternate screen (some log-capture setups, embedded terminals). (v2.1.132) |
 | `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE=1` | When set, Homebrew or WinGet auto-upgrades Claude Code in the background and prompts to restart when a new version is available. (v2.1.129) |
 
-For variables configurable via the `"env"` key in `settings.json` (including `MAX_THINKING_TOKENS`, `CLAUDE_CODE_SHELL`, `CLAUDE_CODE_ENABLE_TASKS`, `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL`, and more), see section 10.3 Configuration Reference.
+For the full environment variable reference (190+ vars across 17 categories, including all `ANTHROPIC_*`, `CLAUDE_CODE_*`, `DISABLE_*`, and `OTEL_*` vars), see [**Settings Reference: Environment Variables**](core/settings-reference.md#environment-variables).
 
 **Common Combinations:**
 
@@ -25656,6 +25794,8 @@ Set these in your shell profile (`~/.zshrc`, `~/.bashrc`, or Windows System Prop
 | `CLAUDE_CODE_DISABLE_1M_CONTEXT` | Disable 1M context window support (v2.1.50+) | `true` |
 | `CLAUDE_CODE_SIMPLE` | Fully minimal mode: disables skills, agents, MCP, hooks, CLAUDE.md loading (v2.1.50+) | `true` |
 
+> This is a quick-reference subset. For the complete catalog of 190+ environment variables across 17 categories, see [**Settings Reference: Environment Variables**](core/settings-reference.md#environment-variables).
+
 ### Finding Your Paths
 
 **Can't find npm global bin?**
@@ -26055,4 +26195,4 @@ We'll evaluate and add it to this section if it meets quality criteria.
 
 **Contributions**: Issues and PRs welcome.
 
-**Last updated**: January 2026 | **Version**: 3.41.0
+**Last updated**: January 2026 | **Version**: 3.41.1
