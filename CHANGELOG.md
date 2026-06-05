@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.41.2] - 2026-06-04
+
+### Security
+
+- **Threat database v2.20.0** (`examples/commands/resources/threat-db.yaml`): monthly update. New CVE: CVE-2026-32211 (Azure DevOps MCP `@azure-devops/mcp`, CVSS 9.1, missing authentication, no patch yet). New attack technique T031 Shadow Escape (Operant AI, May 2026): zero-click data exfiltration via poisoned documents in MCP-connected AI assistants, no user interaction beyond document upload, exfil blends into normal agent traffic. New scanning tools: Golf Scanner (open-source Go CLI, discovers MCP configs across 7 IDEs, 20 security checks, 0-100 risk score) and Microsoft MDASH (multi-model agentic vuln discovery, 100+ AI agents, Defender integration). New defensive resources: NSA AISC MCP Security Design Considerations advisory (May 20, 2026), Five Eyes "Careful Adoption of Agentic AI Services" joint guidance (May 4, 2026), Microsoft Build 2026 MXC SDK + Agent 365 policy controls. Updated: hightower6eu malicious skill count 354 to 677; CVE-2026-39861 description clarified as symlink sandbox escape, fixed_in corrected to 2.1.64. 7 new sources added (151 total).
+
 ## [3.41.1] - 2026-06-04
 
 ### Added

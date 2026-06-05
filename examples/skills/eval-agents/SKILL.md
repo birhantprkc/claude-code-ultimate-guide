@@ -31,20 +31,23 @@ Agents are not just scripts: they are callable units selected by orchestrators b
 | `~/.claude/agents/<name>.md` | User-level | No |
 | Plugin `agents/*.md` | Per plugin | Yes (in plugin) |
 
-Both flat files and directory-based agents are valid. The agent name is always the filename or directory name, not the `name:` field in frontmatter (though they should match).
+Both flat files and directory-based agents are valid. The `name:` field is the identifier used by orchestrators and hooks (passed as `agent_type`). The filename does not have to match, though keeping them aligned is recommended.
 
 ### Frontmatter fields
 
 | Field | Required | Notes |
 |---|---|---|
-| `name` | No | Display label. The runtime key is always the filename/directory. |
-| `description` | Yes (for dispatch) | Used by orchestrators to select agents. Vague = wrong agent selected. |
+| `name` | Yes | Unique identifier (kebab-case). Hooks receive this as `agent_type`. Filename does not have to match. |
+| `description` | Yes | Used by orchestrators to select agents. Vague = wrong agent selected. |
 | `model` | No | Defaults to session model if absent. Explicit is always better. |
-| `tools` / `allowed-tools` | No | Both spellings parse correctly. Defaults to session tools if absent (risky). |
-| `disallowed-tools` | No | Blocks specific tools even if granted by the session. |
+| `tools` | No | Explicit tool allow-list. Defaults to session tools if absent (risky). Note: `allowed-tools` is the equivalent field for skill files (not valid in agent files). |
+| `disallowedTools` | No | Blocks specific tools even if granted by the session. |
+| `permissionMode` | No | `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `plan`. Flag `bypassPermissions` as a security risk equivalent to unconstrained tools. |
 | `effort` | No | `low`, `medium`, `high`, `xhigh`, `max`. Overrides session effort. |
-| `context` | No | `fork` runs the agent in isolated subagent context. |
-| `argument-hint` | No | Hint shown during autocomplete. |
+| `isolation` | No | `worktree` runs the agent in a temporary git worktree (isolated copy of the repo). |
+| `maxTurns` | No | Maximum agentic turns before the agent stops. Prevents runaway loops in pipelines. |
+| `memory` | No | `user`, `project`, or `local`. Persistent cross-session memory directory. |
+| `background` | No | `true` always runs this agent as a background task. |
 
 ### Why description quality matters more for agents than for skills
 
@@ -89,10 +92,10 @@ Safe alternative: "If context is insufficient, return `{ "status": "needs_contex
 
 | # | Criterion | Max | What is checked |
 |---|-----------|-----|-----------------|
-| 1 | **name** | 1 | `name` field present and matches directory/file name (kebab-case) |
-| 2 | **description** | 4 | Present (1pt), contains trigger phrasing specifying WHEN to use (1pt), specific enough to distinguish from other agents in the same fleet (1pt), combined `description` text under 1,536 chars (1pt) |
+| 1 | **name** | 1 | `name` field present and uses kebab-case; recommend matching the filename for clarity |
+| 2 | **description** | 4 | Present (1pt), contains trigger phrasing specifying WHEN to use (1pt), specific enough to distinguish from other agents in the same fleet (1pt), concise and front-loaded with the most important triggers first (1pt) |
 | 3 | **model** | 2 | Present (1pt), appropriate tier for task complexity using matrix above (1pt) |
-| 4 | **tools** | 3 | `tools` or `allowed-tools` present and explicit (1pt), no `*` wildcard without written justification in the system prompt (1pt), write-capable tools (`Bash`, `Edit`, `Write`) only present when the agent's task requires file mutation (1pt) |
+| 4 | **tools** | 3 | `tools` field present and explicit (1pt), no `*` wildcard without written justification in the system prompt (1pt), write-capable tools (`Bash`, `Edit`, `Write`) only present when the agent's task requires file mutation (1pt) |
 | 5 | **system prompt** | 5 | Has role/scope statement in first paragraph (1pt), defines task boundaries (what it does AND does not do) (1pt), specifies output format or return contract (1pt), no placeholder text or TODO comments (1pt), no human-in-the-loop patterns from the table above (1pt) |
 | Bonus | **hardening** | +1 | `effort` field present and inferred-appropriate for task complexity |
 
@@ -291,15 +294,16 @@ For any agent the user marked as stale: ask for explicit confirmation before rem
 
 - **No `tools:` field**: agent inherits session tools; flag as 0/3 on tools criterion, always raise in interactive step regardless of other scores
 - **`tools: "*"` wildcard**: full session access, treat as equivalent to no tools field unless the system prompt explicitly justifies why unrestricted tools are needed (e.g., a general-purpose agent)
+- **`permissionMode: bypassPermissions`**: flag immediately, same severity as an unconstrained tools field; the agent can execute operations without approval including writes to `.git`, `.claude`, and config directories
 - **`model` field absent**: flag as ⚠️ in model criterion; add model inference note ("inferred sonnet from content signals")
 - **Description under 20 chars**: too vague to be usable for dispatch; flag as 0/4 on description criterion
-- **Description over 1,536 chars**: the runtime truncates at this limit; the tail (often the "NOT for" clarifications) gets cut silently; flag as 0/1 on the length sub-criterion
+- **Excessively long description**: no confirmed character limit exists in the official docs; front-load the most important trigger conditions since orchestrators use early tokens for dispatch; flag descriptions over 800 chars as a style warning
 - **System prompt under 10 lines**: likely a stub or placeholder; flag for content quality review
-- **`context: fork` without an `agent:` field**: defaults to general-purpose subagent, may not match intent; flag and ask whether a specific agent type was intended
+- **`isolation: worktree` on a read-only agent**: filesystem isolation is unnecessary when the agent has no write tools (`Edit`, `Write`, `Bash`); flag as redundant overhead and ask whether isolation is intentional
 - **Human-in-the-loop pattern in a fork agent**: especially problematic since forked agents have no terminal to interact with; flag as ❌ on system prompt criterion 5
 - **Duplicate agent names** (same `name:` field, different files): runtime loads both, last one wins; flag immediately
 - **Agent file not readable**: report and skip (may be a permissions issue or empty file)
-- **`disallowed-tools` with a tool not in `tools`**: redundant but harmless; note it
+- **`disallowedTools` with a tool not in `tools`**: redundant but harmless; note it
 - **Flat `.claude/agents/` file with same stem as a subdirectory agent**: naming conflict, flag which one the runtime will use
 - **Description that says "use for everything" or "general purpose"**: acceptable only for catch-all agents placed intentionally at the bottom of a dispatch priority stack; flag others
 - **Two agents with identical `model` and `tools` but different descriptions**: may be legitimate specializations or may be redundant copies from a refactor; surface to user during interactive step

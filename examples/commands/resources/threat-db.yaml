@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.19.0"
-updated: "2026-05-27"
+version: "2.20.0"
+updated: "2026-06-04"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -440,6 +440,24 @@ sources:
   - name: "Adversa AI - Top MCP security resources May 2026"
     url: "https://adversa.ai/blog/top-mcp-security-resources-may-2026/"
     date: "2026-05"
+  - name: "NSA AISC - MCP Security Design Considerations for AI-Driven Automation"
+    url: "https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/4496698/nsa-releases-security-design-considerations-for-ai-driven-automation-leveraging/"
+    date: "2026-05-20"
+  - name: "Five Eyes - Careful Adoption of Agentic AI Services (CISA/NSA/ASD/CCCS/NCSC-UK/NCSC-NZ)"
+    url: "https://cyberscoop.com/cisa-nsa-five-eyes-guidance-secure-deployment-ai-agents/"
+    date: "2026-05-04"
+  - name: "Microsoft Build 2026 - Securing Code, Agents, and Models"
+    url: "https://www.microsoft.com/en-us/security/blog/2026/06/02/microsoft-build-2026-securing-code-agents-and-models-across-the-development-lifecycle/"
+    date: "2026-06-02"
+  - name: "CVE-2026-32211 - Azure MCP Server Information Disclosure via Missing Authentication"
+    url: "https://windowsnews.ai/article/cve-2026-32211-critical-azure-mcp-server-authentication-flaw-exposes-sensitive-data-cvss-91.409622"
+    date: "2026-04-03"
+  - name: "Operant AI - Shadow Escape: First Zero-Click Agentic Attack via MCP"
+    url: "https://www.operant.ai/art-kubed/shadow-escape"
+    date: "2026-05"
+  - name: "Golf Scanner - Open-source MCP security discovery CLI (golf-mcp/golf-scanner)"
+    url: "https://github.com/golf-mcp/golf-scanner"
+    date: "2026-03"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS AUTHORS (confirmed by security researchers)
@@ -464,9 +482,9 @@ malicious_authors:
     notes: "Mixed prompt-injection + exfil; GitHub repo aztr0nutzs/NET_NiNjA.v1.2 hosts additional weaponized skills"
   # VirusTotal confirmed — single publisher, 354+ skills, 100% malicious
   - name: "hightower6eu"
-    source: "VirusTotal OpenClaw Analysis / Particula.tech"
+    source: "VirusTotal OpenClaw Analysis / Particula.tech / SkyWork AI"
     risk: "critical"
-    notes: "354 malicious skills (updated March 2026; previously 314+); all confirmed malicious by VirusTotal scan; malware disguised as productivity/utility tools"
+    notes: "677 malicious skills (updated June 2026; previously 354 at March 2026); all confirmed malicious by VirusTotal scan; malware disguised as productivity/utility tools across all ClawHub categories; most prolific single attacker in ClawHavoc campaign"
   # Bitdefender / Particula confirmed — automated bulk submission
   - name: "sakaen736jih"
     source: "Particula.tech / Bitdefender (2026-03)"
@@ -1593,12 +1611,12 @@ cve_database:
   - id: "CVE-2026-39861"
     component: "Anthropic Claude Code"
     severity: "critical"
-    description: "Remote code execution vulnerability in Anthropic Claude Code — two critical flaws documented by Sonar researchers allow attackers to execute arbitrary code by tricking a user into running Claude Code in a directory containing malicious project files; attackers exploit the way Claude Code reads and processes configuration and project files on startup"
+    description: "Sandbox escape via symlink manipulation in Anthropic Claude Code — prior to version 2.1.64, Claude Code's sandbox implementation failed to prevent sandboxed processes from creating symbolic links pointing to locations outside the workspace directory; attackers can create crafted symlinks inside the sandbox that allow read or write access to arbitrary host filesystem paths. Part of a pair of RCE code paths documented by Sonar researchers (April 30, 2026); the second code path exploits how Claude Code reads and processes project configuration files on startup in untrusted directories."
     source: "SentinelOne (2026-04-23); Sonar blog (2026-04-30)"
-    fixed_in: "update Claude Code to latest version; see minimum_safe_versions"
-    mitigation: "Update Claude Code to latest version; never run Claude Code in untrusted directories without reviewing project files first (CLAUDE.md, .mcp.json, .claude/settings.json); use --no-memory flag in untrusted contexts; treat project config files as executable code"
-    cwe: "CWE-94"
-    notes: "Two separate RCE code paths documented in Sonar research (April 30, 2026); relates to T011 (Project Configuration Hijacking) and T027 (Supply Chain Memory Poisoning)"
+    fixed_in: "2.1.64"
+    mitigation: "Update Claude Code to >= 2.1.64 (or latest; see minimum_safe_versions); never run Claude Code in untrusted directories without reviewing project files first (CLAUDE.md, .mcp.json, .claude/settings.json); use --no-memory flag in untrusted contexts; treat project config files as executable code"
+    cwe: "CWE-59"
+    notes: "Two separate RCE code paths documented in Sonar research (April 30, 2026); CVE-2026-39861 is specifically the symlink sandbox escape (fixed 2.1.64); relates to T011 (Project Configuration Hijacking) and T027 (Supply Chain Memory Poisoning)"
 
   # --- Upsonic (MCP server/task creation RCE) ---
   - id: "CVE-2026-30625"
@@ -1799,6 +1817,18 @@ cve_database:
     mitigation: "Update MS-Agent beyond v1.5.2; replace regex-based command blacklisting with a strict allowlist of permitted operations; never pass untrusted external content (documents, web pages, user input) directly to agent shell tools without sanitization; isolate MS-Agent execution in sandboxes"
     cwe: "CWE-78"
     notes: "Classic regex blacklist bypass: trusted interpreters (python -c, node -e, perl -e) are not blocked but allow arbitrary execution; tokenization bypass via shell parsing semantics sidesteps individual keyword filters"
+
+  # --- Azure MCP Server (missing authentication, information disclosure) ---
+  - id: "CVE-2026-32211"
+    component: "Azure MCP Server (@azure-devops/mcp npm — Microsoft Azure DevOps integration)"
+    severity: "critical"
+    cvss: 9.1
+    description: "Information disclosure via missing authentication in the Azure MCP Server — the server exposes tools for interacting with Azure DevOps (work items, repos, pipelines, pull requests) without proper authentication, allowing unauthenticated network-accessible attackers to read sensitive data including configuration details, API keys, authentication tokens, and project data. CVSS vector: AV:N/AC:L/PR:N/UI:N (network-reachable, no credentials required, no user interaction needed). The MCP SDK itself does not include built-in authentication — the implementation flaw places responsibility on each server."
+    source: "Microsoft disclosure / WindowsNews.ai / Dev Community (2026-04-03)"
+    fixed_in: "no patch confirmed at time of research — Microsoft has published mitigation guidance; monitor Microsoft Security Response Center for updates"
+    mitigation: "Do not expose Azure DevOps MCP server to untrusted networks; require authentication at the network perimeter (reverse proxy with auth); restrict access to trusted agent identities only; audit all Azure DevOps data accessible via the MCP server; monitor Microsoft MSRC for patch release"
+    cwe: "CWE-306"
+    notes: "Part of the broader MCP authentication vacuum (see ADVISORY-MCP-STDIO-2026-001); the underlying issue — MCP SDK provides no authentication primitives — affects many third-party MCP server implementations; particularly high impact given Azure DevOps exposure of pipelines, repos, and work item data"
 
   # --- OpenClaw Claw Chain (four chained sandbox/privilege CVEs) ---
   - id: "CVE-2026-44112"
@@ -2638,6 +2668,17 @@ attack_techniques:
     source: "Reco.ai / HelpNetSecurity (2026-04-09)"
     mitigation: "Audit installed browser extensions and remove any with unnecessary permissions to read all page data; use AI coding tools via native desktop app rather than browser when handling sensitive code; never share API keys, credentials, or secrets in AI chat sessions; treat browser-based AI conversations as potentially intercepted; implement DLP policies for AI tool usage"
 
+  - id: "T031"
+    name: "Shadow Escape: Zero-Click Data Exfiltration via MCP-Connected AI Assistants"
+    description: "Attacker embeds hidden malicious instructions in seemingly innocuous documents (employee onboarding PDFs, shared spreadsheets, web pages) that users upload to MCP-enabled AI assistants during normal workflows. When the AI processes the poisoned file, the hidden instructions direct it to silently access connected MCP-linked systems (databases, CRM, file shares) and exfiltrate sensitive data. No user interaction beyond uploading the document is required — the attack chain completes invisibly, with exfiltration traffic blending into normal agent data access patterns that would appear legitimate to security monitoring teams."
+    examples:
+      - "Shadow Escape (Operant AI): malicious PDF downloaded from a public source, uploaded to Claude/ChatGPT/Gemini with MCP connections — AI silently accesses connected CRM and database, dumps PII including SSNs, medical records, credit card data, and exfiltrates to attacker"
+      - "Poisoned onboarding document instructs MCP-connected AI to read HR database and send employee PII via connected email tool"
+      - "Malicious shared spreadsheet uploaded by one employee causes AI to query connected CRM for all customer records without any additional user input"
+    affected_platforms: ["ChatGPT (with MCP tools)", "Claude (with MCP tools)", "Gemini (with MCP tools)", "any MCP-connected AI assistant"]
+    source: "Operant AI Research (2026-05); CyberSecurityNews (2026-05); CVE designation process initiated but not yet assigned"
+    mitigation: "Apply content scanning to all documents before processing with MCP-enabled AI assistants; treat uploaded documents as potentially adversarial — never grant AI assistants permissions to access sensitive data based solely on instructions in uploaded files; implement DLP policies on MCP-connected AI outputs; require human approval for data export operations initiated by document-processing tasks; use Operant AI or equivalent runtime guardrails that detect unexpected data access during document analysis workflows"
+
   - id: "T030"
     name: "TrustFall: Malicious Repository Auto-Approval via Folder Trust Dialog"
     description: "Attacker places a malicious repository (e.g., on GitHub) containing crafted JSON configuration files in standard AI coding agent locations (.claude/settings.json, .mcp.json, .cursor/mcp.json). When a developer clones the repo and accepts the workspace folder trust prompt — a standard IDE dialog that defaults to 'Accept' on Enter — the malicious config automatically enables all project MCP servers, spawns an attacker-controlled server as an OS process with full developer privileges, and establishes a long-lived command-and-control channel or embeds a persistent payload. The attack is silent, requires only one Enter keypress, and works against Claude Code, Gemini CLI, Cursor CLI, and GitHub Copilot CLI."
@@ -3134,6 +3175,38 @@ scanning_tools:
       - "No API or programmable interface for automation"
     notes: "Useful for quick pre-install checks in browser without installing any CLI tooling; complements mcp-scan and Aguara for users who prefer no-install verification"
 
+  - name: "Golf Scanner"
+    vendor: "golf-mcp (open-source)"
+    type: "cli"
+    command: "golf-scanner scan"
+    url: "https://github.com/golf-mcp/golf-scanner"
+    capabilities:
+      - "Discovers MCP server configurations across 7 IDEs: Claude Code, Cursor, VS Code, Windsurf, Gemini CLI, Kiro, Antigravity"
+      - "Runs 20 security checks — 9 offline (no network) and 11 online (queries OSV, GitHub, npm, PyPI, OCI registries, MCP Registry)"
+      - "Produces a 0-100 risk score per server with severity-weighted scoring"
+      - "Single binary with zero telemetry and no account required"
+      - "Detects shadow MCP deployments across all supported IDEs in a single scan"
+    limitations:
+      - "Does not scan SKILL.md or agent config content for embedded payloads"
+      - "Discovery-focused — does not provide runtime enforcement or behavioral analysis"
+      - "Online checks require network access to external registries"
+    notes: "Released March 2026; Hacker News launch thread: news.ycombinator.com/item?id=47296417; addresses T017 (Shadow MCP Deployment) with the widest IDE coverage of any open-source tool; complements mcp-scan and Aguara for developer workstation discovery"
+
+  - name: "Microsoft MDASH"
+    vendor: "Microsoft"
+    type: "cloud-saas"
+    url: "https://www.microsoft.com/en-us/security/blog/2026/05/12/defense-at-ai-speed-microsofts-new-multi-model-agentic-security-system-tops-leading-industry-benchmark/"
+    capabilities:
+      - "Multi-model agentic scanning harness orchestrating 100+ specialized AI agents"
+      - "Discovers, debates, and proves exploitable bugs end-to-end"
+      - "Found 16 new vulnerabilities in Windows networking and authentication stack (4 Critical RCE)"
+      - "Integrates with Microsoft Defender for vulnerability management workflow"
+      - "Scales to enterprise codebase size — not limited to MCP configs"
+    limitations:
+      - "Microsoft-internal platform — not publicly available as standalone tool"
+      - "Focused on general vulnerability discovery, not MCP/skill-specific scanning"
+    notes: "Announced May 12, 2026; extended to Defender preview June 2026; demonstrates agentic AI applied to the vulnerability discovery problem itself"
+
 # ═══════════════════════════════════════════════════════════════
 # DEFENSIVE FRAMEWORKS & BLOCKLISTS
 # ═══════════════════════════════════════════════════════════════
@@ -3269,3 +3342,19 @@ defensive_resources:
     url: "https://arxiv.org/html/2604.24020v1"
     type: "research"
     description: "April 2026 paper on embedding security awareness directly into AI agent training rather than relying solely on external scanners. Validates Snyk's ToxicSkills finding that 36.82% of ClawHub/skills.sh packages have at least one security issue, and proposes a feedback loop where agents learn to recognize and refuse malicious skill patterns during execution. Key contribution: behavioral security training reduces agent susceptibility to T001 (Tool Poisoning) and T008 (Credential Theft) attack patterns."
+
+  - name: "NSA AISC - MCP Security Design Considerations for AI-Driven Automation"
+    url: "https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/4496698/nsa-releases-security-design-considerations-for-ai-driven-automation-leveraging/"
+    type: "framework"
+    description: "National Security Agency (NSA) Artificial Intelligence Security Center (AISC) Cybersecurity Information Sheet (CSI) published May 20, 2026 (identifier: U/OO/6030316-26, PP-26-1834). Covers secure design for MCP in enterprise AI automation: data classification zones aligned to tool access, message integrity via signed MCP messages with expiration timestamps and replay protection, filtering outgoing proxy or enterprise DLP for external MCP connections, monitoring and logging of all MCP tool calls with automated behavioral anomaly alerts, and sandboxing for MCP server processes. First national-level security guidance specifically targeting MCP deployments. 17-page technical document."
+    pdf_url: "https://www.nsa.gov/Portals/75/documents/Cybersecurity/CSI_MCP_SECURITY.pdf"
+
+  - name: "Five Eyes - Careful Adoption of Agentic AI Services"
+    url: "https://cyberscoop.com/cisa-nsa-five-eyes-guidance-secure-deployment-ai-agents/"
+    type: "framework"
+    description: "First joint agentic AI security guidance from all Five Eyes nations (ASD-Australia, CISA-US, NSA-US, CCCS-Canada, NCSC-NZ, NCSC-UK). Published May 4, 2026. Identifies five risk categories: privilege (over-permissioned agents amplify breach impact), design/configuration flaws, behavioral risks (unintended goal pursuit), structural risks (interconnected agent failures propagating across org), and accountability (opaque decision-making and hard-to-parse audit logs). Key recommendations: zero-trust and least-privilege access per agent, cryptographically secured agent identity with short-lived credentials, encrypted agent-to-agent communications, and folding agentic systems into existing cybersecurity governance frameworks. Applies directly to MCP deployments in operational environments."
+
+  - name: "Microsoft Build 2026 - Windows Secure Runtime for AI Agents (MXC SDK)"
+    url: "https://www.microsoft.com/en-us/security/blog/2026/06/02/microsoft-build-2026-securing-code-agents-and-models-across-the-development-lifecycle/"
+    type: "tool"
+    description: "Microsoft Build 2026 (June 2026) introduced the Microsoft Execution Containers (MXC) SDK — a cross-platform, policy-driven execution layer for AI agents on Windows and WSL. Developers declare what to constrain (file access, network, process execution) and Windows enforces those constraints at runtime. Also announced: Microsoft Defender asset context mapping for agents (inventories MCP servers, associated identities, and reachable cloud resources per agent), policy-based runtime blocking when agents exhibit malicious patterns, and shadow AI discovery covering 18 agent types including Claude Code and GitHub Copilot CLI. MXC SDK is in early preview. Agent 365 with policy controls entered public preview June 2026."
