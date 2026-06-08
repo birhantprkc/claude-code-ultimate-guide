@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Claude Code releases tracking**: updated from v2.1.162 to v2.1.168
+  - v2.1.163 (2026-06-04): `requiredMinimumVersion`/`requiredMaximumVersion` managed settings, `/plugin list`, Stop/SubagentStop hook `additionalContext`, bazel/EDR bash regression fix
+  - v2.1.165 (2026-06-05): bug fixes and reliability improvements
+  - v2.1.166 (2026-06-06): `fallbackModel` setting with up to 3 fallbacks, deny rule glob patterns, thinking disable on default-thinking models, hardened `SendMessage` cross-session authority, JetBrains 2026.1+ flickering fix
+  - v2.1.167-168 (2026-06-06): bug fixes and reliability improvements
+
 ## [3.41.2] - 2026-06-04
 
 ### Security

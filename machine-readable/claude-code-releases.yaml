@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.162"
-updated: "2026-06-04"
+latest: "2.1.168"
+updated: "2026-06-08"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,37 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.168"
+    date: "2026-06-06"
+    highlights:
+      - "Bug fixes and reliability improvements"
+
+  - version: "2.1.167"
+    date: "2026-06-06"
+    highlights:
+      - "Bug fixes and reliability improvements"
+
+  - version: "2.1.166"
+    date: "2026-06-06"
+    highlights:
+      - "⭐ `fallbackModel` setting: up to 3 fallback models tried in order when primary is overloaded or unavailable; `--fallback-model` works in interactive sessions too"
+      - "Glob patterns in deny rule tool-name position (`\"*\"` denies all tools); hardened `SendMessage`: relayed messages no longer carry user authority, auto mode blocks them"
+      - "`MAX_THINKING_TOKENS=0`, `--thinking disabled`, and per-model toggle now disable thinking on models that think by default via Claude API (3P providers unchanged)"
+      - "15+ bug fixes: JetBrains 2026.1+ flickering fix, Kitty protocol Shift+non-ASCII input fix, PowerShell hang fix, orphaned `--bg-pty-host` CPU spin fix on macOS"
+
+  - version: "2.1.165"
+    date: "2026-06-05"
+    highlights:
+      - "Bug fixes and reliability improvements"
+
+  - version: "2.1.163"
+    date: "2026-06-04"
+    highlights:
+      - "⭐ `requiredMinimumVersion`/`requiredMaximumVersion` managed settings: Claude Code refuses to start outside the allowed version range and directs to an approved version"
+      - "`/plugin list` command with `--enabled`/`--disabled` filters; Stop/SubagentStop hooks can return `additionalContext` to continue the turn without a hook error"
+      - "Skills: `\\$` escape for literal `$` in command bodies; stdio MCPs receive `CLAUDE_CODE_SESSION_ID` on `--resume`; `/btw` adds `c` to copy answer to clipboard"
+      - "10+ bug fixes: `claude -p` background hang fix, bazel/EDR bash regression (since 2.1.154), Windows EEXIST fix, managed settings apply on fresh config"
 
   - version: "2.1.162"
     date: "2026-06-03"
