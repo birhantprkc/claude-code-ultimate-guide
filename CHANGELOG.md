@@ -6,13 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Search index: GDPR/Privacy and Governance sections** (`machine-readable/reference.yaml`): added 16 `data_privacy_*` entries covering data flow, retention tiers (5y/30d/ZDR), known risks (`/bug` command, `.env` exposure, MCP DB), protective measures, and GDPR/HIPAA/PCI compliance. Governance and privacy sections are now searchable via cmd+k on the landing site and link to the local guide reader at `cc.bruniaux.com/guide/`.
+
+- **Section 9.26 Review-Driven Context Optimization** (`guide/ultimate-guide.md`): new advanced pattern covering how to convert structured inline review feedback (via tools like [crit](https://github.com/tomasz-tomczyk/crit)) into CLAUDE.md rules. Covers the round-to-round diff as a verification mechanism, pattern extraction from review comment threads, promotion criteria, and the compounding effect over multiple sessions. Cross-referenced with §9.24 (Instinct-Based Learning) and §9.23 (Update Loop). Added to chapter 9 quick jump and ToC.
+- **Resource evaluation: crit** (`docs/resource-evaluations/crit-human-in-loop-review.md`): score 4/5, decision: integrate. Tool by tomasz-tomczyk for human-in-the-loop review with round-to-round diffing, inline plan review before execution, DOM-anchored web app comments, and native Claude Code integration.
+
+### Updated
+
+- Promoted Opus 4.8 (`claude-opus-4-8`) to current/recommended/default Opus across guide, whitepapers, recap cards, machine-readable files, and landing data; demoted Opus 4.6 and 4.7 to previous generation.
+- Added Fable 5 (`claude-fable-5`, Mythos-class) to model-lineup and selection tables throughout the guide and whitepapers.
+- Updated fast-mode references from "6x price" to "2x price" (verified for Opus 4.8) and corrected the `/fast` cheatsheet entry.
+- Marked Opus 4.8 standard pricing as "see official docs" (no published rate); kept 4.6/4.7 rows as previous-generation reference.
+- Updated effort API code example (`guide/ultimate-guide.md` §11.1) from `claude-opus-4-7` to `claude-opus-4-8`.
+- Added "Escalating to Fable 5" mini-section at §2.5 (model selection guide): decision trigger, practical scenarios, access command, and pricing note.
+
+### Security
+
+- **Threat database v2.21.0** (`examples/commands/resources/threat-db.yaml`): monthly update for June 2026.
+  - New campaign: **Miasma Worm** (TeamPCP, June 1-5, 2026): first self-propagating supply chain worm targeting AI coding agent config files. Compromised 32 npm packages under `@redhat-cloud-services` then propagated to 73 Microsoft Azure GitHub repositories. Attack vector: zero-width Unicode injection into `CLAUDE.md` and `.cursorrules`, invisible to human reviewers. Exfiltrates SSH keys, AWS credentials, GitHub tokens, cryptocurrency keystores to TeamPCP C2 infrastructure.
+  - New attack technique **T032** (Zero-Width Unicode Injection into AI Agent Config Files): hidden instructions using U+200B/200C/200D/FEFF characters in `CLAUDE.md`, `.cursorrules`, `AGENTS.md`. Includes detection commands and mitigation guidance.
+  - New IOCs: 4 TeamPCP/Miasma C2 IPs (`83.142.209.194`, `.11`, `.203`, `216.126.225.129:8443`) and domain `git-service.com` (registered 2026-05-16).
+  - New scanning tools: **NVIDIA SkillSpector** (open-source, 64 patterns across 16 categories, part of Verified Agent Skills framework, May 22, 2026) and **VIPER-MCP** (arXiv 2605.21392, academic framework, scanned 39,884 repos, found 106 zero-days, 67 CVEs assigned, May 30, 2026).
+  - New defensive resource: **vulnerablemcp.info** (community MCP vulnerability database, seeded from VIPER-MCP scan, June 2026).
+  - 6 new sources added (157 total). Total: 157 sources, 15 campaigns, 32 attack techniques, 37 scanning tools, 26 defensive resources, 10 C2 IPs, 4 malicious domains.
+
 ### Documentation
 
-- **Claude Code releases tracking**: updated from v2.1.162 to v2.1.168
-  - v2.1.163 (2026-06-04): `requiredMinimumVersion`/`requiredMaximumVersion` managed settings, `/plugin list`, Stop/SubagentStop hook `additionalContext`, bazel/EDR bash regression fix
-  - v2.1.165 (2026-06-05): bug fixes and reliability improvements
-  - v2.1.166 (2026-06-06): `fallbackModel` setting with up to 3 fallbacks, deny rule glob patterns, thinking disable on default-thinking models, hardened `SendMessage` cross-session authority, JetBrains 2026.1+ flickering fix
-  - v2.1.167-168 (2026-06-06): bug fixes and reliability improvements
+- **Resource evaluations**: evaluated liza-mas token-saving CLI tools and Semble semantic search
+  - `liza-mas` roster (scip-search, mdtoc, functional-clusters, stacklit-cli): all score 1-2/5. scip-search (0 stars, day-one release), mdtoc (1 star, generic utility), and functional-clusters (0 stars, framework-internal) rejected. stacklit-cli (2 stars, Go variant of documented stacklit concept) added to watch-list with trigger condition 50+ stars.
+  - Semble (MinishLab/semble, ~5k stars, MIT): score 3/5. Integrated as Ollama-free alternative to grepai in `guide/ecosystem/mcp-servers-ecosystem.md` Code Search section. Corrects community claim of "index-free" (Semble builds and caches an index; the differentiator is no Ollama dependency, broader search scope code+docs+config).
+  - Eval files: `docs/resource-evaluations/liza-mas-token-saving-cli-tools.md`, `docs/resource-evaluations/semble-code-search.md`
+- **Cost Optimization Levers table** (`guide/ultimate-guide.md` §9.13): added a structured overview of the 6 cost levers (monitoring, output compression, model routing, prompt caching, batch processing, semantic pre-indexing) with Native vs. API/SDK columns and cross-links to existing documented sections. Includes RouteLLM citation (lm-sys, ICLR 2025, arXiv 2406.18665: 85% cost reduction on MT-Bench vs always-strong routing).
+- **Batch API discoverability** (`guide/ultimate-guide.md` §9.13): added cross-link to Message Batches API section in `core/architecture.md` (50% cheaper async processing), previously only reachable from an architecture deep-dive.
+- **machine-readable/reference.yaml**: added `semble_*` entries (upstream, guide, evaluation, purpose, vs_grepai note), `cost_levers_table` pointer (§9.13 new subsection), `batch_api_cost_lever`, `routellm_citation` (arXiv:2406.18665). Updated `updated` date to 2026-06-10, `resource_evaluations_count` to 86.
+
+- **Claude Code releases tracking**: updated from v2.1.168 to v2.1.170
+  - v2.1.169 (2026-06-09): `--safe-mode` flag + `CLAUDE_CODE_SAFE_MODE`, `/cd` command, `disableBundledSkills` setting, enterprise MCP policy fix, macOS startup stall fix, 15+ bug fixes
+  - v2.1.170 (2026-06-09): ⭐ Claude Fable 5 (Mythos-class model) access, VS Code terminal transcript fix
 
 ## [3.41.2] - 2026-06-04
 

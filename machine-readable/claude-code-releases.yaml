@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.168"
-updated: "2026-06-08"
+latest: "2.1.170"
+updated: "2026-06-09"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,20 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.170"
+    date: "2026-06-09"
+    highlights:
+      - "⭐ Claude Fable 5 (Mythos-class model) now available: exceeds capabilities of any previously generally available Anthropic model"
+      - "Fixed transcript saving when sessions are launched from VS Code integrated terminal or shells that inherited Claude Code environment variables"
+
+  - version: "2.1.169"
+    date: "2026-06-09"
+    highlights:
+      - "⭐ `--safe-mode` flag (and `CLAUDE_CODE_SAFE_MODE` env var): starts Claude Code with all customizations disabled (CLAUDE.md, plugins, skills, hooks, MCP servers) for troubleshooting"
+      - "⭐ `/cd` command: change working directory mid-session without breaking the prompt cache"
+      - "`disableBundledSkills` setting and `CLAUDE_CODE_DISABLE_BUNDLED_SKILLS` env var to hide built-in skills, workflows, and slash commands"
+      - "15+ bug fixes: enterprise MCP policy enforcement, macOS startup UI stall (~30-50ms), Windows Git Credential Manager popup, `claude agents --json` missing sessions, `TaskCreate` reliability improvements"
 
   - version: "2.1.168"
     date: "2026-06-06"

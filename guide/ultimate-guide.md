@@ -221,6 +221,7 @@ If you only have time for 5 sections:
   - [9.23 Configuration Lifecycle & The Update Loop](#923-configuration-lifecycle--the-update-loop)
   - [9.24 Instinct-Based Continuous Learning](#924-instinct-based-continuous-learning)
   - [9.25 Harness Engineering](#925-harness-engineering)
+  - [9.26 Review-Driven Context Optimization](#926-review-driven-context-optimization)
 - [10. Reference](#10-reference) `🟢 All levels` `⏱ As needed`
   - [10.1 Commands Table](#101-commands-table)
   - [10.2 Keyboard Shortcuts](#102-keyboard-shortcuts)
@@ -2225,22 +2226,24 @@ Claude Code isn't free - you're using API credits. Understanding costs helps opt
 
 #### Pricing Model (as of April 2026)
 
-The default model depends on your subscription: **Max/Team Premium** subscribers get **Opus 4.7** by default, while **Pro/Team Standard** subscribers get **Sonnet 4.6**. If Opus usage hits the plan threshold, it auto-falls back to Sonnet.
+The default model depends on your subscription: **Max/Team Premium** subscribers get **Opus 4.8** by default, while **Pro/Team Standard** subscribers get **Sonnet 4.6**. If Opus usage hits the plan threshold, it auto-falls back to Sonnet.
 
-> **Model lineup (April 2026)**: Claude Opus 4.7 is the standard production Opus model (`claude-opus-4-7`). Claude Mythos Preview is more capable but remains in limited release. Opus 4.7 is the recommended upgrade path from Opus 4.6. For workflows where Opus 4.6's lower token footprint outweighs 4.7's newer features, see [Pinning Opus 4.6](#pinning-opus-46-community-hack) in the OpusPlan section.
+> **Model lineup (June 2026)**: Claude Opus 4.8 (`claude-opus-4-8`) is the current standard production Opus. Claude Fable 5 (`claude-fable-5`, Mythos-class) is the most capable model available, exceeding any previously GA Anthropic model ([announcement](https://www.anthropic.com/news/claude-fable-5-mythos-5)). Opus 4.7 and 4.6 are previous-generation; for workflows where Opus 4.6's lower token footprint is intentional, see [Pinning Opus 4.6](#pinning-opus-46-community-hack) in the OpusPlan section.
 
 | Model | Input (per 1M tokens) | Output (per 1M tokens) | Context Window | Notes |
 |-------|----------------------|------------------------|----------------|-------|
+| **Fable 5** | See official docs | See official docs | See official docs | Mythos-class, most capable; [specs](https://www.anthropic.com/pricing) |
+| **Opus 4.8** | See official docs | See official docs | 200K tokens | Current default for Max/Team Premium; high effort default |
+| Opus 4.8 (fast mode) | See official docs | See official docs | 200K tokens | Fast mode: 2.5x faster, 2x price |
 | **Sonnet 4.6** | $3.00 | $15.00 | 200K tokens | Default (Pro/Team Standard) |
 | Sonnet 4.5 | $3.00 | $15.00 | 200K tokens | Legacy |
-| **Opus 4.7** | $5.00 | $25.00 | 200K tokens | Released April 2026; default for Max/Team Premium |
-| Opus 4.7 (1M context) | $5.00 | $25.00 | 1M tokens | GA for Max/Team/Enterprise; API requires tier 4 |
+| Opus 4.7 | $5.00 | $25.00 | 200K tokens | Previous generation |
+| Opus 4.7 (1M context) | $5.00 | $25.00 | 1M tokens | Previous generation |
 | Opus 4.6 (standard) | $5.00 | $25.00 | 200K tokens | Previous generation |
 | Opus 4.6 (1M context) | $5.00 | $25.00 | 1M tokens | Previous generation |
-| Opus 4.6 (fast mode) | $30.00 | $150.00 | 200K tokens | Fast mode; 2.5x faster, 6x price |
 | Haiku 4.5 | $0.80 | $4.00 | 200K tokens | Budget option |
 
-> **Opus 4.7 tokenizer**: A new tokenizer means the same input can map to roughly **1.0–1.35×** more tokens depending on content type. At higher effort levels, Opus 4.7 also produces more output tokens (more reasoning). Measure your real traffic when migrating from Opus 4.6; use the `effort` parameter to control spend.
+> **Pricing note**: Opus 4.8 and Fable 5 standard pricing is not yet published in any tracked source. Check [anthropic.com/pricing](https://www.anthropic.com/pricing) for current rates. Fast mode on Opus 4.8 runs at 2.5x speed at 2x the standard price (changed from 4.6's 6x). Use the `effort` parameter to control spend.
 
 **Reality check**: A typical 1-hour session costs **$0.10 - $0.50** depending on usage patterns.
 
@@ -2276,14 +2279,14 @@ For comparison: Gemini 1.5 Pro offers a 2M context window at $3.50/$10.50/MTok �
 
 | Scenario | Recommendation |
 |----------|---------------|
-| Bug fix, PR review, daily coding | Sonnet 4.6 @ 200K — fast and cheap |
-| Full-repo audit, entire codebase load | Opus 4.7 @ 1M — worth the cost for precision |
-| Cross-module refactoring | Sonnet 4.6 @ 1M — but weigh cost vs. chunking + RAG |
-| Architecture analysis, Agent Teams | Opus 4.7 @ 1M — strongest retrieval at scale |
-| Large-document RAG (PDFs, legal, books) | Consider Gemini 1.5 Pro — cheaper at this scale |
+| Bug fix, PR review, daily coding | Sonnet 4.6 @ 200K (fast and cheap) |
+| Full-repo audit, entire codebase load | Opus 4.8 @ 1M (worth the cost for precision) |
+| Cross-module refactoring | Sonnet 4.6 @ 1M (weigh cost vs. chunking + RAG) |
+| Architecture analysis, Agent Teams | Opus 4.8 @ 1M (strongest retrieval at scale) |
+| Large-document RAG (PDFs, legal, books) | Consider Gemini 1.5 Pro (cheaper at this scale) |
 
 **Key facts**
-- Opus 4.7 max output: **128K tokens** (same as Opus 4.6); Sonnet 4.6 max output: **64K tokens**
+- Opus 4.8 max output: **128K tokens** (same as prior Opus generations); Sonnet 4.6 max output: **64K tokens**
 - 1M context ≈ 30,000 lines of code / 750,000 words
 - 1M context is **GA for Max/Team/Enterprise Claude Code plans** (v2.1.75, March 2026) — API direct use still requires tier 4 or custom rate limits
 - API direct use above 200K input tokens: Sonnet 4.6 doubles to $6/$22.50/MTok; Opus 4.6 doubles to $10/$37.50/MTok (standard rate applies for Claude Code Max/Team/Enterprise plans)
@@ -3496,16 +3499,27 @@ _Quick jump:_ [Decision Table](#decision-table) · [Effort Levels](#effort-level
 | System architecture | Opus | high | ~$1.25 |
 | Critical security audit | Opus | max | ~$2+ |
 | Multi-agent orchestration | Sonnet + Haiku | mixed | variable |
+| Tasks where Opus 4.8 at max is insufficient | Fable 5 | max | See official docs |
 
-> **Note on costs**: Estimates based on API pricing (Haiku $0.80/$4.00 per MTok, Sonnet $3/$15, Opus $5/$25). Pro/Max subscribers pay a flat rate, so prioritize quality over cost. See [Section 2.2](#cost-awareness--optimization) for full pricing breakdown.
+> **Note on costs**: Estimates based on API pricing (Haiku $0.80/$4.00 per MTok, Sonnet $3/$15, Opus $5/$25). Pro/Max subscribers pay a flat rate, so prioritize quality over cost. Fable 5 pricing unpublished; check [anthropic.com/pricing](https://www.anthropic.com/pricing). See [Section 2.2](#cost-awareness--optimization) for full pricing breakdown.
 >
-> **Budget modifier** (Teams Standard/Pro): downgrade one tier per phase — use Sonnet where the table says Opus, Haiku where it says Sonnet for mechanical implementation tasks. Community pattern: *Sonnet for Plan → Haiku for Implementation* on a $25/mo Teams Standard plan.
+> **Budget modifier** (Teams Standard/Pro): downgrade one tier per phase (use Sonnet where the table says Opus, Haiku where it says Sonnet for mechanical implementation tasks). Community pattern: *Sonnet for Plan → Haiku for Implementation* on a $25/mo Teams Standard plan.
+
+#### Escalating to Fable 5
+
+Claude Fable 5 (`claude-fable-5`, Mythos-class, available from Claude Code v2.1.170) exceeds the capabilities of any previously GA Anthropic model. In practice, use it when Opus 4.8 at `max` effort is not meeting your quality bar.
+
+Decision trigger: you ran the task on Opus with `max` effort and the output is not good enough for a critical or irreversible decision. Fable 5 is not a default. Cost is unpublished; check [anthropic.com/pricing](https://www.anthropic.com/pricing). Reserve it for tasks where output quality matters more than budget.
+
+Practical scenarios: production security audits where errors are unacceptable, architecture decisions with lasting consequences, or multi-step agentic work where Opus alone has fallen short.
+
+**Access**: `/model claude-fable-5` (v2.1.170+). [Announcement](https://www.anthropic.com/news/claude-fable-5-mythos-5)
 
 ---
 
 ### Effort Levels
 
-The `effort` parameter (Opus 4.6 API) controls the model's **overall computational budget** — not just thinking tokens, but tool calls, verbosity, and analysis depth. Low effort = fewer tool calls, no preamble. High effort = more explanations, detailed analysis.
+The `effort` parameter (Opus 4.6+ API) controls the model's overall computational budget: not just thinking tokens, but tool calls, verbosity, and analysis depth. Low effort = fewer tool calls, no preamble. High effort = more explanations, detailed analysis.
 
 **Calibrated gradient — one real prompt per level:**
 
@@ -14639,7 +14653,7 @@ claude
 
 # 9. Advanced Patterns
 
-_Quick jump:_ [The Trinity](#91-the-trinity) · [Composition Patterns](#92-composition-patterns) · [CI/CD Integration](#93-cicd-integration) · [IDE Integration](#94-ide-integration) · [Tight Feedback Loops](#95-tight-feedback-loops)
+_Quick jump:_ [The Trinity](#91-the-trinity) · [Composition Patterns](#92-composition-patterns) · [CI/CD Integration](#93-cicd-integration) · [IDE Integration](#94-ide-integration) · [Tight Feedback Loops](#95-tight-feedback-loops) · [Review-Driven Context Optimization](#926-review-driven-context-optimization)
 
 ---
 
@@ -14792,7 +14806,7 @@ The most powerful Claude Code pattern combines three techniques:
 | **Opus 4.6** (Feb 2026) | **Adaptive thinking** (dynamic depth) | `effort` parameter (API), Alt+T (CLI) |
 | **Opus 4.7** (Apr 2026) | **Adaptive thinking + xhigh** (new effort level) | `effort` parameter (API), Alt+T (CLI) |
 
-#### Adaptive Thinking (Opus 4.6 and Opus 4.7)
+#### Adaptive Thinking (Opus 4.6+, including Opus 4.8)
 
 **How it works**: The `effort` parameter controls the model's **overall computational budget** — not just thinking tokens, but the entire response including text generation and tool calls. The model dynamically allocates this budget based on query complexity.
 
@@ -14815,7 +14829,7 @@ The most powerful Claude Code pattern combines three techniques:
 **API syntax**:
 ```python
 response = client.messages.create(
-    model="claude-opus-4-7",
+    model="claude-opus-4-8",
     max_tokens=16000,
     output_config={"effort": "xhigh"},  # low|medium|high|xhigh|max
     messages=[{"role": "user", "content": "Analyze..."}]
@@ -14893,11 +14907,11 @@ claude -p "Analyze this architecture."
 - **`assistant-prefill`**: Deprecated on Opus 4.6. Previously allowed pre-filling Claude's response to guide output format. Now unsupported — use system prompts or examples instead.
 
 **New features**:
-- **Fast mode API**: Add `speed: "fast"` + beta header `fast-mode-2026-02-01` for 2.5x faster responses (6x cost)
+- **Fast mode API**: Add `speed: "fast"` + beta header `fast-mode-2026-02-01` for 2.5x faster responses (2x cost on Opus 4.8)
   ```python
   response = client.messages.create(
-      model="claude-opus-4-6",
-      speed="fast",  # 2.5x faster, 6x price
+      model="claude-opus-4-8",
+      speed="fast",  # 2.5x faster, 2x price
       headers={"anthropic-beta": "fast-mode-2026-02-01"},
       messages=[...]
   )
@@ -16873,7 +16887,7 @@ exit 0  # Allow
 - Use `--add-dir` to allow tool access to directories outside the current working directory
 - Manage thinking mode for cost efficiency:
   - Simple tasks: Alt+T to disable thinking → faster, cheaper
-  - Complex tasks: Leave thinking enabled (default in Opus 4.6)
+  - Complex tasks: Leave thinking enabled (default in Opus 4.8)
   - `ultrathink` keyword forces high effort for the next turn specifically (re-introduced in v2.1.68)
 - Set `cleanupPeriodDays` in config to prune old sessions automatically
 - Re-enable thinking summaries if needed: add `"showThinkingSummaries": true` to settings.json (off by default in interactive sessions since v2.1.89)
@@ -18888,6 +18902,23 @@ The timeline matters: on May 6, Anthropic doubled interactive rate limits (annou
 
 For the majority of Claude Code users who use it interactively in the terminal, the impact is zero. For teams that have built significant automation on top of `claude -p` or the Agent SDK, this is a material change worth planning for before June 15.
 
+### Cost Optimization Levers: Native vs. API-Level
+
+Six levers control LLM costs. Some are directly accessible within Claude Code; others require building on the Anthropic API or SDK. The table maps each lever to what is already available and where to find it.
+
+| Lever | Native in Claude Code? | If building with the Anthropic API/SDK | Where documented |
+|-------|------------------------|----------------------------------------|------------------|
+| Cost monitoring | `/cost` command, `ccusage` CLI, subscription credit dashboard | Anthropic Console dashboard, per-call spend tracking | §9.13 above |
+| Output compression | Caveman skill (65-75% prose reduction), RTK for CLI output | Prompt engineering, streaming response handling | §9.13 Caveman + RTK |
+| Model routing | `/model opusplan`, `model:` agent frontmatter, `haiku` for mechanical tasks | RouteLLM (85% fewer calls to top-tier model on MT-Bench, arXiv 2406.18665) | [§2.5 Model Selection](#25-model-selection--thinking-guide) |
+| Prompt caching | Automatic for stable context prefixes (Anthropic caches repeated prefixes transparently) | `cache_control` breakpoints in API requests; up to 90% savings on repeated context | [§2.2 Token Management](#22-token-usage--context-management) |
+| Batch processing | Not available in interactive Claude Code sessions | Message Batches API: 50% cheaper, async, 24-hour window, up to 100 requests per batch | [core/architecture.md, Message Batches API](../core/architecture.md#message-batches-api) |
+| Semantic pre-indexing | grepai MCP, lean-ctx, stacklit | Semble (CPU-only, no Ollama required, native MCP server) | mcp-servers-ecosystem.md, context-engineering-tools.md |
+
+**On model routing via the API**: RouteLLM (lm-sys, ICLR 2025, arXiv 2406.18665) trains a lightweight router that decides per-call whether to invoke a strong model or a cheaper one. On MT-Bench it achieves 85% cost reduction vs always-strong routing while matching 95% of strong-model performance. The technique applies to automated pipelines built on the Anthropic API, not to interactive Claude Code sessions.
+
+**On batch processing**: The [Message Batches API](../core/architecture.md#message-batches-api) is the highest-leverage lever for automated pipelines (nightly classification, bulk document analysis, large-scale data extraction). Not applicable to interactive use. If you run `claude -p` in CI/CD at volume, evaluate the Batches API before the June 15 programmatic billing split, which separates interactive and programmatic usage costs.
+
 ---
 
 ## 9.14 Development Methodologies
@@ -19380,7 +19411,7 @@ Boris Cherny, creator of Claude Code, shared his workflow orchestrating 5-15 Cla
 - **5-10 instances** on claude.ai/code (`--teleport` to sync with local)
 - **Git worktrees** for isolation (each instance = separate checkout)
 - **CLAUDE.md**: 2.5k tokens, team-shared and versioned in git
-- **Model**: Opus 4.6 or Opus 4.7 (slower but fewer corrections needed, adaptive thinking)
+- **Model**: Opus 4.8 (slower but fewer corrections needed, adaptive thinking)
 - **Slash commands**: `/commit-push-pr` used "dozens of times per day"
 
 **Results** (30 days, January 2026):
@@ -19402,7 +19433,7 @@ Boris Cherny, creator of Claude Code, shared his workflow orchestrating 5-15 Cla
 
 > **On verification loops**: "I give Claude a way to verify output (browser/tests): verification drives quality."
 
-**Why Opus 4.6 or Opus 4.7 with Adaptive Thinking**: Although more expensive per token ($5/1M input vs $3/1M for Sonnet), Opus requires fewer correction iterations thanks to adaptive thinking. Net result: faster delivery and lower total cost despite higher unit price.
+**Why Opus 4.8 with Adaptive Thinking**: Although more expensive per token than Sonnet, Opus requires fewer correction iterations thanks to adaptive thinking. Net result: faster delivery and lower total cost despite higher unit price.
 
 **The supervision model**: Boris describes his role as "tending to multiple agents" rather than "doing every click yourself." The workflow becomes about **steering outcomes** across 5-10 parallel sessions, unblocking when needed, rather than sequential execution.
 
@@ -22569,7 +22600,7 @@ I'll decide based on our team context.
 
 **Reading time**: 5 minutes (overview) | [Quick Start →](./workflows/agent-teams-quick-start.md) (8-10 min, practical) | [Full workflow guide →](./workflows/agent-teams.md) (~30 min, theory)
 **Skill level**: Month 2+ (Advanced)
-**Status**: ⚠️ Experimental (v2.1.32+, Opus 4.6 or Opus 4.7 required)
+**Status**: ⚠️ Experimental (v2.1.32+, Opus 4.8 recommended, Opus 4.6+ compatible)
 
 ### What Are Agent Teams?
 
@@ -22595,7 +22626,7 @@ OR in ~/.claude/settings.json:
 ### When Introduced & Production Validation
 
 **Version**: v2.1.32 (2026-02-05) as research preview
-**Model requirement**: Opus 4.6 or Opus 4.7 minimum
+**Model requirement**: Opus 4.8 recommended (Opus 4.6+ compatible)
 
 **Production metrics** (validated cases):
 - **Fountain** (workforce management): 50% faster screening, 2x conversions
@@ -23863,6 +23894,121 @@ This philosophy only applies when throughput is genuinely high. At normal develo
 
 ---
 
+## 9.26 Review-Driven Context Optimization
+
+**Reading time**: 7 minutes
+**Skill level**: Month 2+
+
+> **Relationship to §9.24**: Instinct-based learning captures observations passively from session logs. Review-driven optimization captures structured human corrections actively (what you explicitly marked wrong during a review cycle). Both feed the same destination (CLAUDE.md and `.claude/rules/`), from different signal sources.
+
+### The Problem with End-of-Session Reflections
+
+When you finish a Claude Code session and ask "what should I add to CLAUDE.md?", you're working from memory. You remember the frustrating moments, but you lose the specifics: which file, which line, what the agent produced versus what you wanted. The gap between observation and encoded rule stays wide.
+
+Review-driven optimization changes the capture point. Instead of extracting lessons at session end, you extract them from the structured feedback you left *during* the review: inline comments attached to specific lines, on specific files, at specific points in the agent's output. The signal is richer and already scoped to a location.
+
+### The Feedback Loop
+
+```
+Claude Code produces output (round 1)
+        ↓
+Human reviews inline with crit
+  → leaves comments on specific lines
+        ↓
+Claude Code iterates (round 2)
+        ↓
+crit shows round-to-round diff
+  → what changed, what was addressed, what wasn't
+        ↓
+Extract comment patterns across sessions
+        ↓
+Convert recurring patterns into CLAUDE.md rules
+```
+
+The round-to-round diff (delta between agent iterations, not between commits) is the verification step: it tells you whether the agent actually applied your correction, or just acknowledged it. If round 2 still contains the same issue you flagged in round 1, that is a strong signal the rule needs to be explicit in CLAUDE.md, since the agent can't infer it from context alone.
+
+### crit as the Capture Layer
+
+[crit](https://github.com/tomasz-tomczyk/crit) is a local review interface built for this loop. It provides inline commenting on git diffs, markdown/plan files, and live web apps, with native Claude Code integration:
+
+```bash
+brew install crit
+crit install claude-code   # writes config snippets for the project
+```
+
+Basic review flow:
+
+```bash
+# After Claude Code produces a diff or plan:
+crit                        # auto-detects uncommitted changes
+crit plan.md                # review a plan before Claude executes it
+
+# After Claude iterates (round 2):
+crit                        # shows round-to-round diff alongside your comments
+```
+
+The programmatic comment API lets you annotate from the CLI, useful when scripting the extraction step:
+
+```bash
+crit comment src/file.go:42 "wrong approach, see rule X"
+```
+
+### Extracting Patterns from Review Comments
+
+After a review session, dump the accumulated comments and look for recurrence across files and sessions:
+
+```bash
+# Extract rule candidates from recent crit threads
+cat .crit/threads/*.json | claude --print "
+Analyze these review comments.
+Identify patterns that recur across multiple locations or sessions.
+For each pattern, draft a one-line rule for CLAUDE.md that would prevent the issue.
+Format:
+- pattern: <what kept appearing>
+  rule: <the CLAUDE.md rule that prevents it>
+  confidence: <low|medium|high>
+Only include patterns with 2+ occurrences. Skip one-off corrections."
+```
+
+The confidence field matters. A pattern that appeared twice across two sessions might be coincidence; one that appeared five times across different files and different days is a systematic gap in your context.
+
+### What Gets Promoted vs. What Gets Discarded
+
+The extraction produces candidates. The promotion stays manual:
+
+| Pattern type | Action |
+|---|---|
+| Recurs 4+ times, same type of mistake | Promote to CLAUDE.md rule immediately |
+| Recurs 2-3 times, related to a specific file type | Add to `.claude/rules/` scoped rule |
+| Appeared once, highly specific | Discard: one-off correction, not a pattern |
+| Appeared once, high cost if repeated | Add to `.claude/rules/` with a note |
+
+The rule should encode the *constraint*, not the *correction*. "Don't use em dashes in prose files" is a good rule. "Fix the em dash on line 47 of guide.md" is not.
+
+### The Round-to-Round Diff as Verification
+
+The diff between rounds 1 and 2 answers a different question than the comments themselves. Comments tell you what was wrong. The diff tells you whether the agent understood the correction and applied it correctly.
+
+If you flagged an issue in round 1 and the diff shows it was addressed, that correction may not need a rule: the agent understood and adapted. If you flagged the same issue and the diff shows no change (or a partial change), that pattern belongs in CLAUDE.md. The agent cannot reliably infer it from prompt context alone.
+
+This is the verification step that distinguishes review-driven optimization from pure instinct capture. You're not just observing, you're testing whether an explicit instruction was sufficient, and encoding it as a permanent rule when it wasn't.
+
+### Practical Setup
+
+1. Install crit: `brew install crit && crit install claude-code`
+2. Run a review cycle after any multi-iteration Claude Code session
+3. After 3-5 sessions, dump comment threads and run the extraction prompt above
+4. Promote 0-2 rules per week to CLAUDE.md or `.claude/rules/`
+5. Discard the rest: candidate rules that didn't reach threshold have already served their purpose
+
+**The compounding effect**: each rule added from review feedback removes a class of corrections from future sessions. After a few months, the review comments shift from "you did X wrong" to "this is a design question," which signals that the mechanical patterns are covered and the remaining gaps require judgment.
+
+> **Tool**: [crit by tomasz-tomczyk](https://github.com/tomasz-tomczyk/crit), MIT, active maintenance, native `crit install claude-code` support.
+
+> **See also**: [§9.24 Instinct-Based Continuous Learning](#924-instinct-based-continuous-learning) for passive capture from session logs. [§9.23 Configuration Lifecycle & The Update Loop](#923-configuration-lifecycle--the-update-loop) for deliberate CLAUDE.md maintenance. [§3.1 CLAUDE.md](#31-memory-files-claudemd) for where the extracted rules land.
+
+---
+
 # 10. Reference
 
 _Quick jump:_ [Commands Table](#101-commands-table) · [Keyboard Shortcuts](#102-keyboard-shortcuts) · [Configuration Reference](#103-configuration-reference) · [Troubleshooting](#104-troubleshooting) · [Cheatsheet](#105-cheatsheet) · [Daily Workflow](#106-daily-workflow--checklists)
@@ -23917,7 +24063,7 @@ _Quick jump:_ [Commands Table](#101-commands-table) · [Keyboard Shortcuts](#102
 | `/doctor` | Run diagnostics and troubleshooting checks | Debug |
 | `/execute` | Exit Plan Mode | Mode |
 | `/exit` | Exit Claude Code | Session |
-| `/fast` | Toggle fast mode (Opus 4.6, 2.5x faster, 6x price) | Mode |
+| `/fast` | Toggle fast mode (Opus 4.8, 2.5x faster, 2x price) | Mode |
 | `/hooks` | Interactive hook configuration | Config |
 | `/init` | Generate starter CLAUDE.md based on project structure — ⚠️ output is LLM-generated; review and prune before committing (ETH Zürich research shows auto-generated context files reduce agent task success by ~3% and add 20%+ inference cost) | Config |
 | `/login` | Log in to Claude account | Auth |
