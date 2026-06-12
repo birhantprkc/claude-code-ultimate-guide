@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Claude Code Releases**: Updated tracking to v2.1.173
+  - v2.1.172: sub-agents spawning sub-agents (5 levels deep), Bedrock region auto-detection from `~/.aws`, plugin search bar, 20+ bug fixes including 1M context stuck, model picker `availableModels` issues, permission rule wildcards, workflow script validation
+  - v2.1.173: Fable 5 `[1m]` suffix normalization fix, Windows sandbox warning fix
+
 ### Added
 
 - **Search index: GDPR/Privacy and Governance sections** (`machine-readable/reference.yaml`): added 16 `data_privacy_*` entries covering data flow, retention tiers (5y/30d/ZDR), known risks (`/bug` command, `.env` exposure, MCP DB), protective measures, and GDPR/HIPAA/PCI compliance. Governance and privacy sections are now searchable via cmd+k on the landing site and link to the local guide reader at `cc.bruniaux.com/guide/`.

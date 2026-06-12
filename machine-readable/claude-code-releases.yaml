@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.170"
-updated: "2026-06-09"
+latest: "2.1.173"
+updated: "2026-06-11"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,20 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.173"
+    date: "2026-06-11"
+    highlights:
+      - "Fixed Fable 5 model names with `[1m]` suffix not normalized (1M context included by default, suffix now stripped automatically)"
+      - "Fixed spurious 'sandbox dependencies missing' startup warning on Windows when sandbox enabled in settings"
+
+  - version: "2.1.172"
+    date: "2026-06-11"
+    highlights:
+      - "⭐ Sub-agents can now spawn their own sub-agents (up to 5 levels deep)"
+      - "Amazon Bedrock reads AWS region from `~/.aws` config files when `AWS_REGION` not set; `/status` shows region source"
+      - "Search bar added when browsing marketplace plugins in `/plugin`; `model` attribute added to `claude_code.lines_of_code.count` OTEL metric"
+      - "20+ bug fixes: 1M context stuck without usage credits, repeated image error, agents view spinner delay, background agent settings isolation, model picker `availableModels` issues, permission rule wildcards, workflow script validation, VS Code PowerShell rendering"
 
   - version: "2.1.170"
     date: "2026-06-09"
