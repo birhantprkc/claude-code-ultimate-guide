@@ -8,9 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.173
-  - v2.1.172: sub-agents spawning sub-agents (5 levels deep), Bedrock region auto-detection from `~/.aws`, plugin search bar, 20+ bug fixes including 1M context stuck, model picker `availableModels` issues, permission rule wildcards, workflow script validation
-  - v2.1.173: Fable 5 `[1m]` suffix normalization fix, Windows sandbox warning fix
+- **Claude Code Releases**: Updated tracking to v2.1.176
+  - v2.1.174: `wheelScrollAccelerationEnabled` setting, `/model` picker Default model family fix, VS Code usage attribution per-skill/agent/plugin/MCP, 8+ bug fixes (Bedrock GovCloud prefix, background session env inheritance, Fable 5 billing banner)
+  - v2.1.175: `enforceAvailableModels` managed setting: constrains Default model to allowlist, blocks user/project settings from widening managed list
+  - v2.1.176: session titles in conversation language + `language` setting, `footerLinksRegexes` setting, Bedrock credential caching until Expiration, 15+ bug fixes (availableModels alias enforcement, Fable 5 auto mode fallback, hook `if` path conditions, Linux sandbox symlink, tmux clipboard, Remote Control)
 
 ### Added
 

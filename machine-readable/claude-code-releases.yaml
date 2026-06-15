@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.173"
-updated: "2026-06-11"
+latest: "2.1.176"
+updated: "2026-06-15"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,27 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.176"
+    date: "2026-06-15"
+    highlights:
+      - "⭐ Session titles now generated in the language of your conversation; `language` setting pins a specific language"
+      - "`footerLinksRegexes` setting: regex-matched link badges in the footer row, configurable via user or managed settings"
+      - "Improved Bedrock credential caching: credentials from `awsCredentialExport` cached until `Expiration` instead of fixed 1 hour"
+      - "15+ bug fixes: `availableModels` alias enforcement, Fable 5 auto mode fallback, hook `if` path conditions, Linux sandbox symlink, tmux clipboard, Remote Control model switch, `/cd` git branch reporting, `claude agents` back button"
+
+  - version: "2.1.175"
+    date: "2026-06-15"
+    highlights:
+      - "⭐ `enforceAvailableModels` managed setting: when enabled, constrains the Default model to the allowlist and prevents user/project settings from widening a managed list"
+
+  - version: "2.1.174"
+    date: "2026-06-15"
+    highlights:
+      - "`wheelScrollAccelerationEnabled` setting to disable mouse-wheel scroll acceleration in fullscreen mode"
+      - "Fixed `/model` picker hiding the model family that Default resolves to (Opus row visible on Max/Team Premium/Enterprise, Sonnet on Pro/Team)"
+      - "[VSCode] Usage attribution in Account & usage dialog: cache misses, long context, subagents, per-skill/agent/plugin/MCP breakdowns over 24h or 7d"
+      - "8+ bug fixes: Fable 5 billing banner on enterprise, Bedrock GovCloud prefix, background session env inheritance, exit pause on macOS/Linux, skill hot-reload efficiency"
 
   - version: "2.1.173"
     date: "2026-06-11"
