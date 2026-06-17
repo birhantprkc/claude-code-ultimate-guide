@@ -8,7 +8,7 @@ tags: [reference, integration, plugin, security]
 
 > Community tools for token tracking, context compression, session management, configuration, hook utilities, and alternative UIs.
 >
-> **Last verified**: May 2026
+> **Last verified**: June 2026
 
 ## Table of Contents
 
@@ -1600,6 +1600,7 @@ Claude Code's plugin system supports community-built extensions. For detailed do
 **Notable skill packs**:
 - **[Superpowers](https://github.com/obra/superpowers)** — Complete software development methodology suite (95k+ stars, 7.5k forks, MIT). 7 context-aware skills covering the full development arc: spec elicitation through Socratic brainstorming, detailed implementation planning (2-5 min tasks with exact file paths), subagent-driven development with two-stage review (spec compliance then code quality), mandatory TDD enforcement (code written before a test gets deleted), code review, git worktree management, and branch lifecycle completion (merge/PR/discard decision). Skills trigger automatically based on context — no manual invocation needed. Install: `/plugin install superpowers@claude-plugins-official`. Created by Jesse Vincent (Prime Radiant), MIT. Also supports Cursor, Codex, OpenCode, and Gemini CLI.
 - **[gstack](https://github.com/garrytan/gstack)** — 6-skill workflow suite covering the full ship cycle: strategic product gate (`/plan-ceo-review`), architecture review (`/plan-eng-review`), paranoid code review (`/review`), automated release (`/ship`), native browser QA (`/browse`), and retrospective (`/retro`). Created by Garry Tan (Y Combinator CEO). See [Cognitive Mode Switching](../workflows/gstack-workflow.md) for the workflow pattern and adoption guide.
+- **[Ponytail](https://github.com/DietrichGebert/ponytail)**: "Lazy senior dev" mode for AI agents. Before writing code, the agent stops at the first rung that holds: does this need to exist? → stdlib? → native platform feature? → installed dependency? → one line? → only then the minimum that works. Benchmarked at 80-94% less code, 47-77% lower cost, and 3-6x faster than an unconstrained agent across Haiku, Sonnet, and Opus (median of 10 runs, 5 tasks). Three intensity levels: `lite` (suggest the lazier path, let the user pick), `full` (enforce the ladder, default), `ultra` (YAGNI extremist, challenges the requirement in the same response). Deliberate shortcuts are marked with a `ponytail:` comment naming the ceiling and upgrade path; `/ponytail-debt` harvests them into a ledger so "later" stays visible. Four commands: `/ponytail [lite|full|ultra|off]`, `/ponytail-review` (over-engineering review of current diff), `/ponytail-audit` (whole-repo scan), `/ponytail-debt` (shortcut ledger). Install: `/plugin install ponytail@ponytail`. MIT. Supports 13 agents: Claude Code, Codex, GitHub Copilot CLI, Gemini CLI, Antigravity CLI, OpenCode, pi, OpenClaw, Cursor, Windsurf, Cline, Kiro, and VS Code with the Codex extension.
 
 ---
 
@@ -1634,6 +1635,7 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 | **Config-heavy setup** | claude-code-config + AIBlueprint + Caliber | TUI config management + scaffolding + drift detection |
 | **Codebase newcomer / monorepo** | Graphify | Build graph once, query structure instead of re-reading files every session |
 | **Team skills adoption** | Skillsight | Measure which skills are actually invoked across the team, identify dead skills |
+| **Over-engineering fighter** | Ponytail | Force the laziest solution that works; benchmark-verified 80-94% less code than unconstrained agents |
 
 ---
 

@@ -108,14 +108,14 @@ The most starred open-source agent framework as of May 2026. Created by Nous Res
 | **Install** | `pip install hermes-agent` or `curl -sSL install.hermes-agent.dev \| sh` |
 | **Language** | Python (89%), TypeScript (8%) |
 | **License** | MIT |
-| **Version** | v0.14.0 (May 16, 2026) |
-| **Release cadence** | Weekly (v0.10 Apr 16 → v0.14 May 16) |
+| **Version** | v0.15.1 (June 2026) |
+| **Release cadence** | Weekly (v0.10 Apr 16 → v0.15.1 Jun 2026) |
 | **Contributors** | 215+ |
 | **Creator** | Nous Research (Teknium, @teknium1) |
 
 #### What Is Hermes Agent?
 
-A self-improving terminal agent that works with 200+ LLM providers, runs on any platform, and connects to 22 messaging platforms (Telegram, Discord, Slack, WhatsApp, Signal, Teams, LINE, SimpleX, and more). The distinguishing feature is its learning loop: after completing tasks, Hermes analyzes what worked, extracts reusable patterns, and generates skills automatically. Each session makes the agent marginally better at your specific workflows.
+A self-improving terminal agent that works with 200+ LLM providers, runs on any platform, and connects to 22 messaging platforms (Telegram, Discord, Slack, WhatsApp, Signal, Teams, LINE, SimpleX, and more). The distinguishing feature is its learning loop (GEPA): after completing tasks, Hermes analyzes what worked, extracts reusable patterns, and generates skills automatically. Community benchmarks show agents with 20+ auto-generated skills completing similar tasks 40% faster than fresh instances on the same codebase.
 
 The OpenClaw history matters for two reasons. First, the migration path is clean: `hermes-agent` imports OpenClaw memories, skills, and settings during setup, so switching costs are low. Second, the Anthropic billing controversy from early 2026 was specifically about OpenClaw/Hermes being used on Claude Max subscriptions without proper programmatic billing attribution. Anthropic now explicitly includes Hermes in the programmatic usage bucket (see [Billing: Programmatic vs Interactive](../ultimate-guide.md#the-interactiveprogrammatic-billing-split-effective-june-15-2026)).
 
@@ -136,7 +136,7 @@ The OpenClaw history matters for two reasons. First, the migration path is clean
 
 The model-agnostic case is the strongest argument. If you want to run Claude for code generation, GPT-4o for specific reasoning tasks, and a local model (via Ollama) for offline work, Hermes handles all three in a single agent. Claude Code cannot.
 
-The self-improving loop is genuinely differentiated. Over 30-40 sessions on the same codebase, Hermes builds a library of skills specific to your project's patterns. This compounds in a way that static CLAUDE.md files do not, though the comparison is complex because CLAUDE.md is human-authored and intentional while Hermes skills are machine-generated.
+The self-improving loop is genuinely differentiated. Over 30-40 sessions on the same codebase, Hermes builds a library of skills specific to your project's patterns. Community benchmarks put the compound gain at 40% faster task completion once 20+ skills are accumulated. CLAUDE.md is human-authored and intentional; Hermes skills are machine-generated and project-specific. Different mechanisms, both worth having.
 
 The 22 messaging platform integrations are useful for teams that want to interact with their agent via Telegram or Slack rather than a terminal. Not a priority for most developers, but critical for some workflows.
 
@@ -153,8 +153,77 @@ curl -sSL install.hermes-agent.dev | sh
 # Import from OpenClaw if migrating
 hermes import --from openclaw
 
-# Start
-hermes
+# Start (terminal-only, no WebUI, no dashboard)
+hermes chat
+```
+
+Hermes has no official graphical interface. The entry point is `hermes chat` in a terminal. On Windows, WSL2 is required; native Windows support does not exist. A community project (`hermes-webui`) exists but is not maintained by Nous Research.
+
+#### Known Operational Issues (v0.15.x)
+
+Several failure modes recur in production deployments and are not obvious from the documentation. The following are drawn from community reports and verified issues on the project tracker.
+
+**Agent executes before analyzing.** The default behavior is to start writing code immediately, without listing impacted files or proposing an approach. On complex refactors this leads to partial writes before scope is understood. Add this block to `SOUL.md` (the identity file injected at every session start):
+
+```
+## Defaults
+Before any development action, explicitly list:
+1. Files that will be modified
+2. Proposed approach
+3. Identified risks
+Never write code before confirming these three points.
+```
+
+`SOUL.md` holds durable agent personality and behavior. `AGENTS.md` holds project-specific rules (paths, ports, commands). Mixing them creates confusion when switching projects.
+
+**Kanban parallelism flood.** The default config has `max_in_progress_per_profile: null` (unlimited) combined with `auto_decompose_per_tick: 3`. A batch of 10 tasks can spawn 30+ concurrent workers within seconds. Explicit limits in `.hermes/config.yaml`:
+
+```yaml
+kanban:
+  max_in_progress_per_profile: 2
+  auto_decompose_per_tick: 1
+  task:
+    max_runtime_seconds: 300
+```
+
+**Subprocess PATH not inherited.** Binaries outside `/usr/bin` and `/usr/local/bin` are invisible to Hermes subprocesses (opencode, nvm-managed Node, pyenv Python, any tool installed under `$HOME`). Fix in `.hermes/config.yaml`:
+
+```yaml
+terminal:
+  env_passthrough:
+    - PATH
+```
+
+As of v0.15.1, this is partially resolved for Docker environments (npx, npm, node resolve against `/usr/local/bin`). Native installs still require the manual config above.
+
+**Workers that exit without closing tasks.** A worker that finishes its work and exits without calling `kanban_complete` or `kanban_block` leaves the task permanently in "in progress" state. The dispatcher can re-launch the worker in a loop (issue #28712). Add this rule to every worker profile:
+
+```
+Every session must end with an explicit call to kanban_complete or kanban_block.
+Exiting without this call is a protocol violation and blocks downstream tasks.
+```
+
+**SQLite corruption on `kanban.db`.** Rapid task creation, frequent gateway restarts via SIGTERM, and concurrent gateway access on the same file can corrupt the database. A minimal safeguard:
+
+```bash
+# Hourly backup (add to crontab)
+0 * * * * cp ~/.hermes/kanban.db ~/.hermes/kanban.db.bak.$(date +%Y%m%d%H)
+```
+
+Recovery with `sqlite3` available: dump to SQL, reimport into a fresh file, replace. An open RFC (#23717) proposes replacing SQLite with a pluggable backend (PostgreSQL, MySQL) for multi-agent deployments.
+
+**`HERMES_HOME` not propagated to subprocesses.** In profile mode, subprocesses launched by the gateway start with a minimal environment and do not inherit `HERMES_HOME`. They fall back silently to `~/.hermes`, writing memories and session data to the wrong profile. Workaround until the upstream fix lands:
+
+```bash
+export HERMES_HOME=~/.hermes/profiles/your-profile-name
+hermes ...
+```
+
+**Token overhead is significant.** Each LLM call carries approximately 13,900 tokens of fixed overhead before any task content: tool definitions (~8-9K) and system prompt (~5K). Messaging gateway integrations (Telegram, LINE, Discord) add 15-20K tokens per request on top of that. A community analysis (issue #4379) documented 4 million tokens consumed in two hours on a misconfigured Telegram gateway. Cap context explicitly:
+
+```yaml
+context:
+  max_tokens: 32000
 ```
 
 ---
