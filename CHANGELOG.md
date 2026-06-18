@@ -6,12 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Security: shell injection in `claude-issue-triage.yml`** (`examples/github-actions/claude-issue-triage.yml`): `github.event.issue.title` and `github.event.issue.body` were interpolated directly into shell via `${{ }}`, allowing an attacker to inject arbitrary commands by crafting a malicious issue title. Fixed by moving both values to step-level `env:` (`ISSUE_TITLE`, `ISSUE_BODY`) and referencing them as plain shell variables, so GitHub Actions never interpolates user content into the script text. Reported in issue #50.
+
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.176
+- **Claude Code Releases**: Updated tracking to v2.1.181
   - v2.1.174: `wheelScrollAccelerationEnabled` setting, `/model` picker Default model family fix, VS Code usage attribution per-skill/agent/plugin/MCP, 8+ bug fixes (Bedrock GovCloud prefix, background session env inheritance, Fable 5 billing banner)
   - v2.1.175: `enforceAvailableModels` managed setting: constrains Default model to allowlist, blocks user/project settings from widening managed list
   - v2.1.176: session titles in conversation language + `language` setting, `footerLinksRegexes` setting, Bedrock credential caching until Expiration, 15+ bug fixes (availableModels alias enforcement, Fable 5 auto mode fallback, hook `if` path conditions, Linux sandbox symlink, tmux clipboard, Remote Control)
+  - v2.1.178: `Tool(param:value)` permission syntax, nested `.claude/` directory improvements, auto mode subagent pre-classification, improved `/doctor`, 10+ bug fixes (subagent transcript, compaction fallback model, MCP disallowedTools server-level specs, vim undo)
+  - v2.1.179: fixed mid-stream connection drops, WSL2 mouse-wheel scroll regression (2.1.172), sandbox denyRead/allowRead glob performance, feedback survey capture, welcome banner stacking, 4+ more fixes
+  - v2.1.181: `/config key=value` inline syntax, `sandbox.allowAppleEvents`, `CLAUDE_CLIENT_PRESENCE_FILE`, improved streaming + subagent panel, 30+ bug fixes (prompt caching ANTHROPIC_BASE_URL, Write/Edit truncated files on network drives, startup 120ms regression, macOS TUI freeze)
 
 ### Added
 
