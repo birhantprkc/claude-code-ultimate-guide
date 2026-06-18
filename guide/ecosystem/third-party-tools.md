@@ -722,6 +722,74 @@ pnpm deepsec sandbox process --sandboxes 10 --concurrency 4
 
 > **See also**: [Vercel blog announcement](https://vercel.com/blog/introducing-deepsec-find-and-fix-vulnerabilities-in-your-code-base) for architecture details and real-world examples.
 
+### SkillSpector
+
+A security scanner from NVIDIA that vets skills before you install them. AgentShield audits your live config; DeepSec audits your application code. SkillSpector fills the gap that neither covers: static analysis of a skill file or repository before it touches your machine.
+
+The motivation is concrete: a 2026 study (Liu et al.) on 42,447 skills from major marketplaces found 26.1% contained at least one vulnerability, and 5.2% showed likely malicious intent. Skills with executable scripts were 2.12x more likely to be vulnerable.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector) |
+| **Install** | `uv venv .venv && source .venv/bin/activate && make install` |
+| **Language** | Python 3.12+ |
+| **License** | Apache 2.0 |
+| **Status** | Active (NVIDIA-maintained) |
+
+**Detection coverage**
+
+64 patterns across 16 categories. The categories most relevant to Claude Code users:
+
+- **Prompt injection** (5 patterns): instruction overrides, hidden directives in comments, exfiltration commands, behavior manipulation, harmful content
+- **Data exfiltration** (4 patterns): external transmission, env variable harvesting, file system enumeration, context leakage
+- **MCP tool poisoning** (4 patterns): hidden instructions in metadata (HTML comments, zero-width chars, base64), unicode deception (homoglyphs, RTL overrides), parameter description injection, description-behavior mismatch
+- **Trigger abuse** (3 patterns): overly broad trigger keywords, shadow commands (skill overriding a built-in), keyword baiting
+- **Supply chain** (6 patterns): unpinned dependencies, `curl | bash` patterns, obfuscated/encoded execution, live CVE lookup via OSV.dev, abandoned packages, typosquatting
+- **Rogue agent** (2 patterns): self-modification at runtime, unauthorized persistence via cron/startup scripts
+
+The SC4 pattern is notable: it queries [OSV.dev](https://osv.dev) in real time to check declared dependencies against the full advisory database. No API key required; results are cached in-memory for 1 hour. Falls back to a static list if the network is unreachable.
+
+**Two-stage pipeline**
+
+Stage 1 is fast static analysis (regex + AST inspection on all files). Stage 2 is optional LLM semantic evaluation that filters false positives and adds human-readable explanations. The LLM prompt includes anti-jailbreak protections to prevent a malicious skill from manipulating its own audit.
+
+```bash
+# Scan a local skill directory (static only)
+skillspector scan ./my-skill/ --no-llm
+
+# Scan a GitHub repository
+skillspector scan https://github.com/user/my-skill
+
+# Scan a single SKILL.md
+skillspector scan ./SKILL.md
+
+# With LLM analysis (Anthropic)
+export SKILLSPECTOR_PROVIDER=anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+skillspector scan ./my-skill/
+
+# JSON output for scripting
+skillspector scan ./my-skill/ --no-llm --format json --output report.json
+
+# SARIF for IDE tooling and CI
+skillspector scan ./my-skill/ --format sarif --output report.sarif
+```
+
+**Risk scoring**: CRITICAL findings add 50 points, HIGH add 25, MEDIUM add 10, LOW add 5. Skills containing executable scripts get a 1.3x multiplier. Scores above 50 trigger a "DO NOT INSTALL" recommendation.
+
+**Docker option** for air-gapped environments or CI without Python:
+
+```bash
+docker build -t skillspector .
+docker run --rm -v "$PWD:/scan" skillspector scan ./my-skill/ --no-llm
+```
+
+**When to use it**: before installing any skill from an unfamiliar source, especially those with executable scripts (`scripts/`, `.sh`, `.py` alongside the SKILL.md). Running with `--no-llm` takes a few seconds and catches the majority of supply-chain and exfiltration patterns. Enable LLM analysis for skills you're considering adding to a shared team setup.
+
+**Reported precision**: ~87% after the LLM revalidation pass. Static-only mode has higher recall but more false positives on legitimate patterns like `subprocess` in build tools.
+
+> **See also**: [NVIDIA SkillSpector README](https://github.com/NVIDIA/SkillSpector) for the full pattern catalog and Docker deployment guide.
+
 ---
 
 ## Configuration Quality
@@ -1601,6 +1669,7 @@ Claude Code's plugin system supports community-built extensions. For detailed do
 - **[Superpowers](https://github.com/obra/superpowers)** — Complete software development methodology suite (95k+ stars, 7.5k forks, MIT). 7 context-aware skills covering the full development arc: spec elicitation through Socratic brainstorming, detailed implementation planning (2-5 min tasks with exact file paths), subagent-driven development with two-stage review (spec compliance then code quality), mandatory TDD enforcement (code written before a test gets deleted), code review, git worktree management, and branch lifecycle completion (merge/PR/discard decision). Skills trigger automatically based on context — no manual invocation needed. Install: `/plugin install superpowers@claude-plugins-official`. Created by Jesse Vincent (Prime Radiant), MIT. Also supports Cursor, Codex, OpenCode, and Gemini CLI.
 - **[gstack](https://github.com/garrytan/gstack)** — 6-skill workflow suite covering the full ship cycle: strategic product gate (`/plan-ceo-review`), architecture review (`/plan-eng-review`), paranoid code review (`/review`), automated release (`/ship`), native browser QA (`/browse`), and retrospective (`/retro`). Created by Garry Tan (Y Combinator CEO). See [Cognitive Mode Switching](../workflows/gstack-workflow.md) for the workflow pattern and adoption guide.
 - **[Ponytail](https://github.com/DietrichGebert/ponytail)**: "Lazy senior dev" mode for AI agents. Before writing code, the agent stops at the first rung that holds: does this need to exist? → stdlib? → native platform feature? → installed dependency? → one line? → only then the minimum that works. Benchmarked at 80-94% less code, 47-77% lower cost, and 3-6x faster than an unconstrained agent across Haiku, Sonnet, and Opus (median of 10 runs, 5 tasks). Three intensity levels: `lite` (suggest the lazier path, let the user pick), `full` (enforce the ladder, default), `ultra` (YAGNI extremist, challenges the requirement in the same response). Deliberate shortcuts are marked with a `ponytail:` comment naming the ceiling and upgrade path; `/ponytail-debt` harvests them into a ledger so "later" stays visible. Four commands: `/ponytail [lite|full|ultra|off]`, `/ponytail-review` (over-engineering review of current diff), `/ponytail-audit` (whole-repo scan), `/ponytail-debt` (shortcut ledger). Install: `/plugin install ponytail@ponytail`. MIT. Supports 13 agents: Claude Code, Codex, GitHub Copilot CLI, Gemini CLI, Antigravity CLI, OpenCode, pi, OpenClaw, Cursor, Windsurf, Cline, Kiro, and VS Code with the Codex extension.
+- **[fable-mode](https://github.com/mrtooher/fable-mode)**: Execution discipline skill for complex tasks, structured as a 4-step loop: (1) write a numbered stage map with expected outputs before touching anything, (2) delegate independent stages to parallel subagents where the runtime allows, (3) verify each stage with a check that can actually fail (tests, diffs, sources read — not self-assessment), (4) self-critique as a skeptical reviewer before delivery. Named after the Claude Fable model but works on any model; honest that it shapes procedure, not capability ceiling. Three variants: `fable-mode` (inline on current model), `fable-sonnet` (pins a Sonnet subagent), `fable-haiku` (pins a Haiku subagent for cost-sensitive work). Includes 4 worked examples across domains — API null-path bug, mis-attributed research claim, SQL nulls silently dropped from an AVG, multi-session refactor with no done criteria — each showing exactly where the failable check catches what one-shot misses. Two operational rules worth noting: surface accumulated warnings at threshold 3 rather than one by one; anchor sed replacements on word boundaries to avoid corrupting compound words. Install: copy the skill directory to wherever your Claude environment loads skills from (no plugin registry entry yet). No license. 477 stars, 54 forks (June 2026, 5 days post-launch).
 
 ---
 
