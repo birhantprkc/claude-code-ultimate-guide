@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.181"
-updated: "2026-06-18"
+latest: "2.1.183"
+updated: "2026-06-19"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,15 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.183"
+    date: "2026-06-19"
+    highlights:
+      - "⭐ Auto mode safety: destructive git ops (`reset --hard`, `checkout -- .`, `clean -fd`, `stash drop`) and `git commit --amend` (for commits not made by agent) and `terraform/pulumi/cdk destroy` are now blocked unless explicitly requested"
+      - "Model deprecation warnings added on stderr in print mode (`-p`) and for models set in agent frontmatter"
+      - "`attribution.sessionUrl` setting omits the claude.ai session link from commits and PRs in web/Remote Control sessions"
+      - "`/config --help` lists all available shorthand keys; Esc now saves and closes `/config` instead of reverting; removed startup 'setup issues' line (use `/doctor`)"
+      - "10+ bug fixes: thinking 400 errors on subagent spawns, WebSearch empty in subagents, tmux pane launch failures, scheduled task/webhook no longer treated as keyboard input, focus mode hook timing"
 
   - version: "2.1.181"
     date: "2026-06-18"

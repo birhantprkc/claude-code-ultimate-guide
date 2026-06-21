@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
+- **Claude Code Releases**: Updated tracking to v2.1.183
+  - v2.1.183: ⭐ auto mode safety (destructive git ops + `git commit --amend` + terraform/pulumi/cdk destroy blocked unless explicitly requested), model deprecation warnings on stderr + agent frontmatter, `attribution.sessionUrl` setting, `/config --help`, 10+ bug fixes (thinking 400 errors, WebSearch in subagents, tmux pane launch, scheduled tasks no longer treated as keyboard input)
+
+### Documentation
+
 - **Claude Code Releases**: Updated tracking to v2.1.181
   - v2.1.174: `wheelScrollAccelerationEnabled` setting, `/model` picker Default model family fix, VS Code usage attribution per-skill/agent/plugin/MCP, 8+ bug fixes (Bedrock GovCloud prefix, background session env inheritance, Fable 5 billing banner)
   - v2.1.175: `enforceAvailableModels` managed setting: constrains Default model to allowlist, blocks user/project settings from widening managed list
