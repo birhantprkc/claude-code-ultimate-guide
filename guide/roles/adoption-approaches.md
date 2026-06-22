@@ -37,6 +37,12 @@ Some patterns have emerged from practitioner studies and team retrospectives:
 
 **Source**: MetalBear engineering blog, arXiv practitioner studies, Reddit engineering threads (2024-2025).
 
+Field reports from engineering teams add qualitative texture to these numbers. At ManoMano (250 engineers, 400+ microservices), Jocelyn N'takpe found that the single highest-leverage investment was maintaining an up-to-date AGENTS.md and a set of rules encoding internal conventions: how to connect to the database, how messages are encoded for Kafka, naming standards. The agent-facing documentation became better maintained than the team's Confluence wiki, because the feedback loop is immediate. Poorly documented conventions produce bad agent output today, not in six months. ([IFTTD ep 346 "IA & DevX"](https://www.ifttd.io/episodes/ia-devx))
+
+Research from ETH Zurich and UC Berkeley (Mündler et al., PLDI 2025, [arXiv 2504.09246](https://arxiv.org/abs/2504.09246)) found that 94% of compilation errors in LLM-generated code are type errors. The practical implication: strictly typed languages and strict architectural patterns (hexagonal architecture, DDD) act as a safety net for agent-generated code, because the compiler rejects a large class of agent mistakes automatically. N'takpe's team at ManoMano observed this directly: the more structure the codebase imposes, the more consistently agents work within it. ([IFTTD ep 346](https://www.ifttd.io/episodes/ia-devx))
+
+Two practices experienced practitioners recommend maintaining deliberately: alternating AI-assisted and manual coding sessions to preserve deep system understanding (Sébastien Deleuze, Spring Framework committer, [IFTTD ep 349](https://www.ifttd.io/episodes/tech-et-soft-skills)), and capping daily AI development cycles even when tooling makes more cycles technically possible, as cognitive load limits are real and practitioners who ignored them reported significant fatigue within weeks (Julien Lepine, [IFTTD ep 351](https://www.ifttd.io/episodes/aws-summit)).
+
 ---
 
 ## Starting Points (Not Prescriptions)

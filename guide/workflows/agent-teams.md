@@ -1483,6 +1483,22 @@ The overhead is real (each cycle costs tokens and latency). Apply it to tasks wh
    Paul Rayner (CEO Virtual Genius, EventStorming Handbook author), Feb 2026
    Production usage: 3 concurrent workflows (job search app, business ops, infrastructure)
 
+8. **[IFTTD ep 311 "IA Agentique"](https://www.ifttd.io/episodes/ia-agentique)**
+   Samy Lastmann (CTO, Smart Tribune), 2024
+   Production multi-agent system: micro-agents replacing one mega-prompt. Each agent has a single task and the corresponding tools. Scalability, explainability, and measurability all improve when agents are split by responsibility. Not every agent in the pipeline needs an LLM; deterministic steps (regex, BM25, SQL lookups) belong to code, not to a reasoning model.
+
+9. **[IFTTD ep 361 "Pourquoi le RAG n'est pas mort"](https://www.ifttd.io/episodes/rag)**
+   Guillaume Laforge (Developer Advocate, Google Cloud), 2025
+   Introduced "harness engineering" as the discipline of managing context flow across a multi-agent pipeline. Orchestrating isolated sub-agents is as much a context architecture problem as it is a task decomposition problem: each agent receives only the slice of context it needs, and the harness controls what gets passed where.
+
+10. **[IFTTD ep 341 "Bilan 2025"](https://www.ifttd.io/episodes/bilan-2025)**
+    Quentin Adam (CEO, Clever Cloud), 2025
+    Multi-model orchestration pattern: Claude decomposes a task and orchestrates Gemini (larger context window) to execute large codebase rewrites that would exceed Claude's window. Planning and task formulation stay with the stronger reasoner; bulk context ingestion goes to the model built for it.
+
+11. **[IFTTD ep 346 "IA & DevX"](https://www.ifttd.io/episodes/ia-devx)**
+    Jocelyn N'takpe (Head of Engineering & Architecture, ManoMano), 2025
+    At scale (250 engineers, 400+ microservices): a dedicated platform team maintains skills and rules encoding internal architecture conventions (database connection patterns, Kafka message encoding, naming standards). Agents are treated as new developers who need onboarding. Agent-facing documentation is now better maintained than Confluence. MCP stack in production: Serena (semantic code search via LSP), Playwright, Context7.
+
 ### Related Documentation
 
 - [Claude Code Releases](../core/claude-code-releases.md) — v2.1.32, v2.1.33 release notes

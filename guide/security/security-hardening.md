@@ -33,6 +33,10 @@ tags: [security, guide, hooks]
 
 Model Context Protocol (MCP) servers extend Claude Code's capabilities but introduce significant attack surface. Understanding the threat model is essential.
 
+**Command allowlist, not blanket auto-approval.** Granting an agent permission to run all commands eliminates approval friction but grants the agent host-user-level capability. A practical baseline: allow `git add` and `git commit`, but require explicit approval before `git push`, hard resets, force-deletes, or any database mutation. Jocelyn N'takpe (Head of Engineering & Architecture, ManoMano) documented losing all Firefox bookmarks to an agent that misidentified them as "context to clear" during a cleanup task, illustrating that the blast radius of broad permissions extends well beyond production systems. ([IFTTD ep 346 "IA & DevX"](https://www.ifttd.io/episodes/ia-devx))
+
+---
+
 #### Attack: MCP Rug Pull
 
 ```

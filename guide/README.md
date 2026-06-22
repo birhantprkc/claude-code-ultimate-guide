@@ -68,6 +68,7 @@ Core documentation for mastering Claude Code, organized by topic.
 | [ecosystem/third-party-tools.md](./ecosystem/third-party-tools.md) | **Community tools**: GUIs, TUIs, config managers, token trackers, alternative UIs | 15 min |
 | [ecosystem/context-engineering-tools.md](./ecosystem/context-engineering-tools.md) | **Context & token optimization**: output compression (RTK, Headroom), prompt compression (LLMLingua), AI gateways (Edgee, Portkey), RAG, LLMOps | 20 min |
 | [ecosystem/remarkable-ai.md](./ecosystem/remarkable-ai.md) | Remarkable AI usage patterns and power-user techniques | 10 min |
+| [ecosystem/practitioner-insights.md](./ecosystem/practitioner-insights.md) | **Practitioner field reports**: 22 paraphrased insights from IFTTD episodes 311-361, organized by theme (context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption) | 15 min |
 
 ---
 

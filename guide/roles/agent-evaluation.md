@@ -425,12 +425,112 @@ Metrics are useless without action:
 
 ---
 
+---
+
+## Evaluating Probabilistic Systems
+
+Standard unit tests do not apply to LLM outputs. A test that passes or fails deterministically cannot capture the behavior of a system whose outputs vary across runs with the same input. Production teams working with agentic pipelines have converged on a different evaluation model.
+
+### Build a Scored Dataset, Not a Test Suite
+
+The foundational shift is treating evaluation as: build a dataset of inputs paired with expected outputs, run a scoring function over agent responses, and track the score over time. The metric is a percentage, not a boolean. Moving from 85% to 87% to 89% is success; having a test suite that was green last week and is still green this week tells you nothing about the direction of travel.
+
+This means collecting real inputs from production, labeling expected outputs (manually or with a larger LLM), and running the scoring function after every significant change to the agent prompt, model, or tool configuration.
+
+*Source: Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
+### Statistical CI/CD: Replay, Do Not Assert
+
+Because LLM outputs are non-deterministic, a single run of a test scenario proves nothing about reliability. The statistical CI/CD approach replays each key scenario 10 to 100 times in parallel and measures the success rate with a confidence interval. A regression is detected when the success rate drops below a threshold across many runs, not when a single run fails.
+
+```bash
+# Conceptual structure for a statistical eval run
+for i in $(seq 1 50); do
+  response=$(run_agent_task "create a migration for adding user_id to orders table")
+  score=$(score_response "$response" "$EXPECTED_OUTPUT")
+  echo "$score" >> eval_runs.txt
+done
+
+# Compute success rate
+awk '{ total++; if ($1 >= 0.8) pass++ } END { print pass/total*100 "% pass rate" }' eval_runs.txt
+```
+
+Set a pass-rate threshold for each scenario (for example, 90% of runs must score above 0.8). Monitor threshold drift across agent versions and model updates.
+
+*Source: Frédéric Barthelet (engineer), [IFTTD ep 329 "Front agentique"](https://www.ifttd.io/episodes/front-agentique)*
+
+---
+
+### LLM-as-Judge: Run Asynchronously
+
+LLM-as-judge uses a larger or more capable model to evaluate the output of the agent model. Running this synchronously on every user request penalizes all users for the failure rate of a minority of interactions. The pattern that works in production:
+
+1. Serve the agent response immediately.
+2. Log the input, output, and full context.
+3. Run the judge model asynchronously on the logged data.
+4. Use judge verdicts to update the dataset, adjust prompt thresholds, and flag regressions.
+
+The judge model is typically larger than the production model (for example, using Opus 4.8 to judge outputs from Sonnet 4.6). It evaluates on dimensions like factual accuracy, instruction adherence, and hallucination presence. Over time the judge dataset becomes the primary signal for prompt iteration.
+
+*Sources: Samy Lastmann (CTO, Smart Tribune), [IFTTD ep 311 "IA Agentique"](https://www.ifttd.io/episodes/ia-agentique); Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
+### Hallucination as a Trade-Off, Not a Bug
+
+Hallucination is a structural feature of how LLMs are trained, not a defect that can be eliminated. The training process rewards confident answers over abstentions, which means models sometimes fabricate plausible-sounding content rather than saying they do not know.
+
+The evaluation question is therefore: what balance of correct answers, abstentions, and hallucinations fits your use case? A system that is 85% correct, 10% abstaining, and 5% hallucinating may be preferable to one that is 80% correct, 19% abstaining, and 1% hallucinating, or vice versa, depending on the cost of each error type in context.
+
+Tuning this balance involves adjusting confidence thresholds in the system prompt, providing retrieval context that anchors the model to factual material, and using the judge model to detect and flag hallucinated responses. The target is not zero hallucination; it is a calibrated and monitored rate that fits the application's risk tolerance.
+
+*Source: Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
+### Observability: OpenTelemetry and Langfuse
+
+For agentic pipelines, treat observability as a first-class requirement from day one. The standard approach uses OpenTelemetry for trace instrumentation and Langfuse (or a similar LLM observability platform) for storage, visualization, and alerting.
+
+A basic trace structure for an agent interaction:
+
+```
+Trace: user_request_id
+  Span: user_input          (latency, token count)
+  Span: context_retrieval   (latency, sources_found)
+  Span: llm_call_1          (model, input_tokens, output_tokens, latency)
+    Span: tool_call         (tool_name, success, latency)
+  Span: llm_call_2          (model, input_tokens, output_tokens, latency)
+  Span: response            (output_tokens, total_latency)
+```
+
+This mirrors the Sentry span model and gives you the same observability for an LLM pipeline as for a conventional service. Key metrics to surface: p50/p95/p99 latency per span, token costs per interaction, tool call success rates, and judge scores over time.
+
+Adding instrumentation retroactively is expensive and disruptive. Instrument before the first deployment.
+
+*Source: Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
+### Workflow vs. Pure Agent: Evaluation Implications
+
+Agentic workflows where the sequence of steps is predetermined are easier to evaluate than pure agents where the model decides its own path. In a workflow, each step has a defined expected output and can be evaluated independently. In a pure agent, the path to the result varies and you can only evaluate the final output.
+
+If latency and cost are constraints (they almost always are), a deterministic workflow with LLM components at decision points evaluates more cheaply and reliably than an open-ended agent loop. Reserve the pure agent pattern for tasks where the sequence of actions is genuinely unknowable in advance.
+
+*Source: Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
 ## Related Sections
 
 - **[Agents](#4-agents)**: Creating custom agents
 - **[Hooks](#7-hooks)**: Automation with event hooks
 - **[Observability](../ops/observability.md)**: Logging and monitoring strategies
 - **[AI Ecosystem](../ecosystem/ai-ecosystem.md#82-domain-specific-agent-frameworks)**: External frameworks like nao
+- **[Practitioner Insights](../ecosystem/practitioner-insights.md)**: Field reports on evaluation practices from production teams
 
 ---
 

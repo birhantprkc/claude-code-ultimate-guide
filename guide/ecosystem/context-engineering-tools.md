@@ -6,7 +6,7 @@ tags: [context, tokens, optimization, ecosystem, tools, advanced]
 
 # Context Engineering: Tools & Ecosystem
 
-> **Confidence**: Tier 1/2 — Core concepts based on published research and production data. Third-party tool details based on public documentation (March 2026).
+> **Confidence**: Tier 1/2. Core concepts based on published research and production data. Third-party tool details based on public documentation (June 2026).
 >
 > **Related**: [Context Engineering (configuration guide)](../core/context-engineering.md) | [Third-Party Tools](./third-party-tools.md) | [MCP Servers Ecosystem](./mcp-servers-ecosystem.md)
 
@@ -18,7 +18,7 @@ This page maps the ecosystem of tools that help you manage what enters the conte
 
 1. [The Mental Model](#1-the-mental-model)
 2. [Core Concepts](#2-core-concepts)
-3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, tilth, context-mode, stacklit)
+3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, tilth, Token Savior, context-mode, stacklit)
 4. [Prompt Compression](#4-prompt-compression)
 5. [AI Gateways](#5-ai-gateways)
 6. [RAG Optimization](#6-rag-optimization)
@@ -121,28 +121,45 @@ RTK supports custom filters via TOML DSL (`.rtk/filters.toml`) for project-speci
 
 ### Headroom
 
-Headroom targets a different problem: structured data returned by tools (JSON payloads, database results, API responses) that is large but not entirely droppable.
-
-The key difference from RTK: Headroom is lossless. Rather than discarding content, it replaces verbose data with a compressed summary and registers the original with a retrieval handle. If the model determines it needs the full data, it can call a tool to fetch it. This preserves the agent's ability to access detail on demand without loading everything upfront.
+Headroom compresses what enters the context from tool outputs, structured data, and conversation history. Its output shaper also reduces what comes back from the model, making it one of the few tools that operates on both sides of the LLM call.
 
 | Attribute | Details |
 |-----------|---------|
-| **Source** | [headroom.ai](https://headroom.ai) |
-| **Compression** | 70–95% on structured tool output |
-| **Architecture** | Lossless (original accessible via retrieval handle) |
-| **Compression models** | SmartCrusher (fast), Kompress (high fidelity) |
+| **Source** | [GitHub: chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| **Docs** | [headroom-docs.vercel.app](https://headroom-docs.vercel.app/docs) |
+| **Stars** | ~43,000 (June 2026, #2 monthly trending on Trendshift) |
+| **Author** | Tejas Chopra (Senior Engineer, Netflix) |
+| **License** | Apache 2.0 |
+| **Install** | `pip install headroom-ai` or `npm install headroom-ai` |
+| **Version** | v0.25.0 (GitHub, June 2026) |
 
-When to choose Headroom over RTK:
+> **URL correction**: Earlier versions of this guide linked `headroom.ai`, which is an unrelated domain. The correct source is `github.com/chopratejas/headroom`.
 
-- Tool outputs contain structured data the model may need partially (database results, API responses)
-- You cannot predict which parts of the output the model will need
-- Lossless retrieval is a requirement (compliance, debugging, audit trails)
+**Five deployment modes**:
 
-When RTK is sufficient:
+1. Python library: `compress(messages)` directly in application code
+2. TypeScript/npm: `withHeadroom()` / `compress()`
+3. HTTP proxy: `headroom proxy --port 8787`, then set `ANTHROPIC_BASE_URL=http://localhost:8787`
+4. MCP server: `headroom mcp install` (exposes `headroom_compress`, `headroom_retrieve`, `headroom_stats`)
+5. Agent wrap: `headroom wrap claude|codex|cursor|aider|copilot`
 
-- Output is unstructured command-line text
-- Successful runs produce noise you definitively do not need
-- Simplicity and zero infrastructure is preferred
+**Compress-Cache-Retrieve (CCR)**: Instead of sending verbose tool output to the model, Headroom replaces it with a `{{HEADROOM_TAG_N}}` placeholder, stores the original in a local SQLite store (HNSW vector index + FTS5 full-text index), and registers a retrieval handle. The model calls `headroom_retrieve(tag)` when it needs the original data. Multiple agents (Claude + Codex) can share the same SQLite store for cross-agent context handoff.
+
+**Output shaper** (`HEADROOM_OUTPUT_SHAPER=1`): appends a brevity instruction at the end of the system prompt (cache prefix is preserved) and reduces model effort on turns that follow successful tool results. Savings are reported as "estimated" using a 10% holdout control group with 95% confidence intervals.
+
+**Benchmark scope**: The published token reductions (code search 92%, SRE debugging 92%, GitHub triage 73%) are measured on specific structured content types under optimal conditions, not full-session spend. An independent measurement found approximately 47% full-session reduction. Accuracy benchmarks (GSM8K 0.870 to 0.870, TruthfulQA +0.030) are N=100 samples, run on v0.5.18, not independently reproduced. Reproduction command: `python -m headroom.evals suite --tier 1`.
+
+**Known issues (June 2026, check the issue tracker for current resolution status)**:
+
+- **Issue #714**: CCR originals expire after 5 minutes (LRU TTL). Long-running agent jobs that pause between steps will hit retrieval failures when the cache expires. No persistent fallback is documented for this case.
+- **Issue #1158**: `headroom wrap claude` silently caps context at 200K for Claude Max subscribers (the `context-1m-2025-08-07` beta header is dropped). Claude Max users should use `headroom mcp install` instead of `wrap`.
+- **Issue #1227** (security, unresolved as of June 2026): CCR endpoints lack loopback protection and use permissive CORS. A local web page can read cached tool outputs without authentication. Avoid CCR if the host runs alongside untrusted local web content.
+- **Issue #1209**: In some configurations, CCR stores the `{{HEADROOM_TAG_N}}` placeholder as the original, so `headroom_retrieve` returns the placeholder rather than the actual data. PR #1208 filed.
+- **Issue #1233**: `CodeAwareCompressor` generates invalid Python syntax on roughly 28% of real files containing modern syntax (match/case, walrus operator, nested async). Silent fallback to uncompressed output in those cases.
+
+**When to choose Headroom over RTK**: RTK handles unstructured CLI text and drops content you definitively do not need. Headroom is the right choice for structured data (JSON payloads, database results, API responses) where you cannot predict upfront which parts the model will need, and where lossless retrieval is a requirement. The two tools complement each other; RTK operates at the shell output layer, Headroom at the structured data layer.
+
+**Production note**: Core compression is functional. CCR has reliability issues under bugs #714 and #1209 above. For Claude Max users, prefer MCP mode over `headroom wrap`.
 
 ### tilth
 
@@ -188,6 +205,55 @@ tilth install claude-code   # registers the MCP server in Claude Code
 No per-project configuration is needed after global install.
 
 **Comparison with lean-ctx**: Both tilth and lean-ctx use tree-sitter to compress file reads. lean-ctx operates as a hook-level redirect (intercepts native Read calls at the MCP layer), while tilth exposes explicit navigation tools the model calls directly. lean-ctx is more transparent and requires no change to how the model requests files. tilth gives the model more control over what it fetches but requires it to use the tilth tools rather than standard read operations. On teams that want the model to actively navigate code structure rather than have reads compressed passively, tilth's explicit tools fit better.
+
+### Token Savior
+
+Token Savior is a three-in-one MCP server: structural code navigation by symbol (replacing full-file reads), Bash output compaction for 34 common CLI tools, and persistent cross-session memory via SQLite with FTS5.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [GitHub: Mibayy/token-savior](https://github.com/Mibayy/token-savior) |
+| **Install** | `pip install "token-savior-recall[mcp]"` then `ts init --agent claude --yes` |
+| **Stars** | ~1,000 (June 2026) |
+| **Language** | Python 3.11+ |
+| **Last commit** | April 2026 (C99/C11 and GLSL support added) |
+
+**Core navigation tools** (via the `optimized` profile, 15+ tools):
+
+- `find_symbol(name)` - locate functions and classes across the indexed codebase
+- `get_function_source(name)` - retrieve implementation without loading the full file
+- `get_full_context(identifier)` - extended context around a symbol
+- `get_change_impact(identifier)` - dependency chain for blast-radius analysis before refactoring
+- `build_commit_summary` - recent git changes without reading every file
+- `memory_index` / `memory_search` - store and retrieve session learnings across runs
+- `ts_discover()` - scan past transcripts for missed optimization opportunities
+
+**Bash compaction**: 34 output compactors for git, pytest, jest, kubectl, and similar tools, activated via `TS_BASH_COMPACT=1` and PostToolUse hooks. Outputs above 4KB fall back to full capture. This feature is opt-in and accounts for a significant share of the reported gains; skipping it reduces the savings substantially.
+
+**6 tool profiles** (controls how many tools the model sees, useful when manifest budget is constrained): `full`, `core`, `nav`, `lean`, `ultra`, `tiny`. The `tiny` profile exposes 6 tools; roughly 60 others are reachable via `ts_search` on demand.
+
+**Language support**: Python, TypeScript/JavaScript, Go, Rust, C#, C/C99/C11, GLSL, plus config formats (JSON, YAML, TOML, INI, ENV, HCL/Terraform, Dockerfile, Markdown).
+
+**tsbench results** (Claude Opus 4.7, 96 tasks, synthetic 2,000-line codebase, `--seed 42`, author-created benchmark):
+
+| Metric | Without Token Savior | With Token Savior |
+|--------|---------------------|-------------------|
+| Task completion | 78.3% | 97.9% |
+| Active tokens/task | ~16,800 | ~3,929 (-77%) |
+| Wall time/task | ~111s | ~26.6s (-76%) |
+
+The project separately reports 97% reduction in characters injected across 170+ real sessions. No independent third-party reproduction of the benchmark has been published. Behavior on large codebases (100K+ lines) has not been benchmarked under controlled conditions.
+
+```bash
+# Recommended install
+pip install "token-savior-recall[mcp]"
+ts init --agent claude --yes   # merges hooks into ~/.claude/settings.json
+
+# Or without global install
+WORKSPACE_ROOTS=/your/project uvx token-savior
+```
+
+**Comparison with tilth**: tilth (Rust, 14 languages, controlled benchmark across 4 real repositories) focuses on structural code navigation and file outlines. Token Savior adds Bash output compaction and persistent cross-session memory, features tilth does not have. Choose tilth for a faster, independently benchmarked code navigation layer. Choose Token Savior if you also need Bash compaction and memory persistence across sessions.
 
 ### context-mode
 
@@ -237,6 +303,14 @@ stacklit generate-json    # re-index after structure changes
 **Worktree compatibility**: generates per-repository indexes with no centralized state. Unlike grepai (which requires a local embedding index) or Serena (which connects to a language server), stacklit produces a static JSON file that works in git worktrees and ephemeral CI environments without additional setup.
 
 **Comparison with RTK and context-mode**: RTK intercepts CLI output during a session. context-mode intercepts MCP tool output in real time. stacklit eliminates exploration-phase token spend before the session starts, by making the repo structure known from the first message. The three tools target different moments in a session's lifecycle and are complementary.
+
+### Zero-install approach: claude-token-efficient
+
+[claude-token-efficient](https://github.com/drona23/claude-token-efficient) (5,700+ stars, June 2026) is a single `CLAUDE.md` file that instructs Claude to generate concise responses. No binary, no MCP server, no hooks.
+
+The creator claims approximately 63% output token reduction. No methodology is published for that figure. The approach works within a real but narrow scope: if verbose model output is your primary cost driver, a style instruction in `CLAUDE.md` costs nothing to try. It cannot compress shell output, file reads, or tool responses. Those require tools like RTK, lean-ctx, Headroom, or tilth. The 5,700 stars reflect genuine demand for zero-config options, not validated performance across diverse workloads.
+
+Use it as a starting point. When you hit the ceiling, the tools above address what a `CLAUDE.md` file cannot.
 
 ---
 
@@ -341,6 +415,18 @@ Traditional RAG loads the retrieval results at the start of the request. JIT (Ju
 This matters for agent workflows with unpredictable information requirements. A code debugging agent may need one set of docs for a Python error and a completely different set for the database error encountered two steps later. Loading both upfront wastes context; loading neither forces hallucination. JIT retrieval threads the needle.
 
 In Claude Code terms: this is what the agent does naturally when it uses tools (`list_directory`, `read_file`, `grep`) rather than receiving a pre-assembled context. The "search when needed" pattern is a design principle, not just a Claude capability.
+
+### Query-Side Indexing: Semantic Chunking and Synthetic Questions
+
+Two indexing-time techniques consistently improve retrieval quality beyond what better embeddings alone achieve.
+
+**Semantic chunking** splits documents by logical unit (paragraph, section, argument block) rather than by a fixed token count. A 500-token boundary drawn mid-sentence produces two fragments that are individually ambiguous and poorly retrieve against any query. Splitting at paragraph or section boundaries preserves the unit of meaning, even when chunk sizes become irregular.
+
+**Synthetic question generation** takes each chunk and asks an LLM: what questions would this chunk answer? Those generated questions are indexed alongside (or instead of) the raw chunk text. At query time, user questions match indexed questions far more reliably than they match prose, because the vocabulary and phrasing align better. The technique is formalized in the doc2query line of work (Nogueira & Lin, 2019) and in HyDE (Hypothetical Document Embeddings, Gao et al., 2022). In production systems, practitioners have observed retrieval improvements in the 10% range on their evaluation sets, though gains vary significantly with dataset and embedding model.
+
+The two techniques compose well with Anthropic's contextual retrieval approach described above: contextualize each chunk first, then generate synthetic questions from the contextualized version. The questions inherit the surrounding document context and produce richer index entries.
+
+*Source: Guillaume Laforge (Developer Advocate, Google Cloud), [IFTTD ep 361 "Pourquoi le RAG n'est pas mort"](https://www.ifttd.io/episodes/rag); doc2query: Nogueira & Lin (2019); HyDE: Gao et al. (2022).*
 
 ### RAG Triad Evaluation
 
@@ -554,7 +640,7 @@ These tools are not mutually exclusive. Langfuse for tracing plus Phoenix for RA
 | Problem | Tool |
 |---------|------|
 | Command outputs flooding context | RTK |
-| File reads consuming most of context budget | tilth or lean-ctx |
+| File reads consuming most of context budget | tilth, lean-ctx, or Token Savior |
 | Monitoring token spend | ccusage (see [Third-Party Tools](./third-party-tools.md)) |
 | Context growing too long in a session | `/compact` at 70% usage |
 | Forgetting past session decisions | ICM memory system |

@@ -92,6 +92,56 @@ Token-threshold switching between single-agent unified evaluation (cross-file de
 
 ---
 
+---
+
+## IFTTD (If This Then Dev) Podcast
+
+**Podcast**: [ifttd.io](https://www.ifttd.io/)
+**Host**: Bruno Soulez
+**License**: Editorial citation (no code)
+
+IFTTD is a French tech podcast (360+ episodes, 2020-2026) covering practical software engineering. Transcripts from episodes 290 to 361 were analyzed and their practitioner insights paraphrased into the guide. No direct quotes appear in the guide; all material is reformulated in English and attributed by episode.
+
+### Sections drawing on IFTTD
+
+**Guide section**: [Practitioner Insights](../ecosystem/practitioner-insights.md)
+**Source episodes**: 311, 326, 329, 338, 341, 346, 349, 351, 357, 360, 361
+Consolidated digest of paraphrased insights organized by theme (context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption).
+
+**Guide section**: [§6 RAG Optimization: Query-Side Indexing](../ecosystem/context-engineering-tools.md#query-side-indexing-semantic-chunking-and-synthetic-questions)
+**Source**: ep 361, Guillaume Laforge (Developer Advocate, Google Cloud)
+Practitioner perspective on semantic chunking and synthetic-question generation at index time, supplementing the existing Anthropic Contextual Retrieval documentation.
+
+**Guide section**: [§17 Attention Mechanics: Lost-in-the-Middle](../core/context-engineering.md#the-lost-in-the-middle-problem)
+**Source**: ep 361, Guillaume Laforge
+Practitioner note on large context window anti-patterns, added to the existing Liu et al. research citation.
+
+**Guide section**: [Evaluating Probabilistic Systems](../roles/agent-evaluation.md#evaluating-probabilistic-systems)
+**Source**: ep 338 (Louis Pinsard), ep 329 (Frédéric Barthelet), ep 311 (Samy Lastmann)
+Consolidated section on scored-dataset evaluation, statistical CI/CD, LLM-as-judge (async), hallucination calibration, and OpenTelemetry/Langfuse observability.
+
+**Guide section**: [Why Sandboxing Matters: Field Incidents](../security/sandbox-native.md#why-sandboxing-matters-field-incidents)
+**Source**: ep 326 (Zineb Bendhiba), ep 360 (Guillaume Lours)
+Documented incidents on guardrail evasion and unsupervised agent data loss.
+
+**Guide section**: [MCP Vetting Workflow](../security/security-hardening.md#mcp-vetting-workflow)
+**Source**: ep 346, Jocelyn N'takpe (Head of Engineering & Architecture, ManoMano)
+Command allowlist recommendation, illustrated with a real incident.
+
+**Guide section**: [Usage Principles](../ecosystem/mcp-servers-ecosystem.md#usage-principles-beyond-the-evaluation-checklist)
+**Source**: ep 326 (Zineb Bendhiba), ep 329 (Frédéric Barthelet)
+Tool count, tool design principles, and LLM statefulness notes.
+
+**Guide section**: [Practitioner Testimonials](../workflows/agent-teams.md#practitioner-testimonials)
+**Source**: ep 311, 341, 346, 361
+Four new testimonials on micro-agent architectures, harness engineering, multi-model orchestration, and production MCP stacks.
+
+**Guide section**: [Adoption Approaches: What We Do Know](../roles/adoption-approaches.md#what-we-do-know-empirical-data)
+**Source**: ep 346, 349, 351
+Practitioner notes on documentation-as-onboarding, typed language safety nets, and sustainable development pace.
+
+---
+
 ## Adding to This File
 
 When a guide section is directly inspired by or adapted from external open-source work, add an entry here. Include:

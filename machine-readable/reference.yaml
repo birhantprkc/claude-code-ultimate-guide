@@ -344,6 +344,17 @@ deep_dive:
   whitepapers_fr: "whitepapers/fr/"  # FR sources (Quarto .qmd)
   whitepapers_en: "whitepapers/en/"  # EN sources (Quarto .qmd)
   whitepapers_topics: "foundations, prompting, customization, security, architecture, team, privacy, reference, agent-teams"
+  # Practitioner Insights (IFTTD podcast, episodes 290-361) - Added 2026-06-21
+  practitioner_insights_guide: "guide/ecosystem/practitioner-insights.md"
+  practitioner_insights_description: "Paraphrased field insights from 11 IFTTD episodes (290-361), 5 themes: context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption. 22 attributed insights, English only, no direct quotes."
+  practitioner_insights_context_engineering: "guide/ecosystem/practitioner-insights.md#context-engineering"
+  practitioner_insights_agentic_patterns: "guide/ecosystem/practitioner-insights.md#agentic-patterns-and-orchestration"
+  practitioner_insights_llm_evaluation: "guide/ecosystem/practitioner-insights.md#llm-evaluation"
+  practitioner_insights_agent_security: "guide/ecosystem/practitioner-insights.md#agent-security"
+  practitioner_insights_devx: "guide/ecosystem/practitioner-insights.md#devx-and-adoption"
+  practitioner_insights_source: "ifttd.io — Bruno Soulez, 360+ episodes, 2020-2026"
+  practitioner_insights_episodes: "ep 311 (Lastmann), 326 (Bendhiba), 329 (Barthelet), 338 (Pinsard), 341 (Adam), 346 (N'takpe), 349 (Deleuze), 351 (Lepine), 357, 360 (Lours), 361 (Laforge)"
+  practitioner_insights_credits: "guide/core/credits.md#ifttd-if-this-then-dev-podcast"
   # Learning with AI (guide/roles/learning-with-ai.md)
   learning_quick_check: "guide/roles/learning-with-ai.md:38"
   learning_uval_protocol: "guide/roles/learning-with-ai.md:218"

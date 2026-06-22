@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.183"
-updated: "2026-06-19"
+latest: "2.1.185"
+updated: "2026-06-22"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,11 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.185"
+    date: "2026-06-22"
+    highlights:
+      - "Improved stream-stall hint: message changed to 'Waiting for API response · will retry in …' (was 'No response from API · Retrying in …') and triggers after 20s of silence instead of 10s"
 
   - version: "2.1.183"
     date: "2026-06-19"

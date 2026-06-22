@@ -2180,11 +2180,13 @@ Claude's attention is not uniform across the context window. Position within the
 
 ### The Lost-in-the-Middle Problem
 
-Research by Liu et al. (2023, arXiv:2307.03172) examined how large language models use information at different positions within long contexts. The finding: retrieval accuracy follows a U-shaped curve. Information placed at the start or end of a long context is recalled significantly more accurately than information placed in the middle.
+Research by Liu et al. (*Lost in the Middle: How Language Models Use Long Contexts*, TACL 2024, [arXiv:2307.03172](https://arxiv.org/abs/2307.03172)) examined how large language models use information at different positions within long contexts. The finding: retrieval accuracy follows a U-shaped curve. Information placed at the start or end of a long context is recalled significantly more accurately than information placed in the middle.
 
 For Claude specifically, NIAH (Needle-in-a-Haystack) benchmarks on the 100K context window showed that passage retrieval accuracy dropped from 98% for documents placed at the start or end to 27% for documents placed in the middle, a 71-point gap. Subsequent model releases improved middle-context recall, but the U-shaped bias persists at scale.
 
 **Practical consequence:** Any information the model needs to use reliably should not be buried in the middle of a long context.
+
+This has a direct implication for how to think about large context windows: treating a 1M-token window as a space to dump everything potentially relevant is an anti-pattern, not a capability demonstration. A practitioner who has worked extensively with RAG and context engineering at Google notes that exploiting a 1M-token window is not a sign of capability, and may in fact be its opposite; information in the middle of a very long context competes poorly for the model's attention regardless of window size. (*Guillaume Laforge, Developer Advocate, Google Cloud, [IFTTD ep 361](https://www.ifttd.io/episodes/rag)*)
 
 ---
 
