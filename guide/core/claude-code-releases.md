@@ -2,6 +2,7 @@
 title: "Claude Code Release History"
 description: "Condensed changelog of official Claude Code releases with highlights and breaking changes"
 tags: [reference, release]
+canonicalURL: "https://cc.bruniaux.com/releases/"
 ---
 
 # Claude Code Release History
