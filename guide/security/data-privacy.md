@@ -66,42 +66,7 @@ When you use Claude Code, the following data is sent to Anthropic:
 
 ---
 
-## 2. Anthropic Retention Policies
-
-### Tier 1: Consumer Default (Training Enabled)
-
-- **Retention**: 5 years
-- **Usage**: Model improvement, training data
-- **Applies to**: Free, Pro, Max plans with training setting ON
-
-### Tier 2: Consumer Opt-Out (Training Disabled)
-
-- **Retention**: 30 days
-- **Usage**: Safety monitoring, abuse prevention only
-- **How to enable**:
-  1. Go to https://claude.ai/settings/data-privacy-controls
-  2. Disable "Allow model training on your conversations"
-  3. Changes apply immediately
-
-### Tier 3: Commercial (Team / Enterprise / API)
-
-- **Retention**: 30 days
-- **Usage**: Safety monitoring, abuse prevention only
-- **Training**: Not used for training by default (no opt-out needed)
-- **Applies to**: Team plans, Enterprise plans, API users, third-party platforms, Claude Gov
-
-### Tier 4: Zero Data Retention (ZDR)
-
-- **Retention**: 0 days server-side (local client cache may persist up to 30 days)
-- **Usage**: None retained on Anthropic servers
-- **Requires**: Appropriately configured API keys (see [Anthropic documentation](https://www.anthropic.com/enterprise))
-- **Use cases**: HIPAA (requires separate BAA), GDPR, PCI-DSS compliance, government contracts
-
-> **Important**: Data is encrypted in transit via TLS but is **not encrypted at rest** on Anthropic servers. Factor this into your security assessments.
-
----
-
-## 3. Known Risks
+## 2. Known Risks
 
 ### Risk 1: Automatic File Reading
 
@@ -147,15 +112,24 @@ STRIPE_SECRET_KEY=sk_live_...
 
 When you run `/bug` in Claude Code, your **full conversation history** (including all code, file contents, and potentially secrets) is sent to Anthropic for bug triage. This data is retained for **5 years**, regardless of your training opt-out setting.
 
-This is independent of your privacy preferences: even with training disabled and 30-day retention, bug reports follow their own 5-year retention policy.
+This is independent of your privacy preferences: even with training disabled and 30-day retention, bug reports follow their own 5-year retention policy. The distinction matters because `/bug` is easy to trigger accidentally, and because its retention period is longer than any other data sent during normal Claude Code usage.
 
-**Mitigation**: Disable the command entirely if you work with sensitive codebases:
+What gets included in a bug report: your entire session context at the time of `/bug` invocation. File paths, file contents Claude read during the session, bash command outputs, MCP server results, and any secrets that appeared in any of those. There is no scrubbing or filtering before submission.
+
+**Verify if you have already disabled it:**
 
 ```bash
+echo $DISABLE_BUG_COMMAND
+```
+
+If empty, the command is active. To disable permanently:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc
 export DISABLE_BUG_COMMAND=1
 ```
 
-Or add it to your shell profile (`~/.zshrc`, `~/.bashrc`) to make it permanent.
+If you work on multiple machines or share dotfiles via a repo, adding this to your profile is the only way to keep it off across environments. Environment variables set in `.claude/settings.json` do not persist across shell sessions.
 
 ### Risk 5: Documented Community Incidents
 
@@ -166,7 +140,7 @@ Or add it to your shell profile (`~/.zshrc`, `~/.bashrc`) to make it permanent.
 | Credentials exposed via environment variables | GitHub issues |
 | Prompt injection via malicious MCP servers | r/programming |
 
-### Risk 6: Claude Desktop Browser Integration — Silent Native Messaging Host Installation
+### Risk 6: Claude Desktop Browser Integration: Silent Native Messaging Host Installation
 
 Claude Desktop installs native messaging host manifest files into browsers' `NativeMessagingHosts` directories to enable its "Claude in Chrome" feature. As of April 2026, this happens without an explicit opt-in prompt from the user.
 
@@ -180,7 +154,7 @@ Claude Desktop installs native messaging host manifest files into browsers' `Nat
   claude_browser_native_host  (helper binary)
 ```
 
-Claude Desktop writes these files to **all Chromium-based browsers found on the system** — Chrome, Brave, Edge, Arc, Vivaldi, Opera, Chromium — including browsers not installed at the time of Claude Desktop's installation. The "Don't ask" opt-out in Claude Desktop's preferences does not reliably prevent this ([GitHub #53864](https://github.com/anthropics/claude-code/issues/53864), April 2026).
+Claude Desktop writes these files to **all Chromium-based browsers found on the system** (Chrome, Brave, Edge, Arc, Vivaldi, Opera, Chromium), including browsers not installed at the time of Claude Desktop's installation. The "Don't ask" opt-out in Claude Desktop's preferences does not reliably prevent this ([GitHub #53864](https://github.com/anthropics/claude-code/issues/53864), April 2026).
 
 **What native messaging actually does (and doesn't do):**
 
@@ -221,17 +195,11 @@ If you don't use the browser integration feature, you can safely delete the mani
 
 ---
 
-## 4. Protective Measures
+## 3. Protective Measures
 
 ### Immediate Actions
 
-#### 4.1 Opt-Out of Training
-
-1. Visit https://claude.ai/settings/data-privacy-controls
-2. Toggle OFF "Allow model training"
-3. Retention reduces from 5 years to 30 days
-
-#### 4.2 Configure File Exclusions
+#### 3.1 Configure File Exclusions
 
 In `.claude/settings.json`, use `permissions.deny` to block access to sensitive files:
 
@@ -258,7 +226,7 @@ In `.claude/settings.json`, use `permissions.deny` to block access to sensitive 
 
 > **Warning**: `permissions.deny` has [known limitations](./security-hardening.md#known-limitations-of-permissionsdeny). For defense-in-depth, combine with security hooks and external secrets management.
 
-#### 4.3 Use Security Hooks
+#### 3.2 Use Security Hooks
 
 Create `.claude/hooks/PreToolUse.sh`:
 
@@ -278,7 +246,7 @@ if [[ "$TOOL_NAME" == "Read" ]]; then
 fi
 ```
 
-#### 4.4 Opt-Out of Telemetry and Error Reporting
+#### 3.3 Opt-Out of Telemetry and Error Reporting
 
 Claude Code connects to third-party services for operational metrics (Statsig) and error logging (Sentry). These do not include your code or file paths, but you can disable them entirely:
 
@@ -321,7 +289,7 @@ export DISABLE_BUG_COMMAND=1
 
 ---
 
-## 5. Comparison with Other Tools
+## 4. Comparison with Other Tools
 
 | Feature | Claude Code + MCP | Cursor | GitHub Copilot |
 |---------|-------------------|--------|----------------|
@@ -334,7 +302,7 @@ export DISABLE_BUG_COMMAND=1
 
 ---
 
-## 6. Enterprise Considerations
+## 5. Enterprise Considerations
 
 ### When to Use Enterprise API (ZDR)
 
@@ -354,7 +322,7 @@ export DISABLE_BUG_COMMAND=1
 
 ---
 
-## 7. Quick Reference
+## 6. Quick Reference
 
 ### Links
 
@@ -378,73 +346,49 @@ claude /status
 ./examples/scripts/audit-scan.sh
 ```
 
-### Quick Checklist
+### Quick Audit Checklist
 
-- [ ] Training opt-out enabled at claude.ai/settings
-- [ ] `.env*` files blocked via `permissions.deny` in settings.json
-- [ ] No production database connections via MCP
-- [ ] Security hooks installed for sensitive file access
-- [ ] Team aware of data flow to Anthropic
+Run these checks today. Each takes under two minutes.
 
----
+**1. Training opt-out**
+Go to [claude.ai/settings/data-privacy-controls](https://claude.ai/settings/data-privacy-controls) and verify "Allow model training on your conversations" is OFF. If it is ON, your data is retained 5 years and used for training.
 
-## 8. Intellectual Property Considerations
+**2. `/bug` command disabled**
 
-> **Disclaimer**: This is not legal advice. Consult a qualified attorney for your specific situation.
+```bash
+echo $DISABLE_BUG_COMMAND
+# Should print: 1
+# If empty: add "export DISABLE_BUG_COMMAND=1" to your ~/.zshrc
+```
 
-When using AI code generation tools, discuss these points with your legal team:
+**3. `.env` files blocked**
+Check your `.claude/settings.json`: it should contain at minimum `"Read(./.env*)"` in `permissions.deny`. If the file does not exist yet, Claude can read your `.env` right now.
 
-| Consideration | What to Discuss |
-|---------------|-----------------|
-| **Ownership** | Copyright status of AI-generated code remains legally unsettled in most jurisdictions |
-| **License contamination** | Training data may include open-source code with copyleft licenses (GPL, AGPL) that could affect your codebase |
-| **Vendor indemnification** | Some enterprise plans offer legal protection (e.g., Microsoft Copilot Enterprise includes IP indemnification) |
-| **Sector compliance** | Regulated industries (healthcare, finance, government) may have additional IP requirements |
+**4. Native messaging host presence (macOS)**
 
-This guide focuses on Claude Code usage—not legal strategy. For IP guidance, consult specialized legal resources or your organization's legal counsel.
+```bash
+ls ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/ 2>/dev/null | grep anthropic
+# Nothing should appear if you don't use Claude Desktop
+```
 
----
+**5. MCP server inventory**
+Open `~/.claude/claude.json` (or `.mcp.json` in your project root) and list every configured MCP server. For each database server, confirm it points to a dev or staging connection string, not production.
 
-## 9. Claude's Governance & Values
+**6. Telemetry env vars**
 
-### Constitutional AI Framework
+```bash
+echo $DISABLE_TELEMETRY
+echo $DISABLE_ERROR_REPORTING
+# Both should print: 1
+```
 
-Anthropic published Claude's constitution in January 2026 (CC0 license - public domain). This document defines the value hierarchy that guides Claude's behavior:
-
-**Priority Order** (used to resolve conflicts):
-
-1. **Broadly safe** - Never compromise human supervision and control
-2. **Broadly ethical** - Honesty, harm avoidance, good conduct
-3. **Anthropic compliance** - Internal guidelines and policies
-4. **Genuinely helpful** - Real utility for users and society
-
-### What This Means for Claude Code Users
-
-| Scenario | Expected Behavior |
-|----------|-------------------|
-| Security-sensitive requests | Claude prioritizes safety over helpfulness (may be more conservative) |
-| Borderline biology/chemistry | May decline or ask for context to assess safety implications |
-| Ethical conflicts | Will follow hierarchy: safety > ethics > compliance > utility |
-
-### Why This Matters
-
-- **Training data source**: Constitution is used to generate synthetic training examples
-- **Behavior specification**: Reference document explaining intended vs. accidental outputs
-- **Audit & governance**: Provides legal/ethical foundation for compliance reviews
-- **Your own agents**: CC0 license allows reuse/adaptation for custom models
-
-### Resources
-
-- Constitution full text: https://www.anthropic.com/constitution
-- PDF version: https://www-cdn.anthropic.com/.../claudes-constitution.pdf
-- Announcement: https://www.anthropic.com/news/claude-new-constitution
-- Alignment research: https://alignment.anthropic.com/
+**7. Shell command exposure**
+Run `env | grep -iE 'key|secret|token|pass'` to see what environment variables are currently set. Any that appear here will be visible to Claude if it runs a bash command in that shell session.
 
 ---
 
 ## Changelog
 
+- 2026-06: Reframed around CLI-specific risks. Removed policy paraphrase sections (retention tiers detail, Constitutional AI, IP considerations). Enriched /bug section with verification commands. Added 7-point Quick Audit Checklist.
 - 2026-02: Fixed retention model (3 tiers to 4 tiers), added /bug command warning, telemetry opt-out variables, encryption-at-rest disclosure, updated ZDR conditions
-- 2026-01: Added Claude's governance & constitutional AI framework section
-- 2026-01: Added intellectual property considerations section
-- 2026-01: Initial version - documenting retention policies and protective measures
+- 2026-01: Initial version

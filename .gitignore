@@ -61,3 +61,6 @@ mcp-server/node_modules/
 .vitals/
 .worktrees/
 .fastembed_cache/
+
+# Serena MCP tool (local project context, not shared)
+.serena/
