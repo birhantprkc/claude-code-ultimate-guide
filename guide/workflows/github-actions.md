@@ -1,6 +1,6 @@
 ---
 title: "GitHub Actions Workflows with Claude Code"
-description: "Production-ready patterns for automating PR reviews, issue triage, and quality gates with claude-code-action"
+description: "Step-by-step setup for claude-code-action in GitHub Actions: PR code review on mention, automatic review on push, issue triage. Includes permissions config and real YAML examples."
 tags: [workflow, ci-cd, github-actions, automation]
 ---
 

@@ -1,6 +1,6 @@
 ---
-title: "Claude Code Data Privacy: Risks the Official Docs Don't Cover"
-description: "The privacy risks specific to Claude Code that docs.anthropic.com doesn't document: /bug command 5-year retention override, MCP database exposure, silent browser host installation, and how to lock down each with permissions.deny and PreToolUse hooks."
+title: "Claude Code Privacy: What Gets Sent to Anthropic & How to Control It"
+description: "What Claude Code sends to Anthropic servers: code context, file paths, shell commands, MCP logs. Data retention by plan (Consumer 5 yr, ZDR 0 days). Practical controls via env vars and PreToolUse hooks."
 tags: [privacy, security, guide]
 ---
 
@@ -384,6 +384,11 @@ echo $DISABLE_ERROR_REPORTING
 
 **7. Shell command exposure**
 Run `env | grep -iE 'key|secret|token|pass'` to see what environment variables are currently set. Any that appear here will be visible to Claude if it runs a bash command in that shell session.
+
+## Go further
+
+- [Whitepapers](/whitepapers/) - in-depth security and privacy analyses
+- [Security](/security/) - CVE tracking, threat campaigns, and hardening
 
 ---
 

@@ -12,11 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.186
-  - ⭐ `claude mcp login/logout <name>` authenticates MCP servers from the CLI without the interactive `/mcp` menu; `--no-browser` flag for SSH sessions
-  - `!` bash commands now auto-trigger Claude to respond to output; opt-out via `"respondToBashCommands": false`
-  - Background subagents surface permission prompts in main session instead of auto-denying
-  - Fixed `Agent(type)` deny rules not enforced for named subagent spawns; 25+ bug fixes
+- **Claude Code Releases**: Updated tracking to v2.1.191
+  - v2.1.191: ⭐ `/rewind` works after `/clear`; ~37% CPU reduction during streaming; MCP capability discovery retries; 20+ bug fixes
+  - v2.1.190: Bug fixes and reliability improvements
+  - v2.1.187: ⭐ `sandbox.credentials` blocks credential file reads; org model restrictions in picker/`--model`/`ANTHROPIC_MODEL`; MCP 5-min hang fix; 15+ bug fixes
 
 ### Added
 

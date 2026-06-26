@@ -1839,3 +1839,8 @@ As of February 2026, the community tooling ecosystem has notable gaps:
 - [MCP Servers Ecosystem](./mcp-servers-ecosystem.md) - Validated community MCP servers
 - [Architecture](../core/architecture.md) - How Claude Code works internally
 - [Ultimate Guide Section 8](../ultimate-guide.md) - Plugin system and marketplaces
+
+## Go further
+
+- [AI Ecosystem](/ecosystem/) - complementary AI tools and integrations
+- [Examples](/examples/) - ready-to-use Claude Code templates

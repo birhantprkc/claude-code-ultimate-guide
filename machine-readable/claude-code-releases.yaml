@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.186"
-updated: "2026-06-23"
+latest: "2.1.191"
+updated: "2026-06-25"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,27 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.191"
+    date: "2026-06-24"
+    highlights:
+      - "⭐ `/rewind` now works after `/clear` to resume a conversation from before the clear"
+      - "Reduced CPU usage during streaming by ~37% by coalescing text updates to 100ms intervals"
+      - "MCP server reliability: capability discovery retries transient errors; OAuth retries + headless paste-URL fallback; HTTP 404 errors now show URL"
+      - "Fixed background agents resurrecting after being stopped from the tasks panel; 20+ bug fixes including scroll jump, welcome splash overflow, sandbox network re-prompting"
+
+  - version: "2.1.190"
+    date: "2026-06-24"
+    highlights:
+      - "Bug fixes and reliability improvements"
+
+  - version: "2.1.187"
+    date: "2026-06-23"
+    highlights:
+      - "⭐ `sandbox.credentials` setting blocks sandboxed commands from reading credential files and secret environment variables"
+      - "⭐ Org-configured model restrictions enforced in model picker, `--model`, `/model`, and `ANTHROPIC_MODEL` with explanatory message"
+      - "Fixed remote MCP tool calls hanging indefinitely; now abort after 5 min with error (override: `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`)"
+      - "Fixed `--resume` failing with 'No conversation found' after no-model `-p` runs; fixed structured output looping; 15+ bug fixes"
 
   - version: "2.1.186"
     date: "2026-06-23"

@@ -1885,3 +1885,8 @@ In classification pipelines, a `detected_pattern` field surfaces the evidence th
 ```
 
 When `is_complaint: true` with `detected_pattern: "your service is terrible"`, a human reviewer can validate the classification in seconds. When `detected_pattern: null` and `confidence: 0.6`, that is a signal to escalate for manual review rather than auto-process.
+
+## Go further
+
+- [Examples](/examples/) - ready-to-use Claude Code templates
+- [Workflows](/guide/workflows/) - end-to-end workflow guides
