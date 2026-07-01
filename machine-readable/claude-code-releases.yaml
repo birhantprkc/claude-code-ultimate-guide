@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.195"
-updated: "2026-06-29"
+latest: "2.1.197"
+updated: "2026-07-01"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,20 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-June 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.197"
+    date: "2026-06-30"
+    highlights:
+      - "⭐ Introducing Claude Sonnet 5: now the default model in Claude Code, native 1M-token context window, promotional pricing $2/$10 per Mtok through August 31"
+
+  - version: "2.1.196"
+    date: "2026-06-29"
+    highlights:
+      - "Added support for organization default models (shown as \"Org default\" or \"Role default\" in `/model`); readable default session names; clickable file attachments in chat (Cmd/Ctrl-click reveals in Finder/Explorer)"
+      - "Security: `claude mcp list`/`get` no longer spawn `.mcp.json` servers self-approved by a committed `.claude/settings.json`; untrusted workspaces show `⏸ Pending approval`"
+      - "Fixed waking a background job permanently deleting its conversation on a transcript misread (file is now set aside, never deleted); rate-limit warning flicker/over-counting; duplicate recap lines after schema-rejected StructuredOutput retry"
+      - "Fixed PowerShell `git diff`/`grep`/`egrep`/`fgrep` with `|` reported as failures on exit 1; `claude agents` panel focus/status bugs; `--dangerously-skip-permissions` silently falling back to auto mode"
+      - "Improved background session reliability across process stop/restart/update (including Windows shell handoff); `/code-review` merged five cleanup finders (~25% token reduction); streaming idle watchdog on by default (5min, `CLAUDE_ENABLE_STREAM_WATCHDOG=0` to disable)"
 
   - version: "2.1.195"
     date: "2026-06-26"
@@ -1498,6 +1512,7 @@ breaking_summary:
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.197": "Claude Sonnet 5 becomes the default model, native 1M-token context, promotional pricing $2/$10 per Mtok through August 31"
   "2.1.78": "StopFailure hook, ${CLAUDE_PLUGIN_DATA} persistent state, streaming line-by-line, security: silent sandbox disable fix"
   "2.1.69": "InstructionsLoaded hook, ${CLAUDE_SKILL_DIR}, 4 security fixes, 15+ memory fixes, Voice STT 20 languages"
   "2.1.68": "ultrathink re-introduced, Opus 4.6 medium effort default, Opus 4/4.1 removed"

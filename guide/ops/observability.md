@@ -976,6 +976,90 @@ For a full governance setup with automatic audit trail logging, see [Enterprise 
 
 ---
 
+## 10. Team-level Log Aggregation
+
+The sections above cover individual developer monitoring. For a team of 10+ developers, you need logs flowing into a central store to track total spend, flag unusual patterns, and answer compliance questions.
+
+### Option A: Route Through LiteLLM Gateway (Recommended)
+
+The [API Gateway guide](./api-gateway.md) captures usage at the network level with zero client-side setup: every request is logged server-side with the team's virtual key alias, model, and token counts. Each developer connects to the same gateway with a team-scoped virtual key. No per-machine cron jobs.
+
+This is the lower-friction path for most teams. The session JSONL approach below is useful when you need file-level detail (which files were read and written) rather than just token usage.
+
+### Option B: Ship Session JSONL to a Central Store
+
+Claude Code writes session logs to `~/.claude/projects/**/*.jsonl`. A lightweight cron job or PostToolUse hook can ship new entries to Loki:
+
+```bash
+#!/bin/bash
+# Ship new session log entries to Loki
+# Add to crontab: */5 * * * * ~/.claude/hooks/ship-logs.sh
+
+LOKI_ENDPOINT="${CENTRAL_LOG_ENDPOINT:-http://loki:3100/loki/api/v1/push}"
+TEAM_ID="${CLAUDE_TEAM_ID:-unknown}"
+MARKER="/tmp/.claude-last-ship-${USER}"
+
+find ~/.claude/projects -name "*.jsonl" -newer "$MARKER" 2>/dev/null | while read -r f; do
+  while IFS= read -r line; do
+    curl -s -X POST "$LOKI_ENDPOINT" \
+      -H "Content-Type: application/json" \
+      -d "{\"streams\":[{\"stream\":{\"app\":\"claude_code\",\"team\":\"$TEAM_ID\",\"user\":\"$(whoami)\"},\"values\":[[\"$(date +%s%N)\",$(echo "$line" | jq -Rs .)]}]}" \
+      > /dev/null
+  done < "$f"
+done
+touch "$MARKER"
+```
+
+Set `CLAUDE_TEAM_ID` and `CENTRAL_LOG_ENDPOINT` in each developer's shell profile. Coordinate with your platform team to provision the Loki endpoint.
+
+### OTel Collector Configuration
+
+If you are using the LiteLLM Gateway with OTel export, a minimal collector config to forward spans to Grafana Tempo:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+    timeout: 5s
+
+exporters:
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+This feeds Claude Code usage spans into the same Tempo backend as your application traces, so you can correlate an AI session with a deployment event on a single timeline.
+
+### Key Grafana Queries
+
+With LiteLLM Prometheus metrics and Loki for session logs, three panels cover most team needs:
+
+```promql
+# Daily spend by team (USD)
+sum by (team_id) (increase(litellm_spend_total[1d]))
+
+# Request volume by model
+sum by (model) (rate(litellm_requests_total[1h]))
+
+# Budget headroom (fraction remaining per team)
+1 - (litellm_spend_total / litellm_budget_limit)
+```
+
+---
+
 ## Related Resources
 
 - [Session Search Script](../../examples/scripts/session-search.sh) - Fast session search & resume

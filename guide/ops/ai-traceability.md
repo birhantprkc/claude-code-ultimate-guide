@@ -807,6 +807,132 @@ See full template: [examples/config/PULL_REQUEST_TEMPLATE-ai.md](../../examples/
 
 ---
 
+## PR Audit Trail
+
+For regulated environments and compliance-conscious orgs, capturing a snapshot of AI activity at PR creation gives you a structured artifact that answers the question "what did Claude do during this change?" without relying on session memory.
+
+### What to Capture
+
+A minimal PR audit artifact contains four things:
+
+1. **Tool call log**: which tools Claude used (Bash, Edit, Read, etc.) and on which files
+2. **Files modified**: the list of files changed during the session, with before/after line counts
+3. **Session metadata**: session ID, timestamp, Claude Code version, model used
+4. **CLAUDE.md hash**: proof of which rules were active during the session
+
+### Session Logger Hook
+
+This PreToolUse hook writes a structured log to `.claude/logs/activity-{date}.jsonl`:
+
+```bash
+#!/bin/bash
+# .claude/hooks/session-logger.sh
+# Event: PreToolUse
+# Logs tool calls to a daily activity file
+
+LOG_DIR="${HOME}/.claude/logs"
+mkdir -p "$LOG_DIR"
+
+TOOL_NAME="${CLAUDE_TOOL_NAME:-unknown}"
+TOOL_INPUT="${CLAUDE_TOOL_INPUT:-{}}"
+SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
+DATE=$(date +%Y-%m-%d)
+
+echo "{\"timestamp\":\"$(date -u +%FT%TZ)\",\"session_id\":\"${SESSION_ID}\",\"tool\":\"${TOOL_NAME}\",\"input\":${TOOL_INPUT},\"user\":\"$(whoami)\",\"repo\":\"$(git rev-parse --show-toplevel 2>/dev/null)\"}" \
+  >> "${LOG_DIR}/activity-${DATE}.jsonl"
+```
+
+### GitHub Actions: Capture and Upload at PR Time
+
+Add this step to your PR workflow to collect the session log and attach it as a GitHub artifact:
+
+```yaml
+# .github/workflows/ai-audit.yml
+name: AI Session Audit
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  capture-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect AI activity logs
+        run: |
+          mkdir -p audit-artifacts
+
+          # Session log (if shipped to repo or mounted from developer machine)
+          if [ -f ".claude/logs/session.jsonl" ]; then
+            cp .claude/logs/session.jsonl audit-artifacts/
+          fi
+
+          # Files modified in this PR
+          git diff --name-status origin/${{ github.base_ref }}...HEAD \
+            > audit-artifacts/files-changed.txt
+
+          # CLAUDE.md hash for rules provenance
+          if [ -f "CLAUDE.md" ]; then
+            sha256sum CLAUDE.md > audit-artifacts/claude-md-hash.txt
+          fi
+
+          # Metadata
+          echo "{
+            \"pr\": \"${{ github.event.pull_request.number }}\",
+            \"author\": \"${{ github.actor }}\",
+            \"base\": \"${{ github.base_ref }}\",
+            \"head\": \"${{ github.head_ref }}\",
+            \"captured_at\": \"$(date -u +%FT%TZ)\"
+          }" > audit-artifacts/metadata.json
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-audit-pr-${{ github.event.pull_request.number }}
+          path: audit-artifacts/
+          retention-days: 90
+```
+
+The artifact is stored for 90 days and linked to the PR. Auditors can download it directly from the GitHub Actions tab.
+
+### Compliance Report Script
+
+For periodic reports across all PRs:
+
+```bash
+#!/bin/bash
+# scripts/compliance-report.sh
+# Usage: ./compliance-report.sh 2026-06-01 2026-06-30
+
+START_DATE=${1:-$(date -d "30 days ago" +%Y-%m-%d 2>/dev/null || date -v-30d +%Y-%m-%d)}
+END_DATE=${2:-$(date +%Y-%m-%d)}
+REPORT_FILE="ai-activity-report-${START_DATE}-to-${END_DATE}.json"
+
+echo "Generating compliance report: $START_DATE to $END_DATE"
+
+find ~/.claude/logs -name "activity-*.jsonl" \
+  -newer <(date -d "$START_DATE" +%s 2>/dev/null | xargs -I{} date -d "@{}" 2>/dev/null || date -j -f "%Y-%m-%d" "$START_DATE" +%s | xargs -I{} date -r {} 2>/dev/null) \
+  2>/dev/null | xargs cat 2>/dev/null | \
+jq -s '{
+  report_period: {start: "'"$START_DATE"'", end: "'"$END_DATE"'"},
+  total_tool_calls: length,
+  tool_breakdown: (group_by(.tool) | map({tool: .[0].tool, count: length})),
+  unique_files_modified: ([.[] | select(.tool == "Edit" or .tool == "Write") | .input.file_path] | unique | length),
+  sessions: ([.[].session_id] | unique | length),
+  repositories: ([.[].repo] | unique)
+}' > "$REPORT_FILE"
+
+echo "Report saved: $REPORT_FILE"
+```
+
+### What This Does Not Cover
+
+The session logger captures tool calls at the Claude Code level. It does not record what the tool actually produced (the file content after an edit, the output of a bash command). For that level of detail, the LiteLLM Gateway approach in [api-gateway.md](./api-gateway.md) captures full request/response pairs at the API level, at the cost of including all prompt content in your logs. Choose based on your compliance requirements and data classification rules.
+
+---
+
 ## See Also
 
 ### In This Guide

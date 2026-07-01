@@ -6,13 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **api-gateway.md** (`guide/ops/api-gateway.md`): New guide on setting up an API gateway (LiteLLM or Portkey) between Claude Code clients and Anthropic's API. Covers virtual keys, per-team budget limits, model allowlists, Prometheus metrics, OTel integration, and production Docker Compose setup. Addresses the P0 enterprise deployment gap (cost control and centralized permissions).
+- **WebAssembly MCP tool sandboxing** (`guide/security/sandbox-isolation.md §7b`): New section covering Wassette, wasmcp, whamm, and splicer as an emerging Wasm-based approach to sandboxing MCP tools at the OS level. Includes tool comparison table, Wasmtime CVE caveat, and scope statement (Wasm isolation does not cover cost tracking or audit logs). Based on adversarial deep research (100 agents, 25 claims verified 3-vote).
+- **Team-level log aggregation** (`guide/ops/observability.md §10`): New section covering two paths for centralizing Claude Code logs across a team: LiteLLM Gateway (recommended) and JSONL shipping to Loki. Includes OTel collector config for Tempo and Prometheus queries for Grafana dashboards.
+- **Settings propagation guide** (`guide/security/enterprise-governance.md §2.3`): New subsection explaining three mechanisms for distributing Claude Code config to a team: shared settings.json in repos, CLAUDE.md hierarchy, and Anthropic Team/Enterprise admin console.
+- **PR audit trail** (`guide/ops/ai-traceability.md`): New section covering what to capture at PR creation time, a PreToolUse session logger hook, a GitHub Actions workflow that uploads audit artifacts with 90-day retention, and a compliance report script.
+
 ### Changed
 
 - **data-privacy.md** (`guide/security/data-privacy.md`): reframed around CLI-specific risks for practitioners. Removed policy-paraphrase sections (retention tiers, Constitutional AI, IP considerations). Enriched the `/bug` command section with live verification commands and clarification that session context is included without scrubbing. Added a 7-point Quick Audit Checklist with runnable shell commands (training opt-out, bug command, env file blocking, native messaging host, MCP inventory, telemetry vars, env secret exposure). Section numbering updated throughout.
 
 ### Documentation
 
-- **Claude Code Releases**: Updated tracking to v2.1.195
+- **Claude Code Releases**: Updated tracking to v2.1.197
+  - v2.1.197: ⭐ Claude Sonnet 5 introduced as the default model, native 1M-token context window, promotional pricing $2/$10 per Mtok through August 31
+  - v2.1.196: Org default models in `/model`; readable session names; clickable file attachments; security fix for `.mcp.json` servers self-approved via committed settings; streaming idle watchdog on by default
   - v2.1.195: Bug fixes: hook exact-match for hyphenated names, voice dictation, background agent daemons, plugin name mismatch; `CLAUDE_CODE_DISABLE_MOUSE_CLICKS`; Remote provisioning checklist
   - v2.1.193: ⭐ `claude_code.assistant_response` OTel event (review if logging prompts); `autoMode.classifyAllShell`; live bash path autocomplete; auto memory-pressure reaping
   - v2.1.191: ⭐ `/rewind` works after `/clear`; ~37% CPU reduction during streaming; MCP capability discovery retries; 20+ bug fixes

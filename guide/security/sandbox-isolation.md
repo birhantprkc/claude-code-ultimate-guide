@@ -543,6 +543,44 @@ For CI/CD, cloud sandboxes (E2B, Vercel, Sprites) are typically better than Dock
 
 ---
 
+## 7b. WebAssembly-based MCP Tool Sandboxing (Experimental)
+
+> **Confidence**: Tier 3, primary sources verified (GitHub repos, Microsoft Open Source Blog). No production deployments confirmed as of June 2026.
+> **Maturity**: Experimental. None of the tools listed here are production-ready.
+
+The sandboxing approaches in sections 2–7 isolate where Claude Code *runs*. A separate isolation boundary covers what MCP *tools* can access on the OS when Claude Code calls them. Without this, a compromised or misconfigured MCP server runs with the same OS privileges as your Claude Code process, including unrestricted filesystem read/write and outbound network access.
+
+WebAssembly offers a different model: compile each MCP tool to a `.wasm` component, run it inside a Wasm runtime, and declare capability grants explicitly. The tool gets exactly what you grant, nothing more. The deny-by-default model is enforced at the runtime level rather than relying on the tool's own code.
+
+### Available Tools
+
+| Tool | Role | Maturity |
+|------|------|----------|
+| [Wassette](https://github.com/microsoft/wassette) (Microsoft) | Runtime that runs MCP servers as Wasm components, YAML-declared capability grants (filesystem paths, network hosts, env vars) | v0.4.0, not production-ready (self-declared) |
+| [wasmcp](https://github.com/wasmcp/wasmcp) | Compiles MCP servers to Wasm components with WIT-boundary isolation | Early stage, no enforcement docs |
+| [whamm](https://github.com/ejrgilbert/whamm) | DTrace-inspired DSL for Wasm instrumentation and observability | Not a sandbox, observability only |
+| [splicer](https://github.com/ejrgilbert/splicer) | Wasm component composition middleware | No MCP integration documented |
+
+**Wassette** is the only tool here that directly addresses the problem. A YAML policy file declares which filesystem paths, network hosts, and environment variables each MCP component can access. The underlying runtime is [Wasmtime](https://wasmtime.dev/), which Microsoft describes as providing "browser-grade isolation." That framing is intentional: modern browsers run untrusted third-party code in Wasm at the same isolation level, which is a meaningful guarantee but not the same as a certified enterprise security boundary.
+
+Note on Wasmtime CVEs: the runtime has a confirmed history of sandbox escape vulnerabilities, including CVE-2026-34971 (Cranelift miscompilation on aarch64 with wasm_memory64 enabled, patched in 36.0.7 / 42.0.2 / 43.0.1). If you evaluate this approach, track [Bytecode Alliance security advisories](https://github.com/bytecodealliance/wasmtime/security/advisories) directly.
+
+### What Wasm Sandboxing Does Not Cover
+
+This isolation layer controls OS-level access for MCP tools. It does not provide:
+
+- Token usage metering or cost tracking (use LiteLLM Gateway for this)
+- Audit logs or traceability (use OpenTelemetry / Grafana)
+- MCP approval workflows across your org (see [enterprise-governance.md §3](./enterprise-governance.md#3-mcp-governance-workflow))
+
+These are complementary controls, not alternatives to each other.
+
+### When to Watch This Space
+
+If your threat model includes compromised or third-party MCP servers with unpredictable filesystem access, Wasm-based isolation is the right architectural direction. For most teams today, the practical path is the approval workflow in enterprise-governance.md combined with Docker-based environment isolation. Reassess when Wassette publishes a production-ready release.
+
+---
+
 ## 8. Anti-Patterns
 
 | Anti-pattern | Why it's dangerous | Do instead |

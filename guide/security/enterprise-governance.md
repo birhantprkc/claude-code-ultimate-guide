@@ -206,6 +206,48 @@ If you encounter restricted data while reading a file, stop and inform the user.
 Do not proceed until explicitly told to skip that content.
 ```
 
+### 2.3 Propagating Settings to the Team
+
+Writing a charter is not enough. Developers need to actually run with the right config. Three mechanisms exist, and most orgs use all three:
+
+**Shared settings.json in your team repo**
+
+Commit a `.claude/settings.json` at your repo root with org-approved permissions and hooks. Every developer who clones the repo picks it up automatically. This is the highest-fidelity distribution mechanism for project-specific settings.
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.key)",
+      "Bash(curl:*)",
+      "Bash(wget:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [".claude/hooks/dangerous-actions-blocker.sh"]
+      }
+    ]
+  }
+}
+```
+
+Developers cannot easily override project-level settings without editing the committed file, which makes drift visible in git history.
+
+**Shared CLAUDE.md for behavior rules**
+
+Project-level `CLAUDE.md` is loaded on every session. Use it to distribute coding standards, data classification rules, and tool restrictions that Claude should follow. See §2.2 for the charter template.
+
+**Anthropic Team and Enterprise admin controls**
+
+For organizations on Anthropic's Team or Enterprise plan, the admin console at [console.anthropic.com](https://console.anthropic.com) provides organization-level settings that apply to all members. These include usage policies and API key management. Consult the [official Anthropic documentation](https://docs.anthropic.com) for the current scope of admin controls, as this feature set evolves with each Claude Code release.
+
+The practical reality for most teams: shared `settings.json` in each repo gives you the most granular control and works on all plans, including personal API key setups. Admin console controls are a useful additional layer for Enterprise customers, not a replacement for repo-level configuration.
+
 ---
 
 ## 3. MCP Governance Workflow
@@ -362,6 +404,10 @@ exit 0
 ```
 
 **Note**: This hook warns, it does not block. Blocking at session start creates too much friction. Use periodic compliance checks instead (see §5.3).
+
+### 3.4 Emerging: Runtime-level MCP Tool Isolation
+
+Beyond approval workflows, an emerging approach sandboxes each MCP tool's OS access at runtime via WebAssembly. Tools like [Wassette](https://github.com/microsoft/wassette) run MCP servers as Wasm components with deny-by-default filesystem and network access, declared in YAML. None of these tools are production-ready as of mid-2026, but they are worth tracking if your risk model includes third-party MCP servers with unpredictable privilege scope. Full coverage: [sandbox-isolation.md §7b](./sandbox-isolation.md#7b-webassembly-based-mcp-tool-sandboxing-experimental).
 
 ---
 
