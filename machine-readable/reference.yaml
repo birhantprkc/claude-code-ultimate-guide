@@ -339,11 +339,16 @@ deep_dive:
   remarkable_workflows_to_build: "guide/ecosystem/remarkable-ai.md#14-workflows-ai-augmentés-à-construire"
   remarkable_getting_started: "guide/ecosystem/remarkable-ai.md#15-par-où-commencer"
   remarkable_community: "https://github.com/reHackable/awesome-reMarkable"
-  # Whitepapers (FR + EN) — 9 focused whitepapers on Claude Code
+  # Whitepapers (FR + EN), 13 focused whitepapers on Claude Code
   whitepapers_url: "https://cc.bruniaux.com/whitepapers/"
   whitepapers_fr: "whitepapers/fr/"  # FR sources (Quarto .qmd)
   whitepapers_en: "whitepapers/en/"  # EN sources (Quarto .qmd)
-  whitepapers_topics: "foundations, prompting, customization, security, architecture, team, privacy, reference, agent-teams"
+  whitepapers_topics: "foundations, prompting, customization, security, architecture, team, privacy, reference, agent-teams, learning, budget, team-metrics, agent-engineering"
+  # Recap Cards (FR + EN), 57 thematic memo sheets (A4 1-page), series T (Technical), M (Methodology), C (Conception)
+  recap_cards_url: "https://cc.bruniaux.com/whitepapers/"
+  recap_cards_fr: "whitepapers/recap-cards/fr/"
+  recap_cards_en: "whitepapers/recap-cards/en/"
+  recap_cards_count: "57"
   # Practitioner Insights (IFTTD podcast, episodes 290-361) - Added 2026-06-21
   practitioner_insights_guide: "guide/ecosystem/practitioner-insights.md"
   practitioner_insights_description: "Paraphrased field insights from 11 IFTTD episodes (290-361), 5 themes: context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption. 22 attributed insights, English only, no direct quotes."

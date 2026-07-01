@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.22.0"
-updated: "2026-06-18"
+version: "2.23.0"
+updated: "2026-07-01"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -500,6 +500,45 @@ sources:
   - name: "CSA Lab Space - Claude Code GitHub Action Prompt Injection CI/CD Supply Chain Threat"
     url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-claude-code-github-action-prompt-injection/"
     date: "2026-06"
+  - name: "Tenet Security - Agentjacking: Coding Agents Tricked by Fake Sentry Errors"
+    url: "https://tenetsecurity.ai/blog/agentjacking-coding-agents-with-fake-sentry-errors/"
+    date: "2026-06-17"
+  - name: "The Hacker News - Agentjacking Attack Tricks AI Coding Agents"
+    url: "https://thehackernews.com/2026/06/agentjacking-attack-tricks-ai-coding.html"
+    date: "2026-06-17"
+  - name: "GitHub Security Advisory GHSA-8pcm-8jpx-hv8r - Cursor Agent Terminal Sandbox Escape"
+    url: "https://github.com/cursor/cursor/security/advisories/GHSA-8pcm-8jpx-hv8r"
+    date: "2026-06-26"
+  - name: "BitNinja - Critical CVE-2026-50548 Exploits"
+    url: "https://bitninja.com/blog/critical-cve-2026-50548-exploits-linux-server-security/"
+    date: "2026-06-26"
+  - name: "Akamai - New MCP Specification, Security Teams Must Prepare"
+    url: "https://www.akamai.com/blog/security-research/new-mcp-specification-security-teams-must-prepare"
+    date: "2026-06-25"
+  - name: "SecurityWeek - New Enterprise-Ready MCP Specification Brings New Security Challenges"
+    url: "https://www.securityweek.com/new-enterprise-ready-mcp-specification-brings-new-security-challenges/"
+    date: "2026-06-25"
+  - name: "Microsoft Security Blog - Securing AI Agents: AI Tools Move from Reading to Acting"
+    url: "https://www.microsoft.com/en-us/security/blog/2026/06/30/securing-ai-agents-ai-tools-move-from-reading-acting/"
+    date: "2026-06-30"
+  - name: "Tech Hub Weekly Security Roundup 2026-06-29 (Microsoft MCP governance in VS Code / Azure APIM)"
+    url: "https://tech.hub.ms/security/roundups/weekly-security-roundup-2026-06-29"
+    date: "2026-06-29"
+  - name: "Palo Alto Networks Unit 42 - OpenClaw AI Supply Chain Risk"
+    url: "https://unit42.paloaltonetworks.com/openclaw-ai-supply-chain-risk/"
+    date: "2026-06-23"
+  - name: "Open Source For You - OpenClaw Skill Store Breach Raises Open Source AI Security Alarm"
+    url: "https://www.opensourceforu.com/2026/07/openclaw-skill-store-breach-raises-open-source-ai-security-alarm/"
+    date: "2026-07-01"
+  - name: "GitHub Advisory GHSA-vv7q-7jx5-f767 - FastMCP OpenAPIProvider SSRF + Path Traversal"
+    url: "https://github.com/advisories/GHSA-vv7q-7jx5-f767"
+    date: "2026-04-10"
+  - name: "Threat-Modeling.com - LibreChat MCP Access-Control Vulnerabilities (CVE-2026-32625)"
+    url: "https://threat-modeling.com/librechat-mcp-access-control-vulnerabilities-cve-2026-32625/"
+    date: "2026-06-02"
+  - name: "GitHub Advisory GHSA-8r9q-7v3j-jr4g - Anthropic MCP TypeScript SDK ReDoS"
+    url: "https://github.com/advisories/GHSA-8r9q-7v3j-jr4g"
+    date: "2026-01"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS AUTHORS (confirmed by security researchers)
@@ -918,6 +957,38 @@ malicious_skills:
     source: "TeamPCP / Datadog Security Labs / Trend Micro (2026-03-24)"
     risk: "critical"
     notes: "Second malicious version in same TeamPCP attack window (same payload as 1.82.7); both quarantined by PyPI after ~40 minutes; tracked as sonatype-2026-001357"
+
+  # ─── Unit 42 OpenClaw AI Supply Chain Risk report (2026-06-23) ───
+  - name: "money-radar"
+    type: "malware"
+    category: "affiliate-fraud"
+    source: "Palo Alto Networks Unit 42 (2026-06-23)"
+    risk: "critical"
+    notes: "Runtime agentic affiliate injection targeting financial-advice communities; manipulates the agent's recommendations to redirect users toward attacker-controlled affiliate links"
+  - name: "letssendit"
+    type: "malware"
+    category: "crypto"
+    source: "Palo Alto Networks Unit 42 (2026-06-23)"
+    risk: "critical"
+    notes: "Agentic front-running scheme; coordinates Solana meme-token pooling via the agent to manipulate token prices"
+  - name: "omnicogg"
+    type: "malware"
+    category: "evasion"
+    source: "JFrog (2026-03) / Palo Alto Networks Unit 42 (2026-06-23)"
+    risk: "critical"
+    notes: "AMOS dropper hidden in a README.md padded to ~22M characters to exceed automated scanner size thresholds; SHA256 b30eaed1f7478c28f4ec50d07ed5ef014ffbc4b2bc5a38d689ba9f7abb5e19c2; originally found by JFrog, re-analyzed and republished by Unit 42"
+  - name: "ai-tradingview-assistant-for-macos"
+    type: "malware"
+    category: "infostealer"
+    source: "Palo Alto Networks Unit 42 (discovered 2026-05-17, reported 2026-06-23)"
+    risk: "critical"
+    notes: "Poses as a TradingView trading assistant; delivers a macOS infostealer tracked as 'cluw'"
+  - name: "tradingview-ai-indicator-assistant"
+    type: "malware"
+    category: "infostealer"
+    source: "Palo Alto Networks Unit 42 (discovered 2026-05-17, reported 2026-06-23)"
+    risk: "critical"
+    notes: "Companion skill to ai-tradingview-assistant-for-macos; same 'cluw' macOS infostealer payload"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS SKILL PATTERNS (for wildcard/regex matching)
@@ -1964,6 +2035,59 @@ cve_database:
     cwe: "CWE-20 CWE-77"
     notes: "GHSA-xq4m-mc3c-vvg3; CVSS v4.0 7.8; Anthropic paid $4,800 bounty to RyotaK (GMO Flatt Security); Cline's GitHub Actions was already exploited with the same pattern in February 2026 (Clinejection campaign); RyotaK has reported ~50 separate permission bypass paths in Claude Code; represents a class vulnerability affecting any AI coding agent action that ingests GitHub-controlled content (issue bodies, PR descriptions, comments)"
 
+  # --- Cursor Agent Terminal Sandbox Escape (2-CVE chain) ---
+  - id: "CVE-2026-50548"
+    component: "Cursor (agent terminal sandbox)"
+    severity: "critical"
+    cvss: 9.8
+    description: "Working-directory restriction bypass in Cursor's agent terminal sandbox lets an AI agent run terminal commands outside the intended workspace boundary"
+    source: "GitHub Security Advisory GHSA-8pcm-8jpx-hv8r; BitNinja (2026-06-26)"
+    fixed_in: "Cursor Desktop 3.0+"
+    mitigation: "Update Cursor to >= 3.0; audit agent terminal sessions for out-of-workspace command execution"
+    cwe: "CWE-22"
+    notes: "Chained with CVE-2026-50549; both flaws disclosed together on 2026-06-26"
+  - id: "CVE-2026-50549"
+    component: "Cursor (agent terminal sandbox)"
+    severity: "critical"
+    cvss: 9.8
+    description: "File-write escape triggered when path canonicalization fails and falls back insecurely, letting the agent write files outside the project boundary"
+    source: "GitHub Security Advisory GHSA-8pcm-8jpx-hv8r; BitNinja (2026-06-26)"
+    fixed_in: "Cursor Desktop 3.0+"
+    mitigation: "Update Cursor to >= 3.0"
+    cwe: "CWE-22"
+    notes: "Chained with CVE-2026-50548"
+
+  # --- FastMCP OpenAPIProvider ---
+  - id: "CVE-2026-32871"
+    component: "FastMCP (OpenAPIProvider)"
+    severity: "high"
+    description: "SSRF and path traversal via unencoded URL templates in OpenAPIProvider tool generation"
+    source: "GitHub Advisory GHSA-vv7q-7jx5-f767"
+    fixed_in: "See GHSA-vv7q-7jx5-f767 for patched version"
+    mitigation: "Update FastMCP to the patched release; sanitize/encode URL template parameters before use"
+    cwe: "CWE-918 CWE-22"
+
+  # --- LibreChat MCP access control ---
+  - id: "CVE-2026-32625"
+    component: "LibreChat (MCP access control)"
+    severity: "critical"
+    cvss: 9.6
+    description: "MCP access-control and environment-variable injection vulnerabilities in LibreChat's MCP integration"
+    source: "Threat-Modeling.com (2026-06-02)"
+    fixed_in: "See vendor advisory for patched version"
+    mitigation: "Update LibreChat to the patched release; audit MCP server configuration for injectable environment variables"
+    cwe: "CWE-284 CWE-74"
+
+  # --- Anthropic MCP TypeScript SDK ---
+  - id: "CVE-2026-0621"
+    component: "@modelcontextprotocol/sdk (TypeScript)"
+    severity: "medium"
+    description: "ReDoS (regular expression denial of service) via resource template arrays"
+    source: "GitHub Advisory GHSA-8r9q-7v3j-jr4g"
+    fixed_in: "See GHSA-8r9q-7v3j-jr4g for patched version"
+    mitigation: "Update @modelcontextprotocol/sdk to the patched release; validate/limit resource template array sizes"
+    cwe: "CWE-1333"
+
 # ═══════════════════════════════════════════════════════════════
 # MINIMUM SAFE VERSIONS (quick reference for scanning)
 # ═══════════════════════════════════════════════════════════════
@@ -2889,6 +3013,19 @@ attack_techniques:
     mitigation: "Audit all AI agent config files for zero-width Unicode after dependency installs or repo clones; add pre-commit hooks that reject config file changes containing zero-width Unicode; use file integrity monitoring on CLAUDE.md, .cursorrules, and AGENTS.md; run 'cat -A CLAUDE.md' to reveal hidden characters before trusting config files; consider CLAUDE.md hashing and re-verification at session start"
     notes: "Particularly insidious because (1) standard diff tools and GitHub PR review render these characters as nothing, making supply chain injection invisible to reviewers, (2) the attacker needs only write access to a dependency's post-install script or GitHub Actions workflow, (3) AI agents process all Unicode in config files faithfully — there is no built-in filtering of invisible characters"
 
+  - id: "T033"
+    name: "Agentjacking (Fake Error/Diagnostic Data Injection)"
+    description: "Attacker harvests a public write-only Sentry DSN (leaked in exposed frontend JS or found via GitHub code search) and crafts malicious Sentry error events. When a developer asks their AI coding agent to 'fix the Sentry errors', the agent reads the injected event content as a legitimate diagnostic instruction and executes attacker-controlled code. Bypasses EDR/WAF/IAM because every step in the chain looks authorized — the agent is doing exactly what it was asked to do, just on poisoned input."
+    examples:
+      - "Fake stack trace in a Sentry issue instructs the agent to run a 'debug helper' curl-pipe-bash one-liner"
+      - "Poisoned error message references a malicious npm package as the 'fix', which the agent then installs"
+    affected_platforms: ["Claude Code", "Cursor", "OpenAI Codex", "any AI coding agent with MCP access to Sentry or similar error-tracking data"]
+    campaigns: []
+    source: "Tenet Security (2026-06-17); The Hacker News (2026-06-17)"
+    detection: "Audit Sentry (and similar error-tracking) DSNs for public write exposure; treat error/diagnostic payloads as untrusted input, never as agent instructions"
+    mitigation: "Rotate exposed write-only DSNs; do not grant coding agents unreviewed access to third-party error-tracking data; require human confirmation before agents act on 'fix this error' prompts sourced from external diagnostic tools"
+    notes: "85% success rate across tested agents in the original disclosure; 2,388+ organizations found with exposed Sentry DSNs; system-prompt 'ignore untrusted data' instructions did not stop the attack, since the agent was explicitly asked by the human to act on the error data"
+
 # ═══════════════════════════════════════════════════════════════
 # SCANNING TOOLS
 # ═══════════════════════════════════════════════════════════════
@@ -3601,3 +3738,13 @@ defensive_resources:
     url: "https://genai.owasp.org/ai-security-solution-landscape/"
     type: "framework"
     description: "OWASP's continuously updated catalog of AI security tooling, mapping solutions to their corresponding OWASP AI Exchange categories. Q2 2026 edition covers 200+ tools across 12 control domains including prompt injection defenses, MCP server hardening, agent sandboxing, supply chain verification, and model security. Each tool entry links directly to the relevant OWASP AI Exchange guidance so teams can identify which controls a given tool addresses before purchasing or deploying. Useful as a first-pass vendor landscape when evaluating AI security tooling and for gap analysis against existing AI agent security posture."
+
+  - name: "Akamai - New MCP Specification Security Analysis"
+    url: "https://www.akamai.com/blog/security-research/new-mcp-specification-security-teams-must-prepare"
+    type: "research"
+    description: "Akamai analysis (2026-06-25) of the upcoming MCP specification (release candidate published 2026-05-21, final release scheduled 2026-07-28). The new spec drops session tracking for a stateless model using server-issued tracking IDs, introducing new risks: workflow/session hijacking via predictable tracking IDs, cross-tenant data access, new MCP-Method/MCP-Name HTTP headers that enable protocol-confusion (desync) attacks, x-mcp-header data leakage, and a new DoS vector from long-running one-way task interactions. Security teams should review MCP server implementations against the new spec before it lands."
+
+  - name: "Microsoft MCP Governance - VS Code / Azure APIM"
+    url: "https://tech.hub.ms/security/roundups/weekly-security-roundup-2026-06-29"
+    type: "platform"
+    description: "Microsoft shipped enterprise-managed authorization for MCP tooling in VS Code (2026-06-29), plus APIM-fronted authorization patterns for MCP traffic and hardened App Service hosting guidance for MCP servers. Also flagged: persistent AI memory itself as an injection surface that needs the same governance treatment as MCP tool access."

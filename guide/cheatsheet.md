@@ -701,7 +701,7 @@ Speed: `rg` (~20ms) → Serena (~100ms) → ast-grep (~200ms) → grepai (~500ms
 - **Official docs**: [docs.anthropic.com/claude-code](https://docs.anthropic.com/en/docs/claude-code)
 - **Advanced guide**: [Claudelog.com](https://claudelog.com/) - Tips & patterns
 - **Full guide**: `ultimate-guide.md` (this repo)
-- **Whitepapers (FR + EN)**: [cc.bruniaux.com/whitepapers](https://cc.bruniaux.com/whitepapers/) — 10 focused PDFs
+- **Whitepapers (FR + EN)**: [cc.bruniaux.com/whitepapers](https://cc.bruniaux.com/whitepapers/), 13 focused PDFs
 - **Project memory**: Create `CLAUDE.md` at project root
 - **DeepSeek (cost-effective)**: Configure via `ANTHROPIC_BASE_URL`
 

@@ -80,6 +80,7 @@ This attack exploits the one-time approval model: once you approve an MCP, updat
 | **CVE-2026-25723** | High | Claude Code file-write sandbox bypass — piped sed/echo commands escaped project sandbox because command chaining wasn't validated | Update to v2.0.55+ |
 | **CVE-2026-33068** | High | Claude Code permission mode bypass — settings.json resolved before workspace trust dialog, allowing `bypassPermissions` to silently skip consent | Update to v2.1.53+ |
 | **ADVISORY-CC-2026-002** | Medium | Claude Code deny-rule bypass — all configured deny rules silently dropped when command exceeded 50 subcommands | **Update to v2.1.90+** |
+| **CVE-2026-50548/50549** | **Critical (9.8 each)** | Cursor agent terminal sandbox escape (working-directory restriction bypass plus a file-write escape when path canonicalization fails), letting an AI agent run commands and write files outside the workspace boundary | Update to Cursor Desktop 3.0+ |
 
 **v2.1.90 Security Fix (May 2026)**: Claude Code v2.1.90 patched the 50-subcommand deny-rule bypass (ADVISORY-CC-2026-002) where all configured deny rules were silently dropped when a command chain exceeded 50 subcommands. **Upgrade immediately** if running v2.1.89 or earlier.
 

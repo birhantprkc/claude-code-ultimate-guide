@@ -1,0 +1,349 @@
+---
+title: "Claude Code Cheatsheet"
+subtitle: "L'essentiel au quotidien pour une productivité maximale"
+author: "Florian BRUNIAUX"
+date: 2026-07-01
+date-format: "MMMM YYYY"
+version: "3.41.1"
+wp-version: "1.1.0"
+series: "Claude Code Ultimate Guide"
+format:
+  whitepaper-typst:
+    toc: false
+  html:
+    toc: true
+    theme: cosmo
+  epub:
+    toc: false
+    epub-cover-image: _extensions/whitepaper/assets/claude-code-ai-logo.jpg
+    css: ../epub-styles.css
+lang: fr
+---
+
+# Installation
+
+```bash
+npm install -g @anthropic-ai/claude-code
+# Vérifier l'installation
+which claude && claude --version
+```
+
+**Contrôle santé** : `claude doctor && claude mcp list`
+
+# Commandes essentielles
+
+| Commande | Action |
+|---------|--------|
+| `/help` | Aide contextuelle |
+| `/powerup` | Leçons animées interactives sur les fonctionnalités de Claude Code |
+| `/clear` | Réinitialiser la conversation |
+| `/compact` | Libérer du contexte |
+| `/status` | État de la session + usage du contexte |
+| `/context` | Détail de la consommation de tokens |
+| `/plan` | Entrer en Plan Mode (aucune modification) |
+| `/ultraplan` | Plan Mode cloud : rédaction dans le cloud, revue dans le navigateur |
+| `/execute` | Sortir du Plan Mode (applique les changements) |
+| `/model` | Changer de modèle (sonnet/opus/opusplan) |
+| `/insights` | Analytique d'usage + rapport d'optimisation |
+| `/simplify` | Détecte la sur-ingénierie dans le code modifié + corrige automatiquement |
+| `/batch` | Refactors à grande échelle via 5 à 30 agents en worktrees parallèles |
+| `/teleport` | Téléporter une session depuis le web |
+| `/tasks` | Suivre les tâches en arrière-plan |
+| `/remote-env` | Configurer un environnement cloud |
+| `/rc` | Démarrer une session de contrôle à distance (Research Preview, Pro/Max) |
+| `/mobile` | Récupérer les liens de téléchargement de l'app mobile Claude |
+| `/fast` | Basculer le mode rapide (vitesse x2,5, coût x6) |
+| `/voice` | Activer l'entrée vocale (maintenir Espace pour parler) |
+| `/recap` | Résumé de contexte de session au retour d'une pause |
+| `/effort [niveau]` | Profondeur de réflexion : low/medium/high/xhigh/max |
+| `/loop [intervalle] [prompt]` | Répète un prompt en boucle (10 min par défaut) |
+| `/goal [condition]` | Mode multi-tours autonome jusqu'à ce que la condition soit remplie |
+| `/rename [nom]` | Nommer ou renommer la session en cours |
+| `/debug` | Débogage systématique |
+| `/exit` | Quitter (ou Ctrl+D) |
+
+# Raccourcis clavier
+
+| Raccourci | Action |
+|----------|--------|
+| `Shift+Tab` | Alterner les modes de permission |
+| `Esc × 2` | Rewind (annuler) |
+| `Ctrl+C` | Interrompre |
+| `Ctrl+R` | Rechercher dans l'historique des commandes |
+| `Ctrl+L` | Effacer l'écran (garde le contexte) |
+| `Ctrl+B` | Tâches en arrière-plan |
+| `Ctrl+F` | Tuer tous les agents en arrière-plan (double appui) |
+| `Alt+T` | Activer/désactiver la réflexion |
+| `Espace` (maintenu) | Entrée vocale (nécessite `/voice`) |
+| `Tab` | Autocomplétion |
+| `Shift+Enter` | Nouvelle ligne |
+| `Ctrl+D` | Quitter |
+
+**Raccourcis IDE** : VS Code `Alt+K` | JetBrains `Cmd+Option+K`
+
+# Références de fichiers
+
+```
+@chemin/vers/fichier.ts   → Référencer un fichier
+@nom-agent                → Appeler un agent
+!commande-shell           → Exécuter une commande shell
+```
+
+# Fonctionnalités méconnues (mais officielles !)
+
+| Fonctionnalité | Ce que ça fait |
+|---------|--------------|
+| **Tasks API** | Listes de tâches persistantes avec dépendances |
+| **Background Agents** | Des sous-agents travaillent pendant que vous codez |
+| **Agent Teams** | Coordination multi-agents (TeamCreate/SendMessage) |
+| **Auto-Memories** | Capture automatique du contexte entre sessions |
+| **Session Forking** | Rewind + création d'une timeline parallèle |
+| **LSP Tool** | Intelligence de code (go-to-def, refs), ~50ms contre 45s avec grep |
+| **Mode vocal** | Entrée vocale native, transcription gratuite |
+| **Remote Control** | Contrôler une session locale depuis téléphone/navigateur (Research Preview, Pro/Max) |
+| **Tâches planifiées (Cloud/Desktop)** | Planification machine éteinte via `/schedule` ou l'app Desktop |
+| **Skill Evals** | Tests A/B et calibrage des déclencheurs pour les skills personnalisées |
+| **Output Styles** | `/config` → modes Default, Explanatory, Learning |
+| **Rules Templates** | Templates `.claude/rules/` prêts à l'emploi (arch/qualité/tests/perf) |
+
+**Astuce** : ce ne sont pas des "secrets", tout est dans le [CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md). Lisez-le !
+
+# Modes de permission
+
+| Mode | Édition | Exécution |
+|------|---------|-----------|
+| Default | Demande | Demande |
+| acceptEdits | Auto | Demande |
+| Plan Mode | Aucune | Aucune |
+| auto | Le classifieur décide | Le classifieur décide |
+| dontAsk | Uniquement si dans les règles autorisées | Uniquement si dans les règles autorisées |
+| bypassPermissions | Auto | Auto (CI/CD uniquement) |
+
+**Shift+Tab** pour changer de mode
+
+# Mémoire & configuration (2 niveaux)
+
+| Niveau | Chemin | Portée | Git |
+|-------|------|-------|-----|
+| **Projet** | `.claude/` | Équipe | Oui |
+| **Personnel** | `~/.claude/` | Vous (tous projets) | Non |
+
+**Priorité** : le projet prime sur le personnel
+
+## Structure du dossier .claude/
+
+```
+.claude/
+├── CLAUDE.md            # Mémoire locale (gitignored)
+├── settings.json        # Hooks (versionné)
+├── settings.local.json  # Permissions (non versionné)
+├── agents/               # Agents personnalisés
+├── hooks/                # Scripts d'événements
+├── rules/                # Règles chargées automatiquement
+│   ├── architecture-review.md
+│   ├── code-quality-review.md
+│   ├── test-review.md
+│   └── performance-review.md
+└── skills/               # Slash commands + modules de connaissance (unifiés)
+```
+
+# Gestion du contexte (CRITIQUE)
+
+**Statusline** : `Model: Sonnet | Ctx: 89.5k | Ctx(u): 56.0%`
+
+```{=typst}
+#context-bar(green: "0-50%", yellow: "50-70%", orange: "70-90%", red: "90%+")
+#v(8pt)
+```
+
+**Surveillez `Ctx(u):`** → >70% = `/compact`, >85% = `/clear`
+
+| Signe | Action |
+|------|--------|
+| Réponses courtes | `/compact` |
+| Oublis fréquents | `/clear` |
+| Contexte >70% | `/compact` |
+| Tâche terminée | `/clear` |
+
+## Commandes de récupération du contexte
+
+| Commande | Usage |
+|---------|-------|
+| `/compact` | Résumer et libérer du contexte |
+| `/clear` | Repartir de zéro |
+| `/rewind` | Annuler les changements récents |
+| `claude -c` | Reprendre la dernière session |
+| `claude -r <id>` | Reprendre une session spécifique |
+
+# Plan Mode & réflexion
+
+| Fonctionnalité | Activation | Usage |
+|---------|------------|-------|
+| **Plan Mode** | `Shift+Tab × 2` ou `/plan` | Explorer sans modifier |
+| **OpusPlan** | `/model opusplan` | Opus pour planifier, Sonnet pour exécuter |
+| **Ultraplan** | `/ultraplan <prompt>` | Planification cloud, revue navigateur, terminal libre |
+
+**Opus 4.8** : l'effort par défaut est **xhigh**. Utilisez `ultrathink` pour forcer l'effort maximum sur le prochain tour.
+
+| Contrôle | Action | Persistance |
+|---------|--------|-------------|
+| **Alt+T** | Activer/désactiver la réflexion | Session |
+| **/config** | Activer/désactiver globalement | Permanent |
+| **Curseur `/effort`** | low/medium/high/xhigh/max | Session |
+| **Paramètre `effort`** | API uniquement, par requête | Par requête |
+
+**Astuce coût** : pour les tâches simples, Alt+T pour désactiver la réflexion, plus rapide et moins cher.
+
+# Workflow typique
+
+```
+1. Démarrer la session   → claude
+2. Vérifier le contexte  → /status
+3. Plan Mode             → Shift+Tab × 2 (tâches complexes)
+4. Décrire la tâche      → prompt clair et précis
+5. Vérifier les diffs    → toujours lire avant d'accepter !
+6. Accepter/Rejeter      → y/n
+7. Vérifier              → lancer les tests
+8. Commit                → une fois la tâche terminée
+9. /compact              → quand le contexte dépasse 70%
+```
+
+# Formule de prompt rapide
+
+```
+QUOI : [Livrable concret]
+OÙ : [Chemins de fichiers]
+COMMENT : [Contraintes, approche]
+VÉRIFIER : [Critères de succès]
+```
+
+**Exemple :**
+
+```
+Ajouter une validation d'entrée au formulaire de connexion.
+OÙ : src/components/LoginForm.tsx
+COMMENT : utiliser un schéma Zod, afficher les erreurs inline
+VÉRIFIER : email vide affiche une erreur, format invalide affiche une erreur
+```
+
+# Serveurs MCP
+
+| Serveur | Usage |
+|--------|---------|
+| **Serena** | Indexation + mémoire de session + recherche de symboles |
+| **grepai** | Recherche sémantique + analyse du graphe d'appels |
+| **Context7** | Documentation des librairies |
+| **Sequential** | Raisonnement structuré |
+| **Playwright** | Automatisation navigateur |
+| **Postgres** | Requêtes base de données |
+| **doobidoo** | Mémoire sémantique + Knowledge Graph |
+
+**Mémoire Serena** : `write_memory()` / `read_memory()` / `list_memories()`
+
+Vérifier l'état : `/mcp`
+
+# Outils de recherche, aide-mémoire
+
+Décision rapide : texte exact → `rg` | nom exact → `rg`/Serena | concept → grepai | structure → ast-grep
+
+| Tâche | Outil |
+|------|------|
+| Trouver du texte exact | `rg "TODO"` |
+| Trouver du code lié à l'auth | `grepai search "authentication"` |
+| Qui appelle une fonction | `grepai trace callers "login"` |
+| Structure d'un fichier | `serena get_symbols_overview` |
+
+# Aide-mémoire des flags CLI
+
+| Flag | Usage |
+|------|-------|
+| `-p "requête"` | Mode non-interactif (CI/CD) |
+| `-c` / `--continue` | Continuer la dernière session |
+| `-r` / `--resume <id>` | Reprendre une session spécifique |
+| `--teleport` | Téléporter une session depuis le web |
+| `--model sonnet` | Changer de modèle |
+| `--add-dir ../lib` | Autoriser l'accès hors du répertoire courant |
+| `--permission-mode plan` | Plan mode |
+| `--worktree` / `-w` | Lancer dans un git worktree isolé |
+| `--max-budget-usd 5.00` | Plafond de dépense API (mode print) |
+| `--dangerously-skip-permissions` | Auto-accepter (à manier avec précaution) |
+| `--mcp-debug` | Déboguer les serveurs MCP |
+| `--allowedTools "Edit,Read"` | Liste blanche d'outils |
+| `--debug` | Sortie de débogage |
+
+# Anti-patterns
+
+```{=typst}
+#do-dont(
+  (
+    "Prompts vagues",
+    "Accepter sans lire",
+    "Ignorer les avertissements",
+    "Sauter les permissions",
+    "Contraintes négatives uniquement",
+  ),
+  (
+    "Préciser fichier + ligne avec @références",
+    "Lire chaque diff",
+    "Utiliser /compact à 70%",
+    "Jamais en production",
+    "Fournir des alternatives",
+  )
+)
+```
+
+# Optimisation des coûts
+
+```{=typst}
+#table(
+  columns: (auto, 1fr, auto),
+  table.header[*Modèle*][*Usage*][*Coût*],
+  [Haiku], [Corrections simples, revues], [\$],
+  [Sonnet], [La majorité du développement], [\$\$],
+  [Opus], [Architecture, bugs complexes], [\$\$\$],
+  [OpusPlan], [Plan (Opus) + Exécution (Sonnet)], [\$\$],
+)
+```
+
+# Arbre de décision rapide
+
+```
+Tâche simple       → demander directement à Claude
+Tâche complexe     → passer par Tasks API pour planifier
+Changement risqué  → Plan Mode d'abord
+Tâche répétitive   → créer un agent ou une commande
+Contexte plein     → /compact ou /clear
+Besoin de doc      → utiliser Context7 MCP
+Analyse profonde   → utiliser Opus (réflexion activée par défaut)
+```
+
+```{=typst}
+#golden-rules((
+  "Toujours relire les diffs avant d'accepter",
+  "Utiliser /compact avant que le contexte devienne critique (>70%)",
+  "Être précis dans les demandes (QUOI, OÙ, COMMENT, VÉRIFIER)",
+  "Plan Mode d'abord pour les tâches complexes ou risquées",
+  "Créer un CLAUDE.md pour chaque projet",
+  "Commit fréquemment après chaque tâche terminée",
+  "Savoir ce qui est envoyé : prompts, fichiers, résultats MCP vers Anthropic",
+))
+```
+
+# Résolution rapide des problèmes courants
+
+| Problème | Solution |
+|---------|----------|
+| "Command not found" | Vérifier le PATH, réinstaller npm global |
+| Contexte trop élevé (>70%) | `/compact` immédiatement |
+| Réponses lentes | `/compact` ou `/clear` |
+| MCP ne fonctionne pas | `claude mcp list`, vérifier la config |
+| Permission refusée | Vérifier `settings.local.json` |
+| Hook bloquant | Vérifier le code de sortie du hook, revoir la logique |
+
+**Contrôle santé** : `which claude && claude doctor && claude mcp list`
+
+---
+
+**Auteur** : Florian BRUNIAUX | [Méthode Aristote](https://methode-aristote.fr) | Écrit avec Claude
+
+*Version 3.41.1 | Juillet 2026*

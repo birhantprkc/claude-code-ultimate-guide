@@ -18,7 +18,7 @@
 - Lines of Documentation: 26,494
 - Production Templates: 262
 - Quiz Questions: 334
-- Whitepapers: 11 titles (FR + EN)
+- Whitepapers: 13 titles (FR + EN)
 
 ---
 
@@ -511,7 +511,7 @@ claude-code-ultimate-guide/
 ├── machine-readable/               # LLM/AI consumption
 │   ├── reference.yaml              # Machine-optimized index (~2K tokens)
 │   └── llms.txt                    # Short version
-├── whitepapers/                    # 9 focused PDFs (FR + EN)
+├── whitepapers/                    # 13 focused PDFs (FR + EN)
 └── quiz/                           # 334-question interactive quiz
 ```
 
