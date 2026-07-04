@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.197"
-updated: "2026-07-01"
+latest: "2.1.199"
+updated: "2026-07-03"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -12,8 +12,24 @@ updated: "2026-07-01"
 releases:
 
   # ─────────────────────────────────────────────────────────────
-  # 2.1.x Series (January-June 2026)
+  # 2.1.x Series (January-July 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.199"
+    date: "2026-07-02"
+    highlights:
+      - "Stacked slash-skill invocations (`/skill-a /skill-b do XYZ`) now load all leading skills (up to 5), not just the first"
+      - "Transient server rate-limit errors (429s unrelated to usage limit) now retried automatically with backoff for subscribers; `CLAUDE_CODE_RETRY_WATCHDOG` raises default retry count to 300 and lifts the `CLAUDE_CODE_MAX_RETRIES` cap of 15"
+      - "Fixed streaming responses discarded on mid-stream server errors (partial output now kept); subagents cut off by rate limits now return partial work to the parent instead of silently failing; API errors in subagents now reported instead of shown as success"
+      - "Fixed background-agent daemon on Linux killing itself and all agents every ~50s after unclean shutdown; SSL certificate errors now fail immediately with actionable guidance instead of burning retries"
+
+  - version: "2.1.198"
+    date: "2026-07-01"
+    highlights:
+      - "⭐ Subagents now run in the background by default — Claude keeps working while they run and is notified when they finish"
+      - "⭐ Claude in Chrome is now generally available"
+      - "Background agents launched from `claude agents` now commit, push, and open a draft PR when finishing code work; new `Notification` hook events `agent_needs_input`/`agent_completed`; Explore agent now inherits the session model (capped at Opus) instead of Haiku"
+      - "Subagents and context compaction inherit the session's extended thinking configuration; added `/dataviz` skill; removed the `/agents` wizard (edit `.claude/agents/` directly or ask Claude)"
 
   - version: "2.1.197"
     date: "2026-06-30"
@@ -1512,6 +1528,7 @@ breaking_summary:
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.198": "Subagents run in the background by default, Claude in Chrome generally available"
   "2.1.197": "Claude Sonnet 5 becomes the default model, native 1M-token context, promotional pricing $2/$10 per Mtok through August 31"
   "2.1.78": "StopFailure hook, ${CLAUDE_PLUGIN_DATA} persistent state, streaming line-by-line, security: silent sandbox disable fix"
   "2.1.69": "InstructionsLoaded hook, ${CLAUDE_SKILL_DIR}, 4 security fixes, 15+ memory fixes, Voice STT 20 languages"

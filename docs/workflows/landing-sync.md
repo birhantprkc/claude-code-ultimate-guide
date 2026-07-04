@@ -65,7 +65,19 @@ All synced!
 
 If mismatch: exit code = number of issues found. Check `landing/CLAUDE.md` for exact line numbers to modify.
 
-## Announcement Banner
+## Search Index (Cmd+K)
+
+The landing's Cmd+K search palette includes guide entries generated from `machine-readable/reference.yaml` (the `deep_dive` section).
+
+```bash
+# From the landing repo, after any reference.yaml change:
+cd ../claude-code-ultimate-guide-landing
+pnpm build:search
+```
+
+The script (`scripts/build-guide-index.mjs`) regenerates `src/data/guide-search-entries.ts`. How it handles anchors: for guide files served locally at `/guide/<slug>/`, the anchor is stripped and the search result links to the top of the page. For everything else, the entry links to GitHub with the anchor kept, so a stale anchor there means a dead link in prod.
+
+**When to rebuild**: after adding, removing, or renaming `deep_dive` keys in `reference.yaml`. Anchor-only changes on locally served guide files don't alter the generated URLs, but keeping the YAML accurate matters anyway since it's the LLM-facing index.
 
 File: `src/components/global/AnnouncementBanner.astro` (landing repo)
 
