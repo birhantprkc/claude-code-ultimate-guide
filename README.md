@@ -933,6 +933,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 - [Ask Zread](https://zread.ai/FlorianBruniaux/claude-code-ultimate-guide) — Ask questions about this guide
 - [Interactive Quiz](./quiz/) — 271 questions
 - [Landing Site](https://cc.bruniaux.com) — Visual navigation, cheat sheets, ebooks, quiz
+- [Claude Code Version History](https://cc.bruniaux.com/releases/): every release with env vars, config flags, and breaking changes
+- [AI Ecosystem Guide](https://cc.bruniaux.com/guide/ai-ecosystem/): model comparisons, complementary tools, multi-provider setups
 - [RSS Feed](https://cc.bruniaux.com/rss.xml) — Subscribe to guide updates, new content, and CC releases
 
 ---
