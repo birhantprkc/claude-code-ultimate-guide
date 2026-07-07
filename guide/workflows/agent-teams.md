@@ -1499,6 +1499,10 @@ The overhead is real (each cycle costs tokens and latency). Apply it to tasks wh
     Jocelyn N'takpe (Head of Engineering & Architecture, ManoMano), 2025
     At scale (250 engineers, 400+ microservices): a dedicated platform team maintains skills and rules encoding internal architecture conventions (database connection patterns, Kafka message encoding, naming standards). Agents are treated as new developers who need onboarding. Agent-facing documentation is now better maintained than Confluence. MCP stack in production: Serena (semantic code search via LSP), Playwright, Context7.
 
+12. **Devoxx, 2026: "The Spec Paradox"**
+    Max Sumrall, 2026
+    Restricting an agent's task too tightly degrades output quality nearly as much as giving it no specification at all; broader, more ambitious goals sometimes pull more creative results out of the agent than a narrow brief does. A documented case at Picnic showed the same pattern at team level: perceived productivity rose sharply in the first weeks of AI-assisted development, then declined once code shipped faster than it could be reviewed, forcing repeated rework on the same features.
+
 ### Related Documentation
 
 - [Claude Code Releases](../core/claude-code-releases.md) — v2.1.32, v2.1.33 release notes

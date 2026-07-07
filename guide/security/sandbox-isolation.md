@@ -550,7 +550,15 @@ For CI/CD, cloud sandboxes (E2B, Vercel, Sprites) are typically better than Dock
 
 The sandboxing approaches in sections 2–7 isolate where Claude Code *runs*. A separate isolation boundary covers what MCP *tools* can access on the OS when Claude Code calls them. Without this, a compromised or misconfigured MCP server runs with the same OS privileges as your Claude Code process, including unrestricted filesystem read/write and outbound network access.
 
+**An MCP server exposed over HTTP needs the same security posture as any other API you would run in production.** Authentication, authorization, and HTTPS are not optional extras for MCP; they are the baseline. A local MCP server left without authentication, or shipped with unhardened defaults, stays an exploitable attack surface even when the underlying model has no flaw at all. The vulnerability lives in the server's own exposure, not in anything the LLM does.
+
+*Daniel Garnier-Moiroux, Devoxx, 2025 (and Makan Sepehrifar, 2026)*
+
 WebAssembly offers a different model: compile each MCP tool to a `.wasm` component, run it inside a Wasm runtime, and declare capability grants explicitly. The tool gets exactly what you grant, nothing more. The deny-by-default model is enforced at the runtime level rather than relying on the tool's own code.
+
+**A more deterministic alternative is to keep the access decision outside the agent's reasoning loop entirely.** Rather than declaring capabilities inside the tool itself, wrap the agent's access behind an MCP server surrounded by a separate, deterministic access-control layer, with rights scoped precisely through OAuth and fine-grained relationship-based authorization (the OpenFGA model). A compromised or manipulated agent cannot reason its way into broader permissions if it never held the authority to grant itself any in the first place.
+
+*Christoph Bühler, Devoxx, 2026 (and Deepu Sasidharan, 2025)*
 
 ### Available Tools
 

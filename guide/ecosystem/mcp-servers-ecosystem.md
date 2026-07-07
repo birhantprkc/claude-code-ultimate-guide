@@ -73,6 +73,10 @@ All community servers are evaluated against these criteria:
 
 **The LLM is stateless; the client holds all routing intelligence.** The model receives tool schemas on each request but has no memory of prior server calls from earlier in the session. Claude Code (as the MCP client) is responsible for routing, retrying, and composing results. Understanding this separation prevents the common mistake of treating a remote MCP server as an intelligent collaborator rather than as a stateless API. (Zineb Bendhiba, Principal Software Engineer at Red Hat, [IFTTD ep 326 "MCP Servers"](https://www.ifttd.io/episodes/mcp-servers))
 
+**MCP is best read as a standardized integration layer, not a new paradigm.** Rather than writing one bespoke integration per data source or tool, the protocol lets a single client speak one language to many servers. Framing it this way cuts through a lot of the hype cycle around MCP: it is the same problem system design has solved before with API gateways and service meshes, applied to how LLMs reach tools. (ByteByteGo, "MCP", 2025)
+
+**Sizing a server for an agentic client starts from the same back-of-the-envelope formula used for any API, with one caveat.** A rough estimate: QPS equals active users times actions per user divided by 86,400 seconds in a day, with peak load usually running two to three times above that average. That peak multiplier was calibrated on human traffic patterns and is probably an underestimate for agents, which tend to hit a server in bursts rather than a smoothed-out stream throughout the day; size headroom accordingly. (ByteByteGo, "Back-of-the-Envelope Estimation," 2022, and "URL Shortener," 2025)
+
 ---
 
 ## Ecosystem Evolution
@@ -114,6 +118,23 @@ Claude now supports interactive tools via MCP Apps spec:
 **Visual Studio 2026** natively integrates Azure MCP Server, GitHub Copilot Chat, and MCP clients.
 
 - **Announcement**: [Microsoft DevBlogs](https://devblogs.microsoft.com/visualstudio/azure-mcp-server-now-built-in-with-visual-studio-2026-a-new-era-for-agentic-workflows/)
+
+### Protocol Roadmap (Mid-2026)
+
+The Model Context Protocol has no IETF- or W3C-style standards body behind the term itself; the closest thing to institutional formalization is MCP's own versioned specification track, now under Linux Foundation governance (see above).
+
+A release candidate published 2026-07-28 adds four changes worth tracking:
+
+- **Stateless protocol core**: a baseline that does not require session state, useful for serverless and edge deployments of MCP servers
+- **Extensions framework**: a formal mechanism for adding capabilities (MCP Apps, above, is the first shipped example) without revising the core spec
+- **Tasks**: long-running operation support, relevant for MCP servers wrapping asynchronous backends
+- **Formal deprecation policy**: a documented process for retiring spec features, plus continued authorization hardening
+
+Source: [MCP roadmap blog](https://blog.modelcontextprotocol.io/posts/2026-mcp-roadmap/), [2026-07-28 release candidate announcement](https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/).
+
+### NSA Security Guidance (June 2026)
+
+The US National Security Agency published MCP-specific security guidance in June 2026 ([CSI_MCP_SECURITY.PDF](https://media.defense.gov/2026/Jun/02/2003943289/-1/-1/0/CSI_MCP_SECURITY.PDF)), the first guidance-level attention from a national security agency on the protocol. It is security guidance, not a methodology standard, but it marks MCP's shift from a developer convenience into something institutions treat as an attack surface worth documenting. Cross-reference against the [Security Checklist](#security-checklist) below when evaluating a new MCP server for production use.
 
 ---
 

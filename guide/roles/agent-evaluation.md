@@ -431,6 +431,16 @@ Metrics are useless without action:
 
 Standard unit tests do not apply to LLM outputs. A test that passes or fails deterministically cannot capture the behavior of a system whose outputs vary across runs with the same input. Production teams working with agentic pipelines have converged on a different evaluation model.
 
+### Temperature Zero Does Not Guarantee Determinism
+
+Setting temperature to 0 is often assumed to make an LLM's output deterministic. It does not. Floating-point arithmetic on GPUs is not strictly associative, and batching, kernel scheduling, and Mixture-of-Experts routing introduce run-to-run variance even when sampling is disabled. Determinism, when it matters, has to be engineered around the model rather than expected from the model: pin the API version, lock the exact model checkpoint used in production, and version prompts explicitly so a silent upstream change does not shift behavior underneath an evaluation suite.
+
+The same caution applies across time, not just across runs. A prompt that returns a stable answer today can return a different one two days later, even with temperature held constant, because providers update models, routing, and infrastructure without changing the version string a team relies on. This is an argument against single-pass evaluation: a suite that passed once tells you about that one moment, not about the system going forward. Re-running the evaluation suite on a recurring basis, not just after a deliberate prompt change, is the only way to catch this kind of silent drift.
+
+*Sources: Alexandre Balmes, Dev With AI Meetup, 2026; Brian Vermeer, Devoxx, 2026*
+
+---
+
 ### Build a Scored Dataset, Not a Test Suite
 
 The foundational shift is treating evaluation as: build a dataset of inputs paired with expected outputs, run a scoring function over agent responses, and track the score over time. The metric is a percentage, not a boolean. Moving from 85% to 87% to 89% is success; having a test suite that was green last week and is still green this week tells you nothing about the direction of travel.
@@ -438,6 +448,18 @@ The foundational shift is treating evaluation as: build a dataset of inputs pair
 This means collecting real inputs from production, labeling expected outputs (manually or with a larger LLM), and running the scoring function after every significant change to the agent prompt, model, or tool configuration.
 
 *Source: Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
+### Match the Metric to the Pipeline Stage
+
+Not every phase of an agent's lifecycle should be evaluated with the same rigor or cost. In the development loop, a fast and cheap metric is enough to catch obvious regressions quickly. During model selection, the evaluation can afford to be slower and more qualitative, since the decision is infrequent and the cost of getting it wrong is high. In production, the metric needs to be reliable and stable over long periods, since it is the signal a team trusts to detect real drift rather than noise.
+
+Two additional defaults help avoid inflated confidence. Test out-of-distribution by default, not only on cases that resemble the training data; an agent that scores well on familiar inputs and fails on unfamiliar ones has an evaluation gap, not a working evaluation. And avoid benchmarks that may already be contaminated by the training data of the model under test, since a high score there measures memorization more than capability.
+
+When evaluation relies on human raters or an LLM-as-judge, measuring raw percent agreement between evaluators overstates reliability, since two raters can agree by chance a large share of the time. Cohen's kappa corrects for that chance agreement and gives a more honest read on whether the evaluation criteria are actually well-defined.
+
+*Source: Yann Dubois, Stanford CS224N, 2024 (cross-referenced in CS336 Lecture 12, 2026)*
 
 ---
 
@@ -460,6 +482,16 @@ awk '{ total++; if ($1 >= 0.8) pass++ } END { print pass/total*100 "% pass rate"
 Set a pass-rate threshold for each scenario (for example, 90% of runs must score above 0.8). Monitor threshold drift across agent versions and model updates.
 
 *Source: Frédéric Barthelet (engineer), [IFTTD ep 329 "Front agentique"](https://www.ifttd.io/episodes/front-agentique)*
+
+---
+
+### Combine Frameworks and Force Structured Output
+
+No single evaluation framework covers every metric a production system needs; one might handle factual accuracy well but say nothing useful about latency, cost, or tool-call correctness. Combining several frameworks, each covering the dimensions it is strongest at, gives a more complete picture than standardizing on one.
+
+On the output side, forcing the model to return a structured schema (a Pydantic model or equivalent) rather than parsing free text pays off directly in evaluation quality. A scoring function that operates on typed fields is far less fragile than one built around regexes or string matching against loosely formatted prose, and it removes an entire class of evaluation bugs caused by output format drift rather than actual behavior change.
+
+*Source: Mete Atamel, Devoxx, 2025*
 
 ---
 
@@ -521,6 +553,36 @@ Agentic workflows where the sequence of steps is predetermined are easier to eva
 If latency and cost are constraints (they almost always are), a deterministic workflow with LLM components at decision points evaluates more cheaply and reliably than an open-ended agent loop. Reserve the pure agent pattern for tasks where the sequence of actions is genuinely unknowable in advance.
 
 *Source: Louis Pinsard (CTO, Dialogue), [IFTTD ep 338 "Evaluation de GenAI"](https://www.ifttd.io/episodes/evaluation-de-genai)*
+
+---
+
+### Evaluate Confidence, Not Coverage
+
+A common trap in agent evaluation is treating test coverage (how many scenarios are scripted) as a proxy for how trustworthy the agent is. A more useful frame is confidence: how sure can you be that the agent behaves correctly, not just on the scenarios you tested, but on the ones you did not think to write.
+
+Building that confidence requires evaluating at two levels simultaneously: each component in isolation (does the retrieval step return the right documents, does the tool call use the right parameters), and the complete system behavior including its guardrails, since a system built from individually correct components can still misbehave once the pieces interact. One practical structure organizes this around three pillars: principle (what the agent is fundamentally meant to do), policy (the explicit rules and guardrails constraining its behavior), and personality (the tone and interaction style users actually experience). Evaluating against all three catches failures that a purely functional test suite misses.
+
+*Source: Jettro Coenradie & Daniël Spee, Devoxx, 2026*
+
+---
+
+### Skill Self-Improvement as Reinforcement Learning
+
+Iterating on a skill (the instructions and structure that shape how an agent performs a task) can be treated as a lightweight reinforcement learning loop: make an incremental change, score the result against a binary or numeric criterion, keep the change if the score improves, discard it otherwise. This turns skill refinement into a repeatable, measurable process instead of an ad hoc round of prompt tweaking.
+
+That evaluation needs to happen on two distinct layers. The first is activation: does the skill trigger at the right moment, given the right context and phrasing. The second is output quality: once triggered, does the skill produce a good result. A skill can fail on either layer independently, so scoring only the output misses activation failures, and scoring only activation misses cases where the skill fires correctly but produces a weak answer. Edge cases on either layer still benefit from human review rather than being folded automatically into the scoring loop.
+
+*Sources: Emmanuel Sciara, Dev With AI Meetup, 2026; Negouai & Drode, 2026*
+
+---
+
+### Scope the Problem Before You Evaluate It
+
+Before adding an LLM to a pipeline, or expanding what a model is asked to do, it is worth confirming that the LLM is actually solving a problem simpler methods cannot. Academic work on model selection makes the same point that practitioners report from production: added sophistication has to demonstrate a real marginal gain, an LLM remains hard to control precisely even in well-resourced teams, and prompting or retrieval-augmented generation is often preferable to costly fine-tuning when the simpler approach reaches comparable quality.
+
+This scoping question also applies to what a single agent call should be trusted to do end to end. Combinatorial optimization problems (route planning, scheduling, bin-packing) are not something an LLM solves reliably by itself. The pattern that holds up better couples the model with a classical solver: the LLM interprets the problem and formats constraints, the solver computes the actual optimal or near-optimal solution. Asking the model to produce the full solution directly is a common source of confidently wrong output that no amount of prompt tuning fully fixes.
+
+*Sources: Stanford ISLR (Hastie & Tibshirani) and CS230 Lecture 8, 2025; Tom Cools, Devoxx, 2026*
 
 ---
 

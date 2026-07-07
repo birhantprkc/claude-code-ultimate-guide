@@ -43,6 +43,28 @@ Research from ETH Zurich and UC Berkeley (Mündler et al., PLDI 2025, [arXiv 250
 
 Two practices experienced practitioners recommend maintaining deliberately: alternating AI-assisted and manual coding sessions to preserve deep system understanding (Sébastien Deleuze, Spring Framework committer, [IFTTD ep 349](https://www.ifttd.io/episodes/tech-et-soft-skills)), and capping daily AI development cycles even when tooling makes more cycles technically possible, as cognitive load limits are real and practitioners who ignored them reported significant fatigue within weeks (Julien Lepine, [IFTTD ep 351](https://www.ifttd.io/episodes/aws-summit)).
 
+**AI amplifies a team's existing practices, for better or worse.** A team with weak engineering habits before AI adoption tends to see its anti-patterns get worse, not corrected, once agents enter the workflow. This contradicts the common assumption that AI mechanically raises the floor and spreads good practices on its own. The tool accelerates whatever is already there.
+
+*Geoffrey Graveaud, Dev With AI Meetup, 2026*
+
+---
+
+**A rare and honestly reported failure case.** One team delegated user stories entirely to agents running continuously without supervision, and lost velocity as a result. The problem was not obvious from daily standups; it only surfaced once the team deliberately set out to measure it, rather than through intuition or complaints.
+
+*Samuel Gallet & Geslain Dahan, Dev With AI Meetup, 2026*
+
+---
+
+**Adoption spreads through practice and permission to fail, not a mandated rollout.** Several independent company contexts converge on the same pattern: teams that carve out dedicated experimentation time, an open discovery phase with no imposed guidance first, then a structuring phase to avoid overlapping projects, build genuine adoption faster than teams handed a top-down mandate.
+
+*The Product Crew, enterprise adoption field reports, 2024-2026 (Alan, Payfit, Joko contexts)*
+
+---
+
+**Leadership buy-in is a non-negotiable precondition for an AI transformation to hold.** Without a convinced sponsor at the executive level, the initiative loses momentum once the initial enthusiasm fades.
+
+*The Product Crew, AI transformation field reports, 2026*
+
 ---
 
 ## Starting Points (Not Prescriptions)

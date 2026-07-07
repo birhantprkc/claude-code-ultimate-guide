@@ -178,7 +178,7 @@ Straude is the only tool in this list that is **social** — it uploads your sta
 
 ### RTK (Rust Token Killer)
 
-A CLI proxy that filters command outputs **before** they reach Claude's context. 446 stars, 38 forks, 700+ upvotes on r/ClaudeAI.
+A CLI proxy that filters command outputs **before** they reach Claude's context. 69,042 stars, 4,279 forks (GitHub API, 2026-07-07), up from 446 in March 2026 and 24,397 in April 2026, a roughly 2.8x jump in under three months worth verifying against the full star-history graph before quoting in a high-stakes context.
 
 | Attribute | Details |
 |-----------|---------|
@@ -260,7 +260,7 @@ Cross-agent statistics dashboard that aggregates cost and token data across mult
 | Attribute | Details |
 |-----------|---------|
 | **Source** | [GitHub: androidZzT/cc-statistics](https://github.com/androidZzT/cc-statistics) |
-| **Stars** | ~87 (May 2026) |
+| **Stars** | 109 (GitHub API, 2026-07-07), up from 87 in May 2026, slow steady growth rather than a breakout |
 
 **Key features**:
 

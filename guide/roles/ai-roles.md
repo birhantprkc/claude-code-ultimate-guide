@@ -335,6 +335,10 @@ Build and maintain the internal developer platform. With AI, this role has expan
 
 When every team is building their own LLM integrations, you get: duplicated cost, inconsistent security, no centralized observability, and no shared learnings. Platform engineers who understand AI prevent this fragmentation. They're the reason the AI investment in a company scales instead of sprawling.
 
+**Operational ownership of AI works best sitting with the business experts themselves, not a centralized innovation cell.** Two independent corporate field reports converge against the instinct to centralize: routing every initiative through an innovation lab or an isolated IT department slows adoption and dilutes domain judgment. The counterintuitive position, relative to the classic "innovation cell" model, is to hand the tool to the people who already own the problem.
+
+*The Product Crew, enterprise field reports, 2026*
+
 ### Required skills (AI additions)
 
 MLOps tooling, LLM gateway products (LiteLLM, Portkey), cloud AI services, cost optimization patterns, security for AI (prompt injection mitigation, output filtering).

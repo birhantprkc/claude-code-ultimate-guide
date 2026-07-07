@@ -46,6 +46,10 @@ That single sentence contains three non-obvious requirements:
 - **Right information**: not all information is equal. Architecture decisions are more valuable than linting preferences. Negative constraints ("never return raw SQL errors to the client") are more actionable than aspirational goals ("write clean code").
 - **Right time**: path-scoped rules for backend code have no value when editing a frontend component. Loading everything always is the lazy approach that degrades adherence.
 
+### A Contested Origin
+
+Karpathy's mid-2025 post is the commonly credited source, but the attribution resurfaced as a live debate at the AI Engineer conferences in 2026. Dex Horthy, founder of HumanLayer and author of "12-Factor Agents," is now described in the AI Engineer conference's own materials as having coined the term, with an earlier antecedent: the "dumb zone," the 40 to 60% band of a large context window where recall degrades and reasoning weakens, based on an analysis of roughly 100,000 developer sessions. Treat this as a genuinely open question rather than a settled fact. What matters practically is not who said it first, but that two independent lines of observation, Karpathy's framing and Horthy's session-scale data, converge on the same conclusion: mid-window content is where instruction-following breaks down first.
+
 ### Prompt Engineering vs. Context Engineering
 
 These terms are often conflated. The distinction matters:
@@ -128,11 +132,15 @@ In practice, every Claude Code session uses both. The static context (your confi
 
 For teams building automated pipelines and agents, Anthropic's September 2025 engineering post ["Effective context engineering for AI agents"](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) covers the dynamic side in depth.
 
+Anthropic's April 2026 [Managed Agents architecture](https://www.anthropic.com/engineering/managed-agents) pushes this further with a named separation: the harness and model ("brain"), the sandboxed execution layer ("hands"), and a durable session event log that lives entirely outside the context window. The harness reads from that log through a `getEvents()`-style interface, pulling positional slices back in on demand rather than keeping everything resident. Anthropic's stated rationale is that they cannot predict which context-management techniques future models will need, so durability belongs in the session layer while the context logic stays in the harness, which is expected to change. The companion post, ["Effective harnesses for long-running agents"](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents), covers the open problem of preserving coherent progress across repeated context resets on multi-hour and multi-day tasks. See [AI Ecosystem §14](../ecosystem/ai-ecosystem.md#14-claude-managed-agents-cloud-hosted-platform) for the full architecture, including the append-only event log and checkpoint/restore mechanics already documented in this guide.
+
 ### Why Context Rot is Structural, Not Accidental
 
 Transformer models attend to all tokens pairwise. That means the number of attention relationships in a context window grows as n², not n. Double the context length and you quadruple the number of relationships the model must weigh. At 200K tokens, this means billions of pairwise computations, and the model's attention becomes increasingly diffuse.
 
 This is not a bug that future models will eliminate. It is a consequence of the architecture itself. Context rot, the progressive degradation of instruction adherence as context grows, is structurally baked in. The implication: you cannot solve context rot by relying on a larger context window. You solve it by keeping context lean and loading information just in time.
+
+**The effect has been refined, not refuted.** A recurring critique through 2026 is that Needle-in-a-Haystack benchmarks measure only lexical retrieval. Once the question and the needle stop sharing obvious vocabulary (realistic, semantically ambiguous queries), degradation with length is worse than NIAH numbers suggest. One data point circulating in 2026, specific to its setup and not a general constant: Opus 4.6, used as a trajectory monitor on MonitorBench, dropped from 98.6% to 88% recall once 800K tokens of benign prior actions were prepended. Read it as evidence that the failure mode also hits monitor and classifier models, not just generation, rather than as a number to generalize past its own conditions.
 
 **Just-in-time retrieval vs. pre-loading**
 
@@ -148,6 +156,8 @@ Pre-loading is the familiar RAG pattern: build a retrieval index, pull relevant 
 Just-in-time retrieval is more demanding to implement but more effective at scale: the model retrieves information dynamically as the task demands it, using tool calls, MCP servers, or file reads. Only the information needed for the current step is in context.
 
 Claude Code's behavior reflects this pattern: CLAUDE.md loads upfront (pre-loaded, always relevant), while file contents and tool results are retrieved at inference time via `read_file`, `glob`, `grep`, and MCP calls. The glob and grep tools are the JIT retrieval layer. They put specific file contents into context only when a task touches those files.
+
+**In-context generation, plain RAG or a well-built prompt, often beats fine-tuning when the goal is teaching a model new knowledge.** Fine-tuning bakes facts into the weights through gradient updates, but it runs into a documented failure mode called the reversal curse: a model fine-tuned on "A is B" frequently cannot answer "what is B," even though the fact is logically symmetric. Retrieval keeps the fact as text in context rather than asking the model to generalize from a weight update, which sidesteps the problem entirely. Two independent Stanford courses converge on this point when advising teams choosing between the two approaches. (*Stanford CS25, 2026; CS230 Lecture 8, 2025*)
 
 **Memory tool (beta)**
 
@@ -234,6 +244,8 @@ The question "should I just use the 1M context window?" is really a question abo
 | Claude Opus 4 | 200K | ~185K | ~150K+ |
 
 These are engineering estimates, not guaranteed values. Treat them as planning figures: if your session regularly approaches 150K tokens, it is time to implement compaction, graduated offloading, or path-scoping before accuracy becomes a problem, not after.
+
+**A sharp, non-linear quality drop shows up around 70% of the context budget used, rather than a smooth decline.** Nine speakers from the same conference corpus converged independently on this same threshold without coordinating with each other beforehand, which is a rare and strong signal for a claim usually reported as a vague hunch. The practical consequence is about timing: purge or compact context before crossing that threshold, not after the drop already shows up in the output. (*Emmanuel Sciara, Dev With AI Meetup, 2026. Malo and Dorian, same corpus and year, describe the same shift as abrupt rather than gradual.*)
 
 ### Path-Scoping and Budget Efficiency
 
@@ -437,6 +449,8 @@ A 600-line CLAUDE.md with no structure is the most common failure mode in produc
 5. Adherence degrades progressively as the file grows
 
 The fix is architectural: decompose the monolith into focused modules, then use path-scoping to load each module only when relevant.
+
+**A CLAUDE.md file that keeps growing hurts the model's performance directly, not just the token bill.** The common reflex when Claude gets something wrong is to add one more rule to the system prompt, on the assumption that more context can only help. Two independent talks from the same 2026 meetup reached the opposite conclusion: past a certain size, splitting rules into separate modular files outperforms piling them into one growing document, because the file itself becomes the bottleneck the model has to work around. (*Florian Allainmat, Dev With AI Meetup, 2026. Gallet and Dahan, same corpus and year, report the same independent finding.*)
 
 ### Path-Scoping Pattern
 
@@ -1560,6 +1574,14 @@ else:
 
 This hook transparently intercepts large bash outputs, writes them to a temp file, and injects the path with a preview. The agent sees a compact summary and knows where to find the full content if it needs it. The same pattern applies to any tool type: MCP tool results, file reads, or API responses can all be offloaded to filesystem and referenced by path.
 
+### Optical and Visual Context Compression
+
+A distinct compression modality emerged in 2026, the first real modality shift in this discipline rather than an incremental improvement on text compression. Following DeepSeek-OCR's late-2025 demonstration that a model can decode more than 10x the token count from a small set of vision tokens, 2026 work (AgentOCR, Glyph, VIST) extends the idea to long documents: render the text as an image, pass it through a frozen vision encoder plus a trainable resampler, and hand the model compact visual tokens instead of raw text tokens. The 10x figure comes from the original DeepSeek-OCR paper under specific conditions; treat it as a compression ratio observed in that setup, not a universal multiplier.
+
+pxpipe is the first production implementation of this pattern targeted specifically at Claude Code and the Anthropic API: a local proxy that rewrites large tool results, collapsed prior turns, and static system-prompt or tool-doc blocks into PNG images before the request leaves the machine, while leaving recent turns, model output, and sparse prose untouched. Exact-byte content (passwords, hashes, IDs) is explicitly excluded and documented as a lossy-recall risk rather than a solved problem. Full tool profile, benchmarks, and known limitations: [Context Engineering Tools: pxpipe](../ecosystem/context-engineering-tools.md#pxpipe).
+
+**When it applies**: large, mostly-static blocks of text your model does not need to recall verbatim (system prompts, tool documentation, old conversation turns already summarized elsewhere). It does not apply to content where exact character-level recall matters, since visual token decoding has a measurable non-zero error rate on precise strings.
+
 ### Summary: Reduction Techniques by Impact
 
 | Technique | Context Reduction | Effort | Adherence Impact |
@@ -2168,7 +2190,28 @@ For every factual claim you include in your response:
 - Do not present inferred conclusions with the same certainty as directly-observed facts
 ```
 
-The difference between claim-source mapping as a QA mechanism vs as a compliance mechanism: compliance tracking asks "did we use authorized sources?", QA tracking asks "is this specific claim accurate?" — both are valuable but for different failure modes. Agents that handle factual queries or generate reports need the QA version.
+The difference between claim-source mapping as a QA mechanism vs as a compliance mechanism: compliance tracking asks "did we use authorized sources?", QA tracking asks "is this specific claim accurate?" Both are valuable but for different failure modes. Agents that handle factual queries or generate reports need the QA version.
+
+### Chain-of-Thought as a Formal Compute Extension
+
+**A model's "reasoning" is defined operationally as the intermediate tokens it generates between an input and an output, not as some separate cognitive faculty.** This reframing carries a formal backing: a transformer that is allowed to produce a chain of reasoning before answering can solve any problem solvable by a Boolean circuit, given a constant number of intermediate steps. This is the theoretical anchor for why extended thinking and chain-of-thought prompting change what a model is capable of, not just how it explains its answer: token budget spent on reasoning is compute budget, not commentary. (*Denny Zhou, Google DeepMind, Stanford CS25 V5, 2025*)
+
+### New Research Directions (April to July 2026)
+
+Research on context management shifted register during this window: earlier papers mostly documented context rot as a problem, while this batch proposes concrete mitigation architectures. Treat the results below with the confidence level noted for each; several are single-paper claims not yet independently reproduced.
+
+| Paper | Contribution | Confidence |
+|-------|--------------|------------|
+| **ACON** ([arXiv:2510.00615](https://arxiv.org/pdf/2510.00615), updated June 2026) | Compresses both tool observations and interaction history into condensed natural-language representations, iteratively refining its own compression rules from analysis of agent failures. Updated figures: 26 to 54% peak-token reduction. | Update to an existing October 2025 paper, not a first publication |
+| **Less Context, Better Agents** ([arXiv:2606.10209](https://arxiv.org/abs/2606.10209), June 2026) | Tests four context configurations on GPT-5 across 50 hotel expense-report tasks. Pruned-and-summarized history beats full history on both cost and success rate. | Independent research paper |
+| **AMA-Bench** ([arXiv:2602.22769](https://arxiv.org/abs/2602.22769), February 2026) | Benchmark dedicated to long-horizon agent memory. Finds existing memory systems underperform because they rely on lossy similarity retrieval and miss causal or goal-relevant information, not just recency. | Research paper |
+| **Agent Memory: Characterization and System Implications** ([arXiv:2606.06448](https://arxiv.org/abs/2606.06448), June 2026) | First systems-level study of what long-horizon stateful agent workloads actually look like at the infrastructure layer. | Research paper |
+| **ContextBudget** ([arXiv:2604.01664](https://arxiv.org/pdf/2604.01664), April 2026) | Formalizes context management as a budget-allocation problem for research agents. | Research paper |
+| **Classifier Context Rot** ([arXiv:2605.12366](https://arxiv.org/html/2605.12366v1), May 2026) | Shows the degradation pattern also affects classifier and monitor models that observe agent trajectories, not only generation. This is the source of the MonitorBench figure cited earlier in this section. | Research paper, distinct angle from Chroma's original context-rot finding |
+| **Context Kubernetes** ([arXiv:2604.11623](https://arxiv.org/abs/2604.11623), April 2026) | Proposes treating enterprise context delivery as structurally analogous to container orchestration: a declarative YAML manifest, a reconciliation loop, and a three-tier permission model where agent authority stays a strict subset of human authority. | Prototype only, eight experiments, not adopted at scale, flag as early-stage |
+| **Recursive Language Models (RLM)** ([arXiv:2512.24601](https://arxiv.org/abs/2512.24601), MIT CSAIL) | Treats an oversized input as an external variable in a Python REPL: the model writes code that recursively chunks and re-queries segments instead of ingesting everything in one pass. Claimed result: processing inputs two orders of magnitude beyond the base context window at comparable cost. | Single-paper, self-reported benchmark, not yet independently replicated at scale; present as a lab result, not an established fact |
+
+**What changed practically**: Anthropic's own framing, restated in the [Managed Agents post](https://www.anthropic.com/engineering/managed-agents) above, moved the field's central question from "what words go in the prompt" to "what context configuration is most likely to produce the intended behavior." That reframing is now visible in the research agenda too: the newer papers target architecture (ACON's self-refining compression, Context Kubernetes' orchestration model, RLM's recursive delegation) rather than further documentation of the original context-rot finding.
 
 ---
 

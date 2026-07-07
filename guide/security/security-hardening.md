@@ -185,6 +185,10 @@ Earlier research by [SafeDep](https://safedep.io/agent-skills-threat-model) esti
 - **Pin skill versions** — Use specific commit hashes when installing from GitHub
 - **Audit scripts/** — Executable scripts bundled with skills are the highest-risk component
 
+**Test prompt injection systematically before shipping an agent to production.** A practical baseline covers at least five categories: system message manipulation, structured-output attacks, role-play framing designed to talk the model out of a refusal, and multi-turn manipulation that builds trust across several exchanges before the payload lands. The same scrutiny applies to third-party skills and agent definition files: installing one from the internet without reading its contents first is a direct injection vector, no different in kind from running an unaudited npm package.
+
+*Brian Vermeer, Devoxx, 2026*
+
 ```bash
 # Scan a skill directory with mcp-scan (Snyk)
 npx mcp-scan ./skill-directory
@@ -499,6 +503,10 @@ The [prompt-injection-detector.sh](../../examples/hooks/bash/prompt-injection-de
 | Nested command `$()` | **New** | Added in v3.6.0 |
 
 ### 2.2 Secret & Output Monitoring
+
+**Treat every LLM session the same way you treat a code repository: as a channel that can leak secrets.** As more developers write production code through an AI assistant, the risk shifts from committed files to prompts and session logs, a place teams rarely apply the same scanning discipline they already apply to git diffs. A session transcript deserves the same secret-scanning treatment as a pull request.
+
+*Brian Vermeer, Devoxx, 2026*
 
 #### Tool Comparison
 

@@ -6,7 +6,7 @@ tags: [context, tokens, optimization, ecosystem, tools, advanced]
 
 # Context Engineering: Tools & Ecosystem
 
-> **Confidence**: Tier 1/2. Core concepts based on published research and production data. Third-party tool details based on public documentation (June 2026).
+> **Confidence**: Tier 1/2. Core concepts based on published research and production data. Third-party tool details based on public documentation, GitHub API star counts verified 2026-07-07.
 >
 > **Related**: [Context Engineering (configuration guide)](../core/context-engineering.md) | [Third-Party Tools](./third-party-tools.md) | [MCP Servers Ecosystem](./mcp-servers-ecosystem.md)
 
@@ -17,9 +17,9 @@ This page maps the ecosystem of tools that help you manage what enters the conte
 ## Table of Contents
 
 1. [The Mental Model](#1-the-mental-model)
-2. [Core Concepts](#2-core-concepts)
-3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, tilth, Token Savior, context-mode, stacklit)
-4. [Prompt Compression](#4-prompt-compression)
+2. [Core Concepts](#2-core-concepts) (MVC, context rot, semantic priming, ghost tokens)
+3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, pxpipe, tilth, Token Savior, context-mode, stacklit, Cloudflare Code Mode MCP)
+4. [Prompt Compression](#4-prompt-compression) (LLMLingua, AttnComp, TOON)
 5. [AI Gateways](#5-ai-gateways)
 6. [RAG Optimization](#6-rag-optimization)
 7. [Memory Systems](#7-memory-systems)
@@ -86,6 +86,14 @@ Context management operates under two simultaneous pressures that pull in opposi
 
 Compression addresses cost. Pruning addresses rot. Good context engineering does both.
 
+### Context Quality After Compaction ("Ghost Tokens")
+
+Most of the tooling in this page answers "how many tokens did we save?" A newer, narrower angle asks a different question: after `/compact` or any lossy summarization pass, how much of what remains is still load-bearing, versus dead weight that survived compaction by accident? The term circulating for the latter is "ghost tokens": content that costs budget but no longer does useful work, distinct from the noise MVC targets before compaction ever runs.
+
+`alexgreensh/token-optimizer` is the tool most associated with this framing (1,565 stars, up from 947 in May 2026, the fastest-growing entry in this category by percentage). Rather than reporting a single reduction percentage, it targets what survives a compaction pass and whether that surviving content is still relevant to the task at hand.
+
+This is a genuinely distinct question from the raw-reduction metrics reported elsewhere on this page (Headroom's 92% on code search, RTK's 60 to 90% on shell output). Raw reduction measures how much was cut. Post-compaction quality measures whether what was kept is still correct and relevant. A tool could score well on the first metric and poorly on the second, if it happens to prune the wrong content. Treat this as an emerging measurement dimension, not yet a mature tooling category. Watch this angle rather than adopt it as a solved problem.
+
 ---
 
 ## 3. Output Compression: CLI & Tool Output
@@ -100,8 +108,10 @@ RTK is a CLI proxy that intercepts command output before it reaches Claude's con
 |-----------|---------|
 | **Source** | [github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk) |
 | **Install** | `brew install rtk-ai/tap/rtk` or `cargo install rtk` |
-| **Stars** | 446 (March 2026) |
+| **Stars** | 69,042 (GitHub API, 2026-07-07), up from 446 in March 2026 and 24,397 in April 2026 |
 | **Integration** | Claude Code hook via `rtk init --global` |
+
+A roughly 2.8x jump in under three months is a steep curve for a CLI proxy. It is plausible given the tool's growing bundling into other agents' default setups (see below), but treat the figure as unverified against the full star-history graph rather than confirmed growth, and re-check before quoting it in a high-stakes context.
 
 Measured savings across command categories:
 
@@ -125,15 +135,17 @@ Headroom compresses what enters the context from tool outputs, structured data, 
 
 | Attribute | Details |
 |-----------|---------|
-| **Source** | [GitHub: chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| **Source** | [GitHub: headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom) |
 | **Docs** | [headroom-docs.vercel.app](https://headroom-docs.vercel.app/docs) |
-| **Stars** | ~43,000 (June 2026, #2 monthly trending on Trendshift) |
+| **Stars** | 57,223 (GitHub API, 2026-07-07), 4,205 forks |
 | **Author** | Tejas Chopra (Senior Engineer, Netflix) |
 | **License** | Apache 2.0 |
-| **Install** | `pip install headroom-ai` or `npm install headroom-ai` |
-| **Version** | v0.25.0 (GitHub, June 2026) |
+| **Install** | `pip install "headroom-ai[all]"` or `npm install headroom-ai` |
+| **Version** | v0.25.0 (June 2026, latest verified) |
 
-> **URL correction**: Earlier versions of this guide linked `headroom.ai`, which is an unrelated domain. The correct source is `github.com/chopratejas/headroom`.
+> **URL correction**: Earlier versions of this guide linked `headroom.ai` (unrelated domain) and later `github.com/chopratejas/headroom` (the author's personal fork). The project has since moved to the `headroomlabs-ai` org; the old personal slug now redirects, a standard GitHub org transfer.
+
+**Reported cost impact**: the maintainer cites aggregate savings of "~$700K across 200B tokens processed." This is self-reported with no third-party audit found. Treat it as a marketing signal, not a verified figure, distinct from the per-workload benchmark numbers below, which do publish methodology.
 
 **Five deployment modes**:
 
@@ -160,6 +172,30 @@ Headroom compresses what enters the context from tool outputs, structured data, 
 **When to choose Headroom over RTK**: RTK handles unstructured CLI text and drops content you definitively do not need. Headroom is the right choice for structured data (JSON payloads, database results, API responses) where you cannot predict upfront which parts the model will need, and where lossless retrieval is a requirement. The two tools complement each other; RTK operates at the shell output layer, Headroom at the structured data layer.
 
 **Production note**: Core compression is functional. CCR has reliability issues under bugs #714 and #1209 above. For Claude Max users, prefer MCP mode over `headroom wrap`.
+
+### pxpipe
+
+pxpipe is the first production tool built on optical/visual context compression specifically for Claude Code and the Anthropic API: instead of shrinking text, it rewrites large context blocks as images before the request leaves the machine. See [Context Engineering: Optical and Visual Context Compression](../core/context-engineering.md#optical-and-visual-context-compression) for the research lineage (DeepSeek-OCR, AgentOCR, Glyph, VIST).
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [github.com/teamchong/pxpipe](https://github.com/teamchong/pxpipe) |
+| **License** | MIT, TypeScript |
+| **Stars** | 4,277 (GitHub API, 2026-07-07), up from 586 at launch in May 2026, roughly 7x in under two months |
+| **Install** | `npx pxpipe-proxy` |
+
+**Mechanism**: a local proxy intercepts `/v1/messages` calls and, above a computed cost-effectiveness threshold, rewrites large `tool_result` blocks, already-collapsed older turns, and the static system-prompt/tool-doc block into PNG images (1928px-wide columns, roughly 92,000 characters per page, roughly 4,761 vision tokens per page). It never touches model output, recent turns, or sparse prose, where text stays cheaper per character. The text-vs-image break-even is around 19 characters per token; the maintainer's observed Claude Code traffic averages 1.91 characters per token, so most large content is worth imaging. Exact-byte content (passwords, hashes, IDs) is explicitly excluded from rendering and flagged in the README as a documented lossy-recall risk, not a solved problem.
+
+```bash
+npx pxpipe-proxy
+ANTHROPIC_BASE_URL=http://127.0.0.1:47821 claude
+```
+
+**Benchmarks**: 59 to 70% end-to-end bill reduction, measured per-request via a parallel counterfactual `count_tokens` call logged to `~/.pxpipe/events.jsonl` and cross-checked against actual billed usage, a reproducible methodology rather than a marketing estimate. SWE-bench Lite pilot: 10/10 passing in both arms at -65% request size (small n, disclosed as such in the README). Verbatim recall of hex strings: 13/15 correct on Fable 5, 0/15 on Opus, numbers the README states plainly rather than hides.
+
+**Model allowlist**: defaults to `claude-fable-5` and `gpt-5.6`. Opus 4.7/4.8 and GPT-5.5 are opt-in because of measured higher misread rates on rendered images.
+
+**When to choose pxpipe over Headroom**: same API-gateway layer, different modality. Headroom compresses text to text (reversible, retrieval-based); pxpipe rasterizes text to images (lossy on exact strings, not retrieval-based). They complement rather than compete: pxpipe is Claude Code/Anthropic-API-specific with limited GPT support, not a multi-agent generalist tool like Headroom.
 
 ### tilth
 
@@ -262,10 +298,12 @@ context-mode is an MCP server that operates at the boundary between tools and co
 | Attribute | Details |
 |-----------|---------|
 | **Source** | [GitHub: mksglu/context-mode](https://github.com/mksglu/context-mode) |
-| **Stars** | ~14,149 (May 2026) |
+| **Stars** | 18,654 (GitHub API, 2026-07-07), up from 14,149 in May 2026 (+32% in about 2 months) |
 | **License** | ELv2 (commercial SaaS planned) |
-| **Platforms** | Claude Code plugin, Gemini CLI, Copilot, Cursor, Kiro, Zed, and 6 others (12 total) |
+| **Platforms** | Claude Code plugin, Gemini CLI, Copilot, Cursor, Kiro, Zed, and 11 others (17 total, up from 12 in May 2026) |
 | **Claims** | 98% MCP output compression, 65–75% response compression |
+
+The growth rate reads as consolidation of an already-mature tool rather than a new-entrant spike: other projects now cite context-mode as a dependency or reference, a sign of an ecosystem forming around it rather than just end users adopting it.
 
 **How the MCP output sandbox works**: Instead of routing raw tool call output directly into the conversation, context-mode intercepts the result, applies compression, and injects a summary with a retrieval handle. The full output is accessible on demand if the model requests it, similar in spirit to Headroom's lossless architecture but operating specifically on MCP tool boundaries.
 
@@ -304,6 +342,14 @@ stacklit generate-json    # re-index after structure changes
 
 **Comparison with RTK and context-mode**: RTK intercepts CLI output during a session. context-mode intercepts MCP tool output in real time. stacklit eliminates exploration-phase token spend before the session starts, by making the repo structure known from the first message. The three tools target different moments in a session's lifecycle and are complementary.
 
+### Cloudflare Code Mode MCP
+
+A different category of tool-schema cost: an MCP server with hundreds or thousands of endpoints loads a schema per tool, and that schema overhead can dwarf the actual task. Cloudflare's Code Mode MCP (`cloudflare/mcp`) addresses this at the API-surface level rather than the output level.
+
+Instead of exposing one MCP tool per endpoint, it exposes exactly two meta-tools, `search()` and `execute()`, backed by a typed SDK. The model writes and runs JavaScript in a sandboxed V8 instance (Dynamic Worker Loader) that calls the typed SDK, rather than receiving a schema definition for every possible endpoint upfront. For Cloudflare's full API surface (2,500+ endpoints), this drops the schema-loading cost from roughly 1.17M tokens to about 1,000, a 99.9% reduction on that specific dimension.
+
+This is a shipped production feature at a major infrastructure vendor, not a side project or a research prototype. It generalizes a pattern worth naming explicitly: when a tool surface is large and mostly unused per session, exposing a code-execution interface over the API instead of one MCP tool per endpoint moves the token cost from "loaded upfront for every session" to "paid only for the endpoints actually called." See [MCP Servers Ecosystem](./mcp-servers-ecosystem.md) for how this interacts with Claude Code's MCP tool-count guidance ([Progressive Disclosure](../core/context-engineering.md#progressive-disclosure) in the core context engineering guide recommends fewer than 80 total tools across active servers; a code-execution MCP server sidesteps that ceiling entirely by exposing 2 tools regardless of API surface size).
+
 ### Zero-install approach: claude-token-efficient
 
 [claude-token-efficient](https://github.com/drona23/claude-token-efficient) (5,700+ stars, June 2026) is a single `CLAUDE.md` file that instructs Claude to generate concise responses. No binary, no MCP server, no hooks.
@@ -341,6 +387,14 @@ The Semantic Priming Hypothesis (see section 2) explains why 20x compression can
 AttnComp (not yet a shipping product as of March 2026) proposes replacing perplexity scoring with cross-attention patterns as the compression metric. The argument: perplexity measures how "surprising" a token is given its predecessors — useful for language modeling, but only loosely correlated with task relevance. Cross-attention patterns directly show which tokens the model attends to for a given output, making it a more principled importance metric.
 
 Published results show AttnComp outperforms LLMLingua at equivalent compression ratios. Monitor for OSS release.
+
+### TOON (Token-Oriented Object Notation)
+
+TOON operates at a different level than LLMLingua or AttnComp: it is a data serialization format, not a compression algorithm applied after the fact. Instead of scoring and dropping tokens from an existing prompt, it re-encodes structured data (arrays of objects, tabular records) into a denser textual notation before that data ever reaches the model, keyed columns declared once instead of repeated per row, the way CSV avoids repeating field names.
+
+`xaviviro/python-toon` provides a Python encoder/decoder, and production case studies (Scalevise, among others cited in the press) report 50%+ token reduction plus a 15% latency improvement on structured, tabular payloads.
+
+The gains are entirely format-dependent: near zero on deeply nested, non-uniform JSON (there is no repeated flat structure to exploit), maximal on flat tabular arrays (API list responses, database query results, CSV-shaped data). Before adopting TOON, check whether your actual payloads are tabular; if they are deeply nested objects, LLMLingua's semantic scoring is the better fit.
 
 ---
 
@@ -671,7 +725,7 @@ These tools are not mutually exclusive. Langfuse for tracing plus Phoenix for RA
 
 ## 11. Research Landscape
 
-Active research areas that have not yet shipped as production tools (March 2026):
+Active research directions that have not yet shipped as production tools (March 2026), plus a newer batch of April to July 2026 papers proposing concrete mitigation architectures rather than further documenting the original context-rot problem: ACON, Recursive Language Models, Context Kubernetes, AMA-Bench, ContextBudget, and Classifier Context Rot. Full summary with confidence levels: [Context Engineering: New Research Directions](../core/context-engineering.md#new-research-directions-april-to-july-2026).
 
 ### SlimInfer (Dynamic Token Pruning)
 

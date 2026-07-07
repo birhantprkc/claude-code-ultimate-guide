@@ -156,6 +156,10 @@ The difference isn't the tool — it's the organizational discipline around it.
 
 **The review bottleneck has inverted.** When code was expensive to produce, senior engineers could review it faster than juniors could write it — review was a quality gate. AI flips this: a junior can now generate code faster than a senior can critically audit it. The rate-limiting factor that historically kept review meaningful has been removed. What used to be a quality gate is now a throughput problem. Teams that don't account for this end up rubber-stamping AI-generated code at scale.
 
+**Verifying AI-produced code is becoming the higher-value skill, ahead of writing it from scratch.** This reframes systematic, rigorous review of an agent's output as the central competency worth developing, rather than raw typing speed.
+
+*Mehran Sahami, Stanford, "It's Never Too Late", 2025*
+
 > **For team leads**: If you're responsible for structuring this — onboarding, policies, growth measurement — jump to [§12 For Tech Leads & Engineering Managers](#for-tech-leads--engineering-managers).
 
 **On maintainability fear**: The concern that AI-generated code creates unmaintainable codebases is not empirically supported — downstream developers show no significant difference in evolution time or code quality (Borg et al., 2025, n=151). The real risks are skill atrophy and over-delegation, not inherent quality degradation for the next developer. ([arXiv:2507.00788](https://arxiv.org/abs/2507.00788))

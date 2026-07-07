@@ -568,6 +568,10 @@ These tool call patterns are worth flagging in automated audits:
 
 Beyond the hook-based approach above, the community has built purpose-specific tools. This is a factual snapshot as of early 2026.
 
+**Instrumenting the coding assistant itself, not just the application it produces, is what turns AI usage into something auditable.** Tracing every decision an agent makes, including tools like Claude Code and Codex, with OpenTelemetry closes the gap between "the AI probably did the right thing" and having the exact chain of tool calls that produced a given output. A system that cannot be observed at that level cannot be structurally trusted with real autonomy.
+
+*Annie Freeman, Devoxx, 2026, talk "Un-observable AI is un-trustworthy AI"*
+
 | Tool | Type | What It Does | Install |
 |------|------|-------------|---------|
 | **ccusage** | CLI / TUI | Cost tracking from JSONL — the de-facto reference for pricing data. ~10K GitHub stars. | `npm i -g ccusage` |
@@ -887,6 +891,12 @@ Logs accumulate over time. Add cleanup to cron:
 # Clean logs older than 30 days
 find ~/.claude/logs -name "*.jsonl" -mtime +30 -delete
 ```
+
+### 5. Resilience Testing for AI Dependencies
+
+**Deliberately simulate AI unavailability or degraded output to confirm the team can keep working without it.** Provider outages, extreme latency, and low-quality responses are failure modes worth rehearsing on purpose, the same way chaos engineering rehearses server or network failures. A workflow that silently assumes the AI is always available and always correct only gets that assumption tested for the first time during an actual incident.
+
+*Konstantin Pavlov, Devoxx, 2025*
 
 ---
 
