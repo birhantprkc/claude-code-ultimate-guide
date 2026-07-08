@@ -23,6 +23,7 @@ tags: [ai-ecosystem, guide, workflows, integration]
 - [6. IDE-Based Tools (Cursor, Windsurf, Cline)](#6-ide-based-tools-cursor-windsurf-cline)
 - [6.1 Google Antigravity (Agent-First IDE)](#61-google-antigravity-agent-first-ide)
 - [7. UI Prototypers (v0, Bolt, Lovable)](#7-ui-prototypers-v0-bolt-lovable)
+- [7.1 Generative UI: Agent-Driven Interactive Output Formats](#71-generative-ui-agent-driven-interactive-output-formats)
 - [8. Workflow Orchestration](#8-workflow-orchestration)
 - [9. Cost & Subscription Strategy](#9-cost--subscription-strategy)
 - [10. Claude Cowork (Research Preview)](#10-claude-cowork-research-preview)
@@ -1454,6 +1455,57 @@ A community [npm package](https://www.npmjs.com/package/antigravity-claude-proxy
 │    → Output: Production-ready integrated component     │
 └─────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 7.1 Generative UI: Agent-Driven Interactive Output Formats
+
+### Why This Category Exists
+
+UI prototypers (Section 7) generate a static app you paste into a codebase. A different problem is showing up in 2025-2026: an agent that needs to render an actual form, an approval gate, or a button *inside a single chat turn*, not as a separate artifact. Plain text can't collect structured input. A static screenshot can't dispatch an action. The response itself needs to be interactive, and it needs to come from a model call, often a small or fine-tuned one, not from a human writing JSX.
+
+Four approaches are competing to solve this, with genuinely different assumptions about who renders the output and what the model has to produce.
+
+| Approach | Vendor | What the model produces | Rendering | Portability |
+|----------|--------|--------------------------|-----------|-------------|
+| **A2UI** | Google | Structured UI description | Google ecosystem clients | Concept popularized by Google, not an independent standard |
+| **MCP Apps** (SEP-1865) | Anthropic + OpenAI + MCP-UI (co-authored) | HTML/iframe payload via MCP tool response | Claude Desktop, VS Code, ChatGPT, Goose | Open protocol extension, multi-vendor from day one |
+| **Vercel AI SDK generative UI** | Vercel | JSX / React components, streamed server-side (`streamUI`, `useObject`) | React only | Tied to the Vercel AI SDK and React |
+| **MDMA** | MobileReality (open-source) | Markdown with embedded YAML, validated against a Zod schema | `@mobile-reality/mdma-renderer-react` (React only, as of this writing) | Spec/parser/validator/runtime packages have zero Node-specific imports, run in any JS runtime; the renderer itself doesn't |
+
+These solve adjacent but distinct problems. MCP Apps is about a tool response carrying a UI. The Vercel AI SDK pattern is about the server choosing and streaming React components directly, so the client never parses an intermediate format. MDMA inverts that: the model produces validated YAML, and a client-side renderer interprets it, which trades some rendering flexibility for a format that's easier for a small or resource-constrained model to produce correctly. A third adjacent category is MCP Apps itself, already covered separately in this guide (`guide/core/architecture.md`, MCP Extensions section) since it's a protocol-level concern, not a rendering-format concern.
+
+### Case Study: MDMA
+
+[MDMA](https://github.com/MobileReality/mdma) is an open-source project built around one core idea: producing a syntactically valid, schema-conformant YAML block is a lower bar for a small LLM (their target is models like Gemini Flash, and they fine-tuned their own 26B model) than producing correct JSX or hand-written HTML. The engineering behind that idea holds up under audit. The marketing claims layered on top of it mostly don't.
+
+**What holds up**:
+- A real deterministic validator/fixer pipeline: one pass, no extra LLM call, regex-based extraction tolerant of broken markdown, 19 validation rules, ordered fixers (field-type inference, YAML key typo correction, binding repair).
+- Standard parsing via remark/unified, with correct handling of streaming state (a plugin distinguishes a block still being generated from one that's actually malformed).
+- Honest, measured evals using promptfoo with custom assertions, explicitly framed in their own docs as "observations, not conclusions." The headline number: 41% success rate with a bare prompt versus 90.5% with the DSL plus validator, on their fine-tuned model (`/Users/florianbruniaux/Sites/divers-test/mdma/evals/own-model/README.md`).
+- "Runs anywhere" is true for the core packages (spec, parser, validator, runtime): zero Node-specific imports (`fs`, `path`, `crypto`), verified by direct grep across those four packages.
+- CI with GitHub Actions pinned by commit SHA (a rare, good practice), changesets-based per-package versioning, and a real test suite (`turbo run test` across all packages, confirmed in `package.json`).
+
+**What's overstated or misleading**:
+- The implicit claim of guaranteed valid UI doesn't hold at the strict sense: 90.5% measured, not 100%. There's an unresolved contradiction in the repo itself: `evals/own-model/results.json` (`/Users/florianbruniaux/Sites/divers-test/mdma/evals/own-model/results.json`) shows a 95/95 pass, 100%, run on 2026-06-30, while the README states 90.5% for the same eval track. Nothing in the repo reconciles the two numbers.
+- "Runs anywhere" doesn't extend to rendering. Exactly one renderer ships, `@mobile-reality/mdma-renderer-react`, 100% React. The default chart component isn't a chart: `ChartRenderer.tsx` parses CSV and renders an HTML `<table>`, with a code comment admitting as much ("Renders chart data as a simple HTML table," `/Users/florianbruniaux/Sites/divers-test/mdma/packages/renderer-react/src/components/ChartRenderer.tsx`).
+- Webhooks aren't wired to anything. `WebhookRenderer.tsx` dispatches a UI event, `INTEGRATION_CALLED`, that the host application has to handle itself (`/Users/florianbruniaux/Sites/divers-test/mdma/packages/renderer-react/src/components/WebhookRenderer.tsx`). No HTTP call happens inside MDMA. To the project's credit, the corresponding webhook execution engine is listed as not-yet-built in their own roadmap docs, unlike the form validation gap below.
+- "On-device / small models" describes the size of the *generator* model (hosted on Modal, distributed via Hugging Face), not anything about the rendered output. The renderer's CSS ships with zero `@media` queries (confirmed by grepping every `.css` file in the React renderer package), so there's no responsive design story here either.
+- The demo site's "accessible by design" claim isn't backed by the code. The basics are there (native labels, native buttons, one `role="alert"` on the callout component), but there's no `aria-invalid` or `aria-live` anywhere in the renderer, and the PII-masking table cell is a clickable `<span>` with no `role="button"` and no `tabIndex`, meaning keyboard users can't reveal or hide it (`/Users/florianbruniaux/Sites/divers-test/mdma/packages/renderer-react/src/components/TableRenderer.tsx`, lines 4-15).
+
+**The functional bug two independent audits both found**: form validation is never enforced. `FormRenderer.tsx` wraps fields in a plain `<div className="mdma-form">`, not a `<form>` element, and the submit control is `<button type="button">` with an `onClick` handler that dispatches an action directly (`/Users/florianbruniaux/Sites/divers-test/mdma/packages/renderer-react/src/components/FormRenderer.tsx`, lines 119-125 and 247-258). Native HTML5 constraint validation only triggers on a real form submit event, which never fires here. Worse, the field-level `validation` object (`pattern`, `min`, `max`) defined in the schema (`/Users/florianbruniaux/Sites/divers-test/mdma/packages/spec/src/schemas/components/form.ts`, line 18) and documented with worked examples in `/Users/florianbruniaux/Sites/divers-test/mdma/docs/reference/component-catalog.md` (including a pattern example matching a company email domain) is never read anywhere in the renderer. A field marked `required: true` can be submitted empty with no error shown. Unlike the webhook gap, which is honestly listed as future work, this one is documented as working, with a concrete example lifted from the repo's own `examples/approval-workflow/document.md`, and it silently doesn't work.
+
+**Security note**: both the audit-log chain integrity and the PII redaction hash are non-cryptographic. `event-log-integrity.ts` uses FNV-1a, and the code comment says so directly ("Simple hash function for log chain integrity (non-cryptographic)," `/Users/florianbruniaux/Sites/divers-test/mdma/packages/runtime/src/core/event-log-integrity.ts`, line 10). The PII redaction hash in `hash.ts` is a djb2-style rolling hash, also flagged as non-cryptographic in its own comment (`/Users/florianbruniaux/Sites/divers-test/mdma/packages/runtime/src/redaction/hash.ts`). Neither resists deliberate tampering. The `@mobile-reality/mdma-runtime` npm package keywords include "audit-log" and "pii" (`/Users/florianbruniaux/Sites/divers-test/mdma/packages/runtime/package.json`), which invites a compliance use case the hash choice doesn't actually back.
+
+**Structural limit**: the format is strictly linear, nine component types stacked vertically (form, button, table, tasklist, callout, approval-gate, webhook, chart, thinking), with no layout or grid concept. That's a coherent choice for a conversational chat turn (the validator even enforces it via `single-interactive-component` and `flow-ordering` rules) but a real wall for anyone wanting a dashboard-style layout.
+
+Full evaluation with scoring breakdown: `docs/resource-evaluations/mdma-evaluation.md`.
+
+### Where This Category Is Actually Headed
+
+This is a young category, all four approaches above shipped or gained traction within the 2025-2026 window, and none has become a de facto standard. The technical debate (Markdown/YAML vs. streamed JSX vs. structured tool payload) isn't settled either: MDMA's own evals don't compare against a JSON-mode or function-calling structured output constrained by a grammar, which is arguably the most relevant alternative to "the model writes YAML by hand." Their 41%→90.5% number documents that a DSL plus a validator beats a bare prompt; it doesn't establish that Markdown beats a JSON schema catalog under the same conditions.
+
+The other open question is distribution, not architecture. MCP Apps has Anthropic and OpenAI co-authoring it and four shipping clients. The Vercel AI SDK pattern has Vercel's platform and Next.js userbase behind it. A2UI has Google's ecosystem. MDMA is a single-team open-source project with no vendor distribution behind it yet, targeting integration with AG-UI (CopilotKit's open protocol), a different bet than A2UI. Whichever format wins broad adoption will likely be decided as much by who ships a default client for it as by which one is technically cleaner.
 
 ---
 

@@ -117,6 +117,10 @@ Each layer has different tradeoffs. Global config is always-on but cannot refere
 
 Good context engineering means putting each piece of information in the right layer — not cramming everything into one file, and not leaving critical knowledge in the session layer where it evaporates after every conversation.
 
+**Markdown files as shared persistent memory work better than a dedicated database for this purpose.** A plain Markdown file that multiple agents or sessions can read and append to serves as durable, human-readable memory without the operational overhead of standing up a store. Pairing that memory with a rules file that documents project conventions (naming, code style, architectural boundaries) gives the model the same onboarding a new engineer would need; without it, output quality and adherence to project style both suffer. (*Alex Gavrilescu, Devoxx, 2025. Konstantin Pavlov, 2025, reaches the same conclusion independently.*)
+
+**A dedicated "research, then plan, then implement" sequence, each stage handed off through its own document, reduces rework on non-trivial tasks.** The pattern: a research document capturing findings with file and line-number references, then a plan document reviewed before any code changes, then implementation against that plan. Splitting research from planning from execution keeps each stage's context focused and gives a natural checkpoint to catch a wrong assumption before it propagates into code. (*Emmanuel Sciara, Dev With AI Meetup, 2026*)
+
 ### Static vs. Dynamic Context
 
 The three-layer system above is *static context* — configuration files that are assembled before a session begins and remain stable throughout. Claude Code is primarily a static context system, which is why CLAUDE.md structure and path-scoping matter so much.
@@ -245,7 +249,7 @@ The question "should I just use the 1M context window?" is really a question abo
 
 These are engineering estimates, not guaranteed values. Treat them as planning figures: if your session regularly approaches 150K tokens, it is time to implement compaction, graduated offloading, or path-scoping before accuracy becomes a problem, not after.
 
-**A sharp, non-linear quality drop shows up around 70% of the context budget used, rather than a smooth decline.** Nine speakers from the same conference corpus converged independently on this same threshold without coordinating with each other beforehand, which is a rare and strong signal for a claim usually reported as a vague hunch. The practical consequence is about timing: purge or compact context before crossing that threshold, not after the drop already shows up in the output. (*Emmanuel Sciara, Dev With AI Meetup, 2026. Malo and Dorian, same corpus and year, describe the same shift as abrupt rather than gradual.*)
+**A sharp, non-linear quality drop shows up around 70% of the context budget used, rather than a smooth decline.** Nine speakers at the same meetup independently reported this same threshold, which this guide reads as a notably strong signal for a claim usually offered as a vague hunch. The practical consequence is about timing: purge or compact context before crossing that threshold, not after the drop already shows up in the output. (*Emmanuel Sciara, Dev With AI Meetup, 2026. Malo and Dorian, same event and year, describe the same shift as abrupt rather than gradual.*)
 
 ### Path-Scoping and Budget Efficiency
 

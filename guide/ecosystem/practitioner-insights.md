@@ -8,13 +8,13 @@ tags: [guide, community, insights]
 
 This page collects paraphrased field reports from engineers and technology leads who have built production systems with LLMs and agentic tooling. These are practitioner accounts, not vendor documentation. Every insight is attributed to its source.
 
-The corpus now spans six sources. [IFTTD](https://www.ifttd.io/) (If This Then Dev), a French tech podcast hosted by Bruno Soulez covering practical software engineering, remains the largest with episodes 290 to 361 (roughly 2024-2025) and verbatim transcripts for 55 recent episodes. Devoxx adds talks from its Java/JVM and architecture conference family, Dev With AI contributes from a French AI-native development meetup, and ByteByteGo covers system design. Stanford Online supplies academic coursework on machine learning and large language models, and The Product Crew rounds out the set with a French product-management podcast. Every talk and episode across the six sources was analyzed for patterns applicable to Claude Code workflows and paraphrased; no direct quotes appear on this page.
+The corpus now spans five sources on this page. [IFTTD](https://www.ifttd.io/) (If This Then Dev), a French tech podcast hosted by Bruno Soulez covering practical software engineering, remains the largest with episodes 290 to 361 (roughly 2024-2025) and verbatim transcripts for 55 recent episodes. Devoxx adds talks from its Java/JVM and architecture conference family, Dev With AI contributes from a French AI-native development meetup, and ByteByteGo covers system design. Stanford Online supplies academic coursework on machine learning and large language models. Every talk and episode across the five sources was analyzed for patterns applicable to Claude Code workflows and paraphrased; no direct quotes appear on this page. A sixth source, The Product Crew (a French product-management podcast), was analyzed for the same project but its insights are folded into the guide's adoption, roles, and unit-economics pages instead, since none of its material fit this page's themes; see [credits.md](../core/credits.md) for that attribution.
 
 ---
 
 ## Context Engineering
 
-**Context quality beats context volume.** Filling a 1M-token window is not a sign of capability; it is often a mistake. LLMs attend better to information at the beginning and end of their context window than to what sits in the middle (see [Attention Mechanics](../core/context-engineering.md#attention-mechanics--reliability)). Injecting large volumes of partially relevant text degrades focus without improving outcomes.
+**Context quality beats context volume.** Filling a 1M-token window is not a sign of capability; it is often a mistake. LLMs attend better to information at the beginning and end of their context window than to what sits in the middle (see [Lost-in-the-Middle Problem](../core/context-engineering.md#the-lost-in-the-middle-problem)). Injecting large volumes of partially relevant text degrades focus without improving outcomes.
 
 *Guillaume Laforge (Developer Advocate, Google Cloud), [IFTTD ep 361 "Pourquoi le RAG n'est pas mort"](https://www.ifttd.io/episodes/rag)*
 
@@ -58,7 +58,7 @@ The corpus now spans six sources. [IFTTD](https://www.ifttd.io/) (If This Then D
 
 **Context quality drops sharply around 70% of the budget used, not gradually.** Nine independent speakers at the same meetup converged on this threshold: once a session crosses roughly 70% of its context window, output quality falls off a cliff rather than declining in a straight line. The practical implication is to purge or compact context before hitting that mark, not after symptoms appear. Malo and Dorian emphasized the abruptness of the drop specifically, warning that teams who wait for visible signs of confusion have usually already crossed the threshold.
 
-*Emmanuel Sciara, Dev With AI Meetup, 2026*
+*Emmanuel Sciara, Dev With AI Meetup, 2026; Malo and Dorian, same event and year*
 
 ---
 

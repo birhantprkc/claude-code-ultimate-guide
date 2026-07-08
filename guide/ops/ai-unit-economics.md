@@ -14,7 +14,7 @@ tags: [cost, ops, guide]
 
 ## A note on what this page is
 
-This page is mostly original synthesis, not a collection of field reports. Across the practitioner sources this guide draws from (conference talks, podcasts, meetups, roughly 1,470 videos reviewed), no one models the real cost of agentic AI at scale in any depth. That absence is itself a finding: teams adopt agents, then discover the cost structure after the fact.
+This page is mostly original synthesis, not a collection of field reports. Across the practitioner sources this guide draws from (conference talks, podcasts, and meetups covering agentic AI and software development), no one models the real cost of agentic AI at scale in any depth. That absence is itself a finding: teams adopt agents, then discover the cost structure after the fact.
 
 So this page reasons from first principles about the cost model, and pulls in a handful of attributable practitioner observations only where they support a specific point. Every attributed claim names its source. Where a number is illustrative rather than measured, it says so. Nothing here is a benchmark, and no figure is presented as an established fact unless it is sourced.
 

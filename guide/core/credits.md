@@ -124,7 +124,7 @@ Consolidated section on scored-dataset evaluation, statistical CI/CD, LLM-as-jud
 **Source**: ep 326 (Zineb Bendhiba), ep 360 (Guillaume Lours)
 Documented incidents on guardrail evasion and unsupervised agent data loss.
 
-**Guide section**: [MCP Vetting Workflow](../security/security-hardening.md#mcp-vetting-workflow)
+**Guide section**: [MCP Vetting Workflow](../security/security-hardening.md#11-mcp-vetting-workflow)
 **Source**: ep 346, Jocelyn N'takpe (Head of Engineering & Architecture, ManoMano)
 Command allowlist recommendation, illustrated with a real incident.
 
@@ -139,6 +139,145 @@ Four new testimonials on micro-agent architectures, harness engineering, multi-m
 **Guide section**: [Adoption Approaches: What We Do Know](../roles/adoption-approaches.md#what-we-do-know-empirical-data)
 **Source**: ep 346, 349, 351
 Practitioner notes on documentation-as-onboarding, typed language safety nets, and sustainable development pace.
+
+---
+
+## Devoxx
+
+**Conference**: [Devoxx](https://devoxx.com/) (Java/JVM, architecture, DevOps, AI tracks)
+**License**: Editorial citation (no code)
+
+Devoxx talks from 2025 and 2026 were analyzed and paraphrased into the guide's practitioner insights. No direct quotes appear; all material is reformulated in English and attributed by speaker and year.
+
+### Sections drawing on Devoxx
+
+**Guide section**: [Practitioner Insights](../ecosystem/practitioner-insights.md#devoxx)
+**Speakers**: Brian Vermeer, Max Sumrall, Tom Cools, Christoph Bühler, Daniel Garnier-Moiroux, Annie Freeman, Mete Atamel, Jettro Coenradie, Daniël Spee, and others (see the Devoxx table on that page)
+Consolidated digest of paraphrased insights on prompt injection testing, the spec paradox, LLM-as-judge design, and MCP access control.
+
+**Guide section**: [security-hardening.md](../security/security-hardening.md)
+**Source**: Brian Vermeer, 2026
+Prompt injection testing and LLM session secrecy.
+
+**Guide section**: [sandbox-isolation.md](../security/sandbox-isolation.md)
+**Source**: Christoph Bühler, Daniel Garnier-Moiroux, 2025-2026
+MCP access control patterns (OAuth, OpenFGA) and MCP server hardening.
+
+**Guide section**: [Evaluating Probabilistic Systems](../roles/agent-evaluation.md#evaluating-probabilistic-systems)
+**Source**: Brian Vermeer, Mete Atamel, Jettro Coenradie, Daniël Spee, Tom Cools, 2025-2026
+Determinism, evaluation framework combination, confidence-based agent evaluation.
+
+**Guide section**: [observability.md](../ops/observability.md)
+**Source**: Annie Freeman, 2026
+Instrumenting coding assistants with OpenTelemetry.
+
+**Guide section**: [agent-teams.md](../workflows/agent-teams.md#practitioner-testimonials)
+**Source**: Max Sumrall, 2026
+The spec paradox and the Picnic productivity REX.
+
+**Guide section**: [context-engineering.md](../core/context-engineering.md)
+**Source**: Alex Gavrilescu, Konstantin Pavlov, 2025
+Markdown as shared persistent memory paired with a conventions file.
+
+---
+
+## Dev With AI Meetup
+
+**Meetup**: Dev With AI (French AI-native development meetup)
+**License**: Editorial citation (no code)
+
+Dev With AI Meetup talks from 2026 were analyzed and paraphrased into the guide's practitioner insights. No direct quotes appear; all material is reformulated in English and attributed by speaker and year.
+
+### Sections drawing on Dev With AI Meetup
+
+**Guide section**: [Practitioner Insights](../ecosystem/practitioner-insights.md#dev-with-ai-meetup)
+**Speakers**: Emmanuel Sciara, Florian Allainmat, Luis Iglesias Hernandez, Alexandre Balmes, Vyncke, Samuel Gallet, Geslain Dahan, Geoffrey Graveaud, and others (see the Dev With AI Meetup table on that page)
+Consolidated digest of paraphrased insights on context degradation thresholds, exit criteria for agents, and skill self-improvement.
+
+**Guide section**: [context-engineering.md](../core/context-engineering.md)
+**Source**: Emmanuel Sciara, Florian Allainmat, 2026
+The 70% context degradation threshold, CLAUDE.md growth hurting performance, and the research-plan-implement handoff pattern.
+
+**Guide section**: [Evaluating Probabilistic Systems](../roles/agent-evaluation.md#evaluating-probabilistic-systems)
+**Source**: Alexandre Balmes, Emmanuel Sciara, Negouai, Drode, 2026
+Temperature-zero determinism myths and skill self-improvement as reinforcement learning.
+
+**Guide section**: [sandbox-native.md](../security/sandbox-native.md)
+**Source**: Bolin, Vyncke, Florian Allainmat, 2026
+Production agent isolation pattern (ephemeral container, read-only repo, network allowlist).
+
+**Guide section**: [Adoption Approaches: What We Do Know](../roles/adoption-approaches.md#what-we-do-know-empirical-data)
+**Source**: Geoffrey Graveaud, Samuel Gallet, Geslain Dahan, 2026
+Practice amplification (good and bad) and a documented velocity-loss REX from unsupervised agent delegation.
+
+---
+
+## ByteByteGo
+
+**Channel**: [ByteByteGo](https://bytebytego.com/) (system design)
+**License**: Editorial citation (no code)
+
+ByteByteGo videos were analyzed and paraphrased into the guide, filtered strictly for relevance to agentic AI and Claude Code workflows. No direct quotes appear.
+
+### Sections drawing on ByteByteGo
+
+**Guide section**: [Practitioner Insights](../ecosystem/practitioner-insights.md#bytebytego)
+**Source**: ByteByteGo, "7 System Design Concepts," 2025
+Start-simple-measure-then-complexify, applied to agentic setups.
+
+**Guide section**: [Usage Principles](../ecosystem/mcp-servers-ecosystem.md#usage-principles-beyond-the-evaluation-checklist)
+**Source**: ByteByteGo, "MCP" (2025), "Back-of-the-Envelope Estimation" (2022), "URL Shortener" (2025)
+MCP as a standardized integration layer, and QPS-based capacity estimation for agent-driven traffic.
+
+---
+
+## Stanford Online
+
+**Channel**: [Stanford Online](https://www.youtube.com/@stanfordonline) (academic ML/LLM coursework)
+**License**: Editorial citation (no code)
+
+Stanford Online lectures were analyzed and paraphrased into the guide, filtered strictly for direct, actionable relevance to Claude Code practice. No direct quotes appear.
+
+### Sections drawing on Stanford Online
+
+**Guide section**: [Practitioner Insights](../ecosystem/practitioner-insights.md#stanford-online)
+**Source**: Denny Zhou (Google DeepMind), Stanford CS25 V5, 2025; Yann Dubois, CS224N, 2024; Mehran Sahami, "It's Never Too Late," 2025; ISLR (Hastie & Tibshirani); CS230; CS25 2026
+Reasoning as intermediate tokens with a formal Boolean-circuit bound, evaluation design (Cohen's kappa, out-of-distribution testing), the shift toward verifying AI-generated code, and the necessity check before adding a model.
+
+**Guide section**: [context-engineering.md](../core/context-engineering.md)
+**Source**: Denny Zhou, Stanford CS25 V5, 2025; CS25 2026; CS230 Lecture 8, 2025
+Chain-of-thought as a formal compute extension, and in-context generation versus fine-tuning.
+
+**Guide section**: [Evaluating Probabilistic Systems](../roles/agent-evaluation.md#evaluating-probabilistic-systems)
+**Source**: Yann Dubois, CS224N, 2024; ISLR; CS230
+Evaluation metric selection by pipeline stage and the necessity check before adding a model.
+
+**Guide section**: [learning-with-ai.md](../roles/learning-with-ai.md)
+**Source**: Mehran Sahami, "It's Never Too Late," 2025
+Verifying AI-generated code as the emerging critical skill.
+
+---
+
+## The Product Crew
+
+**Podcast**: The Product Crew (French product management podcast)
+**License**: Editorial citation (no code)
+
+The Product Crew episodes were analyzed and paraphrased into the guide's adoption, roles, and ops pages, filtered strictly for relevance to AI adoption decisions. No direct quotes appear. The cited Ask For The Moon field report is a single-instance 2026 account, not established industry data, and is presented as such.
+
+### Sections drawing on The Product Crew
+
+**Guide section**: [Adoption Approaches: What We Do Know](../roles/adoption-approaches.md#what-we-do-know-empirical-data)
+**Source**: The Product Crew, 2024-2026 (contexts: Alan, Payfit, Joko)
+AI ownership by domain experts, adoption through practice rather than top-down rollout, and leadership buy-in as a prerequisite.
+
+**Guide section**: [ai-roles.md](../roles/ai-roles.md)
+**Source**: The Product Crew, 2026
+AI ownership by domain experts over a centralized innovation cell.
+
+**Guide section**: [ai-unit-economics.md](../ops/ai-unit-economics.md)
+**Source**: The Product Crew, AI transformation field report, 2026 (context: Ask For The Moon)
+The "tokens into ROI" framing used to introduce the stakes of unit economics.
 
 ---
 
