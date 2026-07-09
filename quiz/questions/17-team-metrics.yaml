@@ -1,9 +1,9 @@
 category: "Team Metrics for AI-Augmented Engineering"
-category_id: 16
+category_id: 17
 source_file: "guide/ops/team-metrics.md"
 
 questions:
-  - id: "16-001"
+  - id: "17-001"
     difficulty: "junior"
     profiles: ["junior", "senior", "power", "pm"]
     question: "What are the four core DORA metrics?"
@@ -20,7 +20,7 @@ questions:
       section: "The DORA Foundation"
       anchor: "#the-dora-foundation"
 
-  - id: "16-002"
+  - id: "17-002"
     difficulty: "intermediate"
     profiles: ["senior", "power", "pm"]
     question: "What are the 2024 DORA benchmarks for Elite tier deployment frequency and lead time?"
@@ -37,7 +37,7 @@ questions:
       section: "The DORA Foundation"
       anchor: "#the-dora-foundation"
 
-  - id: "16-003"
+  - id: "17-003"
     difficulty: "intermediate"
     profiles: ["senior", "power", "pm"]
     question: "What major methodological change did the 2025 DORA report introduce?"
@@ -54,7 +54,7 @@ questions:
       section: "On the 2025 DORA Evolution"
       anchor: "#on-the-2025-dora-evolution"
 
-  - id: "16-004"
+  - id: "17-004"
     difficulty: "intermediate"
     profiles: ["senior", "power", "pm"]
     question: "What are the 5 dimensions of the SPACE framework?"
@@ -71,7 +71,7 @@ questions:
       section: "Beyond DORA: The SPACE Framework"
       anchor: "#beyond-dora-the-space-framework"
 
-  - id: "16-005"
+  - id: "17-005"
     difficulty: "intermediate"
     profiles: ["junior", "senior", "power", "pm"]
     question: "What is the 'Velocity Trap' in AI-augmented teams?"
@@ -88,7 +88,7 @@ questions:
       section: "The Velocity Trap"
       anchor: "#the-velocity-trap"
 
-  - id: "16-006"
+  - id: "17-006"
     difficulty: "intermediate"
     profiles: ["senior", "power"]
     question: "What is the warning signal when AI PR review time is 30% faster than manual PR review time?"
@@ -105,7 +105,7 @@ questions:
       section: "AI-Specific Metrics"
       anchor: "#ai-specific-metrics"
 
-  - id: "16-007"
+  - id: "17-007"
     difficulty: "intermediate"
     profiles: ["senior", "power", "pm"]
     question: "What is the Bug Escape Rate formula and what threshold signals a QA process problem?"
@@ -122,7 +122,7 @@ questions:
       section: "Product Metrics"
       anchor: "#product-metrics-the-often-missing-layer"
 
-  - id: "16-008"
+  - id: "17-008"
     difficulty: "junior"
     profiles: ["junior", "senior", "power", "pm"]
     question: "Which metric should replace Sprint Velocity and why?"
@@ -139,7 +139,7 @@ questions:
       section: "Vanity Metrics to Drop"
       anchor: "#vanity-metrics-to-drop"
 
-  - id: "16-009"
+  - id: "17-009"
     difficulty: "intermediate"
     profiles: ["senior", "power", "pm"]
     question: "What is the 4-Question Test for deciding whether to add a metric to your tracking stack?"
@@ -156,7 +156,7 @@ questions:
       section: "The 4-Question Test"
       anchor: "#the-4-question-test"
 
-  - id: "16-010"
+  - id: "17-010"
     difficulty: "junior"
     profiles: ["junior", "senior", "power", "pm"]
     question: "What is the recommended metrics tooling difference between a 5-person team and a 25-person team?"
@@ -173,7 +173,7 @@ questions:
       section: "By Team Size"
       anchor: "#by-team-size"
 
-  - id: "16-011"
+  - id: "17-011"
     difficulty: "intermediate"
     profiles: ["senior", "power"]
     question: "What does the DORA metric most at risk from AI adoption without review discipline?"
@@ -190,7 +190,7 @@ questions:
       section: "DORA in an AI-Augmented Context"
       anchor: "#dora-in-an-ai-augmented-context"
 
-  - id: "16-012"
+  - id: "17-012"
     difficulty: "intermediate"
     profiles: ["senior", "power", "pm"]
     question: "What is the recommended 3-phase implementation roadmap for a metrics program?"

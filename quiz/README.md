@@ -24,8 +24,8 @@ node src/index.js
 ## Features
 
 - **4 User Profiles**: Junior, Senior, Power User, Product Manager
-- **10 Topic Categories**: From Quick Start to Advanced Patterns
-- **159 Curated Questions**: Practical knowledge, not trivia
+- **17 Topic Categories**: From Quick Start to Advanced Patterns
+- **374 Curated Questions**: Practical knowledge, not trivia
 - **Immediate Feedback**: Learn from mistakes with explanations
 - **Documentation Links**: Direct references to guide sections
 - **Score Tracking**: See strengths and weak areas

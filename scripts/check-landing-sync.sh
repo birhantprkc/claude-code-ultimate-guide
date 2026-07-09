@@ -83,14 +83,14 @@ echo ""
 # ===================
 # 3. QUIZ QUESTIONS
 # ===================
-# Source of truth: questions/*/*.md in the landing repo (questions.json is generated at build)
-QUESTIONS_COUNT=$(find "$LANDING_DIR/questions" -name '*.md' -not -name 'README*' 2>/dev/null | wc -l | tr -d ' ')
+# Source of truth: src/content/questions/*/*.md in the landing repo (questions.json is generated at build via astro:content)
+QUESTIONS_COUNT=$(find "$LANDING_DIR/src/content/questions" -name '*.md' -not -name 'README*' 2>/dev/null | wc -l | tr -d ' ')
 LANDING_QUESTIONS_QUIZ=$(grep -oE '"numberOfQuestions": [0-9]+' "$LANDING_DIR/src/pages/quiz/index.astro" 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "")
 LANDING_QUESTIONS_HERO=$(grep -oE '[0-9]+ questions' "$LANDING_DIR/src/components/landing/HeroBanner.astro" 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "")
 LANDING_QUESTIONS_INDEX=$(grep -oE '[0-9]+-question quiz' "$LANDING_DIR/src/pages/index.astro" 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "")
 
 echo -e "${BLUE}3. Quiz Questions${NC}"
-echo "   questions/ (md files): $QUESTIONS_COUNT"
+echo "   src/content/questions/ (md files): $QUESTIONS_COUNT"
 echo "   quiz/index.astro:      ${LANDING_QUESTIONS_QUIZ:-not found} (numberOfQuestions schema)"
 echo "   HeroBanner badge:      ${LANDING_QUESTIONS_HERO:-not found}"
 echo "   index.astro meta:      ${LANDING_QUESTIONS_INDEX:-not found} (description \"N-question quiz\")"

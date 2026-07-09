@@ -185,7 +185,12 @@ Auto-run tests after edits using a PostToolUse hook:
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "npm test --watchAll=false 2>&1 | head -20"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm test --watchAll=false 2>&1 | head -20"
+          }
+        ]
       }
     ]
   }
