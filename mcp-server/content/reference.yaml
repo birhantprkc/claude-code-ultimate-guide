@@ -3,8 +3,8 @@
 # Source: guide/ultimate-guide.md
 # Purpose: Condensed index for LLMs to quickly answer user questions about Claude Code
 
-version: "3.38.0"
-updated: "2026-03-17"
+version: "3.41.1"
+updated: "2026-07-02"
 
 # ════════════════════════════════════════════════════════════════
 # DEEP DIVE - Line numbers in guide/ultimate-guide.md
@@ -28,12 +28,20 @@ deep_dive:
   # Claude Code Releases
   claude_code_releases: "guide/core/claude-code-releases.md"
   claude_code_releases_yaml: "machine-readable/claude-code-releases.yaml"
+  # CC 2.1.3: Skills-Commands Merger
+  skills_commands_merger_version: "2.1.3"
+  skills_commands_merger_date: "2026-01-11"
+  skills_commands_merger_summary: ".claude/commands/ merged into .claude/skills/. Add disable-model-invocation: true for user-only skills."
+  skills_commands_merger_docs: "https://code.claude.com/docs/en/skills"
+  skills_commands_merger_guide: "guide/ultimate-guide.md:8903"
   # Code Review Automation (Pat Cullen, Jan 2026)
-  review_pr_advanced: "examples/commands/review-pr.md:81"
+  review_pr_advanced: "examples/skills/review-pr/SKILL.md"
+  review_pr_advanced_note: "Since CC 2.1.3: equivalent skill uses disable-model-invocation: true in .claude/skills/"
   review_anti_hallucination: "examples/agents/code-reviewer.md:77"
   review_auto_fix_loop: "guide/workflows/iterative-refinement.md:353"
   # Review Plan Command (Garry Tan-inspired, Feb 2026)
-  review_plan_command: "examples/commands/review-plan.md"
+  review_plan_command: "examples/skills/review-plan/SKILL.md"
+  review_plan_command_note: "Since CC 2.1.3: equivalent skill uses disable-model-invocation: true in .claude/skills/"
   # GitHub Actions: Prompt-Based Code Review (Feb 2026)
   github_actions_code_review_workflow: "examples/github-actions/claude-code-review.yml"
   github_actions_code_review_prompt: "examples/github-actions/prompts/code-review.md"
@@ -41,6 +49,13 @@ deep_dive:
   github_actions_code_review_tools: "Read, Glob, Grep + GitHub PR inspection (read-only)"
   github_actions_code_review_auth: "OAuth token (Claude Max plan, 0$ API) or ANTHROPIC_API_KEY"
   github_actions_cost_per_review: "0$ with OAuth/Max plan; ~0.05-0.15$ with API key (Sonnet, ~5K tokens diff)"
+  github_actions_code_review_gate_job: "examples/github-actions/claude-code-review.yml - 'gate' job parses posted review's Must Fix count, fails the job (add to branch protection required checks to block merge)"
+  # Multi-Provider Code Review Architecture (Jul 2026)
+  multi_provider_code_review_guide: "guide/workflows/multi-provider-code-review.md"
+  multi_provider_code_review_summary: "3-provider non-redundant architecture: Claude Code Action (deep semantic + merge gate), CodeRabbit-equivalent (deterministic PASS/FAIL), Greptile-equivalent (cross-file RAG invariants)"
+  multi_provider_code_review_batched_workflow: "examples/github-actions/claude-code-review-batched.yml"
+  multi_provider_code_review_batched_pattern: "check-size job counts changed files, above threshold splits diff into domain matrix (migrations/backend/api/frontend/tests), parallel review + final synthesis"
+  multi_provider_code_review_greptile_templates: "examples/github-actions/.greptile/ (config.json, rules.md, files.json)"
   # Rules Templates (auto-loaded .claude/rules/)
   rules_templates_directory: "examples/rules/"
   rules_architecture_review: "examples/rules/architecture-review.md"
@@ -52,15 +67,17 @@ deep_dive:
   modular_context_architecture: "guide/ultimate-guide.md:4645"  # Pattern #1: CLAUDE.md-as-index + path-scoped rules
   adversarial_plan_review: "examples/agents/plan-challenger.md"  # Pattern #5: +52.8% security, +80% bug detection
   adr_auto_generation: "examples/agents/adr-writer.md"           # Pattern #3: criticality matrix C1/C2/C3
-  codebase_audit_scoring: "examples/commands/audit-codebase.md"  # Pattern #9: 7-category scoring (Variant Systems)
+  codebase_audit_scoring: "examples/skills/audit-codebase/SKILL.md"  # Pattern #9: 7-category scoring (Variant Systems)
+  codebase_audit_scoring_note: "Since CC 2.1.3: equivalent skill uses disable-model-invocation: true in .claude/skills/"
   event_driven_agents: "guide/workflows/event-driven-agents.md"  # Pattern #8: Linear/GitHub/Jira webhook→agent
+  support_csm_agent: "guide/workflows/support-csm-agent.md"  # Internal support/CSM agent: L0-L5 maturity model, HubSpot/Zendesk/Linear via MCP, read-only DB diagnosis
   worktree_dependency_management: "guide/ultimate-guide.md:15180"  # Pattern #6: manual analysis, no auto-detection
   deployment_automation: "guide/ultimate-guide.md:13172"          # Pattern #10: Vercel + Infisical guardrails
   iterative_refinement_community: "guide/workflows/iterative-refinement.md:515"  # Pattern #7: Ralph Loop + Auto-Continue
   agent_teams_large_justified: "guide/workflows/agent-teams.md:120"  # Pattern #4: when >5 agents are justified
   # Settings Reference (comprehensive settings.json + env vars)
   settings_reference: "guide/core/settings-reference.md"
-  settings_reference_description: "60+ settings.json keys organized into 13 sections (Core, Permissions, MCP, Sandbox, Plugins, Model, Display/UX, Auth, Attribution, Worktrees, AWS/Cloud) + 100+ environment variables across 13 categories. Unverified entries marked ⚠️; schema-only keys marked 📋."
+  settings_reference_description: "60+ settings.json keys organized into 13 sections (Core, Permissions, MCP, Sandbox, Plugins, Model, Display/UX, Auth, Attribution, Worktrees, AWS/Cloud) + 190+ environment variables across 17 categories (Auth, Model, Cloud Providers, Timeouts, Behavior, Context, Telemetry, OpenTelemetry, Feature Toggles, Prompt Caching, MCP, Proxy/Network, UI/Display, Plugins, SDK/Headless, Agent Teams). Synced to v2.1.162. Unverified entries marked ⚠️; schema-only keys marked 📋."
   # Glossary (alphabetical term reference)
   glossary: "guide/core/glossary.md"
   glossary_description: "120+ terms: Claude Code-specific, community-coined patterns, AI engineering concepts. Alphabetical table with Category + Subcategory. Excludes standard CS/DevOps terms."
@@ -74,7 +91,47 @@ deep_dive:
   context_engineering_lifecycle: "guide/core/context-engineering.md#6-context-lifecycle"
   context_engineering_quality: "guide/core/context-engineering.md#7-quality-measurement"
   context_engineering_reduction: "guide/core/context-engineering.md#8-context-reduction-techniques"
+  context_engineering_maturity: "guide/core/context-engineering.md#9-maturity-assessment"
+  context_engineering_maturity_description: "L0-L5 six-level maturity framework with self-assessment questions and recommended next actions per level."
+  context_signal_taxonomy: "guide/core/context-engineering.md#10-signal-taxonomy-and-causal-attribution"
+  context_signal_taxonomy_description: "Five-category friction signal taxonomy (syntactic/semantic/procedural/alignment/performance) + YAML event schema + per-pattern tracking dict. Replaces flat friction_score."
+  context_loop_closure: "guide/core/context-engineering.md#11-loop-closure-pr-based-curation"
+  context_loop_closure_description: "PR-based Curator mechanism: diff + canary A/B results + friction evidence + suggestion escalation. Multi-timescale (real-time/weekly/quarterly). Signal locality options (local cron / pushed store / hosted env)."
+  context_ejection: "guide/core/context-engineering.md#12-ejection-disciplined-de-engineering"
+  context_ejection_description: "Automated detection of dormant rules and negative-ROI skills for archival. Three heuristics: activation threshold, ROI tracking, profile overlap >80%."
+  context_self_audit: "guide/core/context-engineering.md#13-constitutional-and-self-consistency-audits"
+  context_self_audit_description: "Constitutional audit (pre-PR rule conflict check against constitution.md) + self-consistency check (weekly verification that ACE documentation claims match measured state)."
+  context_multidev_reconciliation: "guide/core/context-engineering.md#14-multi-dev-profile-reconciliation"
+  context_multidev_reconciliation_description: "Detection of rules present in >50% of individual profiles → hoist to shared config. Preserves personal preference rules. Bash script included."
+  context_engineering_token_audit: "guide/core/context-engineering.md#15-token-audit-workflow"
+  context_engineering_research: "guide/core/context-engineering.md#16-research-patterns-what-the-literature-shows"
+  context_engineering_attention_mechanics: "guide/core/context-engineering.md#17-attention-mechanics--reliability"
+  context_engineering_attention_description: "Lost-in-the-middle mechanics (Liu et al. 2023, arXiv:2307.03172, U-shaped curve, 71-point gap), primacy/recency placement, per-section pass, persistent facts block (prompt-cache compatible), scratchpad, rolling summaries at 65% threshold."
+  context_lost_in_middle: "guide/core/context-engineering.md:2154"
+  context_primacy_recency_placement: "guide/core/context-engineering.md:2183"
+  context_persistent_facts_block: "guide/core/context-engineering.md:2233"
+  context_scratchpad_pattern: "guide/core/context-engineering.md:2258"
+  context_rolling_summaries: "guide/core/context-engineering.md:2305"
+  context_window_degradation_threshold: "50-70K tokens effective even in 200K-window models; see guide/core/context-engineering.md:2215"
+  context_engineering_compression_tools: "guide/core/context-engineering.md#18-token-compression-tools"
   context_engineering_audit_tool: "tools/context-audit-prompt.md"
+  # Setup Audit Tool (orchestrates all audit skills)
+  setup_audit_tool: "tools/audit-prompt.md"
+  setup_audit_tool_version: "5.0"
+  setup_audit_tool_description: "Prompt-orchestrator auditing 8 weighted dimensions (100 pts): Memory & Context (20), Rules Hygiene (10), Skills Quality (10), Agents/Commands Quality (10), Security Posture (20), MCP Ecosystem (10), Workflow Commands (10), Freshness (10). Delegates to eval-skills/eval-rules/token-audit/audit-agents-skills/security-check when installed; inline bash fallback otherwise."
+  setup_audit_dimensions: ["memory_context", "rules_hygiene", "skills_quality", "agents_commands", "security_posture", "mcp_ecosystem", "workflow_commands", "freshness"]
+  setup_audit_delegated_skills: ["token-audit", "eval-rules", "eval-skills", "audit-agents-skills", "security-check"]
+  setup_audit_scope_flag: "--include-global (extends to ~/.claude/ and ~/.claude.json)"
+  setup_audit_time: "5-8 min (all skills installed) | 3-4 min (fallback mode)"
+  # Agent Harness Engineering (new May 2026)
+  agent_harness_guide: "guide/core/agent-harness.md"
+  agent_harness_nine_components: "guide/core/agent-harness.md#2-the-nine-components"
+  agent_harness_lethal_trifecta: "guide/core/agent-harness.md#3-the-lethal-trifecta-security-model"
+  agent_harness_cicd: "guide/core/agent-harness.md#4-cicd-agentic-patterns"
+  agent_harness_observability: "guide/core/agent-harness.md#6-observability-stack"
+  agent_harness_creator_verifier: "guide/core/agent-harness.md#8-creator-verifier-pattern"
+  agent_harness_three_properties: "guide/core/agent-harness.md#1-three-foundational-properties"
+  agent_harness_digital_twin: "guide/core/agent-harness.md#5-digital-twin-testing"
   context_engineering_examples: "examples/context-engineering/"
   context_engineering_assembler: "examples/context-engineering/assembler.ts"
   context_engineering_profile_template: "examples/context-engineering/profile-template.yaml"
@@ -88,6 +145,36 @@ deep_dive:
   context_ace_pipeline: "guide/core/context-engineering.md#6-context-lifecycle"
   context_path_scoping: "guide/core/context-engineering.md#4-modular-architecture"
   context_maturity_model: "guide/core/context-engineering.md#7-quality-measurement"
+  # Memory Systems (canonical consolidated reference — guide/core/memory-systems.md)
+  memory_systems_guide: "guide/core/memory-systems.md"
+  memory_systems_guide_description: "Canonical reference for all memory patterns: native stack, cross-session tools, team sharing, multi-agent, architecture patterns, risks, decision frameworks, benchmarks."
+  memory_systems_tldr: "guide/core/memory-systems.md#1-tldr-the-three-track-model"
+  memory_systems_native_stack: "guide/core/memory-systems.md#2-native-claude-code-memory-stack"
+  memory_systems_claudemd: "guide/core/memory-systems.md#21-claudemd-three-levels"
+  memory_systems_auto_memory: "guide/core/memory-systems.md#22-auto-memory-v21594"
+  memory_systems_auto_dream: "guide/core/memory-systems.md#23-auto-dream-background-consolidation"
+  memory_systems_agent_memory: "guide/core/memory-systems.md#24-agent-memory-frontmatter"
+  memory_systems_cross_session: "guide/core/memory-systems.md#3-cross-session-tools-single-user"
+  memory_systems_claude_mem: "guide/core/memory-systems.md#31-claude-mem"
+  memory_systems_agentmemory: "guide/core/memory-systems.md#32-agentmemory"
+  memory_systems_icm: "guide/core/memory-systems.md#33-icm-infinite-context-memory"
+  memory_systems_kairn: "guide/core/memory-systems.md#34-kairn"
+  memory_systems_doobidoo: "guide/core/memory-systems.md#35-doobidoo-mcp-memory-service"
+  memory_systems_openMemory: "guide/core/memory-systems.md#36-openmemory-mcp-mem0ai"
+  memory_systems_tool_comparison: "guide/core/memory-systems.md#38-master-comparison-table"
+  memory_systems_team_sharing: "guide/core/memory-systems.md#4-team-sharing"
+  memory_systems_trinity: "guide/core/memory-systems.md#41-the-trinity-claudemd--mcpjson--skills"
+  memory_systems_mem0_cloud: "guide/core/memory-systems.md#43-mem0-cloud-mcp"
+  memory_systems_zep: "guide/core/memory-systems.md#44-zep--graphiti"
+  memory_systems_team_gap: "guide/core/memory-systems.md#47-the-structural-team-memory-gap"
+  memory_systems_multi_agent: "guide/core/memory-systems.md#5-multi-agent-shared-memory"
+  memory_systems_architecture_patterns: "guide/core/memory-systems.md#6-architecture-patterns"
+  memory_systems_risks: "guide/core/memory-systems.md#7-risks-and-security"
+  memory_systems_memory_poisoning: "guide/core/memory-systems.md#71-memory-poisoning-prompt-injection"
+  memory_systems_decision: "guide/core/memory-systems.md#8-decision-frameworks"
+  memory_systems_decision_flowchart: "guide/core/memory-systems.md#81-decision-flowchart"
+  memory_systems_benchmarks: "guide/core/memory-systems.md#9-benchmarks-and-evaluation"
+  memory_systems_open_problems: "guide/core/memory-systems.md#10-open-problems"
   # Team Configuration at Scale (Profile-Based Module Assembly)
   team_ai_instructions_section: "guide/ultimate-guide.md#35-team-configuration-at-scale"
   team_ai_instructions_workflow: "guide/workflows/team-ai-instructions.md"
@@ -119,6 +206,14 @@ deep_dive:
   changelog_fragments_ci: "guide/workflows/changelog-fragments.md:169"  # Independent CI migration check job
   # Smart-Suggest Hook
   smart_suggest_hook: "examples/hooks/bash/smart-suggest.sh"  # UserPromptSubmit behavioral coach, 3-tier priority, ROI logging
+  # Smart-Suggest BM25 Routing
+  smart_suggest_routing: "guide/workflows/smart-suggest-routing.md"  # Two-engine UserPromptSubmit: regex + BM25 lexical skill routing
+  smart_suggest_routing_why: "guide/workflows/smart-suggest-routing.md:24"  # Why regex alone fails on reformulations
+  smart_suggest_routing_corpus: "guide/workflows/smart-suggest-routing.md:68"  # scenarios.json format, positive/negative guidelines
+  smart_suggest_routing_calibration: "guide/workflows/smart-suggest-routing.md:115"  # build-index.js, ok/excluded/conflict status, cache
+  smart_suggest_routing_scoring: "guide/workflows/smart-suggest-routing.md:101"  # BM25-plus K1=1.2 B=0.3, max-per-skill, confidence share
+  smart_suggest_routing_wiring: "guide/workflows/smart-suggest-routing.md:148"  # settings.json nested shape, timeout 2s, Node.js runtime
+  smart_suggest_routing_example: "examples/hooks/bm25-routing/"  # Runnable Node.js example with corpus scaffolding
   # Identity Re-injection After Compaction (Nick Tune pattern, Feb 2026)
   identity_reinjection_hook: "guide/ultimate-guide.md:10171"  # UserPromptSubmit guard: re-injects agent identity lost after context compaction
   identity_reinjection_example: "examples/hooks/bash/identity-reinjection.sh"  # Checks last assistant message for identity marker, injects additionalContext if missing
@@ -144,11 +239,46 @@ deep_dive:
   external_monitoring_tools: "guide/ops/observability.md:527"      # ccusage, claude-code-otel, Akto, MLflow, ccboard
   proxying_claude_code: "guide/ops/observability.md:699"           # Proxyman, mitmproxy, ANTHROPIC_API_URL
   ccboard_activity_plan: "docs/resource-evaluations/ccboard-activity-module-plan.md"
+  # Output Styles (built-in behavior modes)
+  output_styles: "guide/ultimate-guide.md:15790"
+  output_styles_setting: "guide/core/settings-reference.md#outputstyle"
+  output_styles_description: "Three built-in modes: Default (concise), Explanatory (adds design rationale blocks), Learning (pair-programming with TODO(human) markers). Activate via /config or outputStyle in settings.json. Custom styles via .claude/styles/."
+  output_styles_custom_template: "examples/styles/custom-style-template.md"
+  output_styles_official_docs: "https://code.claude.com/docs/en/output-styles"
+  # Scheduled Tasks (three methods) — Cloud = Routines since 2026-04-14
+  scheduled_tasks: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_description: "Three methods: Routines (cloud, machine-off, 3 trigger types, Anthropic infra), Desktop (local machine, min 1min, full file access), /loop (session-scoped, min 1min)"
+  scheduled_tasks_cloud: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_cloud_plans: "Pro, Max, Team, Enterprise"
+  scheduled_tasks_cloud_interval: "1 hour minimum (schedule trigger)"
+  scheduled_tasks_cloud_entry_points: "claude.ai/code/routines, Desktop app (New remote task), /schedule CLI command"
+  scheduled_tasks_cloud_branch_prefix: "claude/ (default)"
+  scheduled_tasks_cloud_official_docs: "https://code.claude.com/docs/en/routines"
+  routines_trigger_types: "schedule (cron) / API (HTTP POST endpoint) / GitHub events (webhooks)"
+  routines_daily_limits: "Pro 5/day, Max 15/day, Team/Enterprise 25/day"
+  routines_api_trigger: "HTTP POST to per-routine endpoint, bearer token, optional text field for context, returns session_url"
+  routines_github_trigger: "17 event types (PR, push, issues, releases, check runs, workflows, discussions...), PR filters (author/label/branch/draft/fork), requires Claude GitHub App"
+  routines_research_preview: "true — behavior, limits, API surface may change"
+  routines_discover_command: "examples/skills/routines-discover/SKILL.md"
+  routines_use_case_angles: "scheduled maintenance / event-driven reactions / alert response / cross-system sync / release automation"
+  scheduled_tasks_desktop: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_desktop_interval: "1 minute minimum"
+  scheduled_tasks_loop_command: "guide/ultimate-guide.md:9004"
+  scheduled_tasks_loop_interval: "1 minute minimum"
+  scheduled_tasks_loop_max_per_session: 50
+  scheduled_tasks_loop_added: "v2.1.71"
+  scheduled_tasks_comparison_table: "guide/ultimate-guide.md:9004"
   # Cost optimization - Local execution bridge
   bridge_script: "examples/scripts/bridge.py"
   bridge_schema: "examples/scripts/bridge-plan-schema.json"
   bridge_guide: "guide/ultimate-guide.md:20003"
   # Cost optimization - RTK (Rust Token Killer)
+  # Cost Optimization Levers table (Added 2026-06-10)
+  cost_levers_table: "guide/ultimate-guide.md:18891"
+  cost_levers_summary: "6 levers: monitoring, output compression, model routing, prompt caching, batch processing, semantic pre-indexing. Native CC vs API/SDK columns."
+  batch_api_cost_lever: "guide/core/architecture.md#message-batches-api"
+  batch_api_savings: "50% cheaper, async, 24h window, up to 100 requests per batch"
+  routellm_citation: "arXiv:2406.18665 (ICLR 2025) — 85% cost reduction on MT-Bench vs always-strong routing, 95% GPT-4 performance"
   rtk_upstream: "https://github.com/rtk-ai/rtk"
   rtk_website: "https://www.rtk-ai.app/"
   rtk_evaluation: "docs/resource-evaluations/rtk-evaluation.md"
@@ -167,6 +297,15 @@ deep_dive:
   antigravity_proxy: "https://www.npmjs.com/package/antigravity-claude-proxy"
   antigravity_codelabs: "https://codelabs.developers.google.com/getting-started-google-antigravity"
   antigravity_vs_claude: "Claude Code = terminal-first predictability; Antigravity = agent-first autonomy"
+  # Generative UI (A2UI vs MCP Apps vs Vercel AI SDK vs MDMA)
+  generative_ui_guide: "guide/ecosystem/ai-ecosystem.md:1461"
+  generative_ui_comparison: "A2UI (Google) vs MCP Apps (SEP-1865) vs Vercel AI SDK generative UI (streamUI/useObject) vs MDMA (Markdown/YAML + validator): comparison table"
+  mdma_upstream: "https://github.com/MobileReality/mdma"
+  mdma_evaluation: "docs/resource-evaluations/mdma-evaluation.md"
+  mdma_score: "3/5"
+  mdma_eval_measured: "41% bare prompt vs 90.5% with DSL + validator, on their fine-tuned model"
+  mdma_key_finding: "Form validation never enforced despite documented schema (required/pattern/min/max); container is a <div> not a <form>, submit button is type=\"button\""
+  mdma_security_note: "Audit-log chain (FNV-1a) and PII redaction hash (djb2-style) are both explicitly non-cryptographic in code comments"
   # PDF Generation
   pdf_generation: "guide/workflows/pdf-generation.md"
   pdf_generator_skill: "examples/skills/pdf-generator.md"
@@ -180,8 +319,8 @@ deep_dive:
   gstack_workflow: "guide/workflows/gstack-workflow.md"
   gstack_6_gears: "guide/workflows/gstack-workflow.md:34"  # Table: 6 roles, core questions, when to switch
   gstack_strategic_gate: "guide/workflows/gstack-workflow.md:47"  # Pre-implementation product gate concept
-  gstack_plan_ceo_review: "examples/commands/plan-ceo-review.md"  # Strategic product gate command template
-  gstack_plan_eng_review: "examples/commands/plan-eng-review.md"  # Engineering architecture gate command template
+  gstack_plan_ceo_review: "examples/skills/plan-pipeline/ceo-review/SKILL.md"  # Strategic product gate command template
+  gstack_plan_eng_review: "examples/skills/plan-pipeline/eng-review/SKILL.md"  # Engineering architecture gate command template
   gstack_browse_non_mcp: "guide/workflows/gstack-workflow.md:106"  # /browse native Chromium daemon vs MCP (~100ms)
   gstack_full_cycle: "guide/workflows/gstack-workflow.md:130"  # Full ship cycle demo (plan-ceo → plan-eng → review → ship → browse)
   gstack_when_to_use: "guide/workflows/gstack-workflow.md:198"  # Comparison vs Plan Pipeline and other workflows
@@ -217,11 +356,34 @@ deep_dive:
   remarkable_workflows_to_build: "guide/ecosystem/remarkable-ai.md#14-workflows-ai-augmentés-à-construire"
   remarkable_getting_started: "guide/ecosystem/remarkable-ai.md#15-par-où-commencer"
   remarkable_community: "https://github.com/reHackable/awesome-reMarkable"
-  # Whitepapers (FR + EN) — 9 focused whitepapers on Claude Code
+  # Whitepapers (FR + EN), 13 focused whitepapers on Claude Code
   whitepapers_url: "https://cc.bruniaux.com/whitepapers/"
   whitepapers_fr: "whitepapers/fr/"  # FR sources (Quarto .qmd)
   whitepapers_en: "whitepapers/en/"  # EN sources (Quarto .qmd)
-  whitepapers_topics: "foundations, prompting, customization, security, architecture, team, privacy, reference, agent-teams"
+  whitepapers_topics: "foundations, prompting, customization, security, architecture, team, privacy, reference, agent-teams, learning, budget, team-metrics, agent-engineering"
+  # Recap Cards (FR + EN), 57 thematic memo sheets (A4 1-page), series T (Technical), M (Methodology), C (Conception)
+  recap_cards_url: "https://cc.bruniaux.com/whitepapers/"
+  recap_cards_fr: "whitepapers/recap-cards/fr/"
+  recap_cards_en: "whitepapers/recap-cards/en/"
+  recap_cards_count: "57"
+  # Practitioner Insights (IFTTD podcast episodes 290-361, plus Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online) - Added 2026-06-21, expanded 2026-07-07
+  practitioner_insights_guide: "guide/ecosystem/practitioner-insights.md"
+  practitioner_insights_description: "Paraphrased field insights from IFTTD (episodes 290-361), Devoxx, Dev With AI Meetup, ByteByteGo, and Stanford Online, 5 themes: context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption. 65 attributed insights, English only, no direct quotes."
+  practitioner_insights_context_engineering: "guide/ecosystem/practitioner-insights.md#context-engineering"
+  practitioner_insights_agentic_patterns: "guide/ecosystem/practitioner-insights.md#agentic-patterns--orchestration"
+  practitioner_insights_llm_evaluation: "guide/ecosystem/practitioner-insights.md#llm-evaluation"
+  practitioner_insights_agent_security: "guide/ecosystem/practitioner-insights.md#agent-security"
+  practitioner_insights_devx: "guide/ecosystem/practitioner-insights.md#devx--adoption"
+  practitioner_insights_source: "ifttd.io, Bruno Soulez, 360+ episodes, 2020-2026; plus Devoxx, Dev With AI Meetup, ByteByteGo, and Stanford Online conference and course talks"
+  practitioner_insights_episodes: "IFTTD ep 311 (Lastmann), 326 (Bendhiba), 329 (Barthelet), 338 (Pinsard), 341 (Adam), 346 (N'takpe), 349 (Deleuze), 351 (Lepine), 357, 360 (Lours), 361 (Laforge)"
+  practitioner_insights_devoxx: "guide/ecosystem/practitioner-insights.md#devoxx"
+  practitioner_insights_devwithai: "guide/ecosystem/practitioner-insights.md#dev-with-ai-meetup"
+  practitioner_insights_bytebytego: "guide/ecosystem/practitioner-insights.md#bytebytego"
+  practitioner_insights_stanford: "guide/ecosystem/practitioner-insights.md#stanford-online"
+  practitioner_insights_credits: "guide/core/credits.md#ifttd-if-this-then-dev-podcast"
+  # AI Unit Economics (guide/ops/ai-unit-economics.md) - Added 2026-07-07
+  ai_unit_economics_guide: "guide/ops/ai-unit-economics.md"
+  ai_unit_economics_description: "Original synthesis on the unit economics of agentic AI usage: per-task cost decomposition, real cost levers (complexity routing, sub-agent isolation, exit criteria), the break-even point of an autonomous agent, and team budget governance. Flagged explicitly as original analysis, not a practitioner-sourced compilation."
   # Learning with AI (guide/roles/learning-with-ai.md)
   learning_quick_check: "guide/roles/learning-with-ai.md:38"
   learning_uval_protocol: "guide/roles/learning-with-ai.md:218"
@@ -230,6 +392,19 @@ deep_dive:
   learning_embracing_ai: "guide/roles/learning-with-ai.md:623"
   learning_30day_plan: "guide/roles/learning-with-ai.md:815"
   learning_red_flags: "guide/roles/learning-with-ai.md:612"
+  # AI Roles (guide/roles/ai-roles.md)
+  ai_roles_guide: "guide/roles/ai-roles.md"
+  ai_roles_spec_engineer: "guide/roles/ai-roles.md#17-spec-engineer"
+  ai_roles_agent_identity_architect: "guide/roles/ai-roles.md#18-agent-identity-architect"
+  ai_roles_eval_engineer: "guide/roles/ai-roles.md#19-ai-eval-engineer"
+  ai_roles_harness_engineer: "guide/roles/ai-roles.md#10-harness-engineer"
+  ai_roles_career_matrix: "guide/roles/ai-roles.md#20-career-decision-matrix"
+  # Adoption & L0-L5 (guide/roles/adoption-approaches.md)
+  adoption_guide: "guide/roles/adoption-approaches.md"
+  adoption_l0_l5_shapiro: "guide/roles/adoption-approaches.md#the-l0-l5-scale-where-is-your-team"
+  adoption_jcurve: "guide/roles/adoption-approaches.md#the-j-curve-you-will-hit-at-l2l3"
+  adoption_metr_rct: "guide/roles/adoption-approaches.md#the-metr-calibration"
+  adoption_deputydev: "guide/roles/adoption-approaches.md#deputydev-enterprise-cohort"
   # Productivity Research RCTs
   productivity_rct_metr: "guide/roles/learning-with-ai.md:925"  # METR 2025: experienced devs 19% slower on large codebases despite perceiving 20% faster
   productivity_rct_echoes: "guide/roles/learning-with-ai.md:926"  # Borg 2025: 30.7% faster (median), ~55.9% habitual users, no maintainability impact downstream
@@ -239,9 +414,9 @@ deep_dive:
   session_naming_guide: "guide/ultimate-guide.md:815"
   session_auto_rename: 859
   learning_mode_template: "examples/claude-md/learning-mode.md"
-  learn_quiz_command: "examples/commands/learn/quiz.md"
-  learn_teach_command: "examples/commands/learn/teach.md"
-  learn_alternatives_command: "examples/commands/learn/alternatives.md"
+  learn_quiz_command: "examples/skills/learn-quiz/SKILL.md"
+  learn_teach_command: "examples/skills/learn-teach/SKILL.md"
+  learn_alternatives_command: "examples/skills/learn-alternatives/SKILL.md"
   learning_capture_hook: "examples/hooks/bash/learning-capture.sh"
   # Anti-patterns
   vibe_coding_trap: "guide/roles/learning-with-ai.md:87"
@@ -311,7 +486,7 @@ deep_dive:
   sandbox_native_score: "5/5"
   # Templates (Added 2026-02-02)
   sandbox_native_config_template: "examples/config/sandbox-native.json"
-  sandbox_status_command: "examples/commands/sandbox-status.md"
+  sandbox_status_command: "examples/skills/sandbox-status/SKILL.md"
   sandbox_validation_hook: "examples/hooks/bash/sandbox-validation.sh"
   # Docker Sandboxes (existing)
   sandbox_evaluation: "docs/resource-evaluations/docker-sandboxes-isolation.md"
@@ -342,6 +517,21 @@ deep_dive:
   enterprise_governance_hook: "examples/hooks/bash/governance-enforcement-hook.sh"
   enterprise_governance_audience: "Tech leads, engineering managers, security officers"
   enterprise_governance_scope: "Org-level policy (vs security-hardening.md = individual dev security)"
+  # Data Privacy & Retention (guide/security/data-privacy.md) - Added 2026-06-10
+  data_privacy_guide: "guide/security/data-privacy.md"
+  data_privacy_retention_summary: "guide/security/data-privacy.md#tldr---retention-summary"
+  data_privacy_data_flow: "guide/security/data-privacy.md#1-understanding-the-data-flow"
+  data_privacy_zdr: "guide/security/data-privacy.md#when-to-use-enterprise-api-zdr"
+  data_privacy_known_risks: "guide/security/data-privacy.md#2-known-risks"
+  data_privacy_bug_command: "guide/security/data-privacy.md#risk-4-the-bug-command-sends-everything-retained-5-years"
+  data_privacy_browser_native_messaging: "guide/security/data-privacy.md#risk-6-claude-desktop-browser-integration-silent-native-messaging-host-installation"
+  data_privacy_protective_measures: "guide/security/data-privacy.md#3-protective-measures"
+  data_privacy_file_exclusions: "guide/security/data-privacy.md#31-configure-file-exclusions"
+  data_privacy_telemetry_optout: "guide/security/data-privacy.md#33-opt-out-of-telemetry-and-error-reporting"
+  data_privacy_enterprise_zdr: "guide/security/data-privacy.md#5-enterprise-considerations"
+  data_privacy_gdpr_hipaa: "guide/security/data-privacy.md#when-to-use-enterprise-api-zdr"
+  data_privacy_checklist: "guide/security/data-privacy.md#quick-audit-checklist"
+  data_privacy_description: "Data flow, retention TL;DR (5y/30d/ZDR), 6 CLI-specific risks (/bug command, .env exposure, MCP DB, native messaging hosts), protective measures, 7-point quick audit checklist"
   # Third-Party Tools (guide/ecosystem/third-party-tools.md) - Added 2026-02-01
   third_party_tools_guide: "guide/ecosystem/third-party-tools.md"
   third_party_tools_cost_tracking: "guide/ecosystem/third-party-tools.md:42"
@@ -368,6 +558,36 @@ deep_dive:
   third_party_claude_chic: "https://pypi.org/project/claudechic/"
   third_party_toad: "https://github.com/batrachianai/toad"
   third_party_conductor: "https://docs.conductor.build"
+  # Project Context Bootstrapping (Added 2026-04-08)
+  third_party_tools_context_bootstrap: "guide/ecosystem/third-party-tools.md:427"
+  third_party_codesight: "https://github.com/Houseofmvps/codesight"
+  third_party_codesight_guide: "guide/ecosystem/third-party-tools.md:433"
+  third_party_codesight_purpose: "Zero-dep CLI: AST-based codebase context map (routes, schema, hot files) + wiki articles + 11 MCP tools. 7-12x token savings on base scan."
+  third_party_codesight_when_useful: "TypeScript projects with recognized framework (Express/Hono/tRPC/Fastify/NestJS) and ORM. Useless on Rust. Use --wiki + MCP on large monorepos (>1500 files)."
+  third_party_codesight_limitations: "AST precision TS-only; Next.js App Router = 0 routes; CF Workers raw HTTP = 0 routes; Rust = near-empty output; --init overwrites CLAUDE.md"
+  # Context Compression (Added 2026-05-17)
+  third_party_lean_ctx_upstream: "https://github.com/yvgude/lean-ctx"
+  third_party_lean_ctx_purpose: "Local-first context compression for AI agents — Rust CLI, strips noise from LLM input (AST signatures, diff-loading, session cache, shell compression)"
+  third_party_lean_ctx_stars: "1366"
+  third_party_lean_ctx_status: "third_party | breaking_changes_frequent | security_fixes_recent | not_yet_integrated"
+  third_party_lean_ctx_note: "Most direct RTK competitor. 60-95% token reduction claimed. Watch for stabilization before adding a dedicated guide section."
+  # MCP Token Optimization (Added 2026-05-17)
+  third_party_mcp2cli_upstream: "https://github.com/knowsuchagency/mcp2cli"
+  third_party_mcp2cli_purpose: "Universal CLI bridge for MCP/OpenAPI/GraphQL — lazy-loads tool schemas so LLM receives only --list (16 tok/tool) + --help (120 tok) instead of full schemas injected upfront each turn"
+  third_party_mcp2cli_stars: "1900"
+  third_party_mcp2cli_status: "third_party | active | dev_single_tenant | cli_first_pattern | Show_HN_Best_March_2026"
+  third_party_mcp2cli_note: "96-99% schema-token reduction benchmarked independently (Firecrawl, Scalekit, CircleCI). Born from 2026 MCP backlash. Caution: 4+ forks with same name — knowsuchagency is the reference. Not for enterprise multi-tenant OAuth/audit."
+  third_party_mcp2cli_evaluation: "docs/resource-evaluations/2026-03-17-mcp2cli-token-optimization.md"
+  third_party_mcp2cli_score: "3/5"
+  # MCP vs CLI vs Skills Decision Guide (Added 2026-05-22)
+  mcp_vs_cli_guide: "guide/ecosystem/mcp-vs-cli.md"
+  mcp_vs_cli_tradeoffs: "guide/ecosystem/mcp-vs-cli.md#tradeoffs"
+  mcp_vs_cli_decision_dimensions: "guide/ecosystem/mcp-vs-cli.md#the-four-decision-dimensions"
+  mcp_vs_cli_situation_table: "guide/ecosystem/mcp-vs-cli.md#guidance-by-situation"
+  mcp_vs_cli_token_cost: "guide/ecosystem/mcp-vs-cli.md#token-cost-of-mcp-schemas--what-the-numbers-look-like"
+  mcp_vs_skills: "guide/ecosystem/mcp-vs-cli.md#mcp-vs-skills"
+  mcp_vs_skills_oauth_boundary: "guide/ecosystem/mcp-vs-cli.md#the-oauth-boundary"
+  mcp_vs_skills_note: "Skills (markdown workflows) and MCP (execution/auth) address different layers — not alternatives. OAuth 2.1 is MCP's structural advantage: skills cannot hold refresh tokens or complete PKCE flows."
   # Configuration Management & Backup (Added 2026-02-02)
   config_management_guide: "guide/ultimate-guide.md:4217"  # Section 3.1 Memory Files
   config_hierarchy: "guide/ultimate-guide.md:4336"  # Global → Project → Local precedence
@@ -453,7 +673,25 @@ deep_dive:
   subscription_token_budgets: 1948
   subscription_opus_ratio: 1946
   subscription_monitoring: 2113
+  # Programmatic Billing Change (announced 2026-05-13, effective 2026-06-15)
+  programmatic_billing_change: "guide/ultimate-guide.md:18854"
+  programmatic_billing_effective: "2026-06-15"
+  programmatic_billing_announced: "2026-05-13"
+  programmatic_billing_affects: "claude -p, Agent SDK (Python+TS), GitHub Actions, OpenClaw/Hermes/Conductor, custom harnesses, CI/CD pipelines, scheduled automation"
+  # Agent Tools comparison page (Hermes, Codex CLI, Aider, Devin, SWE-agent, CrewAI, LangGraph, AutoGen)
+  agentic_tools_page: "guide/ecosystem/agentic-tools.md"
+  agentic_tools_decision_framework: "guide/ecosystem/agentic-tools.md#section-5-decision-framework"
+  agentic_tools_comparison_matrix: "guide/ecosystem/agentic-tools.md#full-comparison-matrix"
+  programmatic_billing_unaffected: "Claude Code terminal (interactive), IDE integrations, web/desktop/mobile chat, human-in-the-loop workflows"
+  programmatic_billing_credits: "Pro $20/mo | Max 5x $100/mo | Max 20x $200/mo — no rollover, not automatic (requires email activation)"
+  programmatic_billing_overage_sonnet: "$3/MTok input, $15/MTok output (standard API rates)"
+  programmatic_billing_api_key_trap: "guide/ultimate-guide.md:18895"
+  programmatic_billing_audit: "claude /cost (session) + npx ccusage (cross-session history)"
+  programmatic_billing_claim_deadline: "2026-06-15 — credits require activation via Anthropic email sent ~2 weeks prior"
+  programmatic_billing_strategic_context: "Split = Anthropic UX (unlimited interactive) vs your harness (capped programmatic). Related: §9.25 Harness Engineering, §11 AI Ecosystem."
+  programmatic_billing_timeline: "2026-05-06 interactive limits doubled (SpaceX) → 2026-05-13 change announced → 2026-06-15 effective → 2026-07-13 +50% interactive bonus ends"
   plan_mode: 576
+  ultraplan: 3003
   rewind: 2566
   mental_model: 2815
   xml_prompting: 3016
@@ -465,6 +703,8 @@ deep_dive:
   # Auto-Memories (v2.1.32+) - Added 2026-02-09
   auto_memories: 4439
   auto_memories_vs_claudemd: 4439
+  auto_memories_file_limits: 5020  # 200-line cap, 25KB max, 200 files/dir — see also memory_limits_detail
+  memory_limits_detail: "MEMORY.md: 200 lines max, 25KB max. Memory dir: 200 files max. Truncation: lines first, then bytes, warning appended."
   # Auto Dream (Community-Discovered) - Added 2026-03-25
   auto_dream: 4945
   auto_dream_phases: 4945
@@ -476,7 +716,7 @@ deep_dive:
   fast_mode_command: 720  # /fast in commands table
   fast_mode_api: 720  # API breaking changes section
   fast_mode_pricing: 1788  # Pricing table
-  fast_mode_behavior: "2.5x faster, 6x price, same Opus 4.6 model"
+  fast_mode_behavior: "2.5x faster, 2x price, Opus 4.8 model"
   # Sonnet 4.6 + 1M Context (Feb 2026) - Added 2026-02-18
   sonnet_4_6_default: 1887  # Pricing table, Sonnet 4.6 now default
   context_200k_vs_1m: 1793  # Decision guide: 200K vs 1M context window
@@ -591,7 +831,7 @@ deep_dive:
   agentskills_spec: "https://agentskills.io"
   agentskills_spec_repo: "https://github.com/agentskills/agentskills"
   agentskills_spec_stars: "8.2K"
-  agentskills_platforms: "26+ (Claude Code, Cursor, VS Code, GitHub, Codex, Gemini CLI, Goose, Roo Code, Spring AI, Databricks...)"
+  agentskills_platforms: "35+ (Claude Code, Cursor, VS Code, GitHub Copilot, Codex, Gemini CLI, Goose, Roo Code, Spring AI, Databricks Genie Code, OpenHands, Amp, Letta, Junie, Firebender, OpenCode, Mux, Kiro, Snowflake Cortex Code, Ona, Laravel Boost, Emdash, TRAE, fast-agent, nanobot, VT Code, Qodo, Agentman, Mistral Vibe, Google AI Edge Gallery, Workshop, Factory, pi, Piebald, Command Code...)"
   agentskills_ref_cli: "https://github.com/agentskills/agentskills/tree/main/skills-ref"
   agentskills_ref_cli_usage: "skills-ref validate <path> | skills-ref to-prompt <path>"
   anthropics_skills_repo: "https://github.com/anthropics/skills"
@@ -688,7 +928,7 @@ deep_dive:
   gsd_note: "Overlap with existing patterns (Ralph Loop, Gas Town, BMAD)"
   # Resource Evaluations (added 2026-01-26, updated 2026-02-07)
   resource_evaluations_directory: "docs/resource-evaluations/"
-  resource_evaluations_count: 84
+  resource_evaluations_count: 86
   resource_evaluations_methodology: "docs/resource-evaluations/README.md"
   resource_evaluations_watchlist: "docs/resource-evaluations/watch-list.md"
   resource_evaluations_appendix: "guide/ultimate-guide.md:20886"
@@ -700,7 +940,7 @@ deep_dive:
   resource_evaluations_grenier_gap: "No automated quality checks for agents/skills (29.5% deploy without evaluation per LangChain 2026)"
   resource_evaluations_grenier_integration: "Created /audit-agents-skills command + skill + criteria.yaml"
   # Agent/Skill Quality Audit (added 2026-02-07)
-  audit_agents_skills_command: "examples/commands/audit-agents-skills.md"
+  audit_agents_skills_command: "examples/skills/audit-agents-skills/SKILL.md"
   audit_agents_skills_skill: "examples/skills/audit-agents-skills/SKILL.md"
   audit_agents_skills_criteria: "examples/skills/audit-agents-skills/scoring/criteria.yaml"
   audit_agents_skills_framework: "16 criteria (Identity 3x, Prompt 2x, Validation 1x, Design 2x)"
@@ -800,14 +1040,14 @@ deep_dive:
   plan_pipeline_claude_md_limit: "120 lines hard limit + pointer strategy for sub-files"
   plan_pipeline_context_reset: "/clear between each command (plan, validate, execute)"
   plan_pipeline_cost: "$2-10 typical Tier 2 feature, compounds down as ADR coverage grows"
-  plan_start_command: "examples/commands/plan-start.md"
+  plan_start_command: "examples/skills/plan-pipeline/start/SKILL.md"
   plan_start_phases: "5 phases: PRD analysis, design analysis, technical decisions, dynamic team, metrics"
   plan_start_tiers: "Tier 0 Solo (0 agents) → Tier 4 Full Spectrum (10+ agents)"
-  plan_validate_command: "examples/commands/plan-validate.md"
+  plan_validate_command: "examples/skills/plan-pipeline/validate/SKILL.md"
   plan_validate_layer1: "structural checks inline: format, deps, file existence, ADR consistency, CLAUDE.md"
   plan_validate_layer2: "0-8 specialist agents triggered by plan content (security Opus, db Opus, integration Opus)"
   plan_validate_autofix: "Bucket A auto-resolve (ADR/PATTERNS/first-principles ~95%) + Bucket B human input"
-  plan_execute_command: "examples/commands/plan-execute.md"
+  plan_execute_command: "examples/skills/plan-pipeline/execute/SKILL.md"
   plan_execute_flow: "worktree → TDD scaffold → parallel level execution → drift detection → quality gate → smoke test → PR merge → cleanup"
   planning_coordinator_agent: "examples/agents/planning-coordinator.md"
   planning_coordinator_role: "Opus synthesis agent: merges multi-agent reports into coherent task graph, resolves conflicts via ADR precedence"
@@ -831,10 +1071,10 @@ deep_dive:
   contribution_metrics_availability: "Public beta - Team and Enterprise plans"
   contribution_metrics_stats: "+67% PRs merged/engineer/day, 70-90% AI-assisted code (Anthropic internal)"
   # Git Worktree Commands (Feb 2026)
-  git_worktree_command: "examples/commands/git-worktree.md"
-  git_worktree_status_command: "examples/commands/git-worktree-status.md"
-  git_worktree_remove_command: "examples/commands/git-worktree-remove.md"
-  git_worktree_clean_command: "examples/commands/git-worktree-clean.md"
+  git_worktree_command: "examples/skills/git-worktree/SKILL.md"
+  git_worktree_status_command: "examples/skills/git-worktree-status/SKILL.md"
+  git_worktree_remove_command: "examples/skills/git-worktree-remove/SKILL.md"
+  git_worktree_clean_command: "examples/skills/git-worktree-clean/SKILL.md"
   git_worktrees_multi_instance: 14013
   advanced_worktree_tooling: 15763
   worktree_tooling_self_assessment: 15763
@@ -911,7 +1151,7 @@ deep_dive:
   agent_teams_best_practices: "guide/workflows/agent-teams.md:928"
   agent_teams_troubleshooting: "guide/workflows/agent-teams.md:1092"
   agent_teams_experimental_flag: "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true"
-  agent_teams_model_requirement: "Opus 4.6 minimum"
+  agent_teams_model_requirement: "Opus 4.8 recommended (Opus 4.6+ compatible)"
   agent_teams_sources:
     - "https://www.anthropic.com/news/claude-opus-4-6"
     - "https://www.anthropic.com/engineering/building-c-compiler"
@@ -991,7 +1231,21 @@ deep_dive:
   spec_osmani_score: "4/5"
   spec_task_granularity: "guide/workflows/spec-first.md:62"  # Vertical slices + PRD checklist (Allan Hill, Feb 2026)
   spec_prd_checklist: "guide/workflows/spec-first.md:68"  # 6-dimension PRD quality checklist
+  spec_feature_list: "guide/workflows/spec-first.md"  # Feature list as harness primitive: triple structure (behavior+verify+state), WIP=1, state machine not_started→passing
+  tdd_verification_gap: "guide/workflows/tdd-with-claude.md"  # Verification Gap pattern: 3-layer stack (lint/test/e2e), independent evaluator, Anthropic experiment source
+  task_session_lifecycle: "guide/workflows/task-management.md"  # 10-step session lifecycle protocol: START/INIT/READ/SELECT/EXECUTE/VERIFY/WRAP UP/CLEANUP/COMMIT/HANDOFF + progress.md template
+  session_lifecycle_feature_list_template: "examples/workflows/feature-list.json"  # Machine-readable scope tracker template
+  session_lifecycle_verification_hook: "examples/hooks/bash/verification-gate.sh"  # PostToolUse independent evaluator hook
   atdd_with_agents: "guide/core/methodologies.md:161"  # ATDD + Gherkin for agentic workflows
+  harness_agents_md_as_toc: "guide/ultimate-guide.md:23447"  # AGENTS.md as ~100-line TOC pointing to docs/ hierarchy, not encyclopedia
+  harness_knowledge_boundary: "guide/ultimate-guide.md:23487"  # "What agent can't see doesn't exist": encode Slack/docs as repo markdown
+  harness_knowledge_base: "guide/ultimate-guide.md:23505"  # Structured docs/ with design-docs/, exec-plans/, product-specs/, references/
+  harness_observability_stack: "guide/ultimate-guide.md:23543"  # Ephemeral per-worktree observability: Vector + VictoriaLogs/Metrics/Traces + LogQL/PromQL/TraceQL
+  harness_taste_invariants: "guide/ultimate-guide.md:23563"  # Taste invariants + custom linters with agent-readable error messages
+  harness_anti_entropy: "guide/ultimate-guide.md:23563"  # Doc-gardening agent + background cleanup + quality score per domain
+  harness_layered_arch: "guide/ultimate-guide.md:23563"  # Layered domain arch enforced by linters: Types→Config→Repo→Service→Runtime→UI
+  harness_throughput_merge: "guide/ultimate-guide.md:23563"  # High-throughput merge philosophy: fixes cheap, waiting expensive
+  openai_harness_engineering: "docs/resource-evaluations/2026-02-11-openai-harness-engineering.md"  # Score 5/5: OpenAI Codex team, 1M lines, 5 months, 3 engineers, no manual code
   commands_table: 47
   shortcuts_table: 368
   troubleshooting: 11311
@@ -1051,6 +1305,25 @@ deep_dive:
   cowork_workflows: "https://github.com/FlorianBruniaux/claude-cowork-guide/tree/main/workflows"
   cowork_section: "guide/ecosystem/ai-ecosystem.md:1809"
   cowork_ultimate_guide: 20348
+  # Team Knowledge Infrastructure (guide/ecosystem/team-knowledge-base.md) - Added 2026-06-23
+  team_knowledge_guide: "guide/ecosystem/team-knowledge-base.md"
+  team_knowledge_three_way: "guide/ecosystem/team-knowledge-base.md#the-one-tool-for-three-needs-trap"  # static docs vs live systems vs team workflows
+  team_knowledge_rag_threshold: "guide/ecosystem/team-knowledge-base.md#the-threshold-when-to-add-rag"  # ~100-1000 docs: switch from direct read to RAG
+  team_knowledge_static_vault: "guide/ecosystem/team-knowledge-base.md#tier-1-versioned-markdown-vault-static-docs"  # versioned Markdown + ~/Shared/CLAUDE.md
+  team_knowledge_shared_claudemd: "guide/ecosystem/team-knowledge-base.md#the-root-claudemd-as-index"  # ~/Shared/CLAUDE.md Code+Cowork bridge
+  team_knowledge_connectors_mcp: "guide/ecosystem/team-knowledge-base.md#tier-2-mcp-connectors-for-live-systems"  # Atlassian/Notion/GitBook MCP
+  team_knowledge_atlassian_mcp: "guide/ecosystem/team-knowledge-base.md#atlassian-jira--confluence"  # Jira + Confluence
+  team_knowledge_notion_mcp: "guide/ecosystem/team-knowledge-base.md#notion"
+  team_knowledge_gitbook_mcp: "guide/ecosystem/team-knowledge-base.md#gitbook"
+  team_knowledge_onyx: "guide/ecosystem/team-knowledge-base.md#onyx-self-hosted-open-source"  # ex-Danswer, self-hosted enterprise RAG
+  team_knowledge_managed_rag: "guide/ecosystem/team-knowledge-base.md#tier-3-rag-at-scale"  # LlamaCloud, Ragie
+  team_knowledge_llamacloud: "guide/ecosystem/team-knowledge-base.md#llamacloud-managed"
+  team_knowledge_ragie: "guide/ecosystem/team-knowledge-base.md#ragie-fastest-managed-setup"
+  team_knowledge_kb_internal_pattern: "guide/ecosystem/team-knowledge-base.md#a-documented-reference-point"  # kb.internal.example.com/mcp single-endpoint shape
+  team_knowledge_workflows_plugins: "guide/ecosystem/team-knowledge-base.md#the-plugin-pattern-distributing-team-workflows"  # plugins for shared skills
+  team_knowledge_decision_table: "guide/ecosystem/team-knowledge-base.md#decision-table"
+  team_knowledge_problem: "Company KB accessible from both Claude Code (CLI) and Cowork (desktop, no API/no code exec)"
+  team_knowledge_threshold: "Static <100 docs: direct read | 100-1000: judgment call | >1000: RAG required"
   # Experimental Features
   teammatetool: 3976
   teammatetool_status: "Experimental, progressive rollout, feature-flagged"
@@ -1070,11 +1343,11 @@ deep_dive:
   myths_tasks_api_autonomous: 20965
   myths_100x_faster: 20997
   myths_reliable_sources: 20983
-  # Quiz System (271 questions, 15 categories)
+  # Quiz System (334 questions, 16 categories)
   quiz_overview: "quiz/README.md"
   quiz_file: "quiz/questions.json"
-  quiz_count: 271
-  quiz_categories: 15
+  quiz_count: 334
+  quiz_categories: 16
   quiz_beginner: "quiz/categories/basics,commands,shortcuts,reference"
   quiz_beginner_count: 60
   quiz_intermediate: "quiz/categories/workflows,context,agents,hooks"
@@ -1098,16 +1371,138 @@ deep_dive:
   security_kill_switch: "guide/security/security-hardening.md:630"  # AI Kill Switch & Containment Architecture (§3.5)
   security_claude_folder_audit: "guide/security/security-hardening.md:228"  # Repository Pre-Scan (§1.4)
   security_toxicskills_evaluation: "docs/resource-evaluations/snyk-toxicskills-evaluation.md"
-  security_check_command: "examples/commands/security-check.md"  # Quick config check vs known threats
-  security_audit_command: "examples/commands/security-audit.md"  # Full 6-phase security audit (score /100)
-  security_threat_db: "examples/commands/resources/threat-db.yaml"  # Threat intelligence database (authors, skills, CVEs, patterns)
-  security_update_threat_db: "examples/commands/update-threat-db.md"  # /update-threat-db — research & update threat database
+  security_check_command: "examples/skills/security-check/SKILL.md"  # Quick config check vs known threats
+  security_audit_command: "examples/skills/security-audit/SKILL.md"  # Full 6-phase security audit (score /100)
+  security_threat_db: "examples/skills/update-threat-db/threat-db.yaml"  # Threat intelligence database (authors, skills, CVEs, patterns)
+  security_update_threat_db: "examples/skills/update-threat-db/SKILL.md"  # /update-threat-db — research & update threat database
   security_cc_scanner: "guide/security/security-hardening.md:780"  # Claude Code Security (research preview) — Anthropic native vuln scanner, adversarial validation, patch suggestions
   security_patcher_agent: "examples/agents/security-patcher.md"  # Agent: applies patches from security-auditor findings, human approval gate, Write/Edit tools
   security_gate_hook: "examples/hooks/bash/security-gate.sh"  # PreToolUse hook: blocks 7 vuln patterns at write time (SQLi, XSS, hardcoded secrets, eval, weak hash, cmd injection, path traversal)
   security_pr_review_workflow: "guide/security/security-hardening.md:712"  # PR security review workflow — 3-agent pipeline, git hook integration
   agent_validation_checklist: 5744  # Agent validation section in ultimate-guide.md
   git_mcp_guide: "guide/ecosystem/mcp-servers-ecosystem.md:113"  # Git MCP server documentation
+  # Packmind Skill Design Patterns (Added 2026-04-16, from Packmind Apache 2.0 repo)
+  skill_design_patterns_guide: "guide/core/skill-design-patterns.md"
+  skill_design_patterns_shared_ground_truth: "guide/core/skill-design-patterns.md#shared-ground-truth-injection"
+  skill_design_patterns_prefiltered_refs: "guide/core/skill-design-patterns.md#pre-filtered-references-via-frontmatter-paths"
+  skill_design_patterns_detection_only: "guide/core/skill-design-patterns.md#detection-only-scope-boundary"
+  skill_design_patterns_input_handler: "guide/core/skill-design-patterns.md#input-handler-dispatch"
+  skill_design_patterns_versioned_subdirs: "guide/core/skill-design-patterns.md#versioned-sub-directories-for-tool-version-coupling"
+  skill_design_patterns_two_tier: "guide/core/skill-design-patterns.md#two-tier-standards"
+  skill_design_patterns_committed_plans: "guide/core/skill-design-patterns.md#plans-and-specs-as-committed-artifacts"
+  # MCP Reference File Pattern (Packmind-inspired)
+  mcp_reference_file_pattern: "guide/ecosystem/mcp-servers-ecosystem.md#documenting-an-mcp-for-claude-the-reference-file-pattern"
+  mcp_reference_file_template: "examples/skills/mcp-integration-reference/"
+  mcp_reference_file_example: "examples/skills/mcp-integration-reference/references/sentry-mcp.md"
+  # Skeptical Reviewer Pattern (Packmind-inspired)
+  skeptical_reviewer_pattern: "guide/ultimate-guide.md#pattern-skeptical-reviewer-sub-agent"
+  skeptical_reviewer_principle: "50%+ rejection rate is normal and healthy — forces evidence-based output"
+  # Handoff Triad (Packmind-inspired, merge rules per section)
+  handoff_triad_create: "examples/skills/handoff-create/SKILL.md"
+  handoff_triad_resume: "examples/skills/handoff-resume/SKILL.md"
+  handoff_triad_update: "examples/skills/handoff-update/SKILL.md"
+  handoff_triad_merge_rules: "Files=merge, Discoveries=append, Work Done=append-only, Status=replace, Next Steps=replace"
+  # Recipe Template (Context Validation Checkpoints)
+  recipe_template: "examples/skills/recipe-template/SKILL.md"
+  recipe_template_key_pattern: "Context Validation Checkpoints — precondition checklist Claude must verify before executing steps"
+  # Statusline script (32K output buffer trick)
+  statusline_script: "examples/scripts/statusline.py"
+  statusline_32k_trick: "Subtract 32K from context_window_size to get effective input window (output buffer reservation)"
+  # context-evaluator patterns (MIT, Packmind, Added 2026-04-16)
+  context_evaluator_tool: "guide/ecosystem/third-party-tools.md#context-evaluator"
+  context_evaluator_website: "https://context-evaluator.ai"
+  skill_design_patterns_runtime_prompt_logging: "guide/core/skill-design-patterns.md#runtime-prompt-logging"
+  skill_design_patterns_adaptive_mode: "guide/core/skill-design-patterns.md#adaptive-unifiedparallel-mode"
+  # Credits & Attributions
+  credits_guide: "guide/core/credits.md"
+  # ── CCA Gap Coverage (added 2026-05-24) ──────────────────────────────────────
+  # Anthropic API Patterns (architecture.md)
+  anthropic_api_patterns: "guide/core/architecture.md:1651"
+  anthropic_api_patterns_description: "Message Batches API (50% cost, 24h window, 100-req batch), tool_choice (auto/any/specific/none), strict-mode structured outputs (beta header, constrained decoding), nullable fields, extensible enums, detected_pattern."
+  message_batches_api: "guide/core/architecture.md:1658"
+  message_batches_cost: "50% of synchronous rate"
+  message_batches_window: "up to 24h, results kept 29 days"
+  message_batches_limit: "100 requests, 256MB max payload per batch"
+  message_batches_incompatible: "does NOT support multi-turn or tool_use continuation"
+  tool_choice_parameter: "guide/core/architecture.md:1732"
+  tool_choice_modes: "auto | any | {type: tool, name: X} | none"
+  tool_choice_forced_output: "tool_choice + forced tool name = guaranteed structured JSON output without beta header"
+  strict_mode_structured_outputs: "guide/core/architecture.md:1792"
+  strict_mode_beta_header: "anthropic-beta: output-schema-2025-02-19"
+  strict_mode_guarantees: "valid JSON, required fields present, correct types, no extra fields"
+  strict_mode_does_not_guarantee: "semantic accuracy, truthful values"
+  nullable_fields_pattern: "{type: [string, null]} prevents hallucinated defaults"
+  extensible_enum_pattern: "add 'other' + companion *_detail field for graceful overflow"
+  detected_pattern_field: "surfaces evidence chain for auditable classification pipelines"
+  max_turns_guidance: "guide/core/architecture.md:231"
+  max_turns_ranges: "5 (simple retrieval) | 20-30 (research) | 50+ (extended autonomous)"
+  # Prompt Engineering Patterns (ultimate-guide.md 2.10)
+  prompt_engineering_patterns: "guide/ultimate-guide.md:4338"
+  few_shot_prompting: "guide/ultimate-guide.md:4350"
+  few_shot_optimal_count: "2-4 examples; message-pair format for tool use tasks"
+  few_shot_null_handling: "include example with null field to prevent invented values"
+  few_shot_calibration: "near-miss examples reduce false positive rate in CI/review tasks"
+  few_shot_limits: "teaches style/format only; cannot enforce business rules or schema constraints"
+  validation_retry_loop: "guide/ultimate-guide.md:4404"
+  validation_retry_budget: "3 attempts; feedback triple: original doc + failed JSON + per-field error list"
+  validation_retry_hallucination_detection: "two different non-null values across attempts = absent from source"
+  validation_retry_degradation: "route to human review queue after budget exhausted"
+  self_review_contamination: "guide/ultimate-guide.md:4505"
+  self_review_bias: "15-30% self-preference bias; use independent review instance"
+  inline_reasoning_triage: "reasoning field in output schema surfaces evidence chain; vague reasoning = escalation signal"
+  # Structured Outputs & Schema Design (ultimate-guide.md 2.11)
+  structured_outputs_schema_design: "guide/ultimate-guide.md:4591"
+  confidence_calibration: "guide/ultimate-guide.md:4595"
+  confidence_calibration_method: "bucket analysis on 200+ labeled examples per field; accuracy vs confidence plot"
+  confidence_per_field_thresholds: "vendor 0.70, date 0.80, financial amount 0.95"
+  confidence_platt_scaling: "corrects systematic overconfidence/underconfidence post-hoc"
+  # Production Reliability Patterns (new file)
+  production_reliability_guide: "guide/workflows/production-reliability.md"
+  production_reliability_description: "Escalation design, circuit breakers, structured error propagation, partial results with coverage annotations, human handoff, source conflict resolution."
+  escalation_canonical_triggers: "3 triggers: explicit_request | policy_gap | inability_to_progress"
+  escalation_frustration_vs_explicit: "frustration = try harder; explicit request = handoff immediately (opposite responses)"
+  escalation_rule_based_routing: "guide/workflows/production-reliability.md:138"
+  circuit_breaker_pattern: "guide/workflows/production-reliability.md:158"
+  circuit_breaker_states: "CLOSED (normal) | OPEN (failing) | HALF_OPEN (testing recovery)"
+  circuit_breaker_per_document: "per-document isolation: one document failure does not abort the batch"
+  structured_agent_error: "guide/workflows/production-reliability.md:269"
+  structured_agent_error_fields: "error_category | is_retryable | failure_type | attempted_query | partial_results | alternative_approach"
+  coverage_annotations: "well-supported | partially-supported | gap; surface in output to consumers"
+  structured_human_handoff: "guide/workflows/production-reliability.md:397"
+  handoff_payload_key_field: "recommended_next_action is the highest-value field for human agent efficiency"
+  source_conflict_resolution: "guide/workflows/production-reliability.md:472"
+  source_conflict_temporal_vs_factual: "temporal (one source is newer) vs factual (same period, different facts) require different resolution strategies"
+  source_publication_date: "mandatory field; without it temporal disambiguation is impossible"
+  # Advanced Orchestration Patterns (agent-teams.md)
+  agent_teams_advanced_orchestration: "guide/workflows/agent-teams.md:1506"
+  hub_and_spoke_coordinator: "guide/workflows/agent-teams.md:1512"
+  hub_and_spoke_rule: "coordinator decomposes/dispatches/aggregates; never does domain work itself"
+  programmatic_prerequisites: "guide/workflows/agent-teams.md:1587"
+  programmatic_prerequisites_patterns: "state-flag gate | phase-based dispatch with PipelinePhase enum"
+  dynamic_subagent_selection: "guide/workflows/agent-teams.md:1677"
+  research_space_partitioning: "guide/workflows/agent-teams.md:1717"
+  research_partitioning_rule: "explicit exclusion lists prevent topic overlap between parallel researchers"
+  crash_recovery_manifest: "guide/workflows/agent-teams.md:1764"
+  crash_recovery_rule: "checkpoint at phase boundaries, not task completion; RecoverableOrchestrator skips completed items on restart"
+  iterative_refinement_stopping: "guide/workflows/agent-teams.md:1843"
+  iterative_refinement_criteria: "numeric target_quality threshold + max_iterations hard budget; coordinator drives, subagent stays stateless"
+  narrow_task_decomposition: "guide/workflows/agent-teams.md:1903"
+  spec_test: "Specific + Programmatically Evaluable + Explicit scope + Constrained (four criteria for decomposable subtasks)"
+  # Advanced MCP Tool Design (mcp-servers-ecosystem.md)
+  advanced_mcp_tool_design: "guide/ecosystem/mcp-servers-ecosystem.md:1367"
+  mcp_isretryable: "guide/ecosystem/mcp-servers-ecosystem.md:1373"
+  mcp_isretryable_note: "application-level convention via structuredContent, not native MCP spec field"
+  mcp_iserror_semantics: "guide/ecosystem/mcp-servers-ecosystem.md:1414"
+  mcp_iserror_false_empty: "isError:false + empty content = success with zero results (not an error)"
+  mcp_iserror_true: "isError:true = operation failed to execute"
+  mcp_resources_vs_tools: "guide/ecosystem/mcp-servers-ecosystem.md:1457"
+  mcp_resources_definition: "application-controlled, read-only, no parameters, browsable catalog"
+  mcp_tools_definition: "model-controlled, parameterized operations, side effects allowed"
+  mcp_resourcelink_bridge: "tool returning reference to resource instead of inline content"
+  mcp_tool_naming_conflicts: "guide/ecosystem/mcp-servers-ecosystem.md:1542"
+  mcp_tool_naming_rule: "avoid generic verbs (run, process, execute) that appear in system prompt; use domain-prefixed compound names"
+  mcp_task_scoped_profiles: "guide/ecosystem/mcp-servers-ecosystem.md:1566"
+  mcp_scoped_profiles_pattern: "exploration (read-only) | analysis | execution (write-capable); restrict tools to current phase"
 
 # ════════════════════════════════════════════════════════════════
 # DECISION TREE (most important - en premier)
@@ -1157,6 +1552,7 @@ commands:
   /clear: "reset conversation - USE AT >90%"
   /status: "show context % and cost"
   /plan: "read-only mode (safe exploration)"
+  /ultraplan: "cloud plan mode — draft in cloud, review in browser, execute on web or teleport back (v2.1.91+, GitHub required)"
   /execute: "exit plan mode"
   /rewind: "undo changes"
   /model: "switch: sonnet|opus|opusplan"
@@ -1168,6 +1564,19 @@ commands:
   /remote-control: "start remote control session (Research Preview, Pro/Max only)"
   /rc: "alias for /remote-control"
   /mobile: "get Claude mobile app download links (iOS + Android)"
+  /usage: "shows token + cost usage per model (v2.1.118) — replaces /cost and /stats"
+  /cost: "alias for /usage (v2.1.118+)"
+  /stats: "alias for /usage (v2.1.118+)"
+  /recap: "summarizes the current session (v2.1.108)"
+  /effort: "sets thinking effort level: xlow/low/default/high/xhigh (v2.1.111)"
+  /tui: "shows tool calls in TUI mode (v2.1.110)"
+  /focus: "focuses agent on specific files or tasks (v2.1.110)"
+  /less-permission-prompts: "reduces permission prompt frequency (v2.1.111)"
+  /ultrareview: "multi-agent cloud code review (v2.1.114)"
+  /proactive: "enables proactive suggestions (alias, v2.1.105)"
+  /undo: "reverts last action (v2.1.108)"
+  /goal: "set completion condition; Claude works autonomously until met — live overlay shows elapsed time, turns, and token usage (v2.1.139)"
+  /scroll-speed: "tune mouse wheel scroll speed with interactive live-preview slider (v2.1.139)"
 
 # ════════════════════════════════════════════════════════════════
 # SHORTCUTS - see deep_dive.shortcuts_table
@@ -1194,6 +1603,25 @@ cli:
   "--dangerously-skip-permissions": "auto-accept ALL (danger)"
   "--debug": "verbose output"
   "--add-dir": "grant tool access to directories outside CWD"
+  "project purge [path]": "delete all Claude Code state for a project (transcripts, tasks, file history); flags: --dry-run -y -i --all (v2.1.126)"
+  "ultrareview [target]": "run /ultrareview non-interactively from CI/scripts; --json; exits 0 on completion 1 on failure (v2.1.120)"
+  "plugin prune": "remove orphaned auto-installed plugin dependencies; cascade with plugin uninstall --prune (v2.1.121)"
+  "plugin details <name>": "show plugin component inventory (skills, agents, commands, hooks, MCP) and projected per-session token cost (v2.1.139)"
+  "--plugin-url <url>": "fetch plugin .zip from URL and load for current session (v2.1.129)"
+
+# ════════════════════════════════════════════════════════════════
+# ENVIRONMENT VARIABLES
+# ════════════════════════════════════════════════════════════════
+env_vars:
+  CLAUDE_CODE_SESSION_ID: "unique session ID injected into all Bash subprocess envs, matches hook stdin session_id field (v2.1.132)"
+  CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN: "set to 1 to opt out of fullscreen alternate-screen renderer, keeps output in native scrollback (v2.1.132)"
+  CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE: "set to 1 for auto Homebrew/WinGet upgrades in background with restart prompt (v2.1.129)"
+
+# ════════════════════════════════════════════════════════════════
+# WORKTREE SETTINGS
+# ════════════════════════════════════════════════════════════════
+worktree_settings:
+  baseRef: "fresh|head — controls branch base for --worktree/EnterWorktree/agent-isolation; fresh=origin default, head=local HEAD including unpushed commits; BREAKING default changed to fresh in v2.1.133"
 
 # ════════════════════════════════════════════════════════════════
 # CONTEXT MANAGEMENT - see deep_dive.context_management
@@ -1228,9 +1656,8 @@ folder_structure:
   settings.json: "hooks config (committed)"
   settings.local.json: "permissions (not committed)"
   agents/: "custom AI personas"
-  commands/: "slash commands"
+  skills/: "user-invocable skills in .claude/skills/ (slash commands + knowledge modules; since CC 2.1.3 commands/ merged here — use disable-model-invocation: true for user-only skills)"
   hooks/: "event scripts"
-  skills/: "knowledge modules"
   rules/: "auto-loaded rules"
 
 # ════════════════════════════════════════════════════════════════
@@ -1241,6 +1668,9 @@ permissions:
   auto_accept: "editing=auto, execution=ask"
   plan_mode: "editing=blocked, execution=blocked"
   switch: "Shift+Tab"
+  bypass_safety_invariant: 1076  # Paths always prompted even in bypassPermissions (git/, .claude/, shell configs)
+  bypass_safe_paths: ".git/, .claude/ (except worktrees), .bashrc, .zshrc, .bash_profile, .gitconfig, .mcp.json, .claude.json"
+  bypass_note: "Content-specific ask rules (e.g. Bash(npm publish:*)) also survive bypassPermissions"
 
 # ════════════════════════════════════════════════════════════════
 # MCP SERVERS - see deep_dive.mcp_servers
@@ -1286,6 +1716,8 @@ mcp:
   git_mcp_status: "Early development (API subject to change)"
   git_mcp_advanced_filtering: "ISO 8601 dates, relative dates (2 weeks ago), absolute dates"
   git_mcp_use_cases: "automated commits, log analysis, branch management, token-efficient diffs, multi-repo"
+  alwaysLoad: "when true in MCP server config, all tools skip tool-search deferral and are always available without ToolSearch call (v2.1.121)"
+  CLAUDE_PROJECT_DIR: "auto-injected into stdio MCP server process envs; usable as ${CLAUDE_PROJECT_DIR} in plugin command strings (v2.1.139)"
   ast_grep: "optional plugin for AST-based code search (explicit invocation required)"
   ast_grep_guide: "guide/ultimate-guide.md:9845"
   ast_grep_skill: "examples/skills/ast-grep-patterns.md"
@@ -1304,6 +1736,15 @@ mcp:
     date: "2026-01-20"
     summary: "-55% tool calls, -97% tokens vs grep (Excalidraw 155k TS)"
     caveat: "Benchmark by tool maintainer, single-project validation"
+  # Semble — Ollama-free alternative to grepai (Added 2026-06-10)
+  semble_upstream: "https://github.com/MinishLab/semble"
+  semble_guide: "guide/ecosystem/mcp-servers-ecosystem.md"
+  semble_evaluation: "docs/resource-evaluations/semble-code-search.md"
+  semble_score: "3/5"
+  semble_purpose: "Semantic search across code + docs + config, CPU-only (Model2Vec + BM25 + RRF), native MCP server, no Ollama required"
+  semble_vs_grepai: "Semble: no external service, code+docs+config scope. Grepai: Ollama dep, code-only, adds call graph analysis."
+  semble_note: "Builds and caches a local index on first run. Community claim of index-free is incorrect."
+  semble_install: "pip install semble && semble mcp"
   serena_symbols: "Symbol-aware + session memory (~100ms)"
   astgrep_structural: "AST patterns for large refactoring (~200ms)"
   search_combined_workflow: "guide/workflows/search-tools-mastery.md:205"
@@ -1318,7 +1759,7 @@ mcp:
 # ════════════════════════════════════════════════════════════════
 architecture:
   master_loop: "while(tool_call) - no DAG, no classifier, no RAG"
-  core_tools: "Bash, Read, Edit, Write, Grep, Glob, Task, TodoWrite"
+  core_tools: "8 daily-use tools: Bash, Read, Edit, Write, Grep, Glob, Agent, TodoWrite — ~40 built-in total: guide/core/tools-reference.md"
   context_budget: "~200K tokens, auto-compact at 75-92%"
   subagents: "Task tool spawns isolated agents (depth=1 max)"
   teammatetool: "Experimental multi-agent coordination (v3294)"
@@ -1335,6 +1776,7 @@ cost:
   sonnet: "most development ($$)"
   opus: "architecture, complex bugs ($$$)"
   opusplan: "plan=opus + execute=sonnet ($$)"
+  ultraplan: "cloud planning (multi-agent Opus 4.8) + browser review + web or terminal execution (v2.1.91+)"
   tip: "--add-dir grants tool access to additional directories (permissions, not context loading)"
   rtk: "Command output filtering (72.6% avg reduction) - rtk git log/status/diff"
 
@@ -1417,22 +1859,77 @@ agent_frontmatter_memory_scopes:
   local: ".claude/memory/<agent-name>.local.md — gitignored"
 agent_frontmatter_guide_line: 5639  # Official fields table in ultimate-guide.md
 
+# Skill frontmatter — all fields (agentskills.io spec + Claude Code extensions)
+# Note: .claude/commands/ was merged into .claude/skills/ in CC 2.1.3 — use disable-model-invocation instead
+skill_frontmatter_fields:
+  # agentskills.io spec fields
+  name: "lowercase, 1-64 chars, hyphens only, must match directory name"
+  description: "when to use this skill (max 1024 chars) — also controls auto-activation trigger"
+  allowed-tools: "space-delimited pre-approved tools; supports wildcard scoping: Bash(npm run *)"
+  license: "license name or reference to bundled file"
+  compatibility: "environment requirements (max 500 chars)"
+  metadata: "arbitrary key-value pairs (author, version, etc.)"
+  # Claude Code extension fields
+  effort: "low|medium|high — overrides session effort level while this skill runs (v2.1.80+)"
+  model: "haiku|sonnet|opus|full-model-id — overrides session model while this skill runs"
+  argument-hint: "placeholder shown in slash menu when skill accepts $ARGUMENTS"
+  disable-model-invocation: "true = user-invocable only (replaces .claude/commands/ pattern)"
+  context: "fork = run skill in isolated subagent; fork ignored when called via Skill tool"
+  hooks: "lifecycle hooks active during this skill's session (same format as settings.json hooks)"
+skill_frontmatter_guide_line: 7840  # Frontmatter table in §5.2
+
 # ════════════════════════════════════════════════════════════════
 # HOOK EVENTS - see deep_dive.hooks
 # ════════════════════════════════════════════════════════════════
 hook_events:
-  PreToolUse: "before tool (exit 2 to block)"
-  PostToolUse: "after tool"
-  UserPromptSubmit: "before prompt sent"
-  Notification: "alerts"
+  # Lifecycle
+  SessionStart: "session opened"
+  SessionEnd: "session closed"
+  Setup: "only fires with --init-only, --init, or --maintenance in -p mode (not on normal startup)"
+  # Agent actions
+  Stop: "agent stopped naturally"
+  StopFailure: "agent stopped with error"
+  PreToolUse: "before tool call (exit 2 to block, return JSON to approve/modify)"
+  PostToolUse: "after tool completes"
+  PostToolUseFailure: "after tool fails"
+  PostToolBatch: "after a full batch of parallel tool calls resolves, before next model call (can block)"
+  # Permissions
+  PermissionDenied: "permission refused"
+  PermissionRequest: "permission being requested (can return decision)"
+  # Compaction
+  PreCompact: "before context compaction"
+  PostCompact: "after context compaction"
+  # Multi-agent
+  SubagentStart: "subagent spawned"
+  SubagentStop: "subagent completed"
+  TeammateIdle: "teammate waiting"
+  TaskCreated: "new task created"
+  TaskCompleted: "task finished"
+  # Configuration
+  ConfigChange: "settings changed"
+  InstructionsLoaded: "CLAUDE.md loaded"
+  # File system
+  CwdChanged: "working directory changed"
+  FileChanged: "file modified on disk"
+  WorktreeCreate: "git worktree created"
+  WorktreeRemove: "git worktree removed"
+  # User interaction
+  UserPromptSubmit: "before prompt sent to model (can inject additionalContext)"
+  UserPromptExpansion: "slash command expands into a prompt, before it reaches Claude (can block)"
+  Notification: "UI notification triggered"
+  MessageDisplay: "while assistant text is displayed on screen (display-only, cannot block; hookSpecificOutput.displayContent replaces rendered text)"
+  Elicitation: "model requesting additional info"
+  ElicitationResult: "user responded to elicitation"
+  # Total: 30 events (updated 2026-06-03, source: official hooks reference)
 
 # Hook Execution Model (v2.1.0+)
-hooks_execution_model: 7969  # Section in ultimate-guide.md
-hooks_async_support: "v2.1.0+ - add 'async: true' for non-blocking execution"
+hooks_execution_model: 10264  # Section in ultimate-guide.md
+hooks_session_scoped: 10428   # Session-scoped hooks (ephemeral, no settings.json, skills use this)
+hooks_async_support: "v2.1.0+ - add 'async: true' for non-blocking execution; 'asyncRewake: true' for background with exit-2 wakeup"
 hooks_async_use_cases: "logging, notifications, formatting, metrics (no feedback needed)"
 hooks_sync_use_cases: "validation, type checking, security (feedback required)"
-hooks_decision_matrix: 6091  # Decision matrix table
-hooks_async_limitations: "no exit code feedback, no additionalContext, no blocking"
+hooks_decision_matrix: 10309  # Decision matrix table
+hooks_async_limitations: "no exit code feedback for blocking (exit 2 ignored), no real-time systemMessage, no guaranteed execution order. Note: additionalContext IS delivered on the next conversation turn after the background process exits."
 hooks_async_bug_fix: "v2.1.23 - fixed cancellation in headless streaming"
 
 # ════════════════════════════════════════════════════════════════
@@ -1452,7 +1949,7 @@ rules:
 ecosystem:
   this_guide:
     focus: "Education - Learn & master"
-    unique: ["architecture docs", "TDD/SDD methodologies", "271-question quiz", "YAML index", "MCP server"]
+    unique: ["architecture docs", "TDD/SDD methodologies", "334-question quiz", "YAML index", "MCP server"]
   mcp_server:
     npm: "claude-code-ultimate-guide-mcp"
     install: "npx -y claude-code-ultimate-guide-mcp"
@@ -1580,7 +2077,7 @@ ecosystem:
       local: "/Users/florianbruniaux/Sites/perso/claude-code-ultimate-guide-landing/"
       purpose: "Marketing site for Claude Code guide"
       audience: "Developers discovering the guide"
-      features: ["badges (version, templates, lines)", "quiz (271 questions)", "FAQ", "cross-links to Cowork"]
+      features: ["badges (version, templates, lines)", "quiz (334 questions)", "FAQ", "cross-links to Cowork"]
       sync_with: "Guide Code (version, templates count, guide lines)"
     cowork_landing:
       local: "/Users/florianbruniaux/Sites/perso/claude-cowork-guide-landing/"
@@ -1594,7 +2091,7 @@ ecosystem:
       - "Cross-links modified → Update all 4 repos"
     history:
       - date: "2026-01-20"
-        event: "Code Landing sync v3.38.0, 66 templates, cross-links"
+        event: "Code Landing sync v3.41.1, 66 templates, cross-links"
         commit: "5b5ce62"
       - date: "2026-01-20"
         event: "Cowork Landing fix (paths, README, UI badges)"
@@ -1606,7 +2103,7 @@ ecosystem:
 onboarding_matrix_meta:
   version: "2.1.0"
   last_updated: "2026-03-09"
-  aligned_with_guide: "3.38.0"
+  aligned_with_guide: "3.41.1"
   changelog:
     - version: "2.1.0"
       date: "2026-03-09"
@@ -1637,7 +2134,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, commands]
       time_budget: "5 min"
       topics_max: 3
-      note: "SECURITY FIRST - sandbox before commands (v3.38.0 critical fix)"
+      note: "SECURITY FIRST - sandbox before commands (v3.41.1 critical fix)"
 
     beginner_15min:
       core: [rules, sandbox_native_guide, workflow, essential_commands]
@@ -1726,7 +2223,7 @@ onboarding_matrix:
         - default: agent_validation_checklist
       time_budget: "60 min"
       topics_max: 6
-      note: "Dual-instance pattern for quality workflows (v3.38.0)"
+      note: "Dual-instance pattern for quality workflows (v3.41.1)"
 
   learn_security:
     intermediate_30min:
@@ -1737,7 +2234,7 @@ onboarding_matrix:
         - default: permission_modes
       time_budget: "30 min"
       topics_max: 4
-      note: "NEW goal (v3.38.0) - Security-focused learning path"
+      note: "NEW goal (v3.41.1) - Security-focused learning path"
 
     power_60min:
       core: [sandbox_native_guide, mcp_secrets_management, security_hardening]
@@ -1762,7 +2259,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, workflow, essential_commands, context_management, plan_mode]
       time_budget: "60 min"
       topics_max: 6
-      note: "Security foundation + core workflow (v3.38.0 sandbox added)"
+      note: "Security foundation + core workflow (v3.41.1 sandbox added)"
 
     intermediate_120min:
       core: [plan_mode, agents, skills, config_hierarchy, git_mcp_guide, hooks, mcp_servers]

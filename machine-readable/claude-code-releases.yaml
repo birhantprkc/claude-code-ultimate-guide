@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.199"
-updated: "2026-07-03"
+latest: "2.1.204"
+updated: "2026-07-08"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,40 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-July 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.204"
+    date: "2026-07-08"
+    highlights:
+      - "Fixed hook events not streaming during SessionStart hooks in headless sessions, which could cause remote workers to be idle-reaped mid-hook"
+
+  - version: "2.1.203"
+    date: "2026-07-07"
+    highlights:
+      - "Added a warning when your login is about to expire, plus a grey ⏸ badge in the footer for manual permission mode"
+      - "Fixed background-agent stability: macOS 15-20s stall on open/switch (2.1.196 regression), sessions going permanently unresponsive on stale daemon tokens, crash-looping on deleted working directories, daemon auto-upgrade silently killing all sessions"
+      - "Fixed worktree-isolated subagents sometimes running shell commands in the parent checkout instead of their own worktree; Bash 'argument list too long' in repos with many worktrees"
+      - "Reduced binary size by ~7 MB and startup memory by ~7 MB by loading a large bundled dependency lazily"
+
+  - version: "2.1.202"
+    date: "2026-07-06"
+    highlights:
+      - "Added a 'Dynamic workflow size' setting in `/config` for controlling how large Claude generally makes dynamic workflows (small/medium/large agent counts)"
+      - "Added `workflow.run_id` and `workflow.name` OpenTelemetry attributes so a workflow run's activity can be reconstructed from OTel data"
+      - "Fixed images and files sent from the Remote Control mobile/web app without a caption being silently dropped; `/rename` on background sessions reverting when the job restarts"
+      - "Changed `/review <pr>` back to a fast single-pass review; use `/code-review <level> <pr#>` for the multi-agent review"
+
+  - version: "2.1.201"
+    date: "2026-07-03"
+    highlights:
+      - "Claude Sonnet 5 sessions no longer use the mid-conversation system role for harness reminders"
+
+  - version: "2.1.200"
+    date: "2026-07-03"
+    highlights:
+      - "⭐ `AskUserQuestion` dialogs no longer auto-continue by default; opt into an idle timeout via `/config`"
+      - "Changed the 'default' permission mode to 'Manual' across CLI, `--help`, VS Code, and JetBrains; `--permission-mode manual` accepted alongside `default`"
+      - "Fixed background sessions silently stopping mid-turn after sleep/wake, and never restarting after a crash left a stale `daemon.lock`"
+      - "Fixed project-scoped plugins not loading correctly from git worktrees of the same repository"
 
   - version: "2.1.199"
     date: "2026-07-02"
@@ -1521,6 +1555,7 @@ breaking_summary:
     - "ultrathink/think keywords now cosmetic only — thinking default with Opus 4.5 (v2.0.67)"
     - "ultrathink keyword re-introduced — now enables high effort for next turn (v2.1.68)"
     - "Dynamic workflow trigger keyword renamed `workflow` → `ultracode` (v2.1.160)"
+    - "'default' permission mode renamed 'Manual' across CLI/VS Code/JetBrains — `--permission-mode manual` and `defaultMode: manual` now accepted alongside `default` (v2.1.200)"
   syntax:
     - "Indexed argument syntax changed: $ARGUMENTS.0 → $ARGUMENTS[0] (v2.1.19)"
 
@@ -1528,6 +1563,7 @@ breaking_summary:
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.200": "'default' permission mode renamed 'Manual' (CLI/VS Code/JetBrains), AskUserQuestion no longer auto-continues by default"
   "2.1.198": "Subagents run in the background by default, Claude in Chrome generally available"
   "2.1.197": "Claude Sonnet 5 becomes the default model, native 1M-token context, promotional pricing $2/$10 per Mtok through August 31"
   "2.1.78": "StopFailure hook, ${CLAUDE_PLUGIN_DATA} persistent state, streaming line-by-line, security: silent sandbox disable fix"

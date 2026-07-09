@@ -156,7 +156,29 @@ The one economic point worth stating here: budgets should be sized against measu
 
 ---
 
-## 6. What this page does not cover yet
+## 6. How to read a vendor's cost-reduction claim
+
+Every vendor selling a cost-optimization tool eventually publishes a number: "cuts token costs by 50%," "twice as fast." The first question worth asking is not whether the number is true, but how the comparison was built.
+
+**Paired beats unpaired.** The most common trap is comparing an average "before" cost across one set of tasks against an average "after" cost across a different set. If task difficulty spans orders of magnitude (a 50-token lookup next to a 50,000-token refactor), the composition of the sample dominates the result more than the tool does. A vendor can present two non-comparable samples without lying and still show an artificial gain. A paired design fixes this: measure the same task with and without the tool, and look at the per-task difference. Each task becomes its own control, which cancels out cross-task difficulty variance.
+
+**Sign test vs. paired t-test.** Once pairs are in hand, two classic tests compete for the job. A paired t-test assumes the differences are roughly normal and is sensitive to outliers: one task where the tool fails outright (a timeout, a runaway loop, a cost spike) can swing the whole mean. Cost and latency distributions are typically heavy-tailed, most tasks look similar, but a handful can cost 10 to 100 times more. In that setting the sign test holds up better against outliers: it ignores the magnitude of each difference and counts only, per pair, whether the tool did better or worse. Less statistical power, but it survives small samples where normality can't be checked.
+
+**The significance ceiling at small n.** The sign test has a mathematical limit few readers know about. At n=6 pairs, the best achievable two-sided p-value is about 0.031 (2 × 0.5⁶), and that result requires the tool to win all 6 pairs with no exception. At 6 samples, only one configuration out of 64 clears the conventional 0.05 threshold, and it happens to be the perfect score. If a vendor reports a "significant" sign test on 6 or 8 tasks, check that the reported result is actually the maximum possible score. If it isn't, the test was likely misapplied.
+
+**Reading a bootstrap confidence interval.** Bootstrapping resamples the observed data, with replacement, thousands of times to estimate the distribution of a statistic such as the median gain. The resulting interval gives a plausible range, not a certainty. A simple red flag is a very wide interval built on a small n. If a vendor reports "median gain of 40%, 95% CI between 5% and 90%," the interval spans a huge range, which means the sample is too small to settle the question. An impressive headline number paired with that wide an interval is a reason to ask for the full sample rather than the promoted mean.
+
+**Median beats aggregate.** Citing the median is a more conservative choice than citing a mean or an aggregate total, precisely because the median resists outliers. A mean can be pulled upward by a single exceptional task, while the median reflects the typical case. When a vendor reports a mean rather than a median without justifying the choice, and never shows the underlying distribution, that omission is worth asking about.
+
+**A generic illustration.** Say a tool claims "35% average token-cost reduction" across 20 tasks. If 18 of them show a 10 to 15% gain and 2 show a 300% gain (because the old pipeline happened to loop on exactly those cases), the overall average is dominated by those 2 outliers. The median tells a different, more representative story of what a typical task should expect.
+
+**What a full evaluation covers: the SWE-bench Lite case.** This coding-agent benchmark measures the resolution rate of real GitHub issues, not just execution speed or cost. A tool that is twice as cheap but resolves half as many tickets is not a net improvement. That is a trade-off that needs pricing on both axes at once. Any cost claim that never mentions the associated success rate is telling an incomplete story (Jimenez et al., "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?", 2023, [arxiv.org/abs/2310.06770](https://arxiv.org/abs/2310.06770)).
+
+A short checklist for the next "X% faster/cheaper" claim: is the comparison paired (same task, before and after), or two separate samples? Is the sample under 10 tasks, in which case a "significant" result needs to be near-perfect to actually be one? Is the cited number a median or a mean, and is the full distribution shown anywhere? Is a confidence interval given, and is it tight or does it span a huge range? Is a success or quality rate mentioned alongside the cost, or is cost the only thing highlighted? Without these answers, a performance number is a marketing claim dressed in statistics, not evidence.
+
+---
+
+## 7. What this page does not cover yet
 
 This page reasons about the cost model. It deliberately does not include:
 

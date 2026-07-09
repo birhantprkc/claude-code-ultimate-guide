@@ -324,6 +324,31 @@ openspec init
 /openspec:archive add-dark-mode     # Merge to specs
 ```
 
+### With BMAD-METHOD (Multi-Role Planning)
+
+BMAD-METHOD ([bmad-code-org/BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD), 50,000+ stars) takes spec-first further: instead of one agent writing one plan, it runs 19+ role-specific agents (Analyst, PM, Architect, Dev, QA) through a planning chain, each producing a versioned artifact (Project Brief, PRD, Architecture Doc, UX spec) before a human signs off and any code gets written.
+
+```bash
+npx bmad-method install
+
+# Planning tracks scale to task size
+# Quick Flow Track: bug fixes, small features
+# BMad Method Track: full PRD + Architecture + UX
+# Enterprise Method Track: extended compliance requirements
+```
+
+Use it when the task benefits from separating "what to build" (PM), "how to build it" (Architect), and "how it should feel" (UX) into distinct, reviewable documents, rather than one combined plan. It does not provide isolated parallel execution on its own, pair it with git worktrees or spec-kitty (below) if you also need that.
+
+For the strategic case (when BMAD's governance overhead pays off versus when it doesn't) see [methodologies.md § Tier 1: Strategic Orchestration](../core/methodologies.md#tier-1-strategic-orchestration).
+
+### With Spec-Kitty (Isolated Parallel Execution)
+
+Spec-kitty ([Priivacy-ai/spec-kitty](https://github.com/Priivacy-ai/spec-kitty), MIT) adds the piece Spec Kit and BMAD-METHOD leave out: each work package runs in its own git worktree, with a local kanban dashboard tracking the `next → review → accept → merge` loop and an audit trail of every merge decision. Smaller community than Spec Kit or BMAD-METHOD (under 1,500 stars as of July 2026), but it is the most direct open source implementation of "isolated agents, human-gated merge" available today.
+
+```bash
+pipx install spec-kitty-cli
+```
+
 ### With Plan Mode
 
 ```
@@ -930,6 +955,24 @@ droid exec --mission path/to/mission.yaml    # Start a mission
 droid status                                  # Check active missions
 droid validate --mission-id <id>             # Run validators manually
 ```
+
+### Full-cycle AI software factories
+
+A distinct product category emerged through 2026: commercial platforms that run the entire spec-to-deploy cycle behind a single interface, rather than a tool you drop into an existing workflow. The pitch is close to Factory.ai's Missions architecture above (spec → parallel isolated build → validation → deploy) but packaged as a managed service, often targeting non-developers as the primary user.
+
+| Product | What it does | Funding / stage | Source |
+|---------|--------------|------------------|--------|
+| [Maleus](https://maleus.ai) | User describes a need in natural language, a team of specialized agents turns it into specs for human approval, then delivers a working app the customer owns on their own repository and infrastructure | Early stage, Paris-based, founder Adrien Maret | [maleus.ai](https://maleus.ai) |
+| [Factory.ai](https://factory.ai) | Covered above (Missions architecture) | $150M Series C, $1.5B valuation, led by Khosla Ventures with Sequoia (April 2026) | [TechCrunch](https://techcrunch.com/2026/04/16/factory-hits-1-5b-valuation-to-build-ai-coding-for-enterprises/) |
+| [Blitzy](https://blitzy.com) | Reverse-engineers an existing codebase into a dependency graph, then coordinates thousands of agents in parallel for multi-day runs (1M to 100M+ line codebases) | $200M raised, $1.4B valuation, led by Northzone (May 2026) | [SiliconANGLE](https://siliconangle.com/2026/05/05/blitzy-raises-200m-1-4b-valuation-deploy-thousands-coding-agents-parallel/) |
+| [Devin](https://devin.ai) (Cognition) | Covered in [agentic-tools.md §2.1](../ecosystem/agentic-tools.md#21-devin-cognition) | $25B valuation (April 2026 fundraise) | See agentic-tools.md |
+
+None of these cover the full governance stack end to end. The gap between "generates a working app fast" and "generates an app you can trust in production without a human re-reading every line" comes down to four questions worth asking before adopting any of them:
+
+1. **Deterministic gate, or LLM self-grading?** Does a separate, non-LLM process (lint, type check, test suite, contract validation) block the merge, or does the agent that wrote the code also decide if it's correct? Factory.ai's independent validator agents (above) and the Spec-to-Code Factory reference implementation (see "See Also" below) are the two documented examples of a hard gate distinct from the generating agent.
+2. **Is there a stop-the-line mechanism?** After N failed remediation attempts, does the pipeline halt and escalate to a human, or does it keep retrying and burning tokens? Few platforms document this explicitly; treat its absence as a real production risk, not an edge case.
+3. **Is every decision traceable?** Can you reconstruct, after the fact, which agent (and which model version) made a given change, and whether a human approved it? This matters most in regulated environments and matches the audit-trail pattern spec-kitty implements at the OSS scale (above).
+4. **Does the spec stay authoritative after the first generation?** See "Spec drift" immediately below: most platforms solve generation, few solve keeping the spec and the code in sync as the app evolves past its first version.
 
 ### Spec drift: the open problem
 

@@ -118,6 +118,21 @@ Entry format:
 
 Prepend at the top of the `rssEntries` array.
 
+### 4.7. Sync MCP Server Content
+
+`mcp-server/content/` is a bundled copy of 3 source files, published to npm as `claude-code-ultimate-guide-mcp`. It does NOT auto-update, sync it every time the tracking YAML changes:
+
+```bash
+cp machine-readable/claude-code-releases.yaml mcp-server/content/claude-code-releases.yaml
+cp machine-readable/reference.yaml mcp-server/content/reference.yaml
+cp llms.txt mcp-server/content/llms.txt
+
+# Bump mcp-server/package.json version (patch, unless server code also changed → minor)
+cd mcp-server && npm run build && cd ..
+```
+
+Commit `mcp-server/content/*` + `mcp-server/package.json` (dist/ is gitignored, rebuilt at publish time). Ask the user before running `npm publish` (irreversible, public).
+
 ### 5. Verify Synchronization
 
 ```bash

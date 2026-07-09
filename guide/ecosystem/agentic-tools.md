@@ -411,6 +411,30 @@ Cross-references:
 
 ---
 
+### 2.4 OpenHands (All Hands AI)
+
+Open source autonomous coding platform, formerly OpenDevin. The closest self-hostable equivalent to Devin.
+
+| Attribute | Details |
+|-----------|---------|
+| **GitHub** | [OpenHands/OpenHands](https://github.com/OpenHands/OpenHands) |
+| **Stars** | 79,900+ (July 2026) |
+| **Model support** | Claude, GPT, Gemini, open-weight models |
+| **Deployment** | Self-host (free) or OpenHands Cloud/Enterprise (paid) |
+| **Execution** | Sandboxed environment |
+
+#### What Is OpenHands?
+
+A planning agent builds a dependency graph before any work starts, then spawns sub-agents to execute it: tasks with no dependencies (Tier 0) run in parallel, and each Tier 1 task starts as soon as its specific dependency resolves rather than waiting for all of Tier 0 to finish. An integrator agent then merges the resulting files, fixes import paths, wires API calls to frontend components, and runs the full test suite before handing back a result.
+
+#### When to Choose OpenHands
+
+OpenHands is the practical choice when you want Devin's dependency-graph parallelism without the per-task billing or the closed-source lock-in. Self-hosting means you control the sandbox and the model routing, at the cost of running the infrastructure yourself.
+
+The governance layer (guardrails, budgets, an internal plugin marketplace, full audit trail) sits behind OpenHands Cloud/Enterprise. The open source core gives you the execution graph and the sandbox, not the organization-wide policy enforcement. If your priority is deterministic gates and traceability across a team, budget for the paid tier or pair OpenHands with an external policy layer.
+
+---
+
 ## Section 3: Multi-Agent Frameworks
 
 These are not coding tools. They are libraries for building custom multi-agent applications from scratch: marketing pipelines, research automation, document processing, customer support bots. You would use them if you are building a product that has AI agents inside it, not if you are a developer wanting an agent to write code for you.

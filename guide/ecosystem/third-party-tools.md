@@ -1378,6 +1378,28 @@ Users working across 5+ parallel features on multiple repos report the following
 
 ---
 
+### Agent Orchestrator (AO)
+
+The open source, cross-platform equivalent of Conductor above: a desktop app and CLI that supervise multiple coding agent CLIs in parallel, each in its own git worktree, with an automatic feedback loop for CI failures, review comments, and merge conflicts.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [github.com/AgentWrapper/agent-orchestrator](https://github.com/AgentWrapper/agent-orchestrator) (renamed from `ComposioHQ/agent-orchestrator`, same repo) |
+| **Install** | `npm install -g @aoagents/ao && ao start`, or desktop build for Windows/macOS/Linux |
+| **License** | Apache-2.0 |
+| **Platform** | Windows, macOS, Linux, plus a headless CLI mode |
+| **Stars** | 8,100+ (July 2026, 5 months after creation) |
+
+**What it adds over Conductor**: 23 supported agent CLI harnesses (Claude Code, Codex, Cursor, Aider, Goose, Devin, and 18 others) instead of 2, and it runs on any OS instead of macOS only. The core pattern is the same: isolated git worktree per session, a local daemon watching PR state, and automatic "nudges" sent back to the right agent session when CI fails, a reviewer comments, or a merge conflict appears.
+
+**Two things worth knowing before adopting it**: the desktop app sends anonymized usage events (and redacted session recordings) to PostHog by default, disable it by setting `VITE_AO_POSTHOG_KEY` to an empty string before building. And despite some secondary coverage describing a "retry twice, then escalate to a human" mechanism for CI failures, that logic does not appear in the project's own README, architecture doc, or status doc as of July 2026, the documented behavior is a direct nudge back to the agent, not a bounded retry-then-escalate policy.
+
+**When to choose AO over Conductor**: you're not on macOS, you use an agent CLI other than Claude Code or Codex, or you want the option to self-host without a proprietary desktop app. Conductor remains more polished and better integrated with Linear/Slack at this stage; AO is younger (416 open issues as of July 2026) and trades that maturity for openness and platform reach.
+
+Full evaluation: [`docs/resource-evaluations/agent-orchestrator-composio.md`](../../docs/resource-evaluations/agent-orchestrator-composio.md).
+
+---
+
 ### Piebald
 
 A cross-platform desktop and web app for agentic AI development. Maintains full compatibility with Claude Code's hooks system and AGENTS.md conventions while adding multi-provider support and a full GUI environment.

@@ -19,7 +19,7 @@ This page maps the ecosystem of tools that help you manage what enters the conte
 1. [The Mental Model](#1-the-mental-model)
 2. [Core Concepts](#2-core-concepts) (MVC, context rot, semantic priming, ghost tokens)
 3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, pxpipe, tilth, Token Savior, context-mode, stacklit, Cloudflare Code Mode MCP)
-4. [Prompt Compression](#4-prompt-compression) (LLMLingua, AttnComp, TOON)
+4. [Prompt Compression](#4-prompt-compression) (LLMLingua, Selective Context, AutoCompressors/Gisting, RECOMP, AttnComp, TOON)
 5. [AI Gateways](#5-ai-gateways)
 6. [RAG Optimization](#6-rag-optimization)
 7. [Memory Systems](#7-memory-systems)
@@ -382,6 +382,20 @@ The Semantic Priming Hypothesis (see section 2) explains why 20x compression can
 
 **When to use**: Long system prompts, repetitive RAG contexts, few-shot examples where the examples are verbose. Not suitable for code (syntax is load-bearing) or numerical data (every digit matters).
 
+### Selective Context
+
+Selective Context (Li et al., 2023) predates LLMLingua and scores lexical units (tokens, phrases, or sentences) by Shannon self-information rather than raw perplexity. It is generally cited as LLMLingua's direct predecessor, and LLMLingua has since superseded it in practice. Reported compression/quality figures for it vary by source; treat any specific ratio you find as a secondary-source citation, not a confirmed benchmark result.
+
+### AutoCompressors and Gist Tokens (Soft-Prompt Compression)
+
+A distinct family that compresses context into learned vectors instead of shorter text. **AutoCompressors** (Chevalier et al., EMNLP 2023) fine-tune a base model to summarize long segments into reusable "summary vectors." **Gisting** (Mu, Li & Goodman, Stanford, NeurIPS 2023) trains a model to compress a prompt into a handful of cacheable "gist tokens" by modifying attention masks during standard fine-tuning, reporting up to 26x compression with minimal quality loss on the Alpaca+ dataset.
+
+Neither technique is deployed in production tooling as of mid-2026: both require fine-tuning the target model itself, which breaks the "works on any LLM" portability that made LLMLingua adoptable. Worth knowing these exist as a category; not yet something to install.
+
+### RECOMP (RAG-Specific Compression)
+
+RECOMP (Xu et al., arXiv 2310.04408) compresses retrieved documents before they enter the prompt, rather than compressing the assembled prompt as a whole (complementary to the Anthropic Contextual Retrieval approach described in §6 below). Two trainable compressors: an extractive one that selects useful sentences, an abstractive one that generates a distilled multi-document summary. Reported gains on Natural Questions, TriviaQA, and HotpotQA for frozen LMs. Still a research technique, not an industry-standard tool, but the underlying principle (compress at retrieval time, not prompt-assembly time) has informed later RAG-compression work.
+
 ### AttnComp (Research Direction)
 
 AttnComp (not yet a shipping product as of March 2026) proposes replacing perplexity scoring with cross-attention patterns as the compression metric. The argument: perplexity measures how "surprising" a token is given its predecessors — useful for language modeling, but only loosely correlated with task relevance. Cross-attention patterns directly show which tokens the model attends to for a given output, making it a more principled importance metric.
@@ -404,18 +418,19 @@ AI gateways sit between your application and the LLM provider. They handle routi
 
 ### Edgee
 
-Edgee positions as a "composable edge layer" for AI applications. Its context engineering features operate transparently at the HTTP layer: the application sends a standard API call, Edgee intercepts it, applies compression and routing policies, and forwards the optimized request to the model.
+Edgee is a Rust-based AI gateway. Its compression features shipped as **Compressor V2** (announced July 2, 2026): three independent layers, each targeting a different part of the request.
 
-| Attribute | Details |
-|-----------|---------|
-| **Source** | [edgee.cloud](https://www.edgee.cloud) |
-| **Context compression** | Up to 50% active compression |
-| **Deployment** | Edge (close to user, low latency) |
-| **Features** | Routing, guardrails, compression, cost policies |
+| Layer | What it compresses | Measured effect (Edgee's own benchmark) |
+|-------|--------------------|-------------------------------------------|
+| **Brevity** | Model output (strips narrated planning, "I'll first read the file, then...") | ~30% median cost reduction, 6 SWE-bench Lite coding tasks |
+| **Tool Surface Reduction (TSR)** | MCP `tools[]` catalog, collapsed to one virtual `search` tool | ~33% token-volume reduction, ~10% cost reduction, 8 MCP tasks |
+| **Tool result trimming** | Conversation history / tool outputs | ~10% cost reduction, 6 coding tasks (carried over and refined from V1) |
 
-The "edge" positioning is deliberate: by running close to the user rather than in a centralized server, Edgee reduces round-trip latency while still intercepting the full request/response cycle. This matters in interactive applications where token compression and latency are both constraints.
+**Source**: [Edgee Blog, Introducing Compressor V2](https://www.edgee.ai/blog/posts/introducing-compressor-v2-three-compression-layers-measured-end-to-end-for-a-50-cost-reduction) | [github.com/edgee-ai/edgee](https://github.com/edgee-ai/edgee)
 
-Guardrails are applied at the gateway level, meaning they are enforced regardless of which application or client initiates the request. In multi-tenant environments, this separates the concern of "what context reaches the model" from the application code that generates it.
+**Relationship to RTK**: Edgee's own post names RTK as the direct inspiration for the tool-result-trimming layer. Structurally, RTK can only ever cover that one layer: it runs as a local shell hook and has no access to the MCP tool catalog or the model's own output. For a Claude Code user already running RTK, Edgee's brevity layer is the genuinely new capability; TSR overlaps with what Claude Code's native MCP Tool Search already does for free (§ [MCP Tool Search](../core/architecture.md#mcp-tool-search-lazy-loading)), and trimming overlaps with what RTK already does locally.
+
+**Reading the "50% combined" claim critically**: the three numbers above come from three separate experiments on two different workloads (coding vs. MCP), never measured together on the same sessions. The "50%" in the post's title tracks closest to brevity's raw aggregate (+51.1%, pulled up by one outlier task), relabeled as the combined figure. It is not an end-to-end measurement of all three layers running at once, and the effects are not mechanically additive (less narration also means less history left to trim). The statistical design is genuinely careful: paired per-task comparison, a sign test chosen over a paired t-test because cost differences are heavy-tailed, and a nonce injected into each replicate to defeat prompt-cache contamination between runs. But the sample sizes are small enough to matter — at n=6, the best achievable two-sided sign-test p-value is 0.031, meaning a perfect 6-of-6 result was the *only* outcome that could clear the conventional 0.05 threshold; one task flipping drops it to 5/6, p=0.22, not significant. The post also never reports SWE-bench Lite's actual metric, resolution rate (the share of issues whose patch still passes tests) — only token cost. A cheaper agent that solves fewer tickets is not a net win, and Edgee's own benchmark repository (`edgee-ai/compression-lab`) confirms it tracks token consumption "rather than task completion rates."
 
 ### Portkey
 
@@ -431,6 +446,14 @@ Portkey is the more established player in the AI gateway category, with a broade
 Portkey's semantic caching layer is particularly relevant for context optimization: identical or near-identical requests are cached and returned without an LLM call. In applications with repetitive query patterns (helpdesks, code review bots, internal search), cache hit rates can reduce total LLM calls by 30–60%.
 
 **Gateway vs. Output Compression**: these categories complement each other. RTK/Headroom compress what goes into the context from tool outputs. Gateways compress or route the assembled prompt before it hits the model. Both reduce total token spend, but they intercept at different points in the pipeline.
+
+### LiteLLM
+
+[LiteLLM](https://github.com/BerriAI/litellm) is the most widely deployed self-hosted alternative: an MIT-licensed Python proxy with Redis-backed caching, virtual keys, and per-team/per-user budget caps. Unlike Edgee or Portkey, it ships no active compression layer of its own: its cost lever is caching and routing, not token-level compression of what gets sent. Pairs well with RTK or lean-ctx (which handle compression) when the goal is also centralized budget enforcement across a team. See [api-gateway.md](../ops/api-gateway.md) for the budget-enforcement side of this.
+
+### Semantic Caching as a Library: GPTCache
+
+Portkey's semantic caching (above) and Anthropic's prompt caching (§8) both require an exact or near-exact prefix match. [GPTCache](https://github.com/zilliztech/GPTCache) (Zilliz, Apache 2.0) targets a different case: it caches the full *response*, keyed by the embedding of the query, and serves it for any new query above a cosine-similarity threshold, skipping the LLM call entirely rather than reducing what gets sent to it. It's a library to integrate into your own code (not a drop-in gateway), with pluggable vector backends (Milvus, FAISS) and storage backends (Redis, MongoDB); embedding lookup adds roughly 3–8ms. Hit-rate figures of 30 to 70% circulate in vendor and blog material but are not independently verified. Treat them as an order of magnitude, not a measured number, until you benchmark your own traffic.
 
 ---
 
@@ -537,6 +560,10 @@ During the prefill phase (processing the input), the transformer computes Key-Va
 For subsequent requests that share a prefix (e.g., the same system prompt), these stored KV values can be reused rather than recomputed. This is KV cache reuse. The autoregressive nature of transformers imposes one strict constraint: only prefixes can be cached. If token N changes, the KV entries for tokens N+1 onward must be recomputed. A modification anywhere in the prefix invalidates everything downstream.
 
 Without KV cache reuse, every request processes the full context from scratch. With effective caching, only the unique portion of each request (the user message, new tool results) requires fresh computation. Anthropic's prompt caching reduces both latency and cost: cached tokens on Opus are billed at approximately $0.50/M versus $5/M for uncached input tokens. Cache hits require the shared prefix to be long enough (typically 1,024+ tokens) and recent enough (cache expires after approximately 5 minutes without access).
+
+### KV Cache Compression: Research Frontier
+
+Distinct from prompt *caching* (reusing an unchanged prefix) is KV cache *compression*: shrinking the cached tensors themselves, since the KV cache can consume up to 70% of inference memory on long contexts. Three technique families dominate current research: selective token eviction (keep the most relevant, discard the rest), quantization (lower numerical precision), and low-rank compression. Recent work like ChunkKV compresses by semantic chunk rather than token-by-token to preserve linguistic coherence, and TurboQuant (ICLR 2026) applies a random orthogonal rotation before quantization to even out variance. This is an active systems/MLOps research area as of 2026, not yet standardized tooling you install. It matters primarily to teams running self-hosted inference (below), not to Claude Code API users, whose caching is fully managed by Anthropic.
 
 ### How Claude Code Uses Prompt Caching
 
