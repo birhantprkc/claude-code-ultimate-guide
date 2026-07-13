@@ -2,8 +2,8 @@
 # For use with /security-check and /security-audit commands
 # Manually maintained — update after new security advisories
 
-version: "2.23.0"
-updated: "2026-07-01"
+version: "2.24.0"
+updated: "2026-07-12"
 sources:
   - name: "Snyk ToxicSkills"
     url: "https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/"
@@ -539,6 +539,45 @@ sources:
   - name: "GitHub Advisory GHSA-8r9q-7v3j-jr4g - Anthropic MCP TypeScript SDK ReDoS"
     url: "https://github.com/advisories/GHSA-8r9q-7v3j-jr4g"
     date: "2026-01"
+  - name: "Wiz - GhostApproval: A Trust Boundary Gap in AI Coding Assistants"
+    url: "https://www.wiz.io/blog/ghostapproval-a-trust-boundary-gap-in-ai-coding-assistants"
+    date: "2026-07-08"
+  - name: "The Hacker News - GhostApproval Symlink Flaws Could Let Malicious Repos Run Code in AI Coding Agents"
+    url: "https://thehackernews.com/2026/07/ghostapproval-symlink-flaws-could-let.html"
+    date: "2026-07-08"
+  - name: "Cato Networks - DuneSlide: Two Critical RCE via Zero-Click Prompt Injection in Cursor IDE"
+    url: "https://www.catonetworks.com/blog/duneslide-two-critical-rce-vulnerabilities/"
+    date: "2026-07-01"
+  - name: "The Hacker News - Critical Cursor Flaws (DuneSlide) Let Prompt Injection Escape Sandbox"
+    url: "https://thehackernews.com/2026/07/critical-cursor-flaws-could-let-prompt.html"
+    date: "2026-07-02"
+  - name: "Adversa AI - GuardFall Shell Injection in Open-Source AI Coding Agents"
+    url: "https://adversa.ai/blog/opensource-ai-coding-agents-shell-injection-vulnerability/"
+    date: "2026-06-30"
+  - name: "The Hacker News - GuardFall Exposes Open-Source AI Coding Agents to Shell Injection Risks"
+    url: "https://thehackernews.com/2026/06/guardfall-exposes-open-source-ai-coding.html"
+    date: "2026-06-30"
+  - name: "Security Affairs - GuardFall Flaw Hits 10 of 11 Popular Open-Source AI Agents"
+    url: "https://securityaffairs.com/194546/ai/guardfall-flaw-hits-10-of-11-popular-open-source-ai-agents.html"
+    date: "2026-07-02"
+  - name: "Cyber Unit - Claude Code Poisoned-Repository Attack (0DIN / Mozilla Zero Day Investigative Network)"
+    url: "https://cyberunit.com/insights/claude-code-poisoned-repo-attack-shadow-ai-risk/"
+    date: "2026-06-25"
+  - name: "Adversa AI - Top MCP security resources July 2026"
+    url: "https://adversa.ai/blog/top-mcp-security-resources-july-2026/"
+    date: "2026-07"
+  - name: "Adversa AI - Top AI Coding Agent security resources July 2026"
+    url: "https://adversa.ai/blog/top-ai-coding-agent-security-resources-july-2026/"
+    date: "2026-07"
+  - name: "kurtpayne/skillscan-security - Security scanner for AI agent skills and MCP tool bundles"
+    url: "https://github.com/kurtpayne/skillscan-security"
+    date: "2026-07"
+  - name: "Tencent Zhuque Lab - AI-Infra-Guard full-stack AI red-teaming platform"
+    url: "https://github.com/Tencent/AI-Infra-Guard"
+    date: "2026-06-30"
+  - name: "AI-Infra-Guard Technical Report (arXiv 2606.31227)"
+    url: "https://arxiv.org/html/2606.31227v1"
+    date: "2026-07-01"
 
 # ═══════════════════════════════════════════════════════════════
 # MALICIOUS AUTHORS (confirmed by security researchers)
@@ -2035,27 +2074,48 @@ cve_database:
     cwe: "CWE-20 CWE-77"
     notes: "GHSA-xq4m-mc3c-vvg3; CVSS v4.0 7.8; Anthropic paid $4,800 bounty to RyotaK (GMO Flatt Security); Cline's GitHub Actions was already exploited with the same pattern in February 2026 (Clinejection campaign); RyotaK has reported ~50 separate permission bypass paths in Claude Code; represents a class vulnerability affecting any AI coding agent action that ingests GitHub-controlled content (issue bodies, PR descriptions, comments)"
 
-  # --- Cursor Agent Terminal Sandbox Escape (2-CVE chain) ---
+  # --- Cursor Agent Terminal Sandbox Escape / DuneSlide (2-CVE chain) ---
   - id: "CVE-2026-50548"
     component: "Cursor (agent terminal sandbox)"
     severity: "critical"
     cvss: 9.8
-    description: "Working-directory restriction bypass in Cursor's agent terminal sandbox lets an AI agent run terminal commands outside the intended workspace boundary"
-    source: "GitHub Security Advisory GHSA-8pcm-8jpx-hv8r; BitNinja (2026-06-26)"
-    fixed_in: "Cursor Desktop 3.0+"
+    description: "DuneSlide #1 — working-directory restriction bypass: the optional working_directory parameter on Cursor's run_terminal_cmd tool lets an AI agent write and run commands outside the intended workspace boundary, and overwriting the cursorsandbox binary turns sandboxed commands into unsandboxed OS-level RCE via zero-click prompt injection"
+    source: "Cato AI Labs DuneSlide (2026-07-01); GitHub Security Advisory GHSA-8pcm-8jpx-hv8r; BitNinja (2026-06-26); THN (2026-07-02)"
+    fixed_in: "Cursor Desktop 3.0 (working-directory fix shipped 2026-04-02)"
     mitigation: "Update Cursor to >= 3.0; audit agent terminal sessions for out-of-workspace command execution"
     cwe: "CWE-22"
-    notes: "Chained with CVE-2026-50549; both flaws disclosed together on 2026-06-26"
+    notes: "Chained with CVE-2026-50549 as the DuneSlide pair; reported to Cursor 2026-02-19 (initially rejected, reopened 2026-02-26); no known in-the-wild exploitation as of disclosure"
   - id: "CVE-2026-50549"
     component: "Cursor (agent terminal sandbox)"
     severity: "critical"
     cvss: 9.8
-    description: "File-write escape triggered when path canonicalization fails and falls back insecurely, letting the agent write files outside the project boundary"
-    source: "GitHub Security Advisory GHSA-8pcm-8jpx-hv8r; BitNinja (2026-06-26)"
-    fixed_in: "Cursor Desktop 3.0+"
-    mitigation: "Update Cursor to >= 3.0"
-    cwe: "CWE-22"
-    notes: "Chained with CVE-2026-50548"
+    description: "DuneSlide #2 — file-write escape via insecure symlink-resolution fallback: when the safety check on path canonicalization fails, Cursor trusts the shortcut's path, letting the agent write files (e.g. overwrite the sandbox binary) outside the project boundary. Also the Cursor instance of the GhostApproval symlink approval-box class."
+    source: "Cato AI Labs DuneSlide (2026-07-01); GitHub Security Advisory GHSA-8pcm-8jpx-hv8r; Wiz GhostApproval (2026-07-08); THN (2026-07-02)"
+    fixed_in: "Cursor Desktop 3.0 (link-target fix shipped 2026-06-01/05)"
+    mitigation: "Update Cursor to >= 3.0; do not accept agent file-write approvals for symlinked paths"
+    cwe: "CWE-22 CWE-59"
+    notes: "Chained with CVE-2026-50548 (DuneSlide); every Cursor version before 3.0 is affected"
+
+  # --- Amazon Q Developer (GhostApproval symlink approval-box + poisoned-workspace) ---
+  - id: "CVE-2026-12958"
+    component: "Amazon Q Developer (VS Code extension / language server)"
+    severity: "high"
+    cvss: 7.8
+    description: "GhostApproval — symlink-based approval-box spoofing: a booby-trapped repository ships an innocent-looking file (e.g. project_settings.json) that is actually a symlink to a sensitive location (e.g. ~/.ssh/authorized_keys). When the developer asks the agent to set up the environment, it follows the link and writes attacker-supplied content (such as a public SSH key granting persistent passwordless access) outside the workspace, while the confirmation dialog shows a benign in-project path"
+    source: "Wiz GhostApproval (2026-07-08); AWS security bulletin; THN (2026-07-08)"
+    fixed_in: "Amazon Q language server 1.69.0 (2026-05-27)"
+    mitigation: "Update Amazon Q language server to >= 1.69.0; never accept agent file-write approvals for symlinked paths; audit cloned repos for symlinks pointing outside the project before running setup"
+    cwe: "CWE-59 CWE-22"
+    notes: "GhostApproval class also affects Claude Code, Cursor (CVE-2026-50549), Google Antigravity (fixed 2026-05-22, no CVE), Augment, and Windsurf (Wiz rated Windsurf most severe — content written to disk before the approval dialog appeared). Discovered 2026-02-10; coordinated 90+ day disclosure; public 2026-07-08. Anthropic disputed that Claude Code's behavior is a vulnerability, arguing folder-trust is explicit consent"
+  - id: "CVE-2026-12957"
+    component: "Amazon Q Developer"
+    severity: "high"
+    description: "Poisoned repository auto-loads a workspace config file and runs commands to steal a developer's AWS credentials once the workspace is trusted"
+    source: "Wiz GhostApproval (2026-07-08); AWS security bulletin"
+    fixed_in: "Amazon Q language server 1.69.0 (2026-05-27)"
+    mitigation: "Update to >= 1.69.0; do not auto-trust cloned workspaces; scope AWS credentials to least privilege and rotate if a poisoned repo was opened"
+    cwe: "CWE-829 CWE-77"
+    notes: "Disclosed alongside CVE-2026-12958 in the GhostApproval report"
 
   # --- FastMCP OpenAPIProvider ---
   - id: "CVE-2026-32871"
@@ -3026,6 +3086,60 @@ attack_techniques:
     mitigation: "Rotate exposed write-only DSNs; do not grant coding agents unreviewed access to third-party error-tracking data; require human confirmation before agents act on 'fix this error' prompts sourced from external diagnostic tools"
     notes: "85% success rate across tested agents in the original disclosure; 2,388+ organizations found with exposed Sentry DSNs; system-prompt 'ignore untrusted data' instructions did not stop the attack, since the agent was explicitly asked by the human to act on the error data"
 
+  - id: "T034"
+    name: "GhostApproval (Symlink Approval-Box Spoofing)"
+    description: "Attacker publishes a repository containing an innocent-looking file (e.g. project_settings.json) that is actually a symbolic link to a sensitive location on the victim's machine (e.g. ~/.ssh/authorized_keys or an AI-agent config directory). When the developer asks the coding assistant to set up or configure the project, the agent follows the symlink and writes attacker-supplied content there — for example a public SSH key granting persistent passwordless access — while the human-in-the-loop confirmation dialog displays only the benign in-project path. The approval UI shows the wrong file, so the developer approves a write they never intended."
+    examples:
+      - "project_settings.json symlinked to ~/.ssh/authorized_keys; agent appends an attacker SSH public key on 'set up the environment'"
+      - "Config file symlinked into ~/.claude/ or .cursor/ so approved writes plant persistent agent instructions"
+      - "Windsurf case (rated most severe by Wiz): malicious content written to disk before the approval dialog even appears"
+    affected_platforms: ["Amazon Q Developer (CVE-2026-12958)", "Cursor (CVE-2026-50549)", "Claude Code", "Google Antigravity", "Augment", "Windsurf"]
+    campaigns: []
+    source: "Wiz GhostApproval (2026-07-08); THN (2026-07-08)"
+    detection: "Scan cloned repos for symlinks pointing outside the project root: find . -type l -exec ls -l {} \\; — flag any target resolving outside the workspace or into ~/.ssh, ~/.aws, ~/.claude, .cursor"
+    mitigation: "Update affected agents (Amazon Q language server >= 1.69.0, Cursor >= 3.0, Antigravity >= 1.19.6); never approve agent file writes to symlinked paths; verify the real resolved path shown in approval dialogs; run untrusted repos in isolated containers"
+    notes: "Discovered 2026-02-10, coordinated 90+ day disclosure, public 2026-07-08. Anthropic disputed that Claude Code's behavior constitutes a vulnerability (folder-trust = explicit consent). The class breaks the human-in-the-loop assumption that the approval box shows the file actually being written"
+
+  - id: "T035"
+    name: "GuardFall (Denylist String-Match Shell-Injection Bypass)"
+    description: "Structural class flaw, not a single CVE: an AI coding agent gates shell execution by matching the raw command string against a denylist/allowlist, but bash later rewrites and evaluates that same text through expansion, substitution, and quote handling. Any rewrite that survives the text matcher yet is bash-equivalent to a blocked pattern is a bypass. Because the guard checks pre-expansion text while bash executes post-expansion, decades-old shell-evasion techniques (variable/brace/command substitution, quote splitting, IFS tricks) defeat the guard. Adding more denylist patterns does not fix it — the agent-to-bash-gated-by-string-matching convention fails by design."
+    examples:
+      - "Command rewritten with ${IFS} or quote-splitting so the denylist substring is absent from the literal but present after bash expansion"
+      - "Brace/command substitution ($(...), backticks) reconstructs a blocked binary name at runtime"
+      - "10 of 11 surveyed open-source agents bypassed: Aider, Cline, Goose, Open Interpreter, OpenHands, opencode, Plandex, Roo-Code, SWE-agent, NousResearch Hermes (only Continue's guard architecture largely closed the surface)"
+    affected_platforms: ["Aider", "Cline", "Goose", "Open Interpreter", "OpenHands", "opencode", "Plandex", "Roo-Code", "SWE-agent", "NousResearch Hermes"]
+    campaigns: []
+    source: "Adversa AI GuardFall (2026-06-30); THN (2026-06-30); Security Affairs (2026-07-02)"
+    detection: "Not detectable by extending command denylists (that is the flawed layer). Detect via runtime observation: log actually-executed argv after expansion, not the pre-parse command string"
+    mitigation: "Do not rely on string-matching command guards. Enforce at the OS/kernel layer instead: run the agent's shell in a sandbox (container, seccomp, restricted syscalls), drop network egress by default, and mediate execution through an allowlisted interpreter rather than pattern-matching raw text. Prefer agents with guard-by-architecture (e.g. Continue) over denylist agents"
+    notes: "~500,000+ open-source deployments in scope. No single patchable CVE — the fix is architectural, not a pattern update. Related to but distinct from the Ona Security Claude Code denylist bypass (2026-03-03)"
+
+  - id: "T036"
+    name: "Runtime DNS-TXT Payload Delivery via Poisoned Repository"
+    description: "Indirect prompt injection where the malicious payload never exists in the repository itself. A clean-looking repo ships (1) a README with normal setup steps, (2) a deliberately failing Python package that nudges the user/agent to run an initialization command, and (3) a setup script that fetches a base64-encoded payload from an attacker-controlled DNS TXT record, decodes it, and executes it. When an AI coding agent tries to resolve the setup errors autonomously, it runs the script and spawns a fully interactive reverse shell with the developer's own privileges. Because the payload arrives dynamically from DNS at runtime, static code review and repo scanners see nothing malicious."
+    examples:
+      - "0DIN PoC (2026-06-25): failing pip install → agent runs init command → setup script resolves attacker DNS TXT, decodes base64, opens reverse shell"
+      - "Stolen secrets from the shell environment: ANTHROPIC_API_KEY, AWS_SECRET_ACCESS_KEY, GITHUB_TOKEN"
+    affected_platforms: ["Claude Code", "any AI coding agent that autonomously resolves setup/build errors by running shell commands"]
+    campaigns: []
+    source: "Cyber Unit / Mozilla 0DIN Zero Day Investigative Network (2026-06-25)"
+    detection: "Monitor for outbound DNS TXT queries during dependency install/setup; treat runtime-fetched-and-executed content (DNS, HTTP) as untrusted; alert on setup scripts that decode base64 into a shell"
+    mitigation: "Do not let coding agents auto-run setup/init commands from untrusted repos; block agent egress DNS/HTTP to non-allowlisted hosts during setup; run unknown repos in network-isolated sandboxes; require human review before executing any repo-provided initialization script"
+    notes: "Evades static scanners entirely because the repo contains only a fetch-and-run stub — the weaponized payload lives off-repo in a DNS TXT record the attacker controls"
+
+  - id: "T037"
+    name: "Friendly Fire (Weaponized Third-Party Documentation during Automated Security Review)"
+    description: "Prompt injections hidden inside third-party library documentation steer an AI coding agent into executing an attacker-controlled binary while the agent is performing an automated security review or dependency audit. The attack exploits the agent's inability to distinguish untrusted data sources (library docs it reads to 'understand' a dependency) from safe instructions, turning a defensive review task into arbitrary code execution."
+    examples:
+      - "Malicious instruction embedded in a dependency's README/docs tells the reviewing agent to run a 'verification' binary that is actually attacker-controlled"
+      - "Automated 'review this dependency for vulnerabilities' prompt causes the agent to fetch and execute a payload referenced in the poisoned docs"
+    affected_platforms: ["Claude Code (Sonnet 4.6, Sonnet 5, Opus 4.8)", "OpenAI Codex (GPT-5.5)"]
+    campaigns: []
+    source: "AI Now Institute / Adversa AI Top AI Coding Agent security resources July 2026"
+    detection: "Treat all library documentation the agent ingests as untrusted input; flag agent shell/exec actions that originate from content read during a review rather than from the user's task"
+    mitigation: "Never grant review/audit agents unrestricted execution; run dependency reviews read-only in a sandbox with no network egress and no exec; keep a hard boundary between 'analyze this text' and 'run this command'"
+    notes: "Medium confidence — reported via the AI Now Institute July 2026 disclosure and aggregated by Adversa; underscores that even defensive security-review workflows are an injection surface"
+
 # ═══════════════════════════════════════════════════════════════
 # SCANNING TOOLS
 # ═══════════════════════════════════════════════════════════════
@@ -3576,6 +3690,39 @@ scanning_tools:
       - "Requires container sandbox infrastructure for dynamic analysis"
       - "67 CVEs from single scan batch — ongoing maintenance unclear"
     notes: "Published May 30, 2026 (arXiv 2605.21392). Most comprehensive automated MCP security audit to date. The 67 CVEs filed from one scan run represents the largest single batch of MCP CVE submissions. Framework methodology is replicable and has been cited by NVIDIA SkillSpector and vulnerablemcp.info teams."
+
+  - name: "SkillScan Security"
+    vendor: "kurtpayne (community, open-source)"
+    type: "cli"
+    url: "https://github.com/kurtpayne/skillscan-security"
+    date_added: "2026-07"
+    capabilities:
+      - "Security scanner for AI agent skills and MCP tool bundles"
+      - "121 static detection rules + 17 multilanguage rules + 15 chain rules"
+      - "Malware and instruction-abuse pattern detection (prompt injection, IOC matching)"
+      - "Optional ML classifier for suspicious skill content"
+      - "Scans SKILL.md and bundled code offline"
+    limitations:
+      - "Static + ML pattern matching — cannot catch runtime-only payloads fetched from benign-looking URLs or DNS (see T036)"
+      - "Community project — detection ruleset freshness depends on maintainer updates"
+    notes: "Complements mcp-scan and NVIDIA SkillSpector; chain rules target multi-step obfuscation (e.g. base64 + eval) rather than single-line patterns"
+
+  - name: "AI-Infra-Guard (A.I.G)"
+    vendor: "Tencent Zhuque Lab"
+    type: "cli"
+    url: "https://github.com/Tencent/AI-Infra-Guard"
+    date_added: "2026-06-30"
+    capabilities:
+      - "Full-stack AI red-teaming platform layered by attack surface: infrastructure, protocol/tool, agent behavior, and model"
+      - "Deterministic rule matching over 75+ AI components and 1,400+ vulnerability rules"
+      - "LLM-driven agentic auditing of MCP servers and agent-skill packages (14 major risk categories)"
+      - "Multi-turn black-box agent red teaming"
+      - "Jailbreak harness: 26+ attack operators over 16 datasets"
+      - "MCP scan, Agent Skills scan, AI Infra scan, and LLM jailbreak evaluation in one framework"
+    limitations:
+      - "Broad platform — heavier to run than a single-purpose skill scanner"
+      - "LLM-driven auditing layers require model access/compute"
+    notes: "Released 2026-06-30 by Tencent's Zhuque Lab; first framework to stratify AI-agent red teaming by layer rather than flat scanning. Technical report: arXiv 2606.31227."
 
 # ═══════════════════════════════════════════════════════════════
 # DEFENSIVE FRAMEWORKS & BLOCKLISTS

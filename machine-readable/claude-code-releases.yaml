@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.204"
-updated: "2026-07-08"
+latest: "2.1.207"
+updated: "2026-07-11"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,32 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-July 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.207"
+    date: "2026-07-11"
+    highlights:
+      - "Bedrock, Vertex AI, and Claude Platform on AWS now default to Claude Opus 4.8"
+      - "Fixed the terminal freezing and keystrokes lagging while streaming very long lists, tables, paragraphs, or code blocks"
+      - "Auto mode is now available without the `CLAUDE_CODE_ENABLE_AUTO_MODE` opt-in on Bedrock, Vertex AI, and Foundry (disable via `disableAutoMode`)"
+    breaking:
+      - "Plugin hooks/monitors/MCP headersHelper: `${user_config.*}` in shell-form commands is now rejected (shell-injection fix); use exec form or `$CLAUDE_PLUGIN_OPTION_<KEY>`"
+      - "Plugin option values (`pluginConfigs`) are no longer read from project-level `.claude/settings.json`; only user, `--settings`, and managed settings are honored"
+
+  - version: "2.1.206"
+    date: "2026-07-09"
+    highlights:
+      - "Added a `/doctor` check that proposes trimming checked-in `CLAUDE.md` files by cutting content Claude can derive from the codebase"
+      - "`/commit-push-pr` now auto-allows `git push` to the repo's configured push remote (`remote.pushDefault`, or the sole remote), not just `origin`"
+      - "Background agents now upgrade to a new version in the background right after an update, instead of a slow stale-session upgrade on attach"
+      - "Improved `/code-review` findings quality on claude-opus-4-8 across all effort levels"
+
+  - version: "2.1.205"
+    date: "2026-07-08"
+    highlights:
+      - "`/doctor` is now a full setup checkup that can diagnose and fix issues (`/checkup` is its alias)"
+      - "Improved the agent view: rows show a colored state word and a classifier-written headline instead of raw tool call text"
+      - "Auto mode now blocks tampering with session transcript files and asks before running `rm -rf` on a variable it can't resolve"
+      - "Fixed `--json-schema` silently producing unstructured output when the schema was invalid, and schemas using the `format` keyword being rejected"
 
   - version: "2.1.204"
     date: "2026-07-08"
@@ -1542,6 +1568,7 @@ breaking_summary:
     - "Removed # shortcut for quick memory (v2.0.70)"
     - "`modelPicker:setAsDefault` keybinding renamed to `modelPicker:thisSessionOnly` (v2.1.153)"
   security:
+    - "Plugin shell-form command injection via `${user_config.*}` fixed, now rejected (v2.1.207)"
     - "Command injection fix in bash processing (v2.1.2)"
     - "Wildcard permission rules compound commands fix (v2.1.7)"
     - "Shell line continuation permission bypass fix (v2.1.6)"
@@ -1558,11 +1585,16 @@ breaking_summary:
     - "'default' permission mode renamed 'Manual' across CLI/VS Code/JetBrains — `--permission-mode manual` and `defaultMode: manual` now accepted alongside `default` (v2.1.200)"
   syntax:
     - "Indexed argument syntax changed: $ARGUMENTS.0 → $ARGUMENTS[0] (v2.1.19)"
+  plugins:
+    - "`${user_config.*}` in shell-form plugin commands rejected; use exec form or `$CLAUDE_PLUGIN_OPTION_<KEY>` (v2.1.207)"
+    - "Plugin option values (`pluginConfigs`) no longer read from project-level `.claude/settings.json` (v2.1.207)"
 
 # ════════════════════════════════════════════════════════════════
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.207": "Bedrock/Vertex/Claude Platform on AWS default to Opus 4.8, terminal streaming perf fix, plugin shell-injection hardening"
+  "2.1.205": "/doctor becomes a full setup checkup (/checkup alias), agent view gains classifier-written headlines"
   "2.1.200": "'default' permission mode renamed 'Manual' (CLI/VS Code/JetBrains), AskUserQuestion no longer auto-continues by default"
   "2.1.198": "Subagents run in the background by default, Claude in Chrome generally available"
   "2.1.197": "Claude Sonnet 5 becomes the default model, native 1M-token context, promotional pricing $2/$10 per Mtok through August 31"
