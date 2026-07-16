@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.207"
-updated: "2026-07-11"
+latest: "2.1.210"
+updated: "2026-07-14"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,29 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-July 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.210"
+    date: "2026-07-14"
+    highlights:
+      - "Added a live elapsed-time counter to the collapsed tool summary line so long-running tool calls visibly tick instead of looking stuck"
+      - "Hardened the Agent tool against indirect prompt injection via content a subagent read, and fixed `ultracode` keyword opt-in firing on non-human input such as webhook payloads and relayed PR comments"
+      - "Fixed `isolation: 'worktree'` subagents being able to run git-mutating commands against the main repo checkout instead of their own isolated worktree"
+      - "Auto mode: the permission classifier now defaults to Sonnet 5 for external sessions, validated on the session's first request and pinned for the session"
+    breaking:
+      - "`Write(path)`, `NotebookEdit(path)`, and `Glob(path)` permission rules now trigger a startup warning; use `Edit(path)` or `Read(path)` instead"
+
+  - version: "2.1.209"
+    date: "2026-07-14"
+    highlights:
+      - "Fixed `/model` and other dialogs being blocked in `claude agents` background sessions (reverts an overly broad guard)"
+
+  - version: "2.1.208"
+    date: "2026-07-13"
+    highlights:
+      - "Added screen reader mode: opt-in plain-text rendering via `claude --ax-screen-reader`, `CLAUDE_AX_SCREEN_READER=1`, or `axScreenReader: true` in settings"
+      - "Added `vimInsertModeRemaps` for mapping two-key insert-mode sequences like `jj` to Escape, and `CLAUDE_CODE_PROCESS_WRAPPER` for running every Claude Code self-spawn through a corporate launcher"
+      - "Fixed the context window and auto-compact indicator briefly resetting to 200k after an auto-update, causing a false '100% context used' when resuming long-context sessions"
+      - "Fixed very large markdown tables stalling rendering; tables over 200 rows now show the first 200 with a '… N more rows' notice"
 
   - version: "2.1.207"
     date: "2026-07-11"
@@ -1585,6 +1608,7 @@ breaking_summary:
     - "'default' permission mode renamed 'Manual' across CLI/VS Code/JetBrains — `--permission-mode manual` and `defaultMode: manual` now accepted alongside `default` (v2.1.200)"
   syntax:
     - "Indexed argument syntax changed: $ARGUMENTS.0 → $ARGUMENTS[0] (v2.1.19)"
+    - "`Write(path)`, `NotebookEdit(path)`, and `Glob(path)` permission rules now warn at startup — use `Edit(path)` or `Read(path)` (v2.1.210)"
   plugins:
     - "`${user_config.*}` in shell-form plugin commands rejected; use exec form or `$CLAUDE_PLUGIN_OPTION_<KEY>` (v2.1.207)"
     - "Plugin option values (`pluginConfigs`) no longer read from project-level `.claude/settings.json` (v2.1.207)"
@@ -1593,6 +1617,7 @@ breaking_summary:
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.208": "Screen reader mode (opt-in plain-text rendering), vimInsertModeRemaps, CLAUDE_CODE_PROCESS_WRAPPER corporate launcher support"
   "2.1.207": "Bedrock/Vertex/Claude Platform on AWS default to Opus 4.8, terminal streaming perf fix, plugin shell-injection hardening"
   "2.1.205": "/doctor becomes a full setup checkup (/checkup alias), agent view gains classifier-written headlines"
   "2.1.200": "'default' permission mode renamed 'Manual' (CLI/VS Code/JetBrains), AskUserQuestion no longer auto-continues by default"
