@@ -736,6 +736,45 @@ Different domain, too. Paperclip targets business operations broadly, not softwa
 
 ---
 
+### 4.6 CLI Agent Orchestrator (CAO, AWS Labs)
+
+A supervisor agent that delegates to worker agents, each one a real CLI process in its own tmux session, coordinated over MCP. Notable for a reason that has nothing to do with its features: it is the only orchestrator in this category with a defensible bus factor.
+
+| Attribute | Details |
+|-----------|---------|
+| **GitHub** | [awslabs/cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) |
+| **Stars** | 893 (July 2026), 172 forks, 71 open issues |
+| **Language** | Python 3.10+, distributed on PyPI as `cli-agent-orchestrator` |
+| **License** | Apache-2.0 |
+| **Created** | July 29, 2025 |
+| **Latest release** | v2.3.0 (July 12, 2026) |
+| **Contributors** | 41, top contributor at 20% of commits |
+| **Works with** | Claude Code, Kiro CLI, Codex CLI, Antigravity CLI, Hermes Agent, Kimi CLI, GitHub Copilot CLI, OpenCode, Cursor CLI |
+
+#### What It Actually Does
+
+One supervisor agent launches, messages, and coordinates multiple workers through three MCP primitives: `handoff` (synchronous, waits for completion), `assign` (asynchronous, fire and forget), and `send_message` (inbox delivery between agents). Every agent runs as a full CLI process in an isolated tmux session, which is the design decision that matters most: because it drives the real binary rather than wrapping an API, native features survive, including Claude Code sub-agents, Kiro custom agents, and provider auth.
+
+Two consequences follow that most orchestrators cannot offer. You can `tmux attach` to any running worker and steer it mid-task, rather than waiting for a sub-agent to finish and hoping. And you can mix providers inside one session, pinning a profile to a given CLI through agent frontmatter, so a Kiro supervisor can drive Claude Code workers.
+
+Around that core sit scheduled flows (cron-style unattended runs), a bundled Web UI, a `cao-ops-mcp` server that lets an agent spawn and monitor CAO sessions from its own chat loop, persistent cross-session memory via `memory_store` and `memory_recall`, and per-agent tool restrictions declared as `role` plus `allowedTools` in the profile, translated to each provider's native enforcement where one exists.
+
+#### Why It Is Listed Here At All
+
+A July 2026 market sweep of eight open-source multi-agent orchestrators, verified against the GitHub API rather than project READMEs, found seven with a single contributor holding 95% to 100% of commits. CAO was the exception, at 41 contributors and a top contributor holding 20%.
+
+The comparison that should stay with you: Mission Control ([builderz-labs/mission-control](https://github.com/builderz-labs/mission-control), MIT) carries 5,763 stars, 6.4 times CAO's count, and one person authored 78% of its commits. Sorting that market by stars selects almost exactly the wrong tool. This guide's position on star counts as an adoption proxy is stated at [Section 5](#the-model-lock-in-question) and in [`docs/resource-evaluations/README.md`](../../docs/resource-evaluations/README.md); CAO versus Mission Control is the cleanest illustration of it in the wild.
+
+#### Where It Stops
+
+CAO owns coordination and nothing else. It ships no quality gate of its own, and it is honest about this: whether an agent can declare "done" on broken code depends entirely on what the underlying CLI runs inside its worktree. Tool restrictions constrain which tools an agent may call, not whether its output is correct. Answer question 1 of the [governance checklist](../workflows/agentic-software-factories.md#4-five-governance-questions-before-you-adopt-anything) yourself, in your own CI, because CAO will not answer it for you.
+
+Isolation is process-level, not system-level. tmux separates contexts and gives real PTY access; it is not a sandbox. Agents inherit the environment, including secrets and configs. The `cao-server` is hardened for localhost specifically (host-header validation against DNS rebinding, WebSocket PTY refusing non-loopback connections), which tells you the intended deployment: your machine, not a shared host.
+
+No published case study with measured outcomes exists as of July 2026, which puts it in the same evidentiary position as every commercial platform in this category. AWS Labs backing means maintenance continuity, not proven production results.
+
+---
+
 ## Section 5: Decision Framework
 
 ### Full Comparison Matrix
