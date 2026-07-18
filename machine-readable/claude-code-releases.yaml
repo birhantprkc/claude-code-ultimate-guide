@@ -3,8 +3,8 @@
 # Purpose: Track Claude Code product releases for documentation sync
 # Maintained: Manual updates when new releases are announced
 
-latest: "2.1.210"
-updated: "2026-07-14"
+latest: "2.1.212"
+updated: "2026-07-16"
 
 # ════════════════════════════════════════════════════════════════
 # RELEASES (newest first, condensed highlights only)
@@ -14,6 +14,24 @@ releases:
   # ─────────────────────────────────────────────────────────────
   # 2.1.x Series (January-July 2026)
   # ─────────────────────────────────────────────────────────────
+
+  - version: "2.1.212"
+    date: "2026-07-16"
+    highlights:
+      - "⭐ `/fork` now copies your conversation into a new background session (its own row in `claude agents`) while you keep working; the in-session subagent it used to launch is now `/subtask`"
+      - "Added a session-wide WebSearch cap (default 200, `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`) and a per-session subagent-spawn cap (default 200, `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`) to stop runaway loops; `/clear` resets the budget"
+      - "MCP tool calls running longer than 2 minutes now move to the background automatically so the session stays usable (`CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS`)"
+      - "Security: fixed plan mode auto-running file-modifying Bash commands (`touch`, `rm`) without a permission prompt, and worktree creation following a committed `.claude/worktrees` symlink to create files outside the repository"
+    breaking:
+      - "Deprecated the Task tool's `mode` parameter (now ignored); subagents inherit the parent session's permission mode by default"
+
+  - version: "2.1.211"
+    date: "2026-07-15"
+    highlights:
+      - "Added `--forward-subagent-text` flag and `CLAUDE_CODE_FORWARD_SUBAGENT_TEXT` to include subagent text and thinking in stream-json output"
+      - "Security: permission previews relayed to chat channels now neutralize bidirectional-override, zero-width, and look-alike quote characters, so tool inputs cannot visually alter the approval message"
+      - "Security: auto mode no longer overrides a PreToolUse hook's `ask` decision for unsandboxed Bash (an `ask` now floors the decision at a prompt)"
+      - "Fixed subagents with an explicit model override reverting to the parent's model when resumed, and nested `.claude/rules/*.md` loading even when setting sources exclude project settings"
 
   - version: "2.1.210"
     date: "2026-07-14"
@@ -1606,6 +1624,7 @@ breaking_summary:
     - "ultrathink keyword re-introduced — now enables high effort for next turn (v2.1.68)"
     - "Dynamic workflow trigger keyword renamed `workflow` → `ultracode` (v2.1.160)"
     - "'default' permission mode renamed 'Manual' across CLI/VS Code/JetBrains — `--permission-mode manual` and `defaultMode: manual` now accepted alongside `default` (v2.1.200)"
+    - "Task tool's `mode` parameter deprecated (now ignored); subagents inherit the parent session's permission mode (v2.1.212)"
   syntax:
     - "Indexed argument syntax changed: $ARGUMENTS.0 → $ARGUMENTS[0] (v2.1.19)"
     - "`Write(path)`, `NotebookEdit(path)`, and `Glob(path)` permission rules now warn at startup — use `Edit(path)` or `Read(path)` (v2.1.210)"
@@ -1617,6 +1636,7 @@ breaking_summary:
 # MILESTONE FEATURES (quick reference)
 # ════════════════════════════════════════════════════════════════
 milestones:
+  "2.1.212": "/fork copies the conversation into a new background session (in-session subagent renamed /subtask), WebSearch + subagent-spawn session caps, MCP calls auto-background after 2 min"
   "2.1.208": "Screen reader mode (opt-in plain-text rendering), vimInsertModeRemaps, CLAUDE_CODE_PROCESS_WRAPPER corporate launcher support"
   "2.1.207": "Bedrock/Vertex/Claude Platform on AWS default to Opus 4.8, terminal streaming perf fix, plugin shell-injection hardening"
   "2.1.205": "/doctor becomes a full setup checkup (/checkup alias), agent view gains classifier-written headlines"
