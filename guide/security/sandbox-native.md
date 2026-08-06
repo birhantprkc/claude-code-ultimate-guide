@@ -148,6 +148,31 @@ sudo dnf install bubblewrap socat
 sudo pacman -S bubblewrap socat
 ```
 
+**Ubuntu 24.04 and later: allow bubblewrap to create user namespaces.** The default AppArmor policy blocks the unprivileged user namespaces bubblewrap needs, so the sandbox fails to start with no obvious cause. Check first:
+
+```bash
+sysctl kernel.apparmor_restrict_unprivileged_userns
+```
+
+`0` or a "No such file or directory" error means nothing to do. If it returns `1`, add a profile for `bwrap`:
+
+```bash
+sudo tee /etc/apparmor.d/bwrap > /dev/null <<'EOF'
+abi <abi/4.0>,
+include <tunables/global>
+
+profile bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+  include if exists <local/bwrap>
+}
+EOF
+sudo systemctl reload apparmor
+```
+
+The profile applies to `bwrap` itself, not to the commands it runs inside the sandbox. The same check applies inside WSL2.
+
+**Optional seccomp filter**: `ripgrep` ships with the native binary, but the seccomp filter that blocks Unix domain sockets is separate. Install it with `npm install -g @anthropic-ai/sandbox-runtime` and restart Claude Code, since the dependency check runs at startup. The `/sandbox` Dependencies tab lists whatever is missing.
+
 **How it works**:
 
 ```
@@ -194,8 +219,28 @@ sudo pacman -S bubblewrap socat
 ### Default Behavior
 
 - **Read access**: Entire computer (except explicitly denied directories)
-- **Write access**: Current working directory (CWD) and subdirectories only
-- **Blocked**: Modifications outside CWD without explicit permission
+- **Write access**: Current working directory (CWD) and subdirectories, **plus the session temp directory**
+- **Blocked**: Modifications outside those paths without explicit permission
+
+> **"Entire computer" includes your credentials.** There is no built-in denylist, so `~/.ssh` and `~/.aws/credentials` are readable by every sandboxed command until you list them in [`sandbox.credentials.files`](../core/settings-reference.md#sandboxcredentialsfiles) or `filesystem.denyRead`. Enabling the sandbox does not protect them; declaring them does.
+
+**A `permissions.deny` read rule does not reach a Bash subprocess.** This is the single most expensive misunderstanding in the whole model, because the rule looks like it protects the file and it reads like a denylist. It governs the Read tool only.
+
+A double dissociation measured on 2.1.220 settles it. `~/.npmrc` carried a `sandbox.credentials.files` entry and no deny rule, and `cat ~/.npmrc` returned `Operation not permitted` five times out of five. A project `.env` carried `Read(**/.env*)` in `permissions.deny` and no credentials entry, and `cat .env` returned exit 0 five times out of five on a file holding real secrets. Same session, same machine, opposite outcomes, and the only variable is which mechanism declared the path.
+
+Two consequences follow. Only `sandbox.credentials.files` reaches sandboxed commands, and it resolves absolute paths rather than `**/` patterns, so a rule shaped like `**/.env*` has nothing to compile into the Seatbelt profile. Since `.env` files live wherever projects put them, no absolute path covers them, and a `PreToolUse` hook on Bash is the only closing move. Scope it to the readers that print or copy (`cat`, `head`, `grep`, `base64`, `cp`) and leave `source .env` alone, otherwise you break the normal way developers load their own variables.
+
+**Two editor directories are write-denied even inside `allowWrite`.** Writing to `.idea/` and `.vscode/` fails under a path already listed in `sandbox.filesystem.allowWrite`, because the deny resolves inside the allow. Adding a narrower `allowWrite` entry does not take the ground back. Tested alongside `.serena`, `.cursor`, `.zed`, `.fleet` and `.settings`, which all accept writes, so the denial is specific to those two names rather than a general rule about dotted config directories.
+
+This surfaces as a supply-chain paper cut: an npm package that ships a `.idea/` folder in its tarball kills `pnpm install` during extraction, and `node_modules/` is left truncated. Running the install in a real terminal is the cheap fix. Putting `pnpm install*` in `excludedCommands` also works and is a much larger concession, since it unsandboxes every postinstall script in the dependency tree.
+
+**The session temp directory is not your shell's.** Claude Code points `$TMPDIR` at a per-session directory for sandboxed commands, so tools that write temp files work without extra configuration. Unsandboxed commands, including anything in `excludedCommands`, inherit your shell's `$TMPDIR` unchanged. The two therefore resolve to different paths, and `/tmp` itself is not writable from inside the sandbox. To pass a file between a sandboxed and an unsandboxed command, write it under the working directory instead. Setting [`filesystem.disabled`](../core/settings-reference.md#sandboxfilesystemdisabled) stops the override and both resolve to the shell value again.
+
+**Git worktrees**: when the working directory is a linked worktree, the sandbox also allows writes to the main repository's shared `.git` directory so `git commit` can update refs and the index. Writes to `hooks/` and `config` inside it stay denied.
+
+**Claude Code's own settings files are protected at every scope.** The sandbox denies writes to every `settings.json` and to the managed settings directory, so a sandboxed command cannot modify its own policy. Since v2.1.210 the deny rules resolve symlinks: a symlink appearing at a protected settings path after startup has its target added to the deny list for the next command, so a linked settings file cannot be edited through the link. Reading is not blocked.
+
+This is easy to hit in practice. A script that edits `~/.claude/settings.json` from a Bash command fails with `PermissionError: [Errno 1] Operation not permitted`, even though the same edit succeeds through the Edit tool, which is not sandboxed. Turning off [`filesystem.disabled`](../core/settings-reference.md#sandboxfilesystemdisabled) is what removes this protection, which is one reason that setting is restricted to user and managed scopes.
 
 ### Why "Read All, Write CWD"?
 
@@ -287,10 +332,10 @@ All network connections from sandboxed commands are routed through a SOCKS5 prox
 
 ### Domain Filtering
 
-**Two modes**:
+**Two modes**, selected by [`strictAllowlist`](../core/settings-reference.md#sandboxnetworkstrictallowlist):
 
-1. **Allowlist (default)**: Permit most traffic, block specific destinations
-2. **Denylist**: Block all traffic, allow only specified destinations
+1. **Permissive (default)**: a host outside `allowedDomains` raises a permission prompt
+2. **Strict** (`strictAllowlist: true`): a host outside the list fails outright, no prompt
 
 **Configuration**:
 
@@ -298,7 +343,7 @@ All network connections from sandboxed commands are routed through a SOCKS5 prox
 {
   "sandbox": {
     "network": {
-      "policy": "deny",
+      "strictAllowlist": true,
       "allowedDomains": [
         "api.anthropic.com",
         "*.npmjs.org",
@@ -310,6 +355,12 @@ All network connections from sandboxed commands are routed through a SOCKS5 prox
   }
 }
 ```
+
+> **The list filters even in permissive mode.** An earlier version of this page claimed the opposite, on the strength of two hosts that returned HTTP 200 against a short `allowedDomains`. Both turned out to sit in the built-in default list, so the test proved nothing. Re-measured on 2026-07-30 against a 32-entry list: `neverssl.com` stayed unreachable, while `cursor.com` and `www.jetbrains.com` went from unreachable to HTTP 200 on the addition of their wildcard alone. Edits take effect immediately, with no session restart. Pick your test hosts from outside the defaults before concluding that a list does nothing.
+
+> **Telling a blocked host from a host that does not exist.** A refusal by the allowlist hangs for 5 to 7 seconds before failing. A hostname that does not resolve fails in under 30 milliseconds, including when a wildcard already covers it. On the same run, `api.cursor.sh` and `cloud.ollama.com` failed in roughly 25 ms while covered by `*.cursor.sh` and `*.ollama.com`: neither host exists. Check that the apex answers before asking for a domain to be added.
+
+Enable strict mode only once the list has survived a week of real work, since it converts every missing domain from a prompt into a hard failure. Note also that `github.com` does not cover `codeload.github.com`, which is where npm and pnpm fetch git dependencies and tarballs.
 
 **Pattern matching**:
 
@@ -348,9 +399,27 @@ For advanced use cases (HTTPS inspection, enterprise proxies):
 
 **⚠️ Important**: Auto-allow mode is **independent** of permission mode (default/auto-accept/plan). Even in "default" mode, sandboxed bash commands run without prompts.
 
-**Built-in blocklist**: Even in auto-allow mode, commands like `curl` and `wget` are blocked by default to prevent arbitrary web content fetching.
-
 **When to use**: Daily development, autonomous refactors, CI/CD pipelines
+
+#### What still applies in auto-allow mode
+
+Auto-allow removes the prompt, not the rest of the permission system. Five things survive it:
+
+| Survives auto-allow | Detail |
+|---------------------|--------|
+| Explicit `deny` rules | Always respected |
+| `rm` / `rmdir` on `/`, `~`, or critical system paths | Still prompts, or goes to the classifier in auto mode (v2.1.218+) |
+| Content-scoped `ask` rules | `Bash(git push *)` prompts even for a sandboxed command |
+| A bare `Bash` or `Bash(*)` ask rule | **Skipped** for sandboxed commands; still applies to commands that fall back to the regular flow |
+| Plan mode | Since v2.1.212, commands outside the [built-in read-only set](../core/settings-reference.md) prompt even with auto-allow on. Since v2.1.218 they route to the classifier instead when auto mode is available and `useAutoModeDuringPlan` is on |
+
+A content-scoped `ask` rule is therefore the only human checkpoint that survives every combination of sandbox, permission mode, and allow rules. If you want a hard stop before a push or a publish, that is where it goes.
+
+There is **no built-in command blocklist**. `curl` and `wget` are not blocked in auto-allow mode; they are constrained by the network allowlist like anything else, and a request to an allowed domain succeeds without a prompt. Verified on 2.1.220: `curl https://api.github.com` returned HTTP 200 in 84 ms under auto-allow, while a non-allowed host hung until timeout (`HTTP 000`, curl exit 28). Expect a hang rather than a clean error when a domain is missing from the allowlist.
+
+#### Subagents
+
+[Subagents](../ultimate-guide.md) run in the same process as the parent session and inherit its sandbox configuration. Bash commands inside a subagent are sandboxed whenever the parent session is. There is no per-subagent sandbox setting, and a subagent cannot widen the boundary.
 
 ### Regular Permissions Mode
 
@@ -371,7 +440,7 @@ For advanced use cases (HTTPS inspection, enterprise proxies):
 # Or edit settings.json
 {
   "sandbox": {
-    "autoAllowMode": true  # or false for Regular Permissions
+    "autoAllowBashIfSandboxed": true  // false for Regular Permissions
   }
 }
 ```
@@ -424,12 +493,54 @@ For tools that **never** work in sandbox, exclude them permanently:
 ```json
 {
   "sandbox": {
-    "excludedCommands": ["docker", "kubectl", "vagrant"]
+    "excludedCommands": ["docker *", "kubectl *", "vagrant *"]
   }
 }
 ```
 
 Excluded commands always run outside sandbox (with normal permission prompts).
+
+#### Three traps, all verified on 2.1.220
+
+**The bare name silently does nothing.** `"docker"` matches only the zero-argument string `docker`, so it never fires on `docker ps` and the command stays sandboxed. The published JSON schema suggests the bare form, so the usual path is to configure something inert, notice the tool is still confined, and only then discover the glob ([#10524](https://github.com/anthropics/claude-code/issues/10524)). Always write `"docker *"`.
+
+**A match unsandboxes the whole Bash invocation.** Once an entry matches anywhere in a compound command, every other command in that call runs unsandboxed too, including commands that execute before the excluded one ([#81157](https://github.com/anthropics/claude-code/issues/81157), open as of 2026-07-25). With `"git *"` in the list, this reads the key:
+
+```bash
+git status && cat ~/.ssh/id_ed25519
+```
+
+`filesystem.denyRead`, `credentials`, and the network allowlist are all suspended for the duration of that call. Claude routinely chains commands, so the window is not theoretical.
+
+**Scope entries to subcommands, not binaries.** Git over SSH is the case most people hit: the sandbox proxy handles HTTP and HTTPS but not port 22, and it blocks the `ssh-agent` Unix socket, so `git push` over an SSH remote fails at DNS resolution. Excluding the whole binary fixes the push and opens the window on every git call. Excluding only the network subcommands fixes the push and keeps local git confined:
+
+```json
+{
+  "sandbox": {
+    "excludedCommands": [
+      "git push *", "git pull *", "git fetch *",
+      "git clone *", "git ls-remote *", "git remote *", "git submodule *",
+      "ssh *", "scp *"
+    ]
+  }
+}
+```
+
+`git status`, `git diff`, `git log`, `git add`, and `git commit` stay inside the sandbox. Until #81157 is fixed, this is the narrowest configuration that keeps an SSH-based git workflow working.
+
+**Anything that moves the command inside the string breaks the match.** An entry matches the command as written, so a wrapper, a prefix, or a loop silently sends the command back into the sandbox. Three shapes hit this in practice:
+
+| What runs | Matches `gh *`? | Result |
+|-----------|-----------------|--------|
+| `gh api rate_limit` | yes | runs unsandboxed, works |
+| `rtk gh api rate_limit` | no | sandboxed, fails |
+| `for d in a b; do (cd $d && git push); done` | no, the string starts with `for` | sandboxed, SSH fails |
+
+The first two differ only by a four-character prefix. A [PreToolUse hook](../ultimate-guide.md) that rewrites commands, which token-optimizing proxies do by design, therefore disables every exclusion naming a wrapped binary, and nothing reports it. The symptom is whatever the sandbox would have caused anyway: `Operation not permitted` on a path, or a Go CLI failing certificate verification with `x509: OSStatus -26276` because it cannot reach the macOS keychain from inside Seatbelt.
+
+Two consequences worth planning for. If a wrapper rewrites your commands, add the wrapped forms explicitly (`rtk gh *` alongside `gh *`). And run network git as plain commands rather than inside a loop or a subshell, or the exclusion never applies.
+
+Taken together with the two traps above, `excludedCommands` has three independent ways to not do what it says, and none of them produce a message naming the real cause. When a sandboxed command fails unexpectedly, check whether the exclusion actually matched the string that ran before looking anywhere else.
 
 ---
 
@@ -568,7 +679,7 @@ flowchart TD
     C --> C2[✅ Kernel exploits protected]
     C --> C3[✅ Full Docker daemon inside]
     C --> C4[❌ Heavier resource usage]
-    C --> C5[Docs: guide/sandbox-isolation.md]
+    C --> C5[Docs: guide/security/sandbox-isolation.md]
 
     D --> D1[Process-level isolation<br/>Seatbelt / bubblewrap]
     D --> D2[⚠️ Shares kernel with host]
@@ -579,7 +690,7 @@ flowchart TD
     E --> E1[Fly.io Sprites]
     E --> E2[E2B]
     E --> E3[Vercel Sandboxes]
-    E --> E4[Docs: guide/sandbox-isolation.md]
+    E --> E4[Docs: guide/security/sandbox-isolation.md]
 ```
 
 ### Comparison Matrix
@@ -609,7 +720,7 @@ flowchart TD
 // settings.json — sandbox settings
 {
   "sandbox": {
-    "autoAllowMode": true,
+    "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
     "network": {
       "policy": "deny",
@@ -638,7 +749,7 @@ flowchart TD
 ```json
 {
   "sandbox": {
-    "autoAllowMode": true,
+    "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": true,
     "network": {
       "policy": "allow",
@@ -646,7 +757,7 @@ flowchart TD
         "*.malicious-domain.com"
       ]
     },
-    "excludedCommands": ["docker", "kubectl"]
+    "excludedCommands": ["docker *", "kubectl *"]
   },
   "permissions": {
     "deny": [
@@ -662,12 +773,12 @@ flowchart TD
 ```json
 {
   "sandbox": {
-    "autoAllowMode": true,
+    "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": true,
     "network": {
       "policy": "allow"
     },
-    "excludedCommands": ["docker", "podman", "kubectl", "vagrant"]
+    "excludedCommands": ["docker *", "podman *", "kubectl *", "vagrant *"]
   }
 }
 ```
@@ -688,6 +799,104 @@ flowchart TD
 ---
 
 ## 13. Troubleshooting
+
+> Running this checklist by hand every time gets old. [`/sandbox-unblock`](../../examples/skills/sandbox-unblock/SKILL.md) packages it as a skill: eight checks that eliminate the known false positives, a report template that forbids paraphrasing the error, and an escalation section naming which keys actually do something. Install it in any project where sessions report blockers you then have to re-verify.
+
+### Check whether the command actually ran sandboxed
+
+Most sandbox bug reports are measurement errors, and one variable explains nearly all of them. Because `excludedCommands` unsandboxes the whole Bash invocation rather than the matching command alone, a probe sharing a line with `git`, `gh`, `ssh` or `docker` reports on the unsandboxed world. Sessions then trade contradictory findings about the same machine.
+
+`$TMPDIR` settles it for free. Sandboxed commands get a per-session directory; unsandboxed ones inherit the shell's value:
+
+```bash
+echo $TMPDIR
+# /tmp/claude-501            -> sandboxed
+# /var/folders/…/T/          -> this invocation escaped the sandbox
+```
+
+An A/B on the same machine, binding a Unix socket in each case:
+
+| Invocation | `$TMPDIR` | `bind()` |
+|---|---|---|
+| socket probe alone | `/tmp/claude-501` | denied |
+| plus `git -C <path> fetch origin` | `/tmp/claude-501` | denied |
+| plus `git fetch origin` | `/var/folders/…/T/` | **succeeded** |
+
+The middle row is the same command with `-C <path>` inserted, which no longer matches the `git fetch *` exclusion. One flag decides whether the entire line runs sandboxed. Probe one command at a time, and rerun `echo $TMPDIR` in the same invocation whenever a result surprises you.
+
+A session that has been open since before a settings change will also disagree with a fresh one, since the profile is compiled at startup. Restart before diagnosing.
+
+### Commands that cannot work sandboxed at all
+
+Three failures have no configuration fix, so recognise them rather than tuning against them.
+
+**setuid binaries fail to exec.** `ps`, `top`, `su` and `login` all carry mode `04000` and report `operation not permitted`; `lsof` and `whoami` do not carry it and run fine. For the usual "is my dev server up" question, `lsof -nP -iTCP -sTCP:LISTEN` returns the command and PID and is a direct substitute for `ps aux | grep`.
+
+**Unix domain sockets cannot be bound.** `bind()` then `listen()` on an `AF_UNIX` path is denied in every writable directory, including `$TMPDIR`, and `network.allowLocalBinding` covers TCP only. Tools that open an IPC server at startup, `tsx` among them, will not start. Bundling first sidesteps it: `esbuild file.ts --bundle --platform=node --format=esm --outfile=tmp/x.mjs && node tmp/x.mjs`.
+
+**Writes to `.idea/` and `.vscode/`** are denied inside `allowWrite`, as covered under [Default Behavior](#default-behavior).
+
+### Plan for a break-in week
+
+The sandbox does not fail on the paths you thought about. It fails on the ones your toolchain uses without telling you: a package manager's global install directory, a supply-chain scanner's cache, a language toolchain's registry. Those live outside your work roots by design, and none of them appear in a configuration you write from first principles.
+
+Expect roughly a week of real work before the configuration stabilizes, and treat each addition as evidence rather than anticipation. Widening a path because something actually broke keeps the boundary meaningful. Widening it because something might break produces an allowlist that permits everything and protects nothing.
+
+One configuration hardened over a week on a 200-repository setup ended at 13 write paths. Every one of them came from a specific failure. The order they appeared in is the useful part, because it is roughly the order anyone will hit them:
+
+| Broke | Path added | Why it was not obvious |
+|-------|-----------|------------------------|
+| First dependency fetch on a Rust project | `~/.cargo`, `~/.rustup` | `cargo build` writes to `target/` in-repo, so builds look fine until a new crate is fetched |
+| Versioned dotfiles repo | `~/.claude` | `.git/index.lock` fails with `Operation not permitted`, which reads like a filesystem or EDR problem |
+| `pnpm install` on any repo | `~/.nvm` | A supply-chain firewall installed as a global npm package caches inside its own install directory |
+| Any local dev server | `network.allowLocalBinding` | Off by default, and nothing in the error names the sandbox |
+| Document builds | `~/Library/Caches` | Quarto, Typst, and Playwright cache there |
+
+The last two are the ones worth pre-empting, because their symptoms point away from the sandbox rather than at it.
+
+### Local servers and proxies fail to bind
+
+**Symptom**: `listen EPERM: operation not permitted 127.0.0.1`, or a dev server that starts and is unreachable
+
+**Cause**: [`sandbox.network.allowLocalBinding`](../core/settings-reference.md#sandboxnetworkallowlocalbinding) defaults to `false`, so sandboxed commands cannot open a listening socket even on localhost.
+
+This reaches further than dev servers. Any tool that proxies its own traffic to inspect it hits the same wall, which includes supply-chain firewalls that wrap `npm` and `pnpm` installs. In that case the install fails with a message about the firewall rather than about binding, so the cause is two steps removed from the symptom.
+
+**Fix**:
+
+```json
+{
+  "sandbox": {
+    "network": { "allowLocalBinding": true }
+  }
+}
+```
+
+macOS only. Enable it if you run dev servers, test runners with a UI, or any tool that starts a local proxy.
+
+### Global npm tooling fails with EPERM
+
+**Symptom**: `EPERM: operation not permitted` on a path under `~/.nvm`, `~/.npm`, or a global `node_modules`
+
+**Cause**: globally installed CLIs write inside their own install directory, which sits outside any project root. A node version manager puts that directory under `~/.nvm/versions/node/<version>/lib/node_modules`, so the path also changes on every node upgrade.
+
+**Fix**: add `~/.nvm` (or your manager's root) to `filesystem.allowWrite`.
+
+> This one is a real trade-off, not a free fix. That directory holds executables on your `$PATH`, and write access to a `$PATH` directory is a documented escalation route: a sandboxed command can leave a binary there that a later command runs outside the sandbox. The alternative is a broken global toolchain. Make it a decision rather than discovering it later.
+
+### Read the last error, not the first
+
+A denied credential file produces a warning on every subsequent command, and that warning survives the actual fix. `credentials.files` blocking `~/.npmrc` makes every `pnpm` invocation open with an `EPERM` line, including the ones that succeed: package managers fall back to the default registry rather than aborting. The line is loud, appears first, and names a real permission denial, so it collects the blame for whatever failed further down.
+
+The failure was three steps away in one measured case: a supply-chain firewall installed as a global npm package could not write its cache under `~/.nvm`, then could not bind its local proxy, and the install stopped after the first workspace. Three sessions independently blamed `~/.npmrc`, which was still printing its warning after both real causes were fixed and the install completed.
+
+When a sandboxed command fails, capture stderr on its own and read the **last** error rather than the first:
+
+```bash
+pnpm install > /tmp/out 2> /tmp/err; echo "exit=$?"; tail -5 /tmp/err
+```
+
+A denied read is usually survivable, since the tool falls back. A denied write or a denied bind is not, since there is nothing to fall back to. The fatal one is almost always the later line.
 
 ### Sandbox not active
 
@@ -739,12 +948,12 @@ which bubblewrap socat
 
 **Cause**: Docker incompatible with sandbox, falls back to regular flow
 
-**Solution**: Add to `excludedCommands`:
+**Solution**: Add to `excludedCommands`, using the glob form (`"docker"` alone never matches):
 
 ```json
 {
   "sandbox": {
-    "excludedCommands": ["docker"]
+    "excludedCommands": ["docker *"]
   }
 }
 ```

@@ -5,7 +5,7 @@ author: "Florian BRUNIAUX"
 date: 2026-07-02
 date-format: "MMMM YYYY"
 version: "3.41.1"
-wp-version: "1.5.0"
+wp-version: "1.5.1"
 series: "Claude Code Ultimate Guide"
 format:
   whitepaper-typst:
@@ -730,7 +730,7 @@ For agents in production, go beyond the one-shot checklist:
 - [ ] Compare 2 configurations via A/B testing
 - [ ] Monthly review of collected metrics
 
-> See `guide/agent-evaluation.md` for full patterns + `examples/agents/analytics-with-eval/` template.
+> See `guide/roles/agent-evaluation.md` for full patterns + `examples/agents/analytics-with-eval/` template.
 
 > 📖 **Go further:** [§4 Agents](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ultimate-guide.md#4-agents) : creation, advanced patterns, evaluation | [11 agent templates](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/tree/main/examples/agents/)
 
@@ -935,7 +935,7 @@ Claude Code ships with a set of built-in commands that cover session management,
 | `/compact` | Compress context (useful at >70% usage) |
 | `/status` | Show session info (model, cost, context %) |
 | `/plan` | Enter Plan Mode (read-only, safe exploration) |
-| `/execute` | Exit Plan Mode (enable modifications) |
+| Approve the plan | Exit Plan Mode (`Shift+Tab` to leave without approving) |
 | `/rewind` | Undo recent changes |
 | `/resume` | Resume a previous session |
 | `/model` | Switch model mid-session |

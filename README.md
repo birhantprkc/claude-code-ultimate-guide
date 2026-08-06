@@ -8,7 +8,7 @@
 <!-- Stats -->
 <p align="center">
   <a href="https://github.com/FlorianBruniaux/claude-code-ultimate-guide/stargazers"><img src="https://img.shields.io/github/stars/FlorianBruniaux/claude-code-ultimate-guide?style=for-the-badge" alt="Stars"/></a>
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-juil._9,_2026_·_v3.41.1-brightgreen?style=for-the-badge" alt="Last Update"/></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Jul_29,_2026_·_v3.41.1-brightgreen?style=for-the-badge" alt="Last Update"/></a>
   <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-473_questions-orange?style=for-the-badge" alt="Quiz"/></a>
   <a href="./examples/"><img src="https://img.shields.io/badge/Templates-275-green?style=for-the-badge" alt="Templates"/></a>
 </p>
@@ -96,7 +96,7 @@ Both guides serve different needs. Choose based on your priority.
 | **Security hardening** | Only threat database (28 CVEs) | Basic patterns only |
 | **Test understanding** | 473-question quiz | Not available |
 | **Methodologies** (TDD/SDD/BDD) | Full workflow guides | Not covered |
-| **Copy-paste ready** templates | 275 templates | 200+ templates |
+| **Copy-paste ready** templates | 268 templates | 200+ templates |
 
 ### Ecosystem Positioning
 
@@ -185,11 +185,11 @@ graph LR
 
     root --> guide[📖 guide/<br/>24K+ lines]
     root --> learning[🎓 learning-path/<br/>7 modules]
-    root --> examples[📋 examples/<br/>275 templates]
+    root --> examples[📋 examples/<br/>268 templates]
     root --> quiz[🧠 quiz/<br/>473 questions]
     root --> tools[🔧 tools/<br/>utils]
     root --> machine[🤖 machine-readable/<br/>AI index]
-    root --> docs[📚 docs/<br/>151 evaluations]
+    root --> docs[📚 docs/<br/>167 evaluations]
 
     style root fill:#d35400,stroke:#e67e22,stroke-width:3px,color:#fff
     style guide fill:#2980b9,stroke:#3498db,stroke-width:2px,color:#fff
@@ -223,7 +223,7 @@ graph LR
 │  ├─ agents/             23 custom AI personas
 │  ├─ commands/           redirect stubs (migrated to skills/ in CC 2.1.3)
 │  ├─ hooks/              37 hooks (bash + PowerShell)
-│  ├─ skills/             64 skills (9 on SkillHub)
+│  ├─ skills/             66 skills (9 on SkillHub)
 │  └─ scripts/            Utility scripts (audit, search)
 │
 ├─ 🧠 quiz/               473 Questions
@@ -233,14 +233,17 @@ graph LR
 │
 ├─ 🔧 tools/              Interactive Utilities
 │  ├─ onboarding-prompt   Personalized guided tour
-│  └─ audit-prompt        Setup audit & recommendations
+│  ├─ audit-prompt        Setup audit & recommendations
+│  ├─ permissions-audit   Do your permission rules still form a boundary?
+│  ├─ context-audit       Context architecture measurement
+│  └─ spec-completeness   Is this project safe to delegate to an agent?
 │
 ├─ 🤖 machine-readable/   AI-Optimized Index
-│  ├─ reference.yaml      Structured index (~2K tokens) — powers landing site CMD+K search
+│  ├─ reference.yaml      Structured index (~43K tokens), powers landing site CMD+K search
 │  ├─ claude-code-releases.yaml  Structured releases changelog
 │  └─ llms.txt            Standard LLM context file
 │
-└─ 📚 docs/               151 Resource Evaluations
+└─ 📚 docs/               167 Resource Evaluations
    └─ resource-evaluations/  5-point scoring, source attribution
 ```
 
@@ -258,8 +261,8 @@ graph LR
 - [Tools Reference](./guide/core/tools-reference.md): all 40 built-in tools, permission rule formats, per-tool behaviors (timeouts, file-read limits, lossy WebFetch), and how-to for Monitor, Workflow, agent teams, Cron, Tasks API
 - [Architecture](./guide/core/architecture.md) — Internal mechanics (context flow, tool orchestration, memory management)
 - [Trade-offs](./guide/ultimate-guide.md#when-to-use-what) — Decision frameworks for agents vs skills vs commands
-- [Configuration Decision Guide](./guide/ultimate-guide.md#27-configuration-decision-guide) — Unified "which mechanism for what?" map across all 7 config layers
-- [Pitfalls](./guide/ultimate-guide.md#common-mistakes) — Common failure modes + prevention strategies
+- [Memory Loading Comparison](./guide/ultimate-guide.md#memory-loading-comparison): unified "which mechanism for what?" map across all 7 config layers
+- [Pitfalls](./guide/ultimate-guide.md#18-eight-beginner-mistakes-and-how-to-avoid-them) — Common failure modes + prevention strategies
 
 **What this means for you**: Troubleshoot issues independently, optimize for your specific use case, know when to deviate from patterns.
 
@@ -332,10 +335,10 @@ graph LR
 **Outcome**: Maintain code quality while working with AI.
 
 Complete guides with rationale and examples:
-- [TDD](./guide/core/methodologies.md#1-tdd-test-driven-development-with-claude) — Test-Driven Development (Red-Green-Refactor with AI)
-- [SDD](./guide/core/methodologies.md#2-sdd-specification-driven-development) — Specification-Driven Development (Design before code)
-- [BDD](./guide/core/methodologies.md#3-bdd-behavior-driven-development) — Behavior-Driven Development (User stories → tests)
-- [GSD](./guide/core/methodologies.md#gsd-get-shit-done) — Get Shit Done (Pragmatic delivery)
+- [TDD](./guide/core/methodologies.md#tier-5-implementation) — Test-Driven Development (Red-Green-Refactor with AI)
+- [SDD](./guide/core/methodologies.md#tier-2-specification--architecture) — Specification-Driven Development (Design before code)
+- [BDD](./guide/core/methodologies.md#tier-3-behavior--acceptance) — Behavior-Driven Development (User stories → tests)
+- [GSD](./guide/core/methodologies.md#tier-1-strategic-orchestration) — Get Shit Done (Pragmatic delivery)
 
 **What this means for you**: Choose the right workflow for your team culture, integrate AI into existing processes, avoid technical debt from AI over-reliance.
 
@@ -356,7 +359,7 @@ Educational templates with explanations:
 
 ---
 
-### 🔍 151 Resource Evaluations
+### 🔍 167 Resource Evaluations
 
 **Outcome**: Trust our recommendations are evidence-based.
 
@@ -407,7 +410,7 @@ Systematic assessment of external resources (5-point scoring):
 4. [MCP Servers](./guide/ultimate-guide.md#8-mcp-servers) — Extended capabilities
 5. [Trinity Pattern](./guide/ultimate-guide.md#91-the-trinity) — Advanced workflows
 6. [Observability](./guide/ops/observability.md) — Monitor costs & sessions
-7. [Agent Teams](./guide/workflows/agent-teams.md) — Multi-agent coordination (Opus 4.7+ experimental)
+7. [Agent Teams](./guide/workflows/agent-teams.md): multi-agent coordination (Opus 4.6+ compatible)
 8. [Examples](./examples/) — Production templates
 
 </details>
@@ -426,15 +429,15 @@ Systematic assessment of external resources (5-point scoring):
 
 **DevOps / SRE** (5 steps):
 1. [DevOps & SRE Guide](./guide/ops/devops-sre.md) — FIRE framework
-2. [K8s Troubleshooting](./guide/ops/devops-sre.md#kubernetes-troubleshooting) — Symptom-based prompts
+2. [K8s Troubleshooting](./guide/ops/devops-sre.md#kubernetes) — Symptom-based prompts
 3. [Incident Response](./guide/ops/devops-sre.md#pattern-incident-response) — Workflows
 4. [IaC Patterns](./guide/ops/devops-sre.md#pattern-infrastructure-as-code) — Terraform, Ansible
 5. [Guardrails](./guide/ops/devops-sre.md#guardrails--adoption) — Security boundaries
 
 **Product Designer** (5 steps):
-1. [Working with Images](./guide/ultimate-guide.md#24-working-with-images) — Image analysis
-2. [Wireframing Tools](./guide/ultimate-guide.md#wireframing-tools) — ASCII/Excalidraw
-3. [Figma MCP](./guide/ultimate-guide.md#figma-mcp) — Design file access
+1. [Working with Images](./guide/ultimate-guide.md#working-with-images-and-screenshots) — Image analysis
+2. [Wireframing Tools](./guide/ultimate-guide.md#wireframing-tools-for-ai-development) — ASCII/Excalidraw
+3. [Figma MCP](./guide/ultimate-guide.md#figma-mcp-integration) — Design file access
 4. [Design-to-Code Workflow](./guide/workflows/design-to-code.md) — Figma → Claude
 5. [Cheat Sheet](./guide/cheatsheet.md) — Print this
 
@@ -625,7 +628,7 @@ Same agentic capabilities as Claude Code, but through a visual interface with no
 
 ### Claude Code Plugins (Marketplace)
 
-All 275 templates from this guide packaged as installable Claude Code plugins — hooks auto-wired, no manual config:
+All 268 templates from this guide packaged as installable Claude Code plugins, hooks auto-wired, no manual config:
 
 ```bash
 # Add the marketplace
@@ -642,7 +645,7 @@ claude plugin install ai-methodology       # Scaffolding, 6-stage talk pipeline,
 claude plugin install session-summary      # Session analytics dashboard (15 sections)
 ```
 
-> **[FlorianBruniaux/claude-code-plugins](https://github.com/FlorianBruniaux/claude-code-plugins)** — 8 plugins, 275 templates, one marketplace
+> **[FlorianBruniaux/claude-code-plugins](https://github.com/FlorianBruniaux/claude-code-plugins)**: 8 plugins, 268 templates, one marketplace
 
 ### Complementary Resources
 
@@ -735,7 +738,7 @@ claude plugin install session-summary      # Session analytics dashboard (15 sec
 4. **Testing**: Isolated Docker sandbox first, monitor tool calls
 5. **Monitoring**: Session logs, error tracking, regular re-audits
 
-**[Full MCP Security Workflow →](./guide/security/security-hardening.md#vetting-mcp-servers)**
+**[Full MCP Security Workflow →](./guide/security/security-hardening.md#11-mcp-vetting-workflow)**
 
 ---
 
@@ -800,11 +803,11 @@ Use this guide critically. Experiment. Share what works for you.
 | **[Credits](./guide/core/credits.md)** | Open-source inspirations and pattern attributions | 2 min |
 
 <details>
-<summary><strong>Examples Library</strong> (275 templates)</summary>
+<summary><strong>Examples Library</strong> (268 templates)</summary>
 
 **Agents** (23): [code-reviewer](./examples/agents/code-reviewer.md), [test-writer](./examples/agents/test-writer.md), [security-auditor](./examples/agents/security-auditor.md), [refactoring-specialist](./examples/agents/refactoring-specialist.md), [output-evaluator](./examples/agents/output-evaluator.md), [devops-sre](./examples/agents/devops-sre.md) ⭐
 
-**Skills** (74): [/pr](./examples/skills/pr/SKILL.md), [/commit](./examples/skills/commit/SKILL.md), [/release-notes](./examples/skills/release-notes/SKILL.md), [/diagnose](./examples/skills/diagnose/SKILL.md), [/security](./examples/skills/security/SKILL.md), [/security-check](./examples/skills/security-check/SKILL.md) **, [/security-audit](./examples/skills/security-audit/SKILL.md) **, [/update-threat-db](./examples/skills/update-threat-db/SKILL.md) **, [/refactor](./examples/skills/refactor/SKILL.md), [/explain](./examples/skills/explain/SKILL.md), [/optimize](./examples/skills/optimize/SKILL.md), [/ship](./examples/skills/ship/SKILL.md)...
+**Skills** (77): [/pr](./examples/skills/pr/SKILL.md), [/commit](./examples/skills/commit/SKILL.md), [/release-notes](./examples/skills/release-notes/SKILL.md), [/diagnose](./examples/skills/diagnose/SKILL.md), [/sandbox-unblock](./examples/skills/sandbox-unblock/SKILL.md), [/security](./examples/skills/security/SKILL.md), [/security-check](./examples/skills/security-check/SKILL.md) **, [/security-audit](./examples/skills/security-audit/SKILL.md) **, [/update-threat-db](./examples/skills/update-threat-db/SKILL.md) **, [/refactor](./examples/skills/refactor/SKILL.md), [/explain](./examples/skills/explain/SKILL.md), [/optimize](./examples/skills/optimize/SKILL.md), [/ship](./examples/skills/ship/SKILL.md)...
 
 **Security Hooks** (38): [dangerous-actions-blocker](./examples/hooks/bash/dangerous-actions-blocker.sh), [prompt-injection-detector](./examples/hooks/bash/prompt-injection-detector.sh), [unicode-injection-scanner](./examples/hooks/bash/unicode-injection-scanner.sh), [output-secrets-scanner](./examples/hooks/bash/output-secrets-scanner.sh)...
 
@@ -838,7 +841,7 @@ cd quiz && npm install && npm start
 </details>
 
 <details>
-<summary><strong>Resource Evaluations</strong> (151 assessments)</summary>
+<summary><strong>Resource Evaluations</strong> (167 assessments)</summary>
 
 Systematic evaluation of external resources (tools, methodologies, articles) before integration into the guide.
 
@@ -944,7 +947,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ---
 
-*Version 3.41.1 | Updated daily · juil. 9, 2026 | Crafted with Claude*
+*Version 3.41.1 | Updated daily · Jul 29, 2026 | Crafted with Claude*
 
 <!-- SEO Keywords -->
 <!-- claude code, claude code tutorial, anthropic cli, ai coding assistant, claude code mcp,

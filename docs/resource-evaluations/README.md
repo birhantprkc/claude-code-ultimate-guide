@@ -78,6 +78,7 @@ Les documents de travail bruts (prompts Perplexity, audits clients) restent dans
 | **MDMA** (MobileReality/mdma) | 3/5 | **3/5** | ✅ Integrated: ai-ecosystem.md Section 7.1 (generative UI) | [mdma-evaluation.md](./mdma-evaluation.md) |
 | **BMAD-METHOD** (bmad-code-org) | 4/5 | **4/5** | ✅ Integrated: spec-first.md (multi-role planning) | [bmad-method-spec-driven-agents.md](./bmad-method-spec-driven-agents.md) |
 | **OpenHands** (All Hands AI) | 4/5 | **4/5** | ✅ Integrated: agentic-tools.md §2.4 | [openhands-autonomous-agent.md](./openhands-autonomous-agent.md) |
+| **Kajan Siva** (Mini Claude Code build tutorial) | 2/5 | **2/5** | ❌ Do not integrate (redundant with architecture.md, French-only content; Thorsten Ball added instead in learning-with-ai.md) | [kajan-siva-mini-claude-code.md](./kajan-siva-mini-claude-code.md) |
 | **Spec-Kitty** (Priivacy-ai) | 3/5 | **3/5** | ✅ Mention: spec-first.md (worktree isolation) | [spec-kitty-worktree-isolation.md](./spec-kitty-worktree-isolation.md) |
 | **Agent Orchestrator** (AgentWrapper, ex-ComposioHQ) | 3/5 | **3/5** | ✅ Mention: third-party-tools.md (OSS equivalent to Conductor) | [agent-orchestrator-composio.md](./agent-orchestrator-composio.md) |
 | **Liza** (framework MAS, liza-mas/liza) | 3/5 | **3/5** | ✅ Mention: spec-first.md (OSS governance reference architecture) | [liza-mas-framework.md](./liza-mas-framework.md) |
@@ -85,6 +86,10 @@ Les documents de travail bruts (prompts Perplexity, audits clients) restent dans
 | **Fusion** (Runfusion/Fusion, MIT) | 4/5 | **4/5** | ✅ Case study only, not a recommended tool (double-checkout anti-cheat pattern + agentic velocity without architecture ; bus factor 1, 94% of commits by one person) | [fusion-multi-agent-orchestrator.md](./fusion-multi-agent-orchestrator.md) |
 | **ORF** (Open Reasoning Format, Guillaume Laforge) | 3/5 | **3/5** | ✅ Intégré (memory-systems.md §3.7, file-based playbook track + citation ReasoningBank) | [orf-open-reasoning-format.md](./orf-open-reasoning-format.md) |
 | **DiffMem** (Growth Kinetics, git-native memory) | 3/5 | **3/5** | ✅ Case study only (memory-systems.md §3.7, LLM-agentic git-shell retrieval + teaching point "match retrieval to query shape" ; bus factor 1, no LICENSE, retrieval untested) | [diffmem-git-native-memory.md](./diffmem-git-native-memory.md) |
+| **Executor** (UsefulSoftwareCo/executor, integration governance layer) | 3/5 | **3/5** | ✅ Cross-reference only: enterprise-governance.md §3.5 (productized form of the manual MCP registry pattern); watch-list, bus factor 1, cadence down 76% since April | [executor-integration-governance-layer.md](./executor-integration-governance-layer.md) |
+| **agentOS** (Rivet, in-process agent VM) | 4/5 | **4/5** | ✅ Integrated: sandbox-isolation.md §5 (in-process counter-example to the four cloud sandbox vendors); watch-list, bus factor 1, vendor-only benchmarks | [agentos-in-process-agent-vm.md](./agentos-in-process-agent-vm.md) |
+| **Rippletide** ("The Harness is the Agent") | 2/5 | **2/5** | ❌ Reject, no new content vs. agent-harness.md, third Rippletide submission | [084-rippletide-harness-is-the-agent.md](./084-rippletide-harness-is-the-agent.md) |
+| **just-bash** (vercel-labs, simulated bash for agents) | 4/5 | **4/5** | ✅ Integrated: sandbox-isolation.md §5 ("simulate, don't isolate" counterpart to agentOS); bus factor 1 (84.7%), no LICENSE file despite Apache-2.0 claim | [just-bash-simulated-shell.md](./just-bash-simulated-shell.md) |
 
 ## Watch List
 
@@ -92,4 +97,4 @@ Ressources surveillées mais pas encore intégrées : [watch-list.md](./watch-li
 
 ---
 
-**Dernier update**: 2026-07-25 (167 fichiers d'évaluation sur disque, 48 indexés ci-dessus ; l'écart est un reliquat connu qui attend une passe d'audit dédiée)
+**Last updated**: 2026-08-04 (171 evaluation files on disk, 52 indexed above; the gap is a known backlog awaiting a dedicated audit pass)
