@@ -3,7 +3,7 @@
 # Source: guide/ultimate-guide.md
 # Purpose: Condensed index for LLMs to quickly answer user questions about Claude Code
 
-version: "3.41.1"
+version: "3.41.3"
 updated: "2026-07-28"
 
 # ════════════════════════════════════════════════════════════════
@@ -1305,6 +1305,21 @@ deep_dive:
     - "https://resources.anthropic.com/hubfs/2026%20Agentic%20Coding%20Trends%20Report.pdf"
     - "https://dev.to/thegdsks/claude-opus-46-for-developers-agent-teams-1m-context-and-what-actually-matters-4h8c"
     - "https://www.linkedin.com/posts/thepaulrayner_this-is-wild-i-just-upgraded-claude-code-activity-7425635159678414850-MNyv"
+  # Section 9.27 - Cross-Session Messaging (ListAgents / SendMessage, v2.1.224+)
+  cross_session_messaging: "guide/workflows/cross-session-messaging.md"
+  cross_session_messaging_overview: "guide/ultimate-guide.md#927-cross-session-messaging-peer-coordination"
+  cross_session_messaging_discovery: "guide/workflows/cross-session-messaging.md#2-discovery-listagents"
+  cross_session_messaging_delivery: "guide/workflows/cross-session-messaging.md#3-delivery-sendmessage"
+  cross_session_messaging_cross_machine: "guide/workflows/cross-session-messaging.md#4-same-machine-vs-cross-machine-delivery"
+  cross_session_messaging_inbox_socket: "guide/workflows/cross-session-messaging.md#5-the-sessions-inbox-socket"
+  cross_session_messaging_security: "guide/workflows/cross-session-messaging.md#6-security-model"
+  cross_session_messaging_limitations: "guide/workflows/cross-session-messaging.md#7-limitations"
+  cross_session_messaging_availability: "guide/workflows/cross-session-messaging.md#8-availability"
+  cross_session_messaging_version_timeline: "guide/workflows/cross-session-messaging.md#10-version-timeline"
+  cross_session_messaging_diagram: "guide/diagrams/07-multi-agent-patterns.md#cross-session-messaging-discovery--delivery"
+  cross_session_messaging_security_hardening: "guide/security/security-hardening.md#cross-session-messaging-threat-model"
+  cross_session_messaging_tools_reference: "guide/core/tools-reference.md#cross-session-messaging-listagents--sendmessage"
+  cross_session_messaging_source: "https://code.claude.com/docs/en/cross-session-messaging"
   # Anthropic 2026 Trends (diffused across sections, not standalone)
   agentic_trends_2026_report: "https://resources.anthropic.com/hubfs/2026%20Agentic%20Coding%20Trends%20Report.pdf"
   agentic_trends_2026_evaluation: "docs/resource-evaluations/anthropic-2026-agentic-coding-trends.md"
@@ -2426,7 +2441,7 @@ ecosystem:
       - "Cross-links modified → Update all 4 repos"
     history:
       - date: "2026-01-20"
-        event: "Code Landing sync v3.41.1, 66 templates, cross-links"
+        event: "Code Landing sync v3.41.3, 66 templates, cross-links"
         commit: "5b5ce62"
       - date: "2026-01-20"
         event: "Cowork Landing fix (paths, README, UI badges)"
@@ -2438,7 +2453,7 @@ ecosystem:
 onboarding_matrix_meta:
   version: "2.1.0"
   last_updated: "2026-03-09"
-  aligned_with_guide: "3.41.1"
+  aligned_with_guide: "3.41.3"
   changelog:
     - version: "2.1.0"
       date: "2026-03-09"
@@ -2469,7 +2484,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, commands]
       time_budget: "5 min"
       topics_max: 3
-      note: "SECURITY FIRST - sandbox before commands (v3.41.1 critical fix)"
+      note: "SECURITY FIRST - sandbox before commands (v3.41.3 critical fix)"
 
     beginner_15min:
       core: [rules, sandbox_native_guide, workflow, essential_commands]
@@ -2558,7 +2573,7 @@ onboarding_matrix:
         - default: agent_validation_checklist
       time_budget: "60 min"
       topics_max: 6
-      note: "Dual-instance pattern for quality workflows (v3.41.1)"
+      note: "Dual-instance pattern for quality workflows (v3.41.3)"
 
   learn_security:
     intermediate_30min:
@@ -2569,7 +2584,7 @@ onboarding_matrix:
         - default: permission_modes
       time_budget: "30 min"
       topics_max: 4
-      note: "NEW goal (v3.41.1) - Security-focused learning path"
+      note: "NEW goal (v3.41.3) - Security-focused learning path"
 
     power_60min:
       core: [sandbox_native_guide, mcp_secrets_management, security_hardening]
@@ -2594,7 +2609,7 @@ onboarding_matrix:
       core: [rules, sandbox_native_guide, workflow, essential_commands, context_management, plan_mode]
       time_budget: "60 min"
       topics_max: 6
-      note: "Security foundation + core workflow (v3.41.1 sandbox added)"
+      note: "Security foundation + core workflow (v3.41.3 sandbox added)"
 
     intermediate_120min:
       core: [plan_mode, agents, skills, config_hierarchy, git_mcp_guide, hooks, mcp_servers]
