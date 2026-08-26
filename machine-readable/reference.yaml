@@ -3,7 +3,7 @@
 # Source: guide/ultimate-guide.md
 # Purpose: Condensed index for LLMs to quickly answer user questions about Claude Code
 
-version: "3.41.3"
+version: "3.42.0"
 updated: "2026-07-28"
 
 # ════════════════════════════════════════════════════════════════
@@ -1064,6 +1064,11 @@ deep_dive:
   liza_framework_governance: "Go supervisors enforce state/merge/TDD gates + adversarial doer/reviewer pairs + YAML blackboard audit trail + circuit breaker (explicit stop-the-line) + 55+ failure-mode behavioral contract"
   liza_framework_evaluation: "docs/resource-evaluations/liza-mas-framework.md"
   liza_satellite_tools_rejected: "docs/resource-evaluations/liza-mas-token-saving-cli-tools.md (scip-search/mdtoc/functional-clusters/stacklit-cli rejected 2026-06-10; framework itself is a separate, higher-scored object)"
+  # Anthropic AI-native SDLC playbook: intent.md upstream document + closed Maintain-to-Plan loop (added 2026-08-26)
+  ai_native_sdlc_playbook_source: "https://claude.com/blog/the-ai-native-sdlc-playbook"
+  ai_native_sdlc_playbook_evaluation: "docs/resource-evaluations/2026-08-26-anthropic-ai-native-sdlc-playbook.md"
+  intent_md_pattern: "guide/workflows/spec-first.md#with-intentmd-upstream-problem-statement"  # intent.md -> spec.md -> plan.md, 3-document chain with separate human gates
+  intent_md_diagram: "guide/diagrams/06-development-workflows.md#spec-first-development-pipeline"  # updated with intent.md upstream node + Maintain-to-Plan closed loop
   # Agentic Software Factories orientation page (added 2026-07-15)
   agentic_software_factories_hub: "guide/workflows/agentic-software-factories.md"  # single entry point: spectrum, decision tree, file map, governance checklist, velocity-trap case study
   agentic_software_factories_spectrum: "guide/workflows/agentic-software-factories.md#1-the-spectrum-six-levels-six-costs"  # 6 levels: single session -> /batch -> Agent Teams -> dynamic-workflows -> plan-pipeline -> third-party orchestrator -> closed factory
@@ -1488,6 +1493,21 @@ deep_dive:
   team_knowledge_decision_table: "guide/ecosystem/team-knowledge-base.md#decision-table"
   team_knowledge_problem: "Company KB accessible from both Claude Code (CLI) and Cowork (desktop, no API/no code exec)"
   team_knowledge_threshold: "Static <100 docs: direct read | 100-1000: judgment call | >1000: RAG required"
+  # Local vs Cloud LLM Inference Economics (guide/ecosystem/local-vs-cloud-inference.md) - Added 2026-08-25
+  local_vs_cloud_guide: "guide/ecosystem/local-vs-cloud-inference.md"
+  local_vs_cloud_llmfit: "guide/ecosystem/local-vs-cloud-inference.md#sizing-local-hardware-with-llmfit"  # llmfit CLI, --memory vs --ram, backend-lock caveat
+  local_vs_cloud_hardware_configs: "guide/ecosystem/local-vs-cloud-inference.md#thirteen-comparable-hardware-configurations"  # 13 complete systems, sorted by price, incl. Mac mini M6/M5 Pro and RTX 5060 Ti 16GB entry tier
+  local_vs_cloud_named_models: "guide/ecosystem/local-vs-cloud-inference.md#what-actually-fits-named-models"  # Llama/Qwen/Mixtral/DeepSeek fit by memory budget
+  local_vs_cloud_which_machine: "guide/ecosystem/local-vs-cloud-inference.md#which-local-machine-for-which-usage"  # usage-to-hardware table + Mermaid decision tree
+  local_vs_cloud_gpu_rental: "guide/ecosystem/local-vs-cloud-inference.md#cloud-gpu-rental-pricing"  # OVH, AWS, Lambda, RunPod hourly rates
+  local_vs_cloud_tco: "guide/ecosystem/local-vs-cloud-inference.md#one-year-cost-projections"  # 4h/8h/24-7 usage vs local purchase price
+  local_vs_cloud_power: "guide/ecosystem/local-vs-cloud-inference.md#power-consumption-watts-watt-hours-joules-per-token"  # TDP specs, measured wattage, ML.Energy J/token, Neuralwatt Wh/req, TokenPowerBench
+  local_vs_cloud_model_efficiency: "guide/ecosystem/local-vs-cloud-inference.md#energy-efficiency-by-model-architecture"  # Llama 4 CO2e disclosure, MoE active-param energy, FP8 batch-size-dependent gains
+  local_vs_cloud_throughput: "guide/ecosystem/local-vs-cloud-inference.md#cloud-api-throughput-claude-vs-gpt-56"  # Claude Opus 5/Sonnet 5 vs GPT-5.6 Sol/Terra/Luna
+  local_vs_cloud_not_comparable: "guide/ecosystem/local-vs-cloud-inference.md#why-cloud-and-local-tokenssec-are-not-comparable"  # queueing, TTFT reasoning tokens, model size mismatch
+  local_vs_cloud_diagram: "guide/ecosystem/local-vs-cloud-inference.md#decision-diagram"  # Mermaid flowchart: license vs local vs cloud rental
+  local_vs_cloud_decision: "guide/ecosystem/local-vs-cloud-inference.md#decision-framework"
+  local_vs_cloud_cli_bridge: "guide/ecosystem/local-vs-cloud-inference.md#switching-providers-at-the-cli-level"  # cc-copilot-bridge, ccd/ccc/cco backend routing
   # Experimental Features
   teammatetool: "guide/ultimate-guide.md#teammatetool-experimental" # was line 5071
   teammatetool_status: "Experimental, progressive rollout, feature-flagged"
@@ -2953,6 +2973,21 @@ section_maps:
     - "9-llmops--observability"
     - "10-tool-selection-by-use-case"
     - "11-research-landscape"
+  "guide/ecosystem/local-vs-cloud-inference.md":
+    - "data-snapshot-date"
+    - "sizing-local-hardware-with-llmfit"
+    - "thirteen-comparable-hardware-configurations"
+    - "what-actually-fits-named-models"
+    - "which-local-machine-for-which-usage"
+    - "cloud-gpu-rental-pricing"
+    - "one-year-cost-projections"
+    - "power-consumption-watts-watt-hours-joules-per-token"
+    - "energy-efficiency-by-model-architecture"
+    - "cloud-api-throughput-claude-vs-gpt-56"
+    - "why-cloud-and-local-tokenssec-are-not-comparable"
+    - "decision-diagram"
+    - "decision-framework"
+    - "switching-providers-at-the-cli-level"
   "guide/ecosystem/mcp-servers-ecosystem.md":
     - "official-vs-community-servers"
     - "evaluation-framework"
@@ -3576,6 +3611,7 @@ section_maps:
     - "task-granularity-sizing-work-for-agents"
     - "claudemd-spec-templates"
     - "integration-with-tools"
+    - "with-intentmd-upstream-problem-statement"
     - "when-to-use"
     - "anti-patterns"
     - "modular-spec-design"
