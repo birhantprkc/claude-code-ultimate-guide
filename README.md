@@ -8,7 +8,7 @@
 <!-- Stats -->
 <p align="center">
   <a href="https://github.com/FlorianBruniaux/claude-code-ultimate-guide/stargazers"><img src="https://img.shields.io/github/stars/FlorianBruniaux/claude-code-ultimate-guide?style=for-the-badge" alt="Stars"/></a>
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Aug_26,_2026_·_v3.42.0-brightgreen?style=for-the-badge" alt="Last Update"/></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Aug_28,_2026_·_v3.42.0-brightgreen?style=for-the-badge" alt="Last Update"/></a>
   <a href="./quiz/"><img src="https://img.shields.io/badge/Quiz-473_questions-orange?style=for-the-badge" alt="Quiz"/></a>
   <a href="./examples/"><img src="https://img.shields.io/badge/Templates-271-green?style=for-the-badge" alt="Templates"/></a>
 </p>
@@ -258,8 +258,13 @@ graph LR
 **Outcome**: Know WebFetch's output is lossy, or that a sub-agent nests to depth 3 by default, before that assumption costs you a debugging session.
 
 **We teach how Claude Code works and why patterns matter**:
-- [Tools Reference](./guide/core/tools-reference.md): all 40 built-in tools, permission rule formats, per-tool behaviors (timeouts, file-read limits, lossy WebFetch), and how-to for Monitor, Workflow, agent teams, Cron, Tasks API
+- [Tools Reference](./guide/core/tools-reference.md): all 40 built-in tools, permission rule formats, per-tool behaviors (timeouts, file-read limits, lossy WebFetch), and how-to for Monitor, WebSocket event ingestion, Workflow, agent teams, Cron, Tasks API
+- [Safe event delegation](./guide/workflows/monitor-event-delegation.md): route verified GitHub events through Monitor to a read-only-first Codex workflow
 - [Architecture](./guide/core/architecture.md): Internal mechanics (context flow, tool orchestration, memory management)
+- [Agent Harness Engineering](./guide/core/agent-harness.md): understand the runtime loop, context, tools, permissions, recovery, evaluation, and outer-loop harness optimization
+- [Agent Harness Map](./guide/ecosystem/agent-harness-landscape.md): compare loop-owning runtimes with orchestrators, frameworks, control planes, support tools, and research meta-harnesses
+- [Agent Tools](./guide/ecosystem/agentic-tools.md): read deeper profiles of selected coding agents and orchestration products
+- [Harness terminology](./guide/core/glossary.md): distinguish runtime, repository, evaluation harness, and orchestrator
 - [Trade-offs](./guide/ultimate-guide.md#when-to-use-what): Decision frameworks for agents vs skills vs commands
 - [Memory Loading Comparison](./guide/ultimate-guide.md#memory-loading-comparison): unified "which mechanism for what?" map across all 7 config layers
 - [Pitfalls](./guide/ultimate-guide.md#18-eight-beginner-mistakes-and-how-to-avoid-them): Common failure modes + prevention strategies
@@ -796,6 +801,7 @@ Open an issue if a claim in this guide turns out wrong in your setup.
 | **[Production Safety](./guide/security/production-safety.md)** | Port stability, DB safety, infrastructure lock | 20 min |
 | **[DevOps & SRE](./guide/ops/devops-sre.md)** | FIRE framework, K8s troubleshooting, incident response | 30 min |
 | **[AI Ecosystem](./guide/ecosystem/ai-ecosystem.md)** | Complementary AI tools & integration patterns | 20 min |
+| **[AI Executive Agents](./guide/ecosystem/ai-executive-agents.md)** | Virtual C-suites and board simulators: OpenExecutive, open-source alternatives, routing table by role | 12 min |
 | **[AI Traceability](./guide/ops/ai-traceability.md)** | Code attribution & provenance tracking | 15 min |
 | **[Search Tools Cheatsheet](./guide/cheatsheet.md)** | Grep, Serena, ast-grep, grepai comparison | 5 min |
 | **[Learning with AI](./guide/roles/learning-with-ai.md)** | Use AI without becoming dependent | 15 min |
@@ -947,7 +953,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ---
 
-*Version 3.42.0 | Updated daily · Aug 26, 2026 | Crafted with Claude*
+*Version 3.42.0 | Updated daily · Aug 28, 2026 | Crafted with Claude*
 
 <!-- SEO Keywords -->
 <!-- claude code, claude code tutorial, anthropic cli, ai coding assistant, claude code mcp,

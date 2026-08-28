@@ -1,7 +1,7 @@
 ---
 title: "Agent Tools: Beyond Claude Code"
-description: "Comparative guide to terminal coding agents, autonomous coders, multi-agent frameworks, and agent orchestrators. Covers Hermes Agent, Codex CLI, Aider, Devin, SWE-agent, CrewAI, LangGraph, AutoGen, MetaGPT, Symphony, and Paperclip with a decision framework."
-tags: [agents, hermes, codex-cli, aider, devin, swe-agent, crewai, langgraph, autogen, metagpt, symphony, paperclip, opencode, gemini-cli, crush, comparison]
+description: "Comparative guide to terminal coding agents, autonomous coders, multi-agent frameworks, orchestrators, and adjacent harness optimizers, with evidence-aware selection guidance."
+tags: [agents, hermes, codex-cli, aider, deepseek-harness, devin, swe-agent, crewai, langgraph, autogen, metagpt, symphony, paperclip, opencode, gemini-cli, crush, comparison]
 ---
 
 # Agent Tools: Beyond Claude Code
@@ -12,7 +12,7 @@ Claude Code is one tool in a field that has expanded dramatically since 2024. Do
 
 **What it does not cover**: GUI-based AI coding IDEs (Cursor, Windsurf, Cline), which are covered in [AI Ecosystem §6](./ai-ecosystem.md#section-6). Multi-Claude orchestration tools (Gas Town, multiclaude, Conductor desktop app) are in [Third-Party Tools: Multi-Agent Orchestration](./third-party-tools.md#multi-agent-orchestration).
 
-For the full field across CLI, IDE, and cloud agents in one table, see [Agent Harness Comparison](./agent-harness-landscape.md).
+For the full field across CLI, IDE, and cloud agents, use the [Agent Harness Landscape](./agent-harness-landscape.md). For the loop, context, tools, permissions, recovery, observability, and automated harness optimization, read [Agent Harness Engineering](../core/agent-harness.md). The [glossary](../core/glossary.md) separates runtime harnesses from repository harnesses, evaluation harnesses, orchestrators, and meta-harnesses.
 
 ---
 
@@ -41,6 +41,8 @@ Agent orchestrator (manage a fleet)
 **Autonomous agents**: you assign a task and come back to a result. Best for well-specified, bounded tasks: fix this bug, implement this spec, review this PR. The quality of the task description determines the quality of the output more than the agent choice.
 
 **Multi-agent frameworks**: libraries for building custom agent systems. Not coding tools themselves. You use LangGraph to build an agent, not to write code.
+
+**Harness optimizers and meta-harnesses**: systems that modify a target harness and compare candidate versions. They are not another terminal coding-agent category. [ADAS](https://proceedings.iclr.cc/paper_files/paper/2025/hash/36b7acf6f6010652b3f2a433774a66fe-Abstract-Conference.html), [AFlow](https://arxiv.org/abs/2410.10762), [Meta-Harness](https://arxiv.org/abs/2603.28052), and [Agentic Harness Engineering](https://arxiv.org/abs/2604.25850) operate at this outer loop. Compare them through the [Landscape research layer](./agent-harness-landscape.md#harness-optimizers-and-meta-harnesses), not by placing them beside Claude Code or Codex in a runtime feature table.
 
 ---
 
@@ -443,6 +445,47 @@ crush
 ```
 
 License text and the two-year MIT conversion terms at [charmbracelet/crush LICENSE.md](https://github.com/charmbracelet/crush/blob/main/LICENSE.md).
+
+---
+
+### 1.8 DeepSeek Harness (dsh)
+
+DeepSeek's official agent runtime. It is technically ambitious, explicitly experimental, and should not be confused with a safe-by-default production sandbox.
+
+| Attribute | Details |
+|-----------|---------|
+| **GitHub** | [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) |
+| **Interface** | Local web UI and headless CLI |
+| **License** | MIT |
+| **Status** | Developer preview; compatibility-breaking changes are expected |
+| **Architecture** | Cordis plugin tree: models, tools, skills, sessions, sandbox, storage, approvals, and UI are composable plugins |
+
+#### What Is DeepSeek Harness?
+
+DeepSeek Harness, exposed as `dsh`, is a local-first runtime that composes a profile from plugins rather than shipping one fixed agent surface. Its official architecture documents profiles and bundles for the agent loop, model adapters, tools, MCP, skills, subagents, workflows, sandboxing, permissions, storage, and UI. That makes it an interesting reference for builders: the seams are visible instead of being hidden behind a single CLI command.
+
+Start from the official package rather than a similarly named community project:
+
+```bash
+npx @deepseek-ai/dsh web
+
+# Inspect the fully composed profile before trusting it
+npx @deepseek-ai/dsh --profile web --dump-config
+```
+
+The project documents Standard, PTC/Code Mode, Minimal, and Creation-oriented profiles. Its session event log can record messages, tool calls, and approval decisions for replay. That helps debugging, but it also raises a data-handling question: inspect telemetry and export settings before putting proprietary code or secrets through a local run.
+
+#### Security and Operational Limits
+
+The repository labels dsh a developer preview. Treat that as an operational constraint, not modest wording. A local-first agent can still read hostile repository content, call a powerful tool, and write to a workspace. Use an isolated VM or container for untrusted code, start with the least-privileged profile, and make consequential actions reviewable outside the model's own reasoning loop. Do not enable a `danger-full-access` preset on a primary machine.
+
+One external study, [arXiv:2608.16393](https://arxiv.org/abs/2608.16393), evaluated one DeepSeek Harness commit and configuration in 14,560 controlled indirect-prompt-injection tests. Its results are evidence about that tested configuration, not a universal security rating. The durable lesson is simpler: sandboxing alone does not prove that untrusted content cannot influence a tool-using agent. Keep provenance, independent authorization, and review gates on top of a sandbox.
+
+Official starting points: the [README](https://github.com/deepseek-ai/deepseek-harness), [architecture](https://github.com/deepseek-ai/deepseek-harness/blob/main/docs/architecture.md), [sandbox package](https://github.com/deepseek-ai/deepseek-harness/tree/main/packages/sandbox), and [permission presets](https://github.com/deepseek-ai/deepseek-harness/tree/main/packages/interaction/permission-presets). Snapshot checked 2026-08-27.
+
+#### When to Choose DeepSeek Harness
+
+Choose dsh to study or extend a plugin-first runtime, or to experiment in an isolated environment with its explicit composition model. Do not standardize on it for a production team merely because it is local or open source. Claude Code remains the better default in this guide for a stable, documented coding workflow; dsh is a fast-moving alternative worth evaluating behind clear security and maintenance gates.
 
 ---
 
@@ -957,6 +1000,7 @@ Every session lands on a searchable kanban board linked to the files it touched.
 | **Hermes Agent** | Yes (MIT) | 170K | 200+ providers | Interactive + cron + messaging | Python | Pay-per-LLM-call |
 | **Aider** | Yes | 45K | 50+ providers | Interactive | Python | Pay-per-LLM-call |
 | **Goose** | Yes | 46K | 15+ providers | Interactive + subagents | Rust | Pay-per-LLM-call |
+| **DeepSeek Harness** | Yes (MIT) | 200K | DeepSeek + multi-provider | Local web UI + headless | TypeScript | Free + per-LLM-call |
 | **Devin** | No | N/A | Proprietary | Fully autonomous | Proprietary | $20-$500/mo |
 | **SWE-agent** | Yes (MIT) | 19K | Any (Claude, GPT...) | Autonomous (issue → PR) | Python | Pay-per-LLM-call |
 | **CrewAI** | Yes (MIT) | 55K | 50+ providers | Framework (build your own) | Python | Framework is free |
@@ -966,7 +1010,7 @@ Every session lands on a searchable kanban board linked to the files it touched.
 | **Symphony** | Yes (Apache 2.0) | 26K | Codex (reference impl) | Orchestrator (issue → run) | Elixir | Free + per-agent LLM cost |
 | **Paperclip** | Yes (MIT) | 74K | Any (heartbeat protocol) | Orchestrator (goal → org) | TypeScript | Free + per-agent LLM cost |
 
-Star counts read July 15, 2026 via the GitHub API. Two rows carry a caveat the number hides: MetaGPT's 69K sits on a repo whose last release was April 2024, and Symphony's 26K sits on an explicit engineering preview. Stars measure reach, not maintenance.
+Star counts read July 15, 2026 via the GitHub API, except DeepSeek Harness, checked August 27, 2026 and rounded from 199,777. Three rows carry a caveat the number hides: DeepSeek Harness is a developer preview, MetaGPT's 69K sits on a repo whose last release was April 2024, and Symphony's 26K sits on an explicit engineering preview. Stars measure reach, not maintenance.
 
 ### Situation to Tool Guide
 
@@ -1019,5 +1063,7 @@ Interactive agents (Claude Code terminal, Hermes, Aider, Goose) give you real-ti
 - **Claude Code's own agent team patterns**: [workflows/agent-teams.md](../workflows/agent-teams.md)
 - **Event-driven autonomous patterns**: [workflows/event-driven-agents.md](../workflows/event-driven-agents.md)
 - **Programmatic billing (Hermes, Codex CLI, third-party harnesses)**: [Ultimate Guide: Billing Split](../ultimate-guide.md#the-interactiveprogrammatic-billing-split-effective-june-15-2026)
-- **Agent harness engineering (theoretical framework)**: [core/agent-harness.md](../core/agent-harness.md)
+- **Agent harness engineering** (architecture, controls, and Claude Code implementation): [core/agent-harness.md](../core/agent-harness.md)
+- **Agent harness landscape** (dated catalog, evidence, and test-drive protocol): [ecosystem/agent-harness-landscape.md](./agent-harness-landscape.md)
+- **Shared harness terminology**: [core/glossary.md](../core/glossary.md)
 - **Coding agents comparison matrix** (23 tools, 11 criteria): [coding-agents-matrix.dev](https://coding-agents-matrix.dev)

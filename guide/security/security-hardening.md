@@ -13,6 +13,8 @@ keywords:
 > **Confidence**: Tier 2, based on CVE disclosures, security research (2024-2026), and community validation
 >
 > **Scope**: Active threats (attacks, injection, CVE). For data retention and privacy, see [data-privacy.md](./data-privacy.md)
+>
+> **Further reading**: [the attack surface nobody audits](https://florian.bruniaux.com/guides/claude-code-attack-surface/) walks through sandbox, hooks, MCP, and supply chain in one pass.
 
 ---
 
@@ -28,6 +30,18 @@ keywords:
 
 > **NEVER**: Approve MCPs from unknown sources without version pinning.
 > **NEVER**: Run database MCPs on production without read-only credentials.
+
+---
+
+## Apply Controls at the Owning Layer
+
+Security review starts by identifying who owns the loop and who can act on its output. A runtime harness mediates tool use, permissions, context, and sandboxing. A repository harness supplies the instructions, dependency setup, and deterministic verification gates. An orchestrator can create additional identities, workspaces, handoffs, and unattended execution, so it needs separate credentials, budgets, stop conditions, and audit trails.
+
+The [Agent Harness Map](../ecosystem/agent-harness-landscape.md) distinguishes runtime harnesses from the wider directory of plugins, frameworks, observability tools, and control planes. Use [Agent Harness Engineering](../core/agent-harness.md) to understand runtime boundaries, [Agent Tools: Beyond Claude Code](../ecosystem/agentic-tools.md) to assess adjacent products, and [Session Observability](../ops/observability.md) to retain evidence without expanding access. Definitions live in the [glossary](../core/glossary.md).
+
+Benchmark security separately from task completion. [AgentDojo](https://arxiv.org/abs/2406.13352) includes 97 realistic tasks and 629 prompt-injection security test cases, which makes utility and attack resistance visible as separate outcomes. [CaMeL](https://arxiv.org/abs/2503.18813) reports 77% task completion under its capability-based control design versus 84% for the undefended reference configuration. These studies do not prove that one control fits every harness, but they show why a single success score hides the security trade-off.
+
+Harness optimizers expand the attack surface because they can modify prompts, tool exposure, control flow, or verification policy. Freeze non-negotiable security invariants outside the optimizer's mutation space. Reject candidates that weaken permission boundaries, leak evaluation data, suppress audit events, or improve task score by skipping a required check.
 
 ---
 

@@ -219,9 +219,10 @@ If you only have time for 5 sections:
   - [9.22 Remote Control (Mobile Access)](#922-remote-control-mobile-access)
   - [9.23 Configuration Lifecycle & The Update Loop](#923-configuration-lifecycle--the-update-loop)
   - [9.24 Instinct-Based Continuous Learning](#924-instinct-based-continuous-learning)
-  - [9.25 Harness Engineering](#925-harness-engineering)
+  - [9.25 Repository Harness Engineering](#925-harness-engineering)
   - [9.26 Review-Driven Context Optimization](#926-review-driven-context-optimization)
   - [9.27 Cross-Session Messaging (Peer Coordination)](#927-cross-session-messaging-peer-coordination)
+  - [9.28 Event Ingestion and Safe Delegation](#928-event-ingestion-and-safe-delegation)
 - [10. Reference](#10-reference) `🟢 All levels` `⏱ As needed`
   - [10.1 Commands Table](#101-commands-table)
   - [10.2 Keyboard Shortcuts](#102-keyboard-shortcuts)
@@ -5766,7 +5767,7 @@ The `.claude/` folder is your project's Claude Code directory for memory, settin
 | Personal preferences | `CLAUDE.md` | ❌ Gitignore |
 | Personal permissions | `settings.local.json` | ❌ Gitignore |
 
-### 3.41.3 Version Control & Backup
+### 3.42.0 Version Control & Backup
 
 **Problem**: Without version control, losing your Claude Code configuration means hours of manual reconfiguration across agents, skills, hooks, and MCP servers.
 
@@ -9610,9 +9611,11 @@ Claude Code provides three distinct mechanisms for running recurring tasks. They
 
 #### Routines (Cloud Automation)
 
-Routines run on Anthropic's infrastructure; your machine can be completely off. Each run clones a fresh copy of your GitHub repository. Three trigger types can be combined on a single routine.
+Routines run on Anthropic-managed cloud infrastructure or an organization's self-hosted environment; your machine can be completely off. Each run clones a fresh copy of your GitHub repository. Three trigger types can be combined on a single routine.
 
 > **Research preview**: behavior, limits, and API surface may change.
+
+> **Event boundary**: Routines run as separate persistent sessions. They are not local Monitors; for a GitHub event relay, WebSocket Monitor, Channels, and gated Codex handoff, see [Event Ingestion and Safe Delegation](#928-event-ingestion-and-safe-delegation).
 
 **Access**: Pro, Max, Team, and Enterprise plans.
 
@@ -19183,6 +19186,8 @@ claude --teleport
 
 **TL;DR**: Multi-instance orchestration = advanced pattern for teams managing 10+ concurrent features. Requires modular architecture + budget + monitoring. **95% of users don't need this.** Sequential workflows with 1-2 instances are more efficient for most contexts.
 
+Before adding another process manager, identify the layer that owns each responsibility. The model generates text; the runtime harness owns a session's model-and-tool loop; the repository harness supplies instructions and delivery gates; the orchestrator coordinates sessions. [Agent Harness Engineering](./core/agent-harness.md) explains the boundaries. The [Agent Harness Map](./ecosystem/agent-harness-landscape.md) compares strict runtime harnesses and keeps its wider sourced directory separate from the runtime table. [Agent Tools: Beyond Claude Code](./ecosystem/agentic-tools.md) covers frameworks and control planes; the [glossary](./core/glossary.md) defines the terms.
+
 ---
 
 ### Agent View: Native Session Management (v2.1.139+)
@@ -23664,16 +23669,20 @@ The promotion step stays manual by design: you decide what gets encoded. The pip
 
 ---
 
-## 9.25 Harness Engineering
+<a id="925-harness-engineering"></a>
+
+## 9.25 Repository Harness Engineering
 
 **Reading time**: 10 minutes
 **Skill level**: Month 2+
 
-> **The core insight**: model capability and execution reliability are orthogonal. The same model produces fundamentally different outcomes depending on the infrastructure around it, not the model's quality. That infrastructure is the harness.
+> **The core insight**: model capability and execution reliability are orthogonal. The same model produces fundamentally different outcomes depending on the infrastructure around it, not the model's quality. In this section, that infrastructure is the **repository harness**: the project environment a runtime such as Claude Code operates inside.
 
-### What Is a Harness?
+The vocabulary is deliberately layered: the **model** generates text; the **runtime harness** runs its tool loop, context, permissions, and sessions; this **repository harness** supplies project instructions, setup, state, and feedback; an **orchestrator** coordinates multiple runtime sessions. See [Agent Harness Engineering](./core/agent-harness.md#0-four-layers-four-responsibilities) for the full distinction and the [Agent Harness Landscape](./ecosystem/agent-harness-landscape.md) for the product landscape.
 
-The harness is everything in the engineering environment around the agent: the instruction files, initialization scripts, state tracking, verification commands, and feedback loops. It is not a prompt file and not a list of guidelines. The harness is the workbench the agent operates inside.
+### What Is a Repository Harness?
+
+The repository harness is everything in the engineering environment around the agent: the instruction files, initialization scripts, state tracking, verification commands, and feedback loops. It is not a prompt file and not a list of guidelines. It is the workbench the runtime operates inside.
 
 Five subsystems make up a complete harness:
 
@@ -24184,6 +24193,19 @@ Each session controls what it accepts from peers via `crossSessionInbound` (`acc
 Coordinate sessions you already have open and steer yourself: hand a finding from one worktree to a sibling worktree, tell the backend session when the database migration finished, push a documentation session the answer that just unblocked the frontend one. No `TeamCreate`, no team lead, no shared task list, just two (or more) independent sessions cutting the human out of the relay.
 
 > **Full reference**: [Cross-Session Messaging](./workflows/cross-session-messaging.md) covers the discovery rows in detail, the inbox socket mechanism, the full `crossSessionInbound` precedence rules, message size and burst limits, and the version timeline. Diagram: [Cross-Session Messaging: Discovery & Delivery](./diagrams/07-multi-agent-patterns.md#cross-session-messaging-discovery--delivery).
+
+---
+
+## 9.28 Event Ingestion and Safe Delegation
+
+**Reading time**: 3 minutes (overview) | [Full guide →](./workflows/monitor-event-delegation.md) (~12 min, sources, boundaries, and Codex workflow)
+**Skill level**: Advanced
+
+Claude Code offers several ways to observe an event, but none turn incoming text into authority: Monitor command source (v2.1.98+), native WebSocket source (v2.1.195+), plugin monitors (v2.1.105+), and MCP Channels (v2.1.80+, research preview). Routines run as separate sessions on Anthropic-managed cloud infrastructure or an organization's self-hosted environment, triggered by schedules, APIs, or GitHub events.
+
+The safe shape is narrow and deliberate: verify the GitHub webhook signature, repository, event type, schema, and delivery ID; relay only typed metadata over an approved WebSocket; classify with read-only `codex exec`; then require an explicit human or policy gate before a separate isolated task can use `--sandbox workspace-write`. Raw comments, issue bodies, logs, and WebSocket frames remain data, never instructions or permission grants.
+
+> **Full reference**: [Monitor, Channels and Safe Delegation to Codex](./workflows/monitor-event-delegation.md) covers Monitor input limits, plugin and Channel trust boundaries, GitHub delivery handling, and a split-job `openai/codex-action@v1` pattern for GitHub Actions.
 
 ---
 

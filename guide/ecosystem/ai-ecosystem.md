@@ -12,6 +12,14 @@ tags: [ai-ecosystem, guide, workflows, integration]
 
 ---
 
+## Choose the Layer Before Choosing a Product
+
+The model is not the runtime harness, and a framework, dashboard, or fleet manager is not automatically a runtime either. A runtime harness owns the iterative model-and-tool loop. A repository harness makes one codebase legible and verifiable. An orchestrator coordinates multiple runtime sessions. This distinction prevents a feature list from becoming a false comparison.
+
+Read the [Agent Harness Map](./agent-harness-landscape.md) for the strict runtime comparison and its wider, sourced directory. Read [Agent Harness Engineering](../core/agent-harness.md) for the four-layer model, [Agent Tools: Beyond Claude Code](./agentic-tools.md) for frameworks and control planes, and the [glossary](../core/glossary.md) for terminology. The operational follow-through belongs in [Agent Evaluation](../roles/agent-evaluation.md), [Session Observability](../ops/observability.md), and [Security Hardening](../security/security-hardening.md).
+
+---
+
 ## Table of Contents
 
 - [Introduction](#introduction)
@@ -60,6 +68,8 @@ What Claude Code doesn't do well (by design):
 - **Browser-based prototyping** (no visual preview)
 
 The goal is not to find "better" tools, but to chain the **right tool for each step**.
+
+> The same persona/agent pattern that chains complementary tools here is being applied one level up, to named business executive roles (CFO, CMO, board of directors) rather than dev tools. See [AI Executive Agents](./ai-executive-agents.md) for that landscape.
 
 ### The Complementarity Matrix
 
