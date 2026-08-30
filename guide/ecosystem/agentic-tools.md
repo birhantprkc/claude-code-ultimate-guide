@@ -989,6 +989,44 @@ Every session lands on a searchable kanban board linked to the files it touched.
 
 ---
 
+### 4.8 Liza
+
+Liza is a code-enforced multi-agent control plane for coding work. It launches provider CLIs as workers, assigns each task to a doer/reviewer pair, isolates their branches in git worktrees, and persists coordination state outside model context.
+
+| Attribute | Details |
+|-----------|---------|
+| **GitHub** | [liza-mas/liza](https://github.com/liza-mas/liza) |
+| **Stars** | 363 (2026-08-28), 49 forks |
+| **License** | Apache-2.0 |
+| **Language** | Go supervisors, Python support utilities |
+| **Latest release** | [v0.8.0](https://github.com/liza-mas/liza/releases/tag/v0.8.0), 2026-06-03 |
+| **Adapter catalog** | Claude Code, Codex, OpenCode, Kimi, Gemini, Qwen, Mistral, Devin; some disabled by default |
+| **Evidence snapshot** | [`a22c123`](https://github.com/liza-mas/liza/commit/a22c12381c5d884d2586a48aaaa517bca184f9cf), 2026-08-27 |
+
+#### What the Code Enforces
+
+Liza's [supervision model](https://github.com/liza-mas/liza/blob/a22c12381c5d884d2586a48aaaa517bca184f9cf/specs/architecture/supervision-model.md) separates semantic work from deterministic lifecycle control. Agents propose task transitions; Go supervisors validate ownership, state, leases, review verdicts, and merge eligibility. The YAML blackboard survives model context loss, while lease generations fence stale workers after recovery. Each doer works in an isolated worktree, and a separate reviewer can reject the submission before the supervisor allows integration.
+
+This makes Liza a useful example of two layers combined. Its `liza init` path installs repository-harness assets such as behavioral contracts, skills, settings, and guardrails. MAS mode adds an orchestrator above the selected runtime. The [provider catalog](https://github.com/liza-mas/liza/blob/a22c12381c5d884d2586a48aaaa517bca184f9cf/provider-catalog.yaml) confirms that Claude Code, Codex, and the other CLIs still own their inner tool loops.
+
+The reviewed commit contained 296 Go test files and passed the project's Ubuntu and macOS CI jobs. This review did not execute the suite locally because Go was unavailable on the review host. Upstream CI is useful maintenance evidence, but it does not establish task quality, recovery success under production load, or security against an untrusted repository.
+
+#### Where It Stops
+
+Liza's isolation boundary is git, not the operating system. Several provider adapters enable broad approval modes, including OpenCode's `--dangerously-skip-permissions` and Devin's `--permission-mode dangerous`. Agents still inherit whatever filesystem, environment, credentials, and network access the underlying process receives. Put an OS or container sandbox and scoped credentials below Liza before unattended use.
+
+The project also publishes an unusually candid [architectural issues ledger](https://github.com/liza-mas/liza/blob/a22c12381c5d884d2586a48aaaa517bca184f9cf/specs/architecture/architectural-issues.md). It records reliance on one orchestrator for semantic interpretation, one supervisor as the correctness gate, incomplete cross-pair review, specification-quality feedback gaps, and context pressure from the behavioral contract. Those limits make Liza suitable for an isolated 8-to-12-ticket pilot, not a default production dependency based on feature count alone.
+
+Read Liza as both a loop system and a domain-specific graph. The frozen [pipeline configuration](https://github.com/liza-mas/liza/blob/a22c12381c5d884d2586a48aaaa517bca184f9cf/internal/embedded/pipeline.yaml) defines the stable organization graph: roles, role pairs, state vocabularies, quorums, and transitions. Runtime tasks and dependencies form the changing work graph. The model does semantic work inside nodes; deterministic Go code validates parts of the transition protocol. Liza is not a general graph runtime, because its transition type is intentionally narrow and its node programs are fixed to the coding lifecycle.
+
+The responsibility boundary is more important than the graph label. Illegal transitions, stale claims, and unmet quorums are mechanically rejectable. Whether a plan is sufficient or a patch is correct still depends on evidence and reviewer judgment. The pinned ledger explicitly identifies unmeasured reviewer accuracy, consequential cross-pair decomposition decisions, provider diversity that is preferred rather than guaranteed, and human checkpoints that constrain throughput. Evaluate workflow correctness and task correctness separately. See [Agent Evaluation](../roles/agent-evaluation.md#evaluate-judgment-allocation-and-reviewer-independence) for the test protocol.
+
+One independent practitioner report now exists. Hippolyte Durix's [Ippon write-up](https://blog.ippon.fr/2026/04/29/premier-rex-multi-agent-liza/) describes a small Spring Boot, Vue.js, and PostgreSQL catalog run: roughly 30 tasks over 5 automated sprints, 35 review verdicts, 3 rejections corrected and resubmitted, and 3 to 4 hours of human time. The author also reports massive token consumption, required human validation of planning stages, and no test of cross-provider review. This is useful operational evidence from a real user, but not a production benchmark: the project was deliberately simple, the figures are self-reported, and no comparable artifact-level baseline is published.
+
+Liza's maintainer also publishes the separate [bash-policy](https://github.com/liza-mas/bash-policy) project. It parses compound shell payloads into command units, evaluates project policy, and produces `allow`, `manual`, or `deny` decisions. The checked repository had no tagged release and no adoption evidence, so treat it as an inspectable policy experiment rather than a mature security dependency. Its boundary is still useful: command policy can constrain and audit what an agent asks to run, but it does not provide filesystem, credential, process, or network isolation. Pair it with the runtime's native policy engine and an OS-level sandbox.
+
+---
+
 ## Section 5: Decision Framework
 
 ### Full Comparison Matrix
@@ -1009,8 +1047,9 @@ Every session lands on a searchable kanban board linked to the files it touched.
 | **MetaGPT** | Yes (MIT) | 69K | Any | Framework (SOP pipeline) | Python | Framework is free |
 | **Symphony** | Yes (Apache 2.0) | 26K | Codex (reference impl) | Orchestrator (issue → run) | Elixir | Free + per-agent LLM cost |
 | **Paperclip** | Yes (MIT) | 74K | Any (heartbeat protocol) | Orchestrator (goal → org) | TypeScript | Free + per-agent LLM cost |
+| **Liza** | Yes (Apache 2.0) | 363 | External coding-agent CLIs | Orchestrator + repository harness | Go | Free + per-agent LLM cost |
 
-Star counts read July 15, 2026 via the GitHub API, except DeepSeek Harness, checked August 27, 2026 and rounded from 199,777. Three rows carry a caveat the number hides: DeepSeek Harness is a developer preview, MetaGPT's 69K sits on a repo whose last release was April 2024, and Symphony's 26K sits on an explicit engineering preview. Stars measure reach, not maintenance.
+Star counts read July 15, 2026 via the GitHub API, except DeepSeek Harness, checked August 27, 2026 and rounded from 199,777, and Liza, checked August 28, 2026. Three rows carry a caveat the number hides: DeepSeek Harness is a developer preview, MetaGPT's 69K sits on a repo whose last release was April 2024, and Symphony's 26K sits on an explicit engineering preview. Stars measure reach, not maintenance.
 
 ### Situation to Tool Guide
 
@@ -1032,6 +1071,7 @@ Star counts read July 15, 2026 via the GitHub API, except DeepSeek Harness, chec
 | Dispatch a tracker board to agents, one workspace per issue | Symphony spec (§4.4) |
 | Coordinate mixed agent runtimes under budgets and approvals | Paperclip |
 | Review Claude Code/Codex edits visually instead of reading diffs in a terminal | Nimbalyst (§4.7) |
+| Run spec-driven doer/reviewer pairs with worktrees, recovery, and merge gates | Liza (§4.8) |
 | Enforce how work gets done inside an agent session | None of the above (see [spec-first.md](../workflows/spec-first.md)) |
 
 ### The Model Lock-In Question
