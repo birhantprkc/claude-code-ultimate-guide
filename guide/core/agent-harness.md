@@ -30,7 +30,7 @@ Controlled evidence supports a narrower claim. In [The Scaffold Effect in Coding
 
 This page uses **agent harness** in its runtime sense: the system that owns the agent loop, tools, context, state, and permissions. A repository can also provide a **repository harness** around that runtime: its instructions, setup, task state, and verification gates. The distinction matters because a project can improve its repository harness without replacing Claude Code, and a team can switch runtime harnesses without discarding every project practice.
 
-This page covers what is inside the runtime. For the repository layer, see [Repository Harness Engineering](../ultimate-guide.md#925-harness-engineering). For a dated comparison of specific products across CLI, IDE, and cloud, see the [Agent Harness Landscape](../ecosystem/agent-harness-landscape.md).
+This page covers what is inside the runtime. For the repository layer, see [Repository Harness Engineering](../ultimate-guide.md#925-harness-engineering). For feedback loops, executable workflow graphs, stopping rules, and judgment boundaries, use [Loop & Graph Engineering](./loop-graph-engineering.md). For a dated comparison of specific products across CLI, IDE, and cloud, see the [Agent Harness Landscape](../ecosystem/agent-harness-landscape.md).
 
 ![A user goal moves through six harness stages: context building, LLM reasoning, policy gating, guarded tool execution, verification, and an accepted result. Observability spans every stage, constraints govern policy and runtime, and feedback returns accepted results to the context builder.](../images/agent-harness-reliability-loop.webp)
 
@@ -41,6 +41,7 @@ This page covers what is inside the runtime. For the repository layer, see [Repo
 | Question | Canonical page |
 |---|---|
 | What does a runtime harness contain, and how do its controls work? | This [Agent Harness Engineering](./agent-harness.md) page |
+| How should loops, workflow graphs, state transitions, stopping rules, and judgment be designed? | [Loop & Graph Engineering](./loop-graph-engineering.md) |
 | Which runtime, orchestrator, framework, or adjacent project should I compare? | [Agent Harness Landscape](../ecosystem/agent-harness-landscape.md) |
 | What does a specific coding-agent product support? | [Agent Tools: Beyond Claude Code](../ecosystem/agentic-tools.md) |
 | What distinguishes a runtime, repository, evaluation harness, and orchestrator? | [Glossary](./glossary.md) |
@@ -507,6 +508,7 @@ Use three evidence levels throughout this page:
 | [Shachar Azriel, Executable Specs: Building a Verification Layer for Agentic Coding](https://www.youtube.com/watch?v=aWrGSM5vVyc), 2026-06-15 | ["The code is how we ground that agent to reality."](https://www.youtube.com/watch?v=aWrGSM5vVyc&t=868s) | Requirement-level verification against actual code | Architecture described by the speaker; outcomes are not independently verified here |
 | [Amit Kushwaha, Benchmarking the Agent Era](https://www.youtube.com/watch?v=guhTp2Q8VX0), 2026-07-10 | ["You can't talk about mean and medians. Now you have to talk about in terms of distributions."](https://www.youtube.com/watch?v=guhTp2Q8VX0&t=810s) | Multi-turn, multi-tool, tail-aware measurement | Benchmark-methodology talk; specific performance claims require the underlying study |
 | [Dex Horthy, Context Engineering](https://www.youtube.com/watch?v=Usufn8IQJgw), 2026-07-15 | ["If you want to do loops engineering, you should build one loop at a time and keep them small and contained."](https://www.youtube.com/watch?v=Usufn8IQJgw&t=3509s) | Bounded loops before lights-off automation | Practitioner interview and retrospective, not a controlled study |
+| [Pavan Belagatti, What Is a Software Factory?](https://www.youtube.com/watch?v=0nM1ygBm8tA), 2026 | ["Agents do the work, humans provide the gates."](https://www.youtube.com/watch?v=0nM1ygBm8tA&t=97s) | Separation between the execution loop and the governance loop | Practitioner short and Port-oriented framing; no comparative reliability or productivity measurement |
 
 The source list is selective. It includes videos that add a distinct mechanism, metric, or failure boundary to this page. Inclusion is not an endorsement of every claim in a talk.
 

@@ -11,6 +11,22 @@ Suivi des versions des ebooks, indépendamment de la version du guide.
 
 ---
 
+## [2026-08-30] DORA 2026 et corpus Pavan Belagatti
+
+### Fixed
+
+- **WP11 FR/EN**: version 1.3.0 à 1.3.1. Le modèle historique à quatre métriques et MTTR est remplacé par les cinq métriques DORA actuelles: Change Lead Time, Deployment Frequency, Failed Deployment Recovery Time, Change Fail Rate et Deployment Rework Rate. Les anciennes tables Elite, High, Medium et Low sont retirées comme cibles courantes, les chiffres internes d'Anthropic sont bornés à leur environnement, et le protocole relie désormais déploiements, incidents et rework.
+- **WP12 FR/EN**: version 1.4.0 à 1.4.1. La recommandation Engineering Manager cite les cinq métriques DORA actuelles; la version anglaise est alignée pour conserver une version bilingue commune.
+
+## [2026-08-30] Loop, graph, harness, orchestrator: publications dérivées
+
+### Added
+
+- **WP12 FR/EN**: version 1.3.0 à 1.4.0. Une synthèse explicite distingue boucle, graphe, harness et orchestrateur, remplace la hiérarchie de couches par la plus petite structure de contrôle qui résout le besoin en sécurité, précise le sens opérationnel de `unknown`, et renvoie vers la nouvelle page `Loop & Graph Engineering` (`https://cc.bruniaux.com/guide/loop-graph-engineering/`).
+- **Fiche WP12 FR**: la synthèse remplace le point générique sur le harness par la taxonomie loop/graph/harness/orchestrator et la consigne de qualifier les mécanismes observés avant le pilote.
+- **C14 FR/EN Agent Harness Map**: la carte une page précise que boucle et graphe sont des vues, pas des couches supplémentaires, ajoute l'étape de flux versionné, rappelle les quatre statuts appliqués aux mécanismes observés, et renvoie vers la nouvelle page `Loop & Graph Engineering`.
+- **Cheatsheets FR/EN**: la carte rapide des quatre couches ajoute la frontière boucle/graphe, réserve `confirmed`/`claimed`/`unknown` aux mécanismes observés, et renvoie vers la nouvelle page `Loop & Graph Engineering`.
+
 ## [2026-08-28] Agent Harness Map, publications dérivées
 
 ### Added

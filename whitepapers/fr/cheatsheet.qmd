@@ -2,10 +2,10 @@
 title: "Claude Code Cheatsheet"
 subtitle: "L'essentiel au quotidien pour une productivité maximale"
 author: "Florian BRUNIAUX"
-date: 2026-07-01
+date: 2026-08-30
 date-format: "MMMM YYYY"
-version: "3.42.0"
-wp-version: "1.1.2"
+version: "3.43.0"
+wp-version: "1.2.0"
 series: "Claude Code Ultimate Guide"
 format:
   whitepaper-typst:
@@ -316,6 +316,8 @@ Décision rapide : texte exact → `rg` | nom exact → `rg`/Serena | concept �
 
 Évaluer le couple modèle-harness exact pour une tâche de code. Ajouter un orchestrateur lorsque la coordination est le besoin identifié. Un optimiseur de harness reste hors des quatre couches opérationnelles et modifie des harnesses candidats sous un protocole d'évaluation séparé.
 
+Boucle et graphe ne sont pas des substituts de plus. La boucle nomme le feedback répété et la règle d'arrêt. Le graphe nomme les nœuds, branches et checkpoints exécutables dans la structure choisie. Pour les mécanismes observés, `confirmed` = mécanisme visible, `claimed` = déclaration source, `unknown` = point non établi. Voir aussi [Loop & Graph Engineering](https://cc.bruniaux.com/guide/loop-graph-engineering/).
+
 ```
 Tâche simple       → demander directement à Claude
 Tâche complexe     → passer par Tasks API pour planifier
@@ -355,4 +357,4 @@ Analyse profonde   → utiliser Opus (réflexion activée par défaut)
 
 **Auteur** : Florian BRUNIAUX | [Méthode Aristote](https://methode-aristote.fr) | Écrit avec Claude
 
-*Version 3.42.0 | Août 2026*
+*Version 3.43.0 | Août 2026*

@@ -35,6 +35,7 @@ Core documentation for mastering Claude Code, organized by topic.
 | [cheatsheet.md](./cheatsheet.md) | 1-page printable quick reference | 5 min |
 | [core/architecture.md](./core/architecture.md) | How Claude Code works internally (master loop, tools, context) | 25 min |
 | [core/agent-harness.md](./core/agent-harness.md) | **Agent Harness Engineering**: runtime components, loop horizons, security, evaluation, and outer-loop harness optimization | 35 min |
+| [core/loop-graph-engineering.md](./core/loop-graph-engineering.md) | **Loop & Graph Engineering**: bounded feedback, executable workflow graphs, durable state, recovery, and judgment allocation | 25 min |
 | [core/tools-reference.md](./core/tools-reference.md) | **Complete tools reference**: all 40 built-in tools, permission rule formats, per-tool behaviors (Bash timeouts, Edit read-before-edit, Glob cap, WebFetch lossy), and how-to for Monitor, Workflow, agent teams, Cron, Tasks API | 20 min |
 | [core/hooks-events-reference.md](./core/hooks-events-reference.md) | **Complete hooks reference**: all 30 hook events, matcher fields, input schemas, decision control formats, and timeout defaults, with copy-paste JSON examples | 15 min |
 | [core/settings-reference.md](./core/settings-reference.md) | **Complete settings.json reference**: every confirmed setting and environment variable | 15 min |
@@ -98,7 +99,7 @@ Core documentation for mastering Claude Code, organized by topic.
 | [ecosystem/third-party-tools.md](./ecosystem/third-party-tools.md) | **Community tools**: GUIs, TUIs, config managers, token trackers, alternative UIs | 15 min |
 | [ecosystem/context-engineering-tools.md](./ecosystem/context-engineering-tools.md) | **Context & token optimization**: output compression (RTK, Headroom), prompt compression (LLMLingua), AI gateways (Edgee, Portkey), RAG, LLMOps | 20 min |
 | [ecosystem/remarkable-ai.md](./ecosystem/remarkable-ai.md) | Remarkable AI usage patterns and power-user techniques | 10 min |
-| [ecosystem/practitioner-insights.md](./ecosystem/practitioner-insights.md) | **Practitioner field reports**: 65 paraphrased insights from IFTTD, Devoxx, Dev With AI Meetup, ByteByteGo, and Stanford Online, organized by theme (context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption) | 20 min |
+| [ecosystem/practitioner-insights.md](./ecosystem/practitioner-insights.md) | **Practitioner field reports**: 69 paraphrased insights from IFTTD, Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, and Pavan Belagatti's 2026 video corpus, organized by theme (context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption) | 20 min |
 | [ecosystem/team-knowledge-base.md](./ecosystem/team-knowledge-base.md) | **Team knowledge infrastructure**: 3-tier framework (static Markdown vault, MCP connectors for live systems, RAG at scale), RAG threshold (~100-1000 docs), Atlassian/Notion/GitBook MCP, Onyx/LlamaCloud/Ragie, plugin distribution, Code+Cowork bridge | 18 min |
 | [ecosystem/local-vs-cloud-inference.md](./ecosystem/local-vs-cloud-inference.md) | **Local vs cloud economics**: 10 comparable hardware builds (llmfit-sized), OVH/AWS/Lambda/RunPod GPU rental pricing, 1-year TCO projections, Claude vs GPT-5.6 cloud throughput, decision framework | 20 min |
 | [ecosystem/ai-executive-agents.md](./ecosystem/ai-executive-agents.md) | **AI executive agents**: OpenExecutive deep dive, open-source alternatives (Become CEO, OneManCompany, crewAI) with verified GitHub stats, a routing table by role (CFO, CMO, CHRO, General Counsel, board), augmentation-vs-replacement and Synthetic Director governance angle | 12 min |
@@ -126,6 +127,7 @@ Core documentation for mastering Claude Code, organized by topic.
 | [ops/ai-traceability.md](./ops/ai-traceability.md) | AI attribution, disclosure policies, git-ai, compliance | 20 min |
 | [ops/team-metrics.md](./ops/team-metrics.md) | **Team metrics for AI-augmented engineering**: DORA, SPACE, DX Core 4, AI-specific signals, by team size (5–25 people) | 20 min |
 | [ops/ai-unit-economics.md](./ops/ai-unit-economics.md) | **AI unit economics**: per-task cost decomposition, real cost levers (routing, sub-agent isolation, exit criteria), autonomous agent break-even point, team budget governance | 15 min |
+| [ops/subscription-strategy.md](./ops/subscription-strategy.md) | **Subscription strategy at team scale**: Team seat cap, Enterprise usage billing, API gateway attribution and controls, multi-vendor governance, personal-plan contract gap, and scenario-based self-hosting economics | 15 min |
 
 ---
 
@@ -144,6 +146,7 @@ Hands-on guides for effective development patterns:
 | [workflows/agent-teams.md](./workflows/agent-teams.md) | Orchestrating multi-agent teams for complex tasks |
 | [workflows/agent-teams-quick-start.md](./workflows/agent-teams-quick-start.md) | Quick start guide for agent team patterns |
 | [workflows/agentic-software-factories.md](./workflows/agentic-software-factories.md) | Orientation map: from a single session to a software factory, and when a closed platform actually wins |
+| [../examples/workflows/bounded-loop-contract.md](../examples/workflows/bounded-loop-contract.md) | Runnable bounded-loop contract with a separate verifier interface, an attempt budget, evidence, and escalation |
 | [workflows/dynamic-workflows.md](./workflows/dynamic-workflows.md) | JavaScript-orchestrated multi-agent pipelines: deterministic control flow, parallel fan-out, automatic resume |
 | [workflows/dual-instance-planning.md](./workflows/dual-instance-planning.md) | Dual-instance planning: Opus plans, Sonnet executes |
 | [workflows/event-driven-agents.md](./workflows/event-driven-agents.md) | Event-driven agent coordination patterns |
