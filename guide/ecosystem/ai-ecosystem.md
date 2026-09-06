@@ -28,7 +28,7 @@ Read the [Agent Harness Map](./agent-harness-landscape.md) for the strict runtim
 - [3. Kimi (PPTX & Long Document Generation)](#3-kimi-pptx--long-document-generation)
 - [4. NotebookLM (Synthesis & Audio)](#4-notebooklm-synthesis--audio)
 - [5. Voice-to-Text Tools (Wispr Flow, Superwhisper)](#5-voice-to-text-tools-wispr-flow-superwhisper)
-- [6. IDE-Based Tools (Cursor, Windsurf, Cline)](#6-ide-based-tools-cursor-windsurf-cline)
+- [6. IDE, ADE, and Hybrid Coding Environments](#6-ide-ade-and-hybrid-coding-environments)
 - [6.1 Google Antigravity (Agent-First IDE)](#61-google-antigravity-agent-first-ide)
 - [7. UI Prototypers (v0, Bolt, Lovable)](#7-ui-prototypers-v0-bolt-lovable)
 - [7.1 Generative UI: Agent-Driven Interactive Output Formats](#71-generative-ui-agent-driven-interactive-output-formats)
@@ -1223,19 +1223,32 @@ Text-to-speech adds audio narration to Claude Code responses, enabling:
 
 ---
 
-## 6. IDE-Based Tools (Cursor, Windsurf, Cline)
+## 6. IDE, ADE, and Hybrid Coding Environments
 
 > **Technical Comparison**: For an objective comparison of Claude Code vs 22+ alternatives across 11 criteria (MCP support, Skills, Commands, Subagents, Plan Mode), see the [AI Coding Agents Matrix](https://coding-agents-matrix.dev/) (updated Jan 2026).
 
-### When IDE Tools Complement Claude Code
+Product labels are no longer reliable boundaries. An agentic development environment, or ADE, may combine an IDE, a standalone CLI, a desktop client, chat entry points, and cloud execution. Cursor, Kiro, Claude Code, Devin Desktop, and Warp Agent span more than one of those surfaces.
 
-| Scenario | Use IDE Tool | Use Claude Code |
-|----------|-------------|-----------------|
-| Quick inline edits | ✅ Faster | ⚠️ Context switch |
-| Autocomplete while typing | ✅ Essential | ❌ Not available |
-| Multi-file refactoring | ⚠️ Limited | ✅ Superior |
-| Understanding large codebase | ⚠️ Limited | ✅ Better context |
-| CI/CD automation | ❌ Manual | ✅ Native |
+Compare three independent questions before choosing a product:
+
+1. **Interface**: CLI, TUI, IDE, desktop, web, or chat.
+2. **Execution**: local, remote, or hybrid.
+3. **Loop ownership**: does this product plan, act through tools, observe results, and decide the next step, or does it only host or coordinate another runtime?
+
+The [Agent Harness Landscape](./agent-harness-landscape.md#interface-execution-and-loop-ownership-are-separate) applies this taxonomy across the sourced catalog. The deeper [Warp Agent CLI profile](./agentic-tools.md#19-warp-agent-cli) shows why a product commonly described as an ADE may also belong in a terminal-agent comparison.
+
+### Choose the Interface by Workflow
+
+| Need | Interface to test first | Examples, not rankings |
+|---|---|---|
+| Inline completion and edits beside code | IDE | Cursor, Cline, Devin Desktop |
+| Shell-heavy work and reproducible commands | CLI | Claude Code, Codex CLI, Warp Agent |
+| Interactive debuggers or full-screen terminal programs | TUI-capable CLI | Warp Agent, opencode, crush |
+| Asynchronous work and remote monitoring | Web | Jules, Devin, cloud-agent surfaces |
+| A dedicated native workspace | Desktop | Claude Code desktop, Devin Desktop, Kiro |
+| Start work from team communication or an issue | Chat | Products with Slack, Discord, or tracker entry points |
+
+An interface match is only a shortlist. Permission controls, repository isolation, execution location, recovery, model access, and accepted-task cost still require a representative trial.
 
 ### Hybrid Workflow
 
@@ -1261,6 +1274,8 @@ claude "Review my changes and suggest tests"
 ### Real-World Migration Path: Cursor → Windsurf → Claude Code
 
 > **Source**: [Zadig&Voltaire Engineering Blog](https://tech.zadig-et-voltaire.com/blog/migration-nuxt/), Benjamin Calef, Feb 2026
+
+This is a dated adoption history, so the original product name is preserved. Windsurf was subsequently renamed [Devin Desktop](https://devin.ai/desktop); the name change does not alter what the team reported for 2025.
 
 A 6-person team at Zadig&Voltaire documented their sequential tool adoption during a 6-month e-commerce rebuild (July 2025 – January 2026):
 
@@ -1306,7 +1321,7 @@ When your team uses multiple AI coding tools (Claude Code + Cursor + Copilot), m
 | Codex/ChatGPT | `AGENTS.md` | AGENTS.md standard |
 | Copilot | `.github/copilot-instructions.md` | GitHub-specific |
 
-**Without sync**: Each file drifts independently → inconsistent AI behavior across tools.
+**Without sync**: Each file drifts independently, producing inconsistent AI behavior across tools.
 
 #### Solution 1: Native @import (Recommended for Claude Code)
 
@@ -1365,7 +1380,7 @@ cat "docs/ai-instructions/cursor-specific.md" >> .cursorrules
 
 **Workaround**: Symlink `ln -s AGENTS.md .claude/CLAUDE.md`
 
-The AGENTS.md standard is supported by: Cursor, Windsurf, Cline, GitHub Copilot. See [AI Coding Agents Matrix](https://coding-agents-matrix.dev) for full compatibility.
+The AGENTS.md standard is supported by several coding tools. Because support changes by product and version, verify the current compatibility in the [AI Coding Agents Matrix](https://coding-agents-matrix.dev) before consolidating instruction files.
 
 ### Export from IDE to Claude
 
@@ -2580,21 +2595,23 @@ For discovering and distributing agent skills beyond local creation:
 
 **URL**: [skills.sh](https://skills.sh/) | **GitHub**: [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | **Launched**: January 21, 2026
 
-**What it is**: Centralized marketplace for agent skills with one-command installation. Provides leaderboard, trending view, and 200+ skills from Vercel, Anthropic, Supabase, and community contributors.
+**What it is**: Centralized directory for discovering and installing agent skills. Its leaderboard and install counts change continuously and do not establish quality, compatibility, or maintenance.
 
 **Installation**:
 ```bash
-npx add-skill vercel-labs/agent-skills  # React/Next.js (35K+ installs)
-npx add-skill supabase/agent-skills     # Postgres patterns
-npx add-skill anthropics/skills         # Frontend design + skill-creator
-npx add-skill anthropics/claude-plugins-official  # CLAUDE.md auditor + plugin dev tools
+npx skills add vercel-labs/agent-skills
+npx skills add supabase/agent-skills
+npx skills add anthropics/skills
+npx skills add anthropics/claude-plugins-official
 ```
 
-**Supported agents**: 20+ including Claude Code, Cursor, GitHub Copilot, Windsurf, Cline, Goose
+**Supported agents**: the current catalog lists Claude Code, Cursor, Codex, GitHub Copilot, Windsurf, Gemini, Cline, and other clients.
 
-**Status**: Community project (Vercel Labs), very recent (Jan 2026), rapid adoption but early stage
+**Status**: Community project by Vercel Labs, launched in January 2026.
 
-**Format**: 100% compatible with Claude Code's `.claude/skills/` structure (SKILL.md + YAML frontmatter)
+**Format**: Agent Skills directory format with `SKILL.md` and YAML frontmatter. Claude Code-specific fields are not guaranteed to behave the same way in another client.
+
+Use the catalog for pattern discovery even when you install nothing. Installation is not a maintenance contract: inspect the selected source, scripts, tool grants, and version, then consume, fork, specialize, or reject it based on local evaluation. See [Ownership and Reuse Governance](../ultimate-guide.md#ownership-and-reuse-governance).
 
 ### claude-code-templates (GitHub)
 
