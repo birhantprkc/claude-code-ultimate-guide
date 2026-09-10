@@ -8412,7 +8412,7 @@ When reviewing architecture:
 
 This skill is now installed in the Méthode Aristote repository at:
 ```
-/Users/florianbruniaux/Sites/MethodeAristote/app/.claude/skills/design-patterns/
+.claude/skills/design-patterns/
 ```
 
 **Usage**:
@@ -18149,21 +18149,23 @@ Also auto-triggers on phrases like "be brief" or "less tokens please." Auto-disa
 
 ### Command Output Optimization with RTK
 
-**RTK (Rust Token Killer)** filters bash command outputs **before** they reach Claude's context, achieving 60-90% token reduction across git, testing, and development workflows. 73,531 stars, 4,597 forks as of 2026-07-27 (was 446 stars, 38 forks), 700+ upvotes on r/ClaudeAI.
+**RTK (Rust Token Killer)** filters command output before it reaches the model. Its reported reductions concern processed shell output, not the whole session or invoice. `rtk gain` uses local token estimates; count retries and task outcomes separately.
 
 **Repository:** [rtk-ai/rtk](https://github.com/rtk-ai/rtk) | **Website:** [rtk-ai.app](https://www.rtk-ai.app/)
+
+For broader hooks, code navigation and MCP interception, see the [Tokenade comparison and evidence boundary](https://github.com/FlorianBruniaux/claude-code-ultimate-guide/blob/main/guide/ecosystem/third-party-tools.md#tokenade). It covers a proprietary alternative with vendor-maintained benchmark results, not a universal replacement recommendation.
 
 **Installation:**
 
 ```bash
 # Option 1: Homebrew (macOS/Linux)
-brew install rtk-ai/tap/rtk
+brew install rtk
 
 # Option 2: Cargo (all platforms)
-cargo install rtk
+cargo install --git https://github.com/rtk-ai/rtk
 
 # Option 3: Install script
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | bash
 
 # Verify installation
 rtk --version  # v0.28.0+
@@ -20104,6 +20106,7 @@ Don't jump to 10 instances. Scale progressively with validation gates.
 # - Headless PM (manual coordination)
 # - Gas Town (parallel task execution)
 # - multiclaude (self-hosted, tmux-based)
+# - Multica (issue/chat control plane with local daemon execution)
 # - Entire CLI (governance + sequential handoffs)
 
 # 2. Define roles
@@ -20125,7 +20128,10 @@ Don't jump to 10 instances. Scale progressively with validation gates.
 | **Manual (worktrees)** | No framework | 2-3 instances, full control |
 | **Gas Town** | Parallel coordination | 5+ instances, complex parallel tasks |
 | **multiclaude** | Self-hosted spawner | Teams needing on-prem/airgap |
+| **Multica** | Issue-driven multi-provider control plane | Teams coordinating local agent CLIs through a server/daemon split |
 | **Entire CLI** | Governance + handoffs | Sequential workflows with compliance |
+
+> **Multica** keeps issues, chat, agent configuration, schedules, and run records in its coordination tier while connected computers execute Claude Code, Codex, and other CLIs through a local daemon. See the [evidence-pinned Multica profile](./ecosystem/agentic-tools.md#49-multica) for deployment, data, security, Git, and licence boundaries.
 
 > **Entire CLI** (Feb 2026): Alternative to parallel orchestration, focuses on **sequential agent handoffs** with governance layer (approval gates, audit trails). Useful for compliance-critical workflows (SOC2, HIPAA) or multi-agent handoffs (Claude → Gemini). See [AI Ecosystem Guide](./ecosystem/ai-ecosystem.md#entire-cli-governance-first-orchestration) for details.
 

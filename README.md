@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Guide-v3.43.0-brightgreen?style=flat-square" alt="Guide version 3.43.0" /></a>
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Sep_5,_2026_·_v3.43.0-brightgreen?style=flat-square" alt="Updated Sep 5, 2026, guide version 3.43.0" /></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/Updated-Sep_9,_2026_·_v3.43.0-brightgreen?style=flat-square" alt="Updated Sep 9, 2026, guide version 3.43.0" /></a>
   <a href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://img.shields.io/badge/Guide-CC_BY--SA_4.0-blue?style=flat-square" alt="Guide license: CC BY-SA 4.0" /></a>
   <a href="https://cc.bruniaux.com/mcp/"><img src="https://img.shields.io/badge/MCP-npx_ready-blueviolet?style=flat-square" alt="MCP server available through npx" /></a>
 </p>
@@ -177,6 +177,7 @@ Context quality affects every tool call and decision. Start with project instruc
 | Coordinate several agents | [Agent Teams](./guide/workflows/agent-teams.md) |
 | Build bounded autonomous loops | [Agentic Software Factories](./guide/workflows/agentic-software-factories.md) |
 | Review code systematically | [Code Review](./guide/workflows/code-review.md) |
+| Prepare a contribution another team can review | [AI-Assisted Open Source Contributions](./guide/workflows/ai-assisted-open-source-contributions.md) |
 | Diagnose unfamiliar repositories | [Exploration Workflow](./guide/workflows/exploration-workflow.md) |
 
 [Browse every workflow](./guide/workflows/) for task management, GitHub Actions, production reliability, event-driven agents, design-to-code, PDF generation, search, and team instructions.
@@ -415,4 +416,4 @@ Watch [GitHub Releases](https://github.com/FlorianBruniaux/claude-code-ultimate-
 
 ---
 
-*Version 3.43.0 | Updated daily · Sep 5, 2026*
+*Version 3.43.0 | Updated daily · Sep 9, 2026*

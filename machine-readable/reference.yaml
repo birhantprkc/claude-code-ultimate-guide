@@ -365,6 +365,9 @@ deep_dive:
   batch_api_cost_lever: "guide/core/architecture.md#message-batches-api"
   batch_api_savings: "50% cheaper, async, 24h window, up to 100 requests per batch"
   routellm_citation: "arXiv:2406.18665 (ICLR 2025) — 85% cost reduction on MT-Bench vs always-strong routing, 95% GPT-4 performance"
+  tokenade_guide: "guide/ecosystem/third-party-tools.md#tokenade"
+  tokenade_license: "Proprietary engine; public installer; FAQ MIT claim contradicted by LICENSE (2026-09-08)"
+  tokenade_evidence: "THOL vendor campaign CC 2.1.206: ratio 0.768 vs control; no independent reproduction in this guide"
   rtk_upstream: "https://github.com/rtk-ai/rtk"
   rtk_website: "https://www.rtk-ai.app/"
   rtk_evaluation: "docs/resource-evaluations/rtk-evaluation.md"
@@ -376,7 +379,7 @@ deep_dive:
   rtk_purpose: "Command output filtering before LLM context (60-90% avg reduction)"
   rtk_version_tested: "v0.28.0"
   rtk_score: "5/5"
-  rtk_installation: "cargo install rtk or brew install rtk-ai/tap/rtk"
+  rtk_installation: "brew install rtk or cargo install --git https://github.com/rtk-ai/rtk"
   # Edgee Compressor V2 (2026-07-02) - documented + cross-referenced with RTK
   edgee_compressor_v2_guide: "guide/ecosystem/context-engineering-tools.md:419"
   edgee_compressor_v2_source: "https://www.edgee.ai/blog/posts/introducing-compressor-v2-three-compression-layers-measured-end-to-end-for-a-50-cost-reduction"
@@ -465,16 +468,25 @@ deep_dive:
   recap_cards_fr: "whitepapers/recap-cards/fr/"
   recap_cards_en: "whitepapers/recap-cards/en/"
   recap_cards_count: "57"
-  # Practitioner Insights (IFTTD episodes 290-361, Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, Pavan Belagatti 2026) - Added 2026-06-21, expanded 2026-08-30
+  # Practitioner Insights (IFTTD selected episodes through 373, Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, Pavan Belagatti 2026) - Added 2026-06-21, expanded 2026-09-09
+  ai_assisted_open_source_contributions: "guide/workflows/ai-assisted-open-source-contributions.md"
+  ai_assisted_contribution_packet: "examples/templates/ai-assisted-contribution.md"
+  review_admission_control: "guide/core/loop-graph-engineering.md#limit-admission-to-verification-capacity"
+  review_admission_worksheet: "examples/workflows/review-admission.md"
+  review_queue_measurements: "guide/ops/team-metrics.md#measure-the-shared-verification-queue"
+  review_comprehension_exercise: "examples/learning-project/review-comprehension-exercise.md"
+  contribution_authority_case: "guide/roles/adoption-approaches.md#open-contribution-without-granting-unrestricted-delivery"
+  data_access_continuity: "guide/security/data-privacy.md#test-access-continuity-as-well-as-data-location"
+
   practitioner_insights_guide: "guide/ecosystem/practitioner-insights.md"
-  practitioner_insights_description: "Paraphrased field insights from IFTTD (episodes 290-361), Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, and 62 Pavan Belagatti videos from 2026. Five themes: context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption. 69 attributed insights, English only, no direct quotes."
+  practitioner_insights_description: "Paraphrased field insights from IFTTD (selected episodes through 373), Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, and 62 Pavan Belagatti videos from 2026. Five themes: context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption. 75 attributed insights, English only, no direct quotes."
   practitioner_insights_context_engineering: "guide/ecosystem/practitioner-insights.md#context-engineering"
   practitioner_insights_agentic_patterns: "guide/ecosystem/practitioner-insights.md#agentic-patterns--orchestration"
   practitioner_insights_llm_evaluation: "guide/ecosystem/practitioner-insights.md#llm-evaluation"
   practitioner_insights_agent_security: "guide/ecosystem/practitioner-insights.md#agent-security"
   practitioner_insights_devx: "guide/ecosystem/practitioner-insights.md#devx--adoption"
   practitioner_insights_source: "IFTTD, Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, and 62 Pavan Belagatti YouTube transcripts published in 2026"
-  practitioner_insights_episodes: "IFTTD ep 311 (Lastmann), 326 (Bendhiba), 329 (Barthelet), 338 (Pinsard), 341 (Adam), 346 (N'takpe), 349 (Deleuze), 351 (Lepine), 357, 360 (Lours), 361 (Laforge)"
+  practitioner_insights_episodes: "IFTTD ep 311 (Lastmann), 326 (Bendhiba), 329 (Barthelet), 338 (Pinsard), 341 (Adam), 346 (N'takpe), 349 (Deleuze), 351 (Lepine), 357, 360 (Lours), 361 (Laforge), 362 (Hmito), 363 (Mathieu), 364 (Burgy), 371 (Gerlic), 372 (de Marmiesse), 373 (Buendé)"
   practitioner_insights_devoxx: "guide/ecosystem/practitioner-insights.md#devoxx"
   practitioner_insights_devwithai: "guide/ecosystem/practitioner-insights.md#dev-with-ai-meetup"
   practitioner_insights_bytebytego: "guide/ecosystem/practitioner-insights.md#bytebytego"
@@ -910,6 +922,7 @@ deep_dive:
   paperclip_tool: "guide/ecosystem/agentic-tools.md#45-paperclip"  # org chart/budgets/approvals for agent fleets; runtime-agnostic; 74K stars; governs who+how much, not how work is done
   nimbalyst_tool: "guide/ecosystem/agentic-tools.md#47-nimbalyst"  # visual workspace, Claude Code + Codex side by side, worktree-per-session, inline diff review on markdown/mockups/diagrams, kanban, MIT, 1.5K stars
   liza_tool: "guide/ecosystem/agentic-tools.md#48-liza"  # code-enforced control plane over external coding-agent CLIs; doer/reviewer pairs, YAML blackboard, worktrees, leases, recovery, merge gates
+  multica_tool: "guide/ecosystem/agentic-tools.md#49-multica"  # issue-driven control plane; server coordination plus local daemon execution across external coding-agent CLIs
   opencode_tool: "guide/ecosystem/agentic-tools.md#15-opencode-anomaly-formerly-sst"  # Anomaly (fka SST), MIT, 199K+ stars (highest in category); 75+ providers, client/server split
   gemini_cli_tool: "guide/ecosystem/agentic-tools.md#16-gemini-cli-google"  # Google, Apache-2.0, 106K+ stars; Gemini-first, free tier is the reason to pick it (60 req/min, 1000/day)
   crush_tool: "guide/ecosystem/agentic-tools.md#17-crush-charm"  # Charm, FSL-1.1-MIT (converts to MIT 2yr after each release), 27.5K+ stars; multi-provider, polished TUI
@@ -924,13 +937,14 @@ deep_dive:
   agent_harness_optimizer_research: "guide/core/agent-harness.md#11-harness-optimizers-and-meta-harnesses"
   agent_harness_scaffold_effect: "guide/core/agent-harness.md#the-core-claim"
   agent_harness_reliability_metrics: "guide/core/agent-harness.md#operational-measures-beyond-telemetry"
-  agent_harness_landscape_page: "guide/ecosystem/agent-harness-landscape.md"  # 160-project pinned upstream snapshot plus 32 guide supplements; separates 42 strict runtimes from 15 adjacent control planes
+  agent_harness_landscape_page: "guide/ecosystem/agent-harness-landscape.md"  # 160-project pinned upstream snapshot plus 33 guide supplements; separates 42 strict runtimes from 16 adjacent control planes
   agent_harness_landscape_entry_points: "guide/ecosystem/agent-harness-landscape.md#choose-the-right-entry-point"
   coding_agent_interfaces: "guide/ecosystem/agent-harness-landscape.md#interface-execution-and-loop-ownership-are-separate"
   agent_harness_catalog_boundary: "guide/ecosystem/agent-harness-landscape.md#160-projects-does-not-mean-160-runtime-harnesses"
   agent_harness_strict_runtime_map: "guide/ecosystem/agent-harness-landscape.md#core-coding-harnesses"
   agent_harness_orchestrators: "guide/ecosystem/agent-harness-landscape.md#orchestrators-products-above-the-runtime"
   agent_harness_liza_profile: "guide/ecosystem/agent-harness-landscape.md#liza-a-repository-harness-and-control-plane-combined"
+  agent_harness_multica_profile: "guide/ecosystem/agentic-tools.md#49-multica"
   agent_harness_liza_practitioner_report: "https://blog.ippon.fr/2026/04/29/premier-rex-multi-agent-liza/"
   agent_harness_category_map: "guide/ecosystem/agent-harness-landscape.md#the-twelve-category-map"
   agent_harness_complete_directory: "guide/ecosystem/agent-harness-landscape.md#complete-project-directory"
@@ -1205,6 +1219,7 @@ deep_dive:
   liza_framework_stars: "363 stars, 49 forks, Apache-2.0 (verified via GitHub API, 2026-08-28)"
   liza_framework_governance: "Go supervisors enforce state/merge/TDD gates + adversarial doer/reviewer pairs + YAML blackboard audit trail + circuit breaker (explicit stop-the-line) + 55+ failure-mode behavioral contract"
   liza_framework_evaluation: "docs/resource-evaluations/liza-mas-framework.md"
+  multica_evaluation: "docs/resource-evaluations/2026-09-05-multica.md"
   liza_satellite_tools_rejected: "docs/resource-evaluations/liza-mas-token-saving-cli-tools.md (scip-search/mdtoc/functional-clusters/stacklit-cli rejected 2026-06-10; framework itself is a separate, higher-scored object)"
   # Anthropic AI-native SDLC playbook: intent.md upstream document + closed Maintain-to-Plan loop (added 2026-08-26)
   ai_native_sdlc_playbook_source: "https://claude.com/blog/the-ai-native-sdlc-playbook"
@@ -1393,6 +1408,11 @@ deep_dive:
       description: "Self-hosted multi-agent Claude Code spawner (tmux + git worktrees)"
       status: "Active development (Jan 2026, 383 stars)"
       guide_section: "guide/ecosystem/ai-ecosystem.md:850"
+    multica:
+      repo: "https://github.com/multica-ai/multica"
+      description: "Issue-driven human-agent control plane with server-side coordination and local daemon execution"
+      status: "Source review at 7a438bd; runtime not tested"
+      guide_section: "guide/ecosystem/agentic-tools.md#49-multica"
     agent_chat:
       repo: "https://github.com/justinabrahms/agent-chat"
       author: "Justin Abrahms"
@@ -1420,7 +1440,7 @@ deep_dive:
       published: "2026-01-21"
       guide_section: "README.md:338"
   # Section 9.18 - Codebase Design for Agent Productivity
-  codebase_design_agents: 20287
+  codebase_design_agents: 20293
   codebase_design_source: "https://marmelab.com/blog/2026/01/21/agent-experience.html"
   codebase_design_author: "François Zaninotto (Marmelab)"
   codebase_design_llms_txt: 20864  # llms.txt standard for AI-optimized documentation
@@ -1568,7 +1588,7 @@ deep_dive:
   daily_workflow: 25233
   # AI Ecosystem (Section 11, ~line 10525)
   ai_ecosystem: 13308
-  ai_ecosystem_complementarity: 25467
+  ai_ecosystem_complementarity: 25473
   ai_ecosystem_tool_matrix: 25540
   ai_ecosystem_workflows: 25675
   ai_ecosystem_integration: 25803
@@ -1668,7 +1688,7 @@ deep_dive:
   # Appendix
   appendix_a_file_locations: "guide/ultimate-guide.md#appendix-a-file-locations-reference" # was line 26179
   appendix_b_faq: "guide/ultimate-guide.md#appendix-b-faq" # was line 26357
-  faq_clawdbot_vs_claudecode: 26326
+  faq_clawdbot_vs_claudecode: 26332
   faq_product_managers: "guide/ultimate-guide.md#can-product-managers-use-claude-code" # was line 26428
   appendix_c_resource_evaluation: "guide/ultimate-guide.md#appendix-c-resource-evaluation-process" # was line 26493
   appendix_d_myths_vs_reality: "guide/ultimate-guide.md#appendix-d-myths-vs-reality" # was line 26536
@@ -2604,13 +2624,13 @@ ecosystem:
     description: "Marketing sites for guide discovery and navigation"
     architecture: "4-repo ecosystem: 2 sources (docs) + 2 landings (vitrine)"
     code_landing:
-      local: "/Users/florianbruniaux/Sites/perso/claude-code-ultimate-guide-landing/"
+      repository: "https://github.com/FlorianBruniaux/claude-code-ultimate-guide-landing"
       purpose: "Marketing site for Claude Code guide"
       audience: "Developers discovering the guide"
       features: ["badges (version, templates, lines)", "quiz (334 questions)", "FAQ", "cross-links to Cowork"]
       sync_with: "Guide Code (version, templates count, guide lines)"
     cowork_landing:
-      local: "/Users/florianbruniaux/Sites/perso/claude-cowork-guide-landing/"
+      repository: "https://github.com/FlorianBruniaux/claude-cowork-guide-landing"
       purpose: "Marketing site for Cowork guide"
       audience: "Knowledge workers discovering Cowork"
       features: ["prompts showcase", "workflows preview", "cross-links to Code"]
@@ -2986,6 +3006,7 @@ section_maps:
     - "bytebytego"
     - "stanford-online"
     - "the-product-crew"
+    - "ai-engineer-and-pragmatic-engineer-interviews"
     - "adding-to-this-file"
   "guide/core/glossary.md":
     - "a"
@@ -3132,7 +3153,6 @@ section_maps:
   "guide/ecosystem/agentic-tools.md":
     - "the-spectrum"
     - "section-1-terminal-coding-agents"
-    - "19-warp-agent-cli"
     - "section-2-autonomous-coding-agents"
     - "section-3-multi-agent-frameworks"
     - "section-4-agent-orchestration-tools"
@@ -3376,7 +3396,6 @@ section_maps:
     - "skill-lifecycle"
     - "best-practices"
     - "validation-youre-ready-if"
-    - "sources"
     - "whats-next"
   "guide/learning-path/06-hooks.md":
     - "goal"
@@ -3478,12 +3497,14 @@ section_maps:
     - "6-workforce-plans-and-production-api-traffic-solve-different-problems"
     - "7-decision-and-pilot-gate"
     - "8-boundaries"
+    - "9-one-page-decision-summary"
   "guide/ops/team-metrics.md":
     - "the-measurement-problem"
     - "the-dora-foundation"
     - "dora-in-an-ai-augmented-context"
     - "beyond-dora-the-space-framework"
     - "ai-specific-metrics"
+    - "measure-the-shared-verification-queue"
     - "agentic-metrics-what-dora-doesnt-measure"
     - "product-metrics-the-often-missing-layer"
     - "by-team-size"
@@ -3494,6 +3515,7 @@ section_maps:
     - "implementation-roadmap"
     - "reporting-delivery-capacity-to-a-skeptical-board"
   "guide/roles/adoption-approaches.md":
+    - "open-contribution-without-granting-unrestricted-delivery"
     - "what-we-dont-know-yet"
     - "what-we-do-know-empirical-data"
     - "starting-points-not-prescriptions"
@@ -3674,6 +3696,14 @@ section_maps:
     - "3-the-map-of-six-files"
     - "4-five-governance-questions-before-you-adopt-anything"
     - "5-the-unbounded-velocity-trap"
+  "guide/workflows/ai-assisted-open-source-contributions.md":
+    - "1-check-whether-the-project-wants-this-contribution"
+    - "2-establish-the-problem-before-editing"
+    - "3-keep-the-patch-and-the-claim-narrow"
+    - "4-verify-the-change-and-explain-it-without-the-agent"
+    - "5-submit-only-when-the-packet-is-ready-then-own-the-follow-up"
+    - "worked-readiness-decision"
+    - "related-workflows"
   "guide/workflows/best-of-n.md":
     - "decision-rule"
     - "the-six-operations-are-different"
