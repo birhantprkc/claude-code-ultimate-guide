@@ -66,6 +66,7 @@ class TranslationStatusTests(unittest.TestCase):
             root = Path(tmp)
             write_qmd(root / "whitepapers/fr/00-introduction.qmd", "fr")
             write_qmd(root / "whitepapers/en/00-introduction-en.qmd", "en")
+            write_qmd(root / "whitepapers/fr/03-security.qmd", "fr")
             write_qmd(root / "cards/fr/c01-card.qmd", "fr")
             write_qmd(root / "cards/en/c01-card.qmd", "en")
             registry = {
@@ -73,6 +74,7 @@ class TranslationStatusTests(unittest.TestCase):
                     "whitepapers": {
                         "roots": {"fr": "whitepapers/fr", "en": "whitepapers/en"},
                         "public_prefixes": ["00"],
+                        "known_unpaired_prefixes": {"fr": ["03"], "en": []},
                     },
                     "recap_cards": {
                         "roots": {"fr": "cards/fr", "en": "cards/en"},
@@ -85,6 +87,26 @@ class TranslationStatusTests(unittest.TestCase):
                 stats,
                 {"whitepapers": 1, "whitepaper_revision_differences": 0, "recap_cards": 1},
             )
+
+    def test_registry_counts_must_match_validated_whitepaper_sources(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        registry = json.loads(
+            (root / "machine-readable/translations.json").read_text(encoding="utf-8")
+        )
+        modified = copy.deepcopy(registry)
+        whitepapers = next(
+            artifact
+            for artifact in modified["localized_artifacts"]
+            if artifact["kind"] == "whitepaper_series"
+        )
+        whitepapers["coverage"]["paired_source_items_in_this_repository"] += 1
+
+        errors, _, _, _ = MODULE.validate_registry(modified, root, False)
+
+        self.assertIn(
+            "whitepaper_series paired source count differs from validated source pairs",
+            errors,
+        )
 
     def test_publication_pairs_report_missing_recap_translation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -143,6 +165,49 @@ class TranslationStatusTests(unittest.TestCase):
             chinese["translated_from"]["commit"],
         )
         self.assertIn("es-419", {item["language"] for item in registry["translations"]})
+
+    def test_canonical_source_hash_must_match_committed_file_bytes(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        registry = json.loads(
+            (root / "machine-readable/translations.json").read_text(encoding="utf-8")
+        )
+        modified = copy.deepcopy(registry)
+        impossible_hash = "0" * 64
+        modified["canonical"]["sha256"] = impossible_hash
+        modified["canonical"]["source"]["sha256"] = impossible_hash
+
+        errors = MODULE.validate_evidence_registry(modified, root)
+
+        self.assertIn("canonical source hash differs from source.commit:path", errors)
+
+    def test_update_local_rejects_uncommitted_canonical_guide(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._git(root, "init")
+            self._git(root, "config", "user.email", "tests@example.invalid")
+            self._git(root, "config", "user.name", "Translation Tests")
+            (root / "guide").mkdir()
+            guide = root / "guide/ultimate-guide.md"
+            guide.write_text("# Guide\n\n**Version**: 1.0.0\n", encoding="utf-8")
+            (root / "VERSION").write_text("1.0.0\n", encoding="utf-8")
+            registry_path = root / "translations.json"
+            registry_path.write_text(
+                json.dumps(
+                    {
+                        "canonical": {"path": "guide/ultimate-guide.md"},
+                        "translations": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self._git(root, "add", "VERSION", "guide/ultimate-guide.md")
+            self._git(root, "commit", "-m", "baseline")
+            guide.write_text("# Guide changed\n\n**Version**: 1.0.0\n", encoding="utf-8")
+            registry_before = registry_path.read_text(encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "commit the guide first"):
+                MODULE.update_local_registry(registry_path, root, False)
+            self.assertEqual(registry_before, registry_path.read_text(encoding="utf-8"))
 
     def test_community_translation_cannot_be_project_official(self) -> None:
         root = Path(__file__).resolve().parents[1]

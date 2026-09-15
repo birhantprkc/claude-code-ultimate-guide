@@ -83,7 +83,7 @@ test('npm metadata exposes the package and official MCP Registry identities', ()
   assert.equal(packageJson.scripts['registry:metadata:check'], 'node scripts/render-registry-metadata.mjs --check')
   assert.equal(
     packageJson.scripts['release:check'],
-    'npm ci && npm test && npm run manifest:check && npm run docs:product:check && npm run registry:metadata:check && npm pack --dry-run --json',
+    'node scripts/run-release-check.mjs',
   )
 
   const manifest = readJson(manifestPath)
