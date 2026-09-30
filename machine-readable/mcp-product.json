@@ -12,9 +12,9 @@
   },
   "guide": {
     "version": "3.43.0",
-    "line_count": 26198,
-    "index_entries": 1859,
-    "claude_code_releases": 252
+    "line_count": 26240,
+    "index_entries": 1884,
+    "claude_code_releases": 256
   },
   "runtime": {
     "tools": [
@@ -485,5 +485,5 @@
       ]
     }
   },
-  "source_digest": "sha256:79f5c4c07c8cd81171313c7984785ab4ddb3f27f6944c431d3be0cb6d6b1024e"
+  "source_digest": "sha256:0d3d4f54ea442efab0e4bc7ea8b722a04aca8fa8dbcdb7686b34ec3f2ca830a7"
 }

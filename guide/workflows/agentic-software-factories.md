@@ -31,10 +31,22 @@ Buying a platform does not create a software factory. The operating model define
 | mechanical verification | repository harness or policy engine | command, output, exit status, and artifact revision |
 | ambiguous exception or high-impact release | named human or pre-authorized policy | verdict, evidence references, and exception record |
 | future process improvement | versioned improvement loop | candidate diff and held-out evaluation |
+| whether the shipped change delivered the intended value | the person who wrote the intent, usually product | an outcome or adoption signal named before the work starts, read after release |
 
 Pavan Belagatti summarizes the split as ["agents do the work, humans provide the gates"](https://www.youtube.com/watch?v=0nM1ygBm8tA&t=97s). His longer software-factory walkthrough shows a [human review gate](https://www.youtube.com/watch?v=pE1S1egMrAI&t=908s) plus [automated rollback and feedback](https://www.youtube.com/watch?v=pE1S1egMrAI&t=764s) in a Port-oriented workflow. The videos prove that the demonstrated workflow can be configured. They do not measure reliability, total cost, reviewer time, hostile-input behavior, or comparative productivity.
 
 OpenAI's [Harness Engineering](https://openai.com/index/harness-engineering/) report uses the related phrase "Humans steer. Agents execute" and documents one internal greenfield experiment. Its self-reported throughput and time estimate are useful implementation evidence, not a neutral benchmark. In both accounts, the human leaves repeated execution while remaining responsible for governance.
+
+### The constraint moves upstream, to what is worth building
+
+Most software-factory designs, including every level in section 1, optimize engineering time: faster implementation, more parallel agents, tighter verification loops. Once code production speeds up, engineering time stops being the scarce resource. The scarce resources become deciding what is worth shipping and checking that what shipped does what it was meant to do. A factory built only around the engineering stages speeds up the part of the system that is no longer the bottleneck, and ships more features without shipping more value.
+
+OpenAI's account of its own pipeline points the same way (see [section 6](#6-the-half-of-the-factory-that-runs-after-the-merge) for the source and its limits). Venkat Venkataramani places judgment, prioritization and taste in the first stage, where a human defines the outcome, and states that OpenAI's engineers are becoming more like product managers than traditional systems engineers. The same article reports that subject matter experts are embedded in the ChatGPT Work engineering teams, because in some domains developers can no longer channel the needed taste into the harness themselves, for example what a good slide deck or business report looks like. That is one company's self-description, not a measured result, but it locates the work that remains human in intent and judgment rather than in execution.
+
+Two consequences for anyone building a factory:
+
+- **Bring the author of the intent back into verification.** Section 4's first question asks whether a gate is deterministic. A second gap sits beside it: tests can pass while failing to cover what the ticket asked for. A read-only review agent can compare the ticket's acceptance criteria with the tests actually written and report criteria that no test exercises, to the person who wrote them. The output is a gap list for that person to judge, not an approval. [Spec-first development](./spec-first.md) covers how to write acceptance criteria an agent can check.
+- **Measure the other half.** A factory that reports throughput and change failure rate but not adoption or time-to-value repeats, on the product side, the trap section 5 describes on the code side. The product metrics in [Team Metrics](../ops/team-metrics.md#product-metrics-the-often-missing-layer) are the missing half of the factory's dashboard, and the last row of the table above gives them an owner.
 
 ---
 
@@ -46,6 +58,7 @@ OpenAI's [Harness Engineering](https://openai.com/index/harness-engineering/) re
 4. [Five governance questions before you adopt anything](#4-five-governance-questions-before-you-adopt-anything)
 5. [The unbounded velocity trap](#5-the-unbounded-velocity-trap)
 6. [The half of the factory that runs after the merge](#6-the-half-of-the-factory-that-runs-after-the-merge)
+7. [Before the merge: two loops Claude Code already ships](#7-before-the-merge-two-loops-claude-code-already-ships)
 
 ---
 
@@ -203,3 +216,44 @@ Nothing, at the levels most readers occupy. Levels 1 through 4 remain the right 
 What the account does change is the shape of the ceiling. The constraint at OpenAI is not model capability and not orchestration; it is that every delivery system downstream of code generation is absorbing load it was not built for, reported as roughly 10x on some systems in about six months. That is the same wall Anthropic hit in its own CI, documented in section 5, from an entirely separate codebase and toolchain. Two competing frontier labs independently reporting that their verification and delivery infrastructure, not their agents, became the binding constraint is the most transferable thing in either account.
 
 Read that alongside what neither account publishes. Both measure throughput in detail and neither publishes a defect rate, an escape rate or a change failure rate. Section 5's trap is not a hypothetical that applies to smaller teams with less rigor. It is visible in the reporting of the two organizations best placed to measure their way out of it.
+
+---
+
+## 7. Before the merge: two loops Claude Code already ships
+
+Section 6 covers the stages a native setup cannot reach. The same OpenAI account also describes two pre-merge loops that do have a native Claude Code counterpart, which makes them the cheapest part of the pipeline to copy. The source and its limits are the same as in section 6: one company's system, described to a journalist, with no quality figures.
+
+### 7.1 One long-running goal instead of many supervised sessions
+
+OpenAI attributes part of its internal adoption surge to a `/goal` setting in Codex, where the agent keeps working until a stated outcome is reached. Andrew Ambrosino, the Codex desktop lead, describes the effect on how people work: "Codex being good at longer-running tasks seems to cause people to do fewer things in parallel. This is because a long-running agent often spins off other agents to do other things, reducing the surface area that you, as a human, have to manage." That is an observation from one team, not a measurement. The April to May internal usage jump (60% to 90%), which he attributes in part to better handling of long-running tasks, is self-reported with no counting method.
+
+The claim is still worth taking seriously, because it cuts against a common piece of advice: open more sessions in parallel to go faster. Every parallel session is a context a human has to hold, check and merge. A single goal that delegates to sub-agents moves that fan-out inside the harness, where the lead agent owns the synthesis. Level 2 and Level 3 in section 1 already describe that shape; the goal is what keeps it running without a prompt per step.
+
+Claude Code ships the same primitive. The [official `/goal` documentation](https://code.claude.com/docs/en/goal) describes the mechanics:
+
+- `/goal <condition>` starts a turn immediately and keeps starting new ones. After each turn, a small fast model (Haiku by default on the Claude API) returns one of three verdicts: not yet met, met, or impossible. The goal clears on met, on impossible, or on an error you have to fix.
+- The completion check comes from a separate model, not from the one doing the work. This is the creator-verifier split from [agent-harness.md §8](../core/agent-harness.md#8-creator-verifier-pattern), applied at the loop level.
+- A goal does not change the permission mode. Unattended runs need auto mode; in Manual mode Claude still asks before tool calls your settings do not allow.
+- It runs non-interactively: `claude -p "/goal <condition>"` loops to completion in one invocation.
+- If Claude keeps answering the evaluator without using any tool for several turns, the loop stops and hands control back with the goal still set.
+
+The limit to design around: the evaluator judges the condition against what appears in the conversation. It does not run commands or read files itself. A condition such as "the feature works" can be satisfied by a confident summary. A condition such as "`npm test` exits 0 and `git status` shows no change outside `src/auth`" forces the proof into the transcript, where the evaluator can read it. That is question 1 from section 4, deterministic gate or LLM self-grading, applied to a single session. To bound the cost, the documentation's own advice is to put a turn or time clause in the condition itself, such as `or stop after 20 turns`.
+
+### 7.2 An agent that babysits the pull request until it is green
+
+In OpenAI's pipeline, the coding agent opens the pull request and then stays on it: it fixes CI failures, answers review comments and updates the PR until checks pass. The human is not the one relaying red builds back to the agent.
+
+The native counterpart is [Auto-fix pull requests](https://code.claude.com/docs/en/claude-code-on-the-web#auto-fix-pull-requests), started from the terminal with `/autofix-pr` on the PR's branch. According to the official documentation, it spawns a cloud session that subscribes to GitHub activity on that PR. On a failing check or a new review comment, Claude pushes a fix when it is confident, asks you when a comment is ambiguous or architecturally significant, and logs duplicates without acting.
+
+Four constraints decide whether it fits your repository:
+
+| Constraint | Consequence |
+|---|---|
+| Requires the Claude GitHub App on the repository | Not available on a forge the app cannot reach |
+| GitHub sends no webhook when the base branch moves and creates a conflict | Conflicts still need a human prompt ("rebase") |
+| Claude replies to review threads under your GitHub account, labeled as Claude Code | Reviewers see your name on agent-written replies |
+| Those replies can trigger comment-driven automation (Atlantis, Terraform Cloud, `issue_comment` workflows) | The documentation recommends disabling auto-fix where a PR comment can deploy infrastructure |
+
+The last row matters most for a factory. An agent that can post comments in a repository where comments are commands has deploy rights by a side door. Audit the repository's comment-triggered workflows before turning it on, the same way section 4's questions audit a platform before adopting it.
+
+What the native loop does not include is the part of OpenAI's review stage that decides how much review a change gets. `/autofix-pr` reacts to whatever reviewers and CI produce. The risk classification that routes a change to more agents, a mandated human, or auto-approval (section 6.1) remains something you build. The loop removes the relay work; it does not replace the decision about who has to look.

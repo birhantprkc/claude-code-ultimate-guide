@@ -18,7 +18,7 @@ This page maps the ecosystem of tools that help you manage what enters the conte
 
 1. [The Mental Model](#1-the-mental-model)
 2. [Core Concepts](#2-core-concepts) (MVC, context rot, semantic priming, ghost tokens)
-3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, pxpipe, tilth, Token Savior, context-mode, stacklit, Cloudflare Code Mode MCP)
+3. [Output Compression: CLI & Tool Output](#3-output-compression-cli--tool-output) (RTK, Headroom, pxpipe, tilth, shunt, Token Savior, context-mode, stacklit, Cloudflare Code Mode MCP)
 4. [Prompt Compression](#4-prompt-compression) (LLMLingua, Selective Context, AutoCompressors/Gisting, RECOMP, AttnComp, TOON)
 5. [AI Gateways](#5-ai-gateways)
 6. [RAG Optimization](#6-rag-optimization)
@@ -242,6 +242,69 @@ No per-project configuration is needed after global install.
 
 **Comparison with lean-ctx**: Both tilth and lean-ctx use tree-sitter to compress file reads. lean-ctx operates as a hook-level redirect (intercepts native Read calls at the MCP layer), while tilth exposes explicit navigation tools the model calls directly. lean-ctx is more transparent and requires no change to how the model requests files. tilth gives the model more control over what it fetches but requires it to use the tilth tools rather than standard read operations. On teams that want the model to actively navigate code structure rather than have reads compressed passively, tilth's explicit tools fit better.
 
+### shunt (delegation, not compression)
+
+shunt targets the same pool as tilth and lean-ctx, file reads, with a different mechanism. It does not compress what Claude reads. It keeps the file away from Claude entirely: a hook blocks the read, and a script sends the files and the question to a cheaper model, which answers with a summary. Claude only sees that summary.
+
+| Attribute | Details |
+|-----------|---------|
+| **Source** | [github.com/spotify/portal-ai-plugins](https://github.com/spotify/portal-ai-plugins) (`plugins/shunt`, Apache-2.0) |
+| **Article** | [Portal by Spotify cut my Claude Code token usage by 90%](https://engineering.atspotify.com/2026/9/portal-by-spotify-cut-my-claude-code-token-usage-by-90) |
+| **Requires** | A Spotify Portal instance (commercial managed Backstage, free trial then sales pricing) with the AiKA assistant |
+| **Worker model** | Gemini 2.5 Flash by default, configurable per Portal "mode" |
+| **Evaluation** | [spotify-portal-shunt.md](../../docs/resource-evaluations/spotify-portal-shunt.md) (3/5) |
+
+**How it works**: a `PreToolUse` hook on `Read` blocks full reads of files above 350 lines and names the `/bulk-reader` skill in its refusal. A second hook does the same for `cat`, `head`, `tail`, `less` and `more` in Bash. The `bulk-read` script sends the files to the worker model through the Portal CLI. A `code-write` script generates boilerplate from a spec and one reference file and writes it straight to disk, so Claude never reads the generated code.
+
+**Reading the 90%**: it is the mean of three read scenarios (82%, 94%, 94%) on a private monorepo, counted as tokens entering Claude's context only. The worker model's tokens, the extra turn caused by each block and answer accuracy are not measured. The cost moves to another bill rather than disappearing. The author also reports the limits: the worker's summaries carry unreliable line numbers, so edits still need a targeted read, and Gemini Flash missed a thread-safety bug that Claude found once given the section. Apply the checklist in [How to read a vendor's cost-reduction claim](../ops/ai-unit-economics.md#6-how-to-read-a-vendors-cost-reduction-claim) before quoting the number.
+
+**Measured defects** (live test, Claude Code 2.1.284, no Portal instance):
+
+- The Read block works on text files, but a PDF is blocked too: the line count is taken on the binary, so a PDF with 4,471 newline bytes is sent down the delegation path.
+- The Bash hook ignores paths that start with `~`: `head -100 ~/project/file.ts` passes while the same command with an absolute path is blocked. The hook tests the literal string, and a quoted `~` is not expanded.
+- Ranged reads always pass, including `offset: 0`, and the refusal message itself suggests re-reading with `offset` and `limit`. The hook steers Claude; it does not enforce a budget.
+- `code-write --target` writes through Bash, outside any hook or permission rule scoped to `Edit` and `Write`.
+
+**What to take from it**: the pattern, not the product. The author's first version was a block of routing rules in `CLAUDE.md`, which Claude could ignore. The hook makes the routing apply on every call. You can reproduce the same enforcement without Portal and without sending code to a second vendor, by redirecting to a subagent that runs on Haiku:
+
+```markdown
+<!-- .claude/agents/bulk-reader.md -->
+---
+name: bulk-reader
+description: Answers a precise question about large files. Use when a full read was refused for size.
+tools: Read, Grep, Glob
+model: haiku
+---
+Read the files named in the task and answer only the question asked, in short bullets.
+Lead each bullet with the exact symbol name and line number. Do not propose edits.
+```
+
+```bash
+#!/usr/bin/env bash
+# PreToolUse hook (matcher: Read): send full reads of large text files to a Haiku subagent
+MIN_LINES="${BULK_READ_MIN_LINES:-350}"
+input=$(cat)
+# The subagent itself must be able to read the files it was sent
+[ "$(jq -r '.agent_type // empty' <<<"$input")" = "bulk-reader" ] && exit 0
+# Ranged reads (offset or limit set, including 0) are targeted: let them through
+[ "$(jq -r '.tool_input | has("offset") or has("limit")' <<<"$input")" = "true" ] && exit 0
+path=$(jq -r '.tool_input.file_path // empty' <<<"$input")
+[ -f "$path" ] || exit 0
+# Text files only: PDFs, images and notebooks go to Read as usual
+case "$(file -b --mime-type "$path")" in
+  text/*|application/json|application/xml|application/javascript) ;;
+  *) exit 0 ;;
+esac
+lines=$(wc -l < "$path" | tr -d ' ')
+[ "$lines" -le "$MIN_LINES" ] && exit 0
+jq -n --arg r "File is $lines lines (threshold: $MIN_LINES). Ask the bulk-reader subagent a precise question about it, or re-read only the section you need with offset and limit." \
+  '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $r}}'
+```
+
+Register it under `hooks.PreToolUse` with `"matcher": "Read"` in `.claude/settings.json`. The hook uses the current `hookSpecificOutput` format, exits silently when it has nothing to decide, and reads `agent_type` so the subagent is not blocked by the rule it serves. File reads are already resolved to absolute paths by Claude Code, so the `~` problem above does not apply to a Read hook. The trade-off stays the same as shunt's: a summary replaces the file, which is fine for "what does this module do" and wrong for "fix line 212". Measure before and after with `/cost` on the same questions, and check the answers, not only the token count.
+
+**Comparison with tilth and lean-ctx**: they cut the tokens of a read locally, without adding a model, and keep exact content available. shunt and the subagent variant replace the read with an answer from another model: larger savings on exploratory questions, lossy by construction, and useless for edits.
+
 ### Token Savior
 
 Token Savior is a three-in-one MCP server: structural code navigation by symbol (replacing full-file reads), Bash output compaction for 34 common CLI tools, and persistent cross-session memory via SQLite with FTS5.
@@ -418,21 +481,41 @@ AI gateways sit between configured applications and their LLM providers. They ca
 
 ### Edgee
 
-Edgee is a Rust-based AI gateway. Its compression features shipped as **Compressor V2** (announced July 2, 2026): three independent layers, each targeting a different part of the request.
+Edgee is a Rust-based AI gateway for coding agents (Claude Code, Codex and others). It sells two cost levers: token compression, shipped as **Compressor V2** (announced July 2, 2026), and model routing. Compression is the lever Edgee has published measurements for; routing has no published benchmark yet (see [Routing](#routing) below). Section reviewed against Edgee's public pages on September 30, 2026.
+
+#### Compressor V2: three layers, measured separately
 
 | Layer | What it compresses | Measured effect (Edgee's own benchmark) |
 |-------|--------------------|-------------------------------------------|
-| **Brevity** | Model output (strips narrated planning, "I'll first read the file, then...") | ~30% median cost reduction, 6 SWE-bench Lite coding tasks |
-| **Tool Surface Reduction (TSR)** | MCP `tools[]` catalog, collapsed to one virtual `search` tool | ~33% token-volume reduction, ~10% cost reduction, 8 MCP tasks |
-| **Tool result trimming** | Conversation history / tool outputs | ~10% cost reduction, 6 coding tasks (carried over and refined from V1) |
+| **Brevity** | Model output (strips narrated planning, "I'll first read the file, then...") | 27.5% median per-task cost reduction, 6 SWE-bench Lite tasks, 6/6 favor Edgee (p = 0.031) |
+| **Tool Surface Reduction (TSR)** | MCP `tools[]` catalog, collapsed to one virtual `search` tool | 33.0% fewer tokens, 8 tool-heavy MCP tasks, 8/8 (p = 0.008); cost ~10%, 5/8, not significant |
+| **Tool result trimming** | Conversation history / tool outputs | 10.4% median cost reduction, 6 SWE-bench Lite tasks, 4/6, not significant |
 
-**Source**: [Edgee Blog, Introducing Compressor V2](https://www.edgee.ai/blog/posts/introducing-compressor-v2-three-compression-layers-measured-end-to-end-for-a-50-cost-reduction) | [github.com/edgee-ai/edgee](https://github.com/edgee-ai/edgee)
+**Sources**: [Edgee Blog, Compressor V2 methodology](https://www.edgee.ai/blog/posts/introducing-compressor-v2-three-compression-layers-measured-end-to-end-for-a-50-cost-reduction) (Khaled Maâmra, July 2, 2026) | [Edgee docs, Token Compression](https://www.edgee.ai/docs/features/token-compression) | [github.com/edgee-ai/edgee](https://github.com/edgee-ai/edgee)
 
-**Relationship to RTK**: Edgee's own post names RTK as the direct inspiration for the tool-result-trimming layer. Structurally, RTK can only ever cover that one layer: it runs as a local shell hook and has no access to the MCP tool catalog or the model's own output. For a Claude Code user already running RTK, Edgee's brevity layer is the genuinely new capability; TSR overlaps with what Claude Code's native MCP Tool Search already does for free (§ [MCP Tool Search](../core/architecture.md#mcp-tool-search-lazy-loading)), and trimming overlaps with what RTK already does locally.
+Since September 16, 2026, TSR is on by default for new Claude Code and Codex keys ([edgee#244](https://github.com/edgee-ai/edgee/pull/244)). Each layer can still be toggled per API key.
 
-**Reading the "50% combined" claim critically**: the three numbers above come from three separate experiments on two different workloads (coding vs. MCP), never measured together on the same sessions. The "50%" in the post's title tracks closest to brevity's raw aggregate (+51.1%, pulled up by one outlier task), relabeled as the combined figure. It is not an end-to-end measurement of all three layers running at once, and the effects are not mechanically additive (less narration also means less history left to trim). The statistical design is genuinely careful: paired per-task comparison, a sign test chosen over a paired t-test because cost differences are heavy-tailed, and a nonce injected into each replicate to defeat prompt-cache contamination between runs. But the sample sizes are small enough to matter: at n=6, the best achievable two-sided sign-test p-value is 0.031, meaning a perfect 6-of-6 result was the *only* outcome that could clear the conventional 0.05 threshold; one task flipping drops it to 5/6, p=0.22, not significant. The post also never reports SWE-bench Lite's actual metric, resolution rate (the share of issues whose patch still passes tests), only token cost. A cheaper agent that solves fewer tickets is not a net win, and Edgee's own benchmark repository (`edgee-ai/compression-lab`) confirms it tracks token consumption "rather than task completion rates."
+**Production vs. benchmark: Edgee now separates the two.** The current docs give two figures and warn against mixing them: **15-20%** token-bill reduction "across active Edgee customers, rolling 30 days, from compression alone, no routing" ("Plan on this one"), and **50%** on SWE-bench Lite with all three layers on, described as "a ceiling under controlled conditions." The docs add: "never quote the 50% without naming SWE-bench Lite." Earlier versions of Edgee's docs gave per-layer production averages (brevity ~6.5%, trimming ~19%, TSR ~25% "in development"); those figures no longer appear, and the current pages publish only the aggregate range.
 
-**A second, separate set of numbers exists, and it tells a different story.** Edgee's documentation (distinct from the blog post) reports production averages across real customer traffic: brevity ~6.5%, tool result trimming ~19%, tool surface reduction ~25% (labeled "in development," i.e. not yet fully shipped), and an aggregate ~20% token-bill reduction across active customers over a rolling 30-day window. These production figures diverge sharply from the controlled benchmark above: brevity's real-world effect (6.5%) sits far below its benchmark median (~30%) or headline aggregate (+51.1%), while trimming's production effect (19%) nearly doubles its benchmark result (~10%). The same page answers the resolution-rate gap with one line, "zero measurable drift on SWE-Bench Verified samples," but gives no sample size, no definition of "measurable," and no confidence interval. It reads as a direct response to the resolution-rate critique, without the statistical rigor the benchmark post itself otherwise demonstrates. Source: [Edgee docs, Why Edgee?](https://www.edgee.ai/docs/introduction/why-edgee)
+**Reading the 50% figure critically**: the methodology post states that "V2's three strategies were evaluated independently against workloads matched to their design target," so its tables contain no run with all three layers on. The docs and [product page](https://www.edgee.ai/token-compression) now back the 50% with a single SWE-bench Lite session, "18,420 → 9,210 tokens with all three on," split into per-layer shares of 10%, 10% and 30%. Two limits apply. That session is n=1 and does not appear in the methodology post. And the three shares come out at exactly 10.0%, 10.0% and 30.0% of the baseline (1,842 + 1,842 + 5,526 tokens), which reads more like an illustration than a measured decomposition. Summing the separately measured per-layer effects would not give the combined gain either: less narration leaves less history to trim.
+
+The statistical design of the per-layer experiments is careful: paired per-task comparison, a sign test chosen over a paired t-test because cost differences are heavy-tailed, a 10,000-resample bootstrap, and a nonce injected into each replicate to defeat prompt-cache contamination between runs. The sample sizes still matter: at n=6, the best achievable two-sided sign-test p-value is 0.031, so a perfect 6-of-6 result was the *only* outcome that could clear the conventional 0.05 threshold; one task flipping drops it to 5/6, p=0.22, not significant. TSR's cost effect (5/8) and trimming (4/6) did not reach significance.
+
+**Task resolution is still unmeasured.** None of Edgee's published material reports SWE-bench's actual metric, resolution rate (the share of issues whose patch still passes the tests), with compression on vs. off. The docs answer with one line, "zero measurable drift on SWE-Bench Verified samples," with no sample size, instance list, baseline rate or confidence interval. The [`compression-lab`](https://github.com/edgee-ai/compression-lab) repository measures token consumption and cost; its reports' only quality signal is "comparable lines added/removed," inside an analysis section that its README says is written by an LLM call. As of September 30, 2026, the latest report in its `reports/` folder dates from May 2026. A cheaper agent that solves fewer tickets is not a net win, so treat "semantically lossless on code tasks" as a claim to test on your own workload.
+
+**Relationship to RTK**: Edgee's methodology post names RTK as the direct inspiration for the tool-result-trimming layer. Structurally, RTK can only ever cover that one layer: it runs as a local shell hook and has no access to the MCP tool catalog or the model's own output. For a Claude Code user already running RTK, Edgee's brevity layer is the genuinely new capability, and trimming overlaps with what RTK already does locally. TSR overlaps with Claude Code's native MCP Tool Search (§ [MCP Tool Search](../core/architecture.md#mcp-tool-search-lazy-loading)); Edgee's launcher force-enables Claude's Tool Search when TSR is on ([edgee#150](https://github.com/edgee-ai/edgee/pull/150)), and no published experiment isolates TSR's gain over native Tool Search alone. The only direct comparison is a pre-V2 Edgee report from March 2026 ([battle report](https://github.com/edgee-ai/compression-lab/blob/main/reports/battle-report-2026-03-12T07-09-26-635Z.md)): 19.5% cost reduction for Edgee vs. 19.0% for RTK on the same instruction set, with RTK's API duration lower (676 s vs. 712 s). It publishes no replicate count or significance test, so it shows the two tools in the same range, not a winner.
+
+#### Routing
+
+Edgee's [routing strategies](https://www.edgee.ai/docs/features/routing-strategies) come in two forms: manual rules (map a requested model to a serving model, with optional per-model budgets or budget stages) and **smart routing, in beta**, which classifies each task as low, medium, high or max complexity and sends it to the model chosen for that level. Edgee's docs publish no savings figure for routing. Its product page mentions "up to 70% combined reduction" for compression plus budget-driven strategies, without a methodology.
+
+The only routing number found is a customer interview hosted on Edgee's blog ([Qonto, September 22, 2026](https://www.edgee.ai/blog/posts/edgee-has-become-our-governance-layer-for-ai-usage-an-interview-with-qontos-kevin-prettre)): compression alone at a "17% median" cost reduction, and compression plus rerouting at "37.7%" in Qonto's latest measurement, after a September 1 policy that moved task-execution traffic to "a cheaper frontier model of the same class." The routing share is not isolated. Qonto states it does "not yet run a formal evaluation platform"; its quality evidence is team feedback, delivery velocity, and a two-week blind trial in which ten engineers were silently rerouted to an open-weight model and "none of them could tell the difference."
+
+#### Deployment notes
+
+- **Latency**: the "<12ms P50 gateway overhead" on the product page is compression time at the edge. Edgee's own [gateway benchmark](https://www.edgee.ai/blog/posts/i-benchmarked-six-ai-gateways-including-ours) (August 10, 2026) measured time-to-first-token overhead of +24 ms on `gpt-5.4` and +101 ms on `claude-sonnet-4-6`, on short prompts over two days; its own scope note excludes long contexts and tool calls.
+- **Data path**: the hosted gateway processes prompts, code context and tool results in transit. An [on-premise option](https://www.edgee.ai/blog/posts/edgee-on-premise-gateway) (July 16, 2026) keeps "prompts and provider keys" inside your infrastructure, with a headless mode for air-gapped networks.
+- **Independent evidence**: as of September 30, 2026, we found no independent reproduction of Edgee's benchmarks. Third-party write-ups, such as [SFEIR's analysis](https://www.sfeir.com/articles/edgee-compression-contexte-agents-codage/) (in French), re-read Edgee's published data rather than re-running it.
 
 ### Portkey
 
@@ -737,6 +820,7 @@ These tools are not mutually exclusive. Langfuse for tracing plus Phoenix for RA
 |---------|------|
 | Command outputs flooding context | RTK |
 | File reads consuming most of context budget | tilth, lean-ctx, or Token Savior |
+| Exploratory questions over large files, where a summary is enough | A Read hook that redirects to a Haiku subagent (the [shunt](#shunt-delegation-not-compression) pattern) |
 | Monitoring token spend | ccusage (see [Third-Party Tools](./third-party-tools.md)) |
 | Context growing too long in a session | `/compact` at 70% usage |
 | Forgetting past session decisions | ICM memory system |
@@ -749,7 +833,7 @@ These tools are not mutually exclusive. Langfuse for tracing plus Phoenix for RA
 | Tool output JSON too verbose | Headroom |
 | Prompts too long, need compression | LLMLingua |
 | Routing across multiple LLM providers | Portkey |
-| Compression + guardrails at the edge | Edgee |
+| Compression + model routing for coding agents | Edgee |
 | RAG chunks losing context | Anthropic Contextual Retrieval |
 | Tracing agent execution | Langfuse or LangSmith |
 | RAG quality measurement | Arize Phoenix |
