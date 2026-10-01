@@ -4,7 +4,7 @@ description: "How to model the real cost per accepted task in agentic AI develop
 tags: [cost, ops, guide]
 ---
 
-# AI Unit Economics
+# AI unit economics
 
 > **Audience**: Tech leads, platform engineers, and engineering managers who need to reason about what agentic AI costs per accepted unit of work, not just what shows up on the monthly invoice.
 >
@@ -165,6 +165,8 @@ Choose the routing level before comparing savings. A request router, a task disp
 
 Two production accounts put bounded numbers on routing. One practitioner reported that routing prompts by complexity to cheaper models cut production cost by roughly half in the observed case (*Antonio Goncalves, [IFTTD ep 357](https://www.ifttd.io/)*). Databricks reports that its internal Smart Router reduced average task cost by more than 30% while roughly matching the most expensive model's quality. Neither account publishes a paired task sample, acceptance protocol, or confidence interval. Treat both as operating results to reproduce on internal tasks, not as portable savings constants. Source: [Databricks, "Managing AI Coding Costs at Scale"](https://www.databricks.com/blog/managing-ai-coding-costs-scale), 2026-08-07.
 
+Task-level and per-phase routers are starting to appear as local tools. [Agent Router](../ecosystem/third-party-tools.md#agent-router) (soon, not public yet), written by the author of this guide, picks the model, effort and skills for the plan, execute and verify phases of a Claude Code or Codex task and records why. Its README publishes no measured cost or quality gain yet, so it illustrates the task-level boundary, not a saving.
+
 The "efficiency frontier" is a useful label for the candidate models that meet a task class's quality bar at the lowest cost. It is not a public leaderboard. Evaluate the model-harness pair on frozen representative tasks, repeated runs, the same acceptance gate, and total review and rework cost before moving traffic.
 
 ### Isolate heavy work in sub-agents
@@ -183,7 +185,7 @@ Because cache reads are priced far below fresh input, a stable context that the 
 
 Routing policy participates in that cache design. Prefer a task-level decision before the session starts when the task can remain on one model-harness pair. If a request-level router may switch models mid-session, measure cache creation, cache reads, cold starts, and total accepted-task cost. A cheaper inference request can make the complete task more expensive when it invalidates a large reusable prefix.
 
-The same lever applies on the tool-output side of the equation. A `git status` or `find` call in a large repo can return thousands of tokens of noise the model never needed. Tools like [rtk](https://github.com/rtk-ai/rtk) filter that CLI output before it reaches the model, cutting input tokens on those calls by a reported 60 to 90% without changing what the agent can act on.
+The same lever applies on the tool-output side of the equation. A `git status` or `find` call in a large repo can return thousands of tokens of noise the model never needed. Tools like [rtk](https://github.com/rtk-ai/rtk) (the guide author is a core contributor to it) filter that CLI output before it reaches the model, cutting input tokens on those calls by a reported 60 to 90% without changing what the agent can act on.
 
 ### Audit what a skill or tool injects, not just what it costs to load
 
@@ -264,15 +266,17 @@ A short checklist for the next "X% faster/cheaper" claim: is the comparison pair
 This page reasons about the cost model. It deliberately does not include:
 
 - **A proprietary benchmark.** There is no measured dataset of cost-per-PR across teams here. The numbers in §2 are illustrative to teach the method, not results.
-- **A provider pricing comparison.** Per-token prices change often enough that a comparison table would be stale within a release or two. For current rates, check the provider's pricing page and the live figures that tools like `ccusage` read from your own sessions.
+- **A provider pricing comparison.** Per-token prices change often enough that a comparison table would be stale within a release or two, so this page keeps none. The dated, source-checked comparison lives in the [LLM market snapshot](./llm-market-snapshot.md), which carries its read date and a refresh rule. For your own rates, check the provider's pricing page and the live figures that tools like `ccusage` read from your own sessions.
 - **A business-value model.** This page treats human-accepted work as the quality denominator. It does not price revenue per feature, defects avoided, customer impact, or regulatory risk. Connecting accepted engineering work to business value remains a separate exercise per team.
 
 If you have measured attempts, acceptance decisions, retries, review time, and rework from your own workflow, use that evidence instead of the illustrative token budget in §2. Treat this page as a measurement framework, not a fleet benchmark.
 
 ---
 
-## See Also
+## See also
 
+- [ai-finops.md](./ai-finops.md) for the AI FinOps section entry point and the full lever map
+- [llm-market-snapshot.md](./llm-market-snapshot.md) for dated provider prices, quotas, and the reference workload cost
 - [api-gateway.md](./api-gateway.md) for the technical implementation of budgets, virtual keys, and per-team caps
 - [observability.md](./observability.md) for per-session cost estimation and the tools that read exact token counts
 - [practitioner-insights.md](../ecosystem/practitioner-insights.md) for the field reports referenced here in full context

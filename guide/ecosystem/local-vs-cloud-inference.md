@@ -4,7 +4,7 @@ description: "Comparable hardware builds for running large open-weight models lo
 tags: [ecosystem, hardware, local-llm, cloud, cost, benchmarks]
 ---
 
-# Local vs Cloud: LLM Hardware and Inference Economics
+# Local vs cloud: LLM hardware and inference economics
 
 > **Reading time**: ≈35 minutes
 >
@@ -12,12 +12,13 @@ tags: [ecosystem, hardware, local-llm, cloud, cost, benchmarks]
 
 ---
 
-## Table of Contents
+## Table of contents
 
 - [Data Snapshot Date](#data-snapshot-date)
 - [Sizing Local Hardware with llmfit](#sizing-local-hardware-with-llmfit)
 - [Benchmark Protocol Before You Buy](#benchmark-protocol-before-you-buy)
 - [Fourteen Comparable Hardware Configurations](#fourteen-comparable-hardware-configurations)
+- [Memory Bandwidth, Prefill and ECC](#memory-bandwidth-prefill-and-ecc)
 - [What Actually Fits: Named Models](#what-actually-fits-named-models)
 - [Which Local Machine for Which Usage](#which-local-machine-for-which-usage)
 - [Serving Engine Tuning: vLLM in Production](#serving-engine-tuning-vllm-in-production)
@@ -31,13 +32,14 @@ tags: [ecosystem, hardware, local-llm, cloud, cost, benchmarks]
 - [Decision Diagram](#decision-diagram)
 - [Decision Framework](#decision-framework)
 - [Sizing Self-Hosted Inference for a Team](#sizing-self-hosted-inference-for-a-team)
+- [One Machine for a Small Team](#one-machine-for-a-small-team)
 - [Switching Providers at the CLI Level](#switching-providers-at-the-cli-level)
 
 ---
 
-## Data Snapshot Date
+## Data snapshot date
 
-Every price, spec, and throughput number on this page is a snapshot from **August 2026**. GPU prices move by double digits in weeks, cloud providers reprice without notice, and model families get replaced. Treat the tables as a method to reproduce, not a permanent price list. The queries and CLI commands used to produce this page are included so you can rerun them.
+Every price, spec, and throughput number on this page is a snapshot from **August 2026**, except where a row or paragraph says it was rechecked on **October 1, 2026** (Mac Studio, Strix Halo and Gorgon Halo rows, the bandwidth table, and the small-team section). Memory prices rose sharply through 2026: TrendForce reported conventional DRAM contract prices up 93-98% quarter over quarter in Q1 2026 and forecast another 58-63% in Q2 ([TrendForce, June 1, 2026](https://www.trendforce.com/presscenter/news/20260601-13070.html), not re-read for this revision), so 128 GB-class machines can cost markedly more than at launch. GPU prices move by double digits in weeks, cloud providers reprice without notice, and model families get replaced. Treat the tables as a method to reproduce, not a permanent price list. The queries and CLI commands used to produce this page are included so you can rerun them.
 
 For a live view instead of this fixed snapshot, two trackers update continuously rather than on a fixed schedule: [llm-stats.com](https://llm-stats.com/llm-updates) (benchmark scores, arena votes, and API pricing pulled directly from providers) and [benchlm.ai](https://benchlm.ai/) (401+ models across 46 leaderboard categories, including tokens/sec and time-to-first-token, explicitly excluding algorithmically-generated benchmark data). Neither replaces the hardware-fit math on this page, which still needs `llmfit` against your own target model.
 
@@ -61,7 +63,7 @@ Two limits to know before trusting its output:
 
 ---
 
-## Benchmark Protocol Before You Buy
+## Benchmark protocol before you buy
 
 A capacity check only answers whether the weights can be loaded. It does not show whether the model remains usable with a real prompt, several users, or the inference backend you plan to run. Test the exact model, quantization, context length, and concurrency target before comparing machines.
 
@@ -80,7 +82,7 @@ One Framework Desktop presentation reports 80-130 W during use, 25-60 tokens/sec
 
 ---
 
-## Fourteen Comparable Hardware Configurations
+## Fourteen comparable hardware configurations
 
 Bare GPUs are not comparable to laptops or appliances. The table below only lists complete systems: CPU, memory, GPU, and storage together, sorted by increasing price. For workstation builds around a bare Nvidia GPU (no fixed CPU from the vendor), the CPU column shows one realistic example, not a spec. The first three rows are the entry tier a reader specifically asked for: machines with a GPU (dedicated or unified) capped around 16-32 GB, cheap enough to try local inference without committing to a €4,000+ build.
 
@@ -91,23 +93,48 @@ Bare GPUs are not comparable to laptops or appliances. The table below only list
 | 1 | Mac mini, Apple M6 | Apple M6, 12 cores (2 super + 4 performance + 6 efficiency) | 16-32 GB unified | Integrated GPU, 12 cores, 170 GB/s bandwidth | 256 GB-2 TB SSD | €1,049 (16 GB/256 GB base) / ≈€1,500 est. at 32 GB max (+$400 BTO) |
 | 2 | Workstation, 1x RTX 5060 Ti 16 GB | *Example*: AMD Ryzen 5 7600, 6 cores | 32-64 GB DDR5 (host only) | RTX 5060 Ti, 4,608 CUDA cores, 16 GB GDDR7 dedicated, 448 GB/s | 1-2 TB NVMe | ≈€1,300-1,600 (GPU alone: $429 MSRP, ≈€590-730 street Aug 2026) |
 | 3 | Mac mini, Apple M5 Pro | Apple M5 Pro, 15 or 18 cores | 24-64 GB unified | Integrated GPU, 16 or 20 cores, 307 GB/s bandwidth | 512 GB-8 TB SSD | €1,999 (24 GB/512 GB base) / ≈€3,000 est. at 64 GB max (+$1,000 BTO) |
-| 4 | AMD Ryzen AI Halo | Ryzen AI Max+ 395, Zen 5, 16 cores/32 threads | 128 GB unified LPDDR5x | Radeon 8060S integrated, 40 CU RDNA 3.5, no dedicated VRAM | 2 TB SSD | ≈$3,999 (≈€3,700-4,000) |
+| 4 | AMD Ryzen AI Halo (same chip in Framework Desktop, GMKtec EVO-X2, HP Z2 Mini G1a) | Ryzen AI Max+ 395, Zen 5, 16 cores/32 threads | 128 GB unified LPDDR5x | Radeon 8060S integrated, 40 CU RDNA 3.5, no dedicated VRAM | 2 TB SSD | ≈$3,999 (≈€3,700-4,000) for AMD's platform; the Framework Desktop 128 GB launched at $1,999, and current street prices for these mini PCs moved with memory prices (not rechecked here) |
 | 5 | NVIDIA DGX Spark | Grace, 20 Arm cores (10x Cortex-X925 + 10x Cortex-A725) | 128 GB unified LPDDR5x | GB10 Blackwell, 6,144 CUDA cores (48 SM), no dedicated VRAM | 4 TB NVMe (included) | ≈$4,699 (≈€4,180-4,700) |
 | 6 | MacBook Pro, Apple M5 Pro | Apple M5 Pro, 15 or 18 cores | 48 GB unified | Integrated GPU, 20 cores | 2 TB SSD | ≈€4,500-5,000 |
 | 7 | Workstation, 1x RTX 5090 | *Example*: AMD Ryzen 9 9950X, 16 cores | 64-128 GB DDR5 (host only) | RTX 5090, 21,760 CUDA cores, 32 GB GDDR7 dedicated | 2-4 TB NVMe | ≈€5,000-6,000 |
 | 8 | MacBook Pro, Apple M5 Max | Apple M5 Max, 18 cores | 128 GB unified | Integrated GPU, 40 cores | 2 TB SSD | ≈€5,500-6,500 |
-| 9 | AMD Ryzen AI Max PRO 400 ("Gorgon Halo") | Ryzen AI Max+ PRO 495, Zen 5, 16 cores/32 threads, up to 5.2 GHz | 192 GB unified + 160 GB dedicated graphics memory | Radeon 8065S integrated, 40 CU RDNA 3.5 | 2-4 TB (estimated) | Unannounced, ≈€5,000-10,000 est. (Q3 2026 launch, no independent benchmark exists) |
+| 9 | AMD Ryzen AI Max PRO 400 ("Gorgon Halo") | Ryzen AI Max+ PRO 495, Zen 5, 16 cores/32 threads, up to 5.2 GHz | Up to 192 GB unified LPDDR5X-8533, up to 160 GB addressable by the GPU | Radeon 8065S integrated, 40 CU RDNA 3.5 | 2-4 TB (estimated) | Announced by AMD; not shipping as of September 27, 2026 per Petronella, which reports HP ZBook Ultra G3a pricing of $5,999 (128 GB) and $7,449 (192 GB). No independent benchmark of production hardware yet (rechecked Oct 1, 2026) |
 | 10 | Workstation pair, 2x NVIDIA DGX Spark | 2x Grace, 20 Arm cores each (10x Cortex-X925 + 10x Cortex-A725) | 256 GB unified LPDDR5x combined (2x128 GB) | 2x GB10 Blackwell, 12,288 CUDA cores combined (96 SM), no dedicated VRAM, no NVLink | 2x 4 TB NVMe (included) | ≈$9,398 (≈€8,360-9,400), twice the single-unit price above |
 | 11 | Workstation, dual RTX 5090 | *Example*: AMD Threadripper 7960X, 24 cores | 128-256 GB DDR5 (host only) | 2x RTX 5090, 43,520 CUDA cores combined, 64 GB GDDR7 combined, no NVLink | 4 TB NVMe | ≈€8,000-12,000 |
-| 12 | Mac Studio, Apple M5 Ultra | Apple M5 Ultra, 36 cores | 256 GB unified | Integrated GPU, 80 cores | 4 TB SSD | ≈€12,000 |
+| 12 | Mac Studio, Apple M5 Ultra | Apple M5 Ultra, 30 or 36 cores | 96-256 GB unified (512 GB announced for late October 2026), 1.2 TB/s | Integrated GPU, 64 or 80 cores | 1-16 TB SSD | From $5,499 (96 GB); 256 GB from $9,499 (30-core CPU, 1 TB). French base price €6,599 (rechecked Oct 1, 2026) |
 | 13 | Workstation, RTX PRO 6000 Blackwell | *Example*: AMD Threadripper PRO 7975WX, 32 cores | 128-256 GB DDR5 ECC (host only) | RTX PRO 6000, 24,064 CUDA cores, 96 GB GDDR7 ECC dedicated | 4 TB NVMe | ≈€16,000-18,000 (the card alone is ≈€14,000) |
 | 14 | Workstation, dual RTX PRO 6000 Blackwell | *Example*: AMD Threadripper PRO 7995WX, 96 cores | 256 GB+ DDR5 ECC (host only) | 2x RTX PRO 6000, 48,128 CUDA cores combined, 192 GB GDDR7 combined, no NVLink | 4-8 TB NVMe | ≈€30,000-32,000+ |
 
-Sources: Nvidia RTX 5090 and RTX PRO 6000 Blackwell core counts and VRAM confirmed via [Central Computer](https://www.centralcomputer.com/pny-nvidia-rtx-pro-6000-graphics-card-96gb-gddr6-24-064-cuda-cores-pci-express-5-0-x16-600w-vcnrtxpro6000b-pb.html) and [Schneider Digital](https://shop.schneider-digital.com/en/graphics-cards/nvidia/rtx-pro-blackwell-series/nvidia-rtx-pro-6000-blackwell-workstation-edition-96gb-pcie-5.0-x16) (card price ≈€14,000). RTX 5060 Ti 16 GB specs and MSRP from [VideoCardz](https://videocardz.com/newz/nvidia-announces-geforce-rtx-5060-ti-at-429-16gb-and-379-8gb-299-rtx-5060-launches-next-month), street price range from [BestValueGPU's August 2026 tracker](https://bestvaluegpu.com/history/new-and-used-rtx-5060-ti-16gb-price-history-and-specs/). GB10 specs from [Arm Learning Paths](https://learn.arm.com/learning-paths/laptops-and-desktops/dgx_spark_llamacpp/1_gb10_introduction/) and [NVIDIA DGX Spark](https://www.nvidia.com/en-us/products/workstations/dgx-spark/). Radeon 8060S CU count from [TechPowerUp](https://www.techpowerup.com/342635/amd-readies-ryzen-ai-max-388-8c-16t-and-full-40-cu-radeon-8060s-gpu). Apple M5 Pro/Max chip specs (core counts, memory bandwidth, confirmed 24/48/64 GB tiers) from [Apple's own tech specs page](https://support.apple.com/en-mide/126318). Apple has not published M5 Ultra specs; the 256 GB / 36-core / 80-core figures come from pre-launch reporting, not an Apple source. Mac mini M6 and M5 Pro were announced August 25, 2026 (shipping September 22, 2026): chip specs and memory tiers from [9to5Mac's launch coverage](https://9to5mac.com/2026/08/25/apple-announces-new-mac-mini-heres-everything-new/), French base pricing from [MacGeneration](https://www.macg.co/mac/2026/08/de-700-eu-1-050-eu-en-moins-de-deux-ans-le-tarif-du-mac-mini-nen-finit-plus-de-bouger-310595), USD BTO memory upgrade pricing (the basis for the EUR "est." figures above, since Apple's French config-by-config EUR pricing wasn't independently reachable) from [Daring Fireball's configuration breakdown](https://daringfireball.net/2026/08/configurations_and_pricing_for_new_mac_minis_and_mac_studios).
+Sources: Nvidia RTX 5090 and RTX PRO 6000 Blackwell core counts and VRAM confirmed via [Central Computer](https://www.centralcomputer.com/pny-nvidia-rtx-pro-6000-graphics-card-96gb-gddr6-24-064-cuda-cores-pci-express-5-0-x16-600w-vcnrtxpro6000b-pb.html) and [Schneider Digital](https://shop.schneider-digital.com/en/graphics-cards/nvidia/rtx-pro-blackwell-series/nvidia-rtx-pro-6000-blackwell-workstation-edition-96gb-pcie-5.0-x16) (card price ≈€14,000). RTX 5060 Ti 16 GB specs and MSRP from [VideoCardz](https://videocardz.com/newz/nvidia-announces-geforce-rtx-5060-ti-at-429-16gb-and-379-8gb-299-rtx-5060-launches-next-month), street price range from [BestValueGPU's August 2026 tracker](https://bestvaluegpu.com/history/new-and-used-rtx-5060-ti-16gb-price-history-and-specs/). GB10 specs from [Arm Learning Paths](https://learn.arm.com/learning-paths/laptops-and-desktops/dgx_spark_llamacpp/1_gb10_introduction/) and [NVIDIA DGX Spark](https://www.nvidia.com/en-us/products/workstations/dgx-spark/). Radeon 8060S CU count from [TechPowerUp](https://www.techpowerup.com/342635/amd-readies-ryzen-ai-max-388-8c-16t-and-full-40-cu-radeon-8060s-gpu). Apple M5 Pro/Max chip specs (core counts, memory bandwidth, confirmed 24/48/64 GB tiers) from [Apple's own tech specs page](https://support.apple.com/en-mide/126318). Mac Studio M5 Max and M5 Ultra prices, memory ceilings and bandwidth come from [Apple's August 2026 announcement](https://www.apple.com/newsroom/2026/08/apple-introduces-new-mac-studio-with-m5-max-and-m5-ultra/) and [September 22 availability release](https://www.apple.com/newsroom/2026/09/the-new-mac-mini-and-mac-studio-are-available-today/); the 256 GB configuration prices and the €6,599 French base price come from Apple's store configurator as reported in this revision's research, not re-read line by line. The Mac Studio with M5 Max (from $2,499, up to 128 GB, 614 GB/s) is not a row in this table; see the bandwidth table below. Gorgon Halo specs from [AMD's Ryzen AI Max+ PRO 495 page](https://www.amd.com/en/products/processors/laptop/ryzen-pro/ai-max-pro-400-series/amd-ryzen-ai-max-plus-pro-495.html); availability and HP pricing from [Petronella Technology Group, September 27, 2026](https://petronellatech.com/blog/dgx-spark-vs-strix-halo-vs-gorgon-halo-local-llm-benchmarks/). Framework Desktop launch pricing from [BotMonster's Strix Halo review](https://botmonster.com/hardware/amd-strix-halo-mini-pcs-ryzen-ai-max-395-homelab/). Mac mini M6 and M5 Pro were announced August 25, 2026 (shipping September 22, 2026): chip specs and memory tiers from [9to5Mac's launch coverage](https://9to5mac.com/2026/08/25/apple-announces-new-mac-mini-heres-everything-new/), French base pricing from [MacGeneration](https://www.macg.co/mac/2026/08/de-700-eu-1-050-eu-en-moins-de-deux-ans-le-tarif-du-mac-mini-nen-finit-plus-de-bouger-310595), USD BTO memory upgrade pricing (the basis for the EUR "est." figures above, since Apple's French config-by-config EUR pricing wasn't independently reachable) from [Daring Fireball's configuration breakdown](https://daringfireball.net/2026/08/configurations_and_pricing_for_new_mac_minis_and_mac_studios).
 
 ---
 
-## What Actually Fits: Named Models
+## Memory bandwidth, prefill and ECC
+
+Memory capacity decides which model loads. Memory bandwidth sets the ceiling on decode speed, because a dense model reads roughly its whole weight file for every generated token. Prefill, the reading of the prompt, depends more on compute. A coding agent sends long prompts on every turn, so both numbers matter.
+
+| Machine | Unified memory | Memory bandwidth | ECC | Source and status |
+|---|---|---|---|---|
+| Mac mini M6 | 16-32 GB | 170 GB/s | Not advertised | Apple, August 2026 |
+| Mac mini / MacBook Pro M5 Pro | 24-64 GB | 307 GB/s | Not advertised | Apple tech specs |
+| AMD Ryzen AI Max+ 395 (Strix Halo) | Up to 128 GB | 256 GB/s theoretical, 234-235 GB/s measured on one laptop | No: LPDDR5X at these speeds is not configured with ECC per a Strix Halo review | AMD spec; Petronella measurement, Sept 27, 2026 |
+| NVIDIA DGX Spark (GB10) | 128 GB | 273 GB/s rated, 258.8 GB/s measured | No (TechPowerUp's GB10 entry lists ECC as unsupported; page not re-read, it returned 403) | NVIDIA spec; Petronella measurement |
+| AMD Ryzen AI Max+ PRO 495 (Gorgon Halo) | Up to 192 GB | ≈273 GB/s, computed from 256-bit LPDDR5X-8533 | Not advertised | AMD spec page; not shipping yet |
+| Mac Studio M5 Max | Up to 128 GB | 614 GB/s | Not advertised | Apple newsroom, August 2026 |
+| Mac Studio M5 Ultra | Up to 256 GB, 512 GB from late October 2026 | 1.2 TB/s | Not advertised | Apple newsroom, August 2026 |
+| RTX PRO 6000 Blackwell | 96 GB dedicated GDDR7 | Card spec, not unified memory | Yes, ECC GDDR7 | NVIDIA |
+
+**Bandwidth predicts the decode ceiling for dense models.** A one-machine benchmark of dense Qwen3.8-27B on a DGX Spark (ASUS GX10) measured FP8 weights (29 GB) at 7.8 tok/s against about 23 tok/s at Q4_K_M (19.6 GB): the larger file reads more bytes per token, so it decodes slower despite newer tensor-core formats. The same repo reports 8-16 tok/s for that dense model through llama.cpp and 24 tok/s for everyday chat through vLLM with NVFP4 and prefix caching, measured September 5-8, 2026. Source: [HAOyezi/qwen38-27b-dgx-spark-benchmarks](https://github.com/HAOyezi/qwen38-27b-dgx-spark-benchmarks), one author, one machine.
+
+**Prefill is where GB10 pulls ahead of Strix Halo.** With the same llama.cpp build and model files, Petronella measured Qwen3.6-35B-A3B prompt processing at 2,323 vs 1,313 tok/s with an empty context, 2,165 vs 1,028 at 8K, and 1,907 vs 638 at 32K, DGX Spark vs a Strix Halo laptop (HP ZBook Ultra G1a). Decode, measured through Ollama 0.34.0, was closer: 74.5 vs 54.4 tok/s on the MoE model and 12.6 vs 11.4 tok/s on dense Qwen3.6-27B. Source: [Petronella Technology Group, September 27, 2026](https://petronellatech.com/blog/dgx-spark-vs-strix-halo-vs-gorgon-halo-local-llm-benchmarks/). The cost of slow prefill is concrete for coding agents: on a GMKtec EVO-X2 (Ryzen AI Max+ 395, Windows, llama.cpp Vulkan), a cold OpenCode request carrying about 13,264 prompt tokens and 41 tool definitions took about 154.5 seconds to read, while cached follow-up turns processed new prompt portions above 200 tok/s and sustained generation stayed at 16.45 tok/s at 128K context. Source: [erstmalreden/qwen3.8-27b-ryzen-ai-max-395-benchmarks](https://github.com/erstmalreden/qwen3.8-27b-ryzen-ai-max-395-benchmarks), tested August 15, 2026, one machine.
+
+**ECC is the gap none of the unified-memory boxes closes.** None of the Mac, GB10 or Strix Halo systems above is sold with ECC unified memory. A silent bit flip matters little for one developer's chat session and more for a shared service whose output feeds code review, builds or data pipelines. ECC means professional cards (RTX PRO 6000 class) or server platforms.
+
+**CUDA is a separate decision.** If the work includes fine-tuning, CUDA-only tooling, or deploying the same model to NVIDIA servers later, the DGX Spark or an NVIDIA workstation keeps one software stack end to end. For inference only, MLX on Apple Silicon and llama.cpp Vulkan or ROCm on AMD are workable, with the runtime caveats in the [MLX section](#coding-agent-setup-apple-silicon-with-mlx).
+
+---
+
+## What actually fits: Named models
 
 Sorting `llmfit`'s database by raw parameter count surfaces obscure or roleplay-oriented fine-tunes that happen to fit in memory, not the flagship models most people actually want to run. Querying `llmfit info` against each lab's own official repo (not a third-party quant mirror) gives a cleaner starting point, but `llmfit`'s HuggingFace scrape has its own data-quality gaps (see the Kimi K3 row below, where it was off by roughly 2x). Every parameter count and MoE expert count in this table was cross-checked a second time against each lab's own model card, GitHub repo, or official announcement, not `llmfit` alone.
 
@@ -141,7 +168,7 @@ The frontier gap still widened rather than narrowed since the previous generatio
 
 ---
 
-## Which Local Machine for Which Usage
+## Which local machine for which usage
 
 The two tables above answer "what fits where." This section answers a different, more common question: given what you actually want to do, which of the fourteen configurations is the right one to buy. Same underlying data, organized by use case instead of by price.
 
@@ -156,6 +183,8 @@ The two tables above answer "what fits where." This section answers a different,
 | Largest model this page supports at full-accelerator-memory residency, no offload tricks | Mac Studio M5 Ultra (256 GB) or dual RTX PRO 6000 Blackwell (192 GB combined) | `DeepSeek-V4-Flash-0731` fits within the available third-party weight estimates on both; `Llama-4-Maverick-17B-128E` fits only on the 256 GB config | ≈100-170 GB (third-party quantized estimates, no official figure) for DeepSeek-V4-Flash-0731; the upper estimate leaves limited runtime headroom on 192 GB. Llama-4-Maverick needs 205.7 GB and does not fit 192 GB |
 | Local fine-tuning or training, not inference-only | RTX PRO 6000 Blackwell workstation (single or dual) | Depends on target model | Training needs VRAM headroom beyond weight residency for optimizer states and gradients, a cost this page's inference-only figures don't model |
 | Sustained heavy or 24/7 production serving | Compare purchase, dedicated rental, and elastic rental | Exact production model and service level | Utilization, power, maintenance, availability, and the required GPU class determine the result; the hourly price alone does not |
+| CUDA required (fine-tuning, CUDA-only tooling, later deployment to NVIDIA servers) | DGX Spark or an NVIDIA workstation | Depends on target model | One software stack from desk to server; GB10 also measured 1.8-3.8x faster prefill than a Strix Halo laptop at 0-32K context |
+| A few people sharing one machine | See [One machine for a small team](#one-machine-for-a-small-team) | ≈27-35B, quantized | Sequential use works; parallel agents compete for the same bandwidth, and llama.cpp-style servers can lose aggregate throughput under concurrency |
 
 ```mermaid
 flowchart TD
@@ -227,7 +256,7 @@ What's the local usage?
 
 ---
 
-## Serving Engine Tuning: vLLM in Production
+## Serving engine tuning: vLLM in production
 
 The tables above answer what hardware to buy. They say nothing about whether that hardware's throughput actually reaches users: the serving engine and its configuration decide that. [vLLM](https://docs.vllm.ai/) is the default open-source serving engine behind most self-hosted OpenAI-compatible deployments, including the CPU-offload MoE row above. These are the configuration levers with a documented effect, and what the official docs actually say about each, per the [vLLM optimization guide](https://docs.vllm.ai/en/stable/configuration/optimization/) (August 2026 snapshot; vLLM ships new releases roughly every two weeks, so re-check exact defaults before relying on them).
 
@@ -293,7 +322,7 @@ No official vLLM-published priority ranking exists. The order below follows wher
 
 ---
 
-## Coding Agent Setup: Apple Silicon with MLX
+## Coding agent setup: Apple Silicon with MLX
 
 vLLM does not target Apple Silicon; on a Mac, the equivalent decision (model, runtime, memory budget) runs through [MLX](https://github.com/ml-explore/mlx), Apple's own array framework, and the ecosystem built on it. This section covers what to run and how, for the specific case of a local coding agent on a unified-memory Mac (the 96-128 GB configs on this page: MacBook Pro M5 Max, Mac Studio, Mac mini M5 Pro).
 
@@ -372,7 +401,7 @@ launchctl start local.mlx-llm
 
 ---
 
-## Cloud GPU Rental Pricing
+## Cloud GPU rental pricing
 
 Hourly, on-demand, per GPU. USD figures kept as published; EUR given only where the provider quotes EUR directly.
 
@@ -397,7 +426,7 @@ AWS does not sell a single-GPU H200 instance: the smallest P5en node is already 
 
 ---
 
-## One-Year Cost Projections
+## One-Year cost projections
 
 `annual cost = price/hour × hours/day × 365`. Three usage patterns, same GPU class (H100/H200), across providers.
 
@@ -432,7 +461,7 @@ Cross-referenced against the hardware table above:
 
 ---
 
-## Power Consumption: Watts, Watt-Hours, Joules per Token
+## Power consumption: Watts, watt-hours, joules per token
 
 OVHcloud, AWS, Lambda, GMI Cloud, and Hetzner do not expose watts-per-token, kWh-per-1000-tokens, or a per-request energy figure for the GPU instances checked for this page. Anthropic and OpenAI also do not disclose energy-per-token or energy-per-query for Claude Opus 5, Sonnet 5, or GPT-5.6 Sol/Terra/Luna. The tables below separate official power ceilings, vendor measurements, independent measurements, and the small number of per-token energy measurements that are available.
 
@@ -466,7 +495,7 @@ No independently measured, LLM-specific power figure exists in the sources check
 
 ---
 
-## Energy Efficiency by Model Architecture
+## Energy efficiency by model architecture
 
 The hardware section above answers "how many watts does the GPU draw." A separate question is "does the model itself matter": does a Mixture-of-Experts architecture, a smaller active-parameter count, or a lower-precision format actually cut energy per token, and do any of the labs behind the models named on this page say so. Checked directly against each model's own official card or repo, plus the two research benchmarks that measure this independently (ML.Energy, EnergyLLM-Bench).
 
@@ -480,7 +509,7 @@ The hardware section above answers "how many watts does the GPU draw." A separat
 
 ---
 
-## Cloud API Throughput: Claude vs GPT-5.6
+## Cloud API throughput: Claude vs GPT-5.6
 
 OpenAI's GPT-5.6 family (launched July 9, 2026) ships in three durable capability tiers named after celestial bodies: **Sol** (flagship), **Terra** (balanced mid-tier), **Luna** (fast, cheap). All three are available in ChatGPT, Codex, and the API, and generally available on Amazon Bedrock. The Claude measurements below concern **Opus 5** and **Sonnet 5**. They are historical model-specific results, not measurements of Opus 5.5 or Fable 5.1. For current aliases, defaults, and prices, see [model selection](../ultimate-guide.md#25-model-selection--thinking-guide).
 
@@ -500,7 +529,7 @@ Sources: [OpenRouter Sol](https://openrouter.ai/openai/gpt-5.6-sol), [OpenRouter
 
 ---
 
-## Why Cloud and Local Tokens/Sec Are Not Comparable
+## Why cloud and local tokens/sec are not comparable
 
 Comparing a cloud API's tokens/sec to a local GPU's tokens/sec is comparing a car's speed on a congested highway to the same car's speed on an empty road. Three concrete mechanisms cause the gap:
 
@@ -518,7 +547,7 @@ The more useful check turned out to be cross-referencing your own measured token
 
 ---
 
-## Decision Diagram
+## Decision diagram
 
 ```mermaid
 flowchart TD
@@ -571,7 +600,7 @@ Need to run a large LLM
 
 </details>
 
-## Decision Framework
+## Decision framework
 
 **Light or bursty usage, with no requirement to own the hardware**: start with a managed API (Claude, GPT-5.6) or a specialized inference provider. This avoids idle hardware and maintenance. Check model quality, data handling, and rate limits before comparing token prices alone.
 
@@ -587,7 +616,7 @@ A practitioner account from two legacy-system RAG projects gives an adjacent exa
 
 ---
 
-## Sizing Self-Hosted Inference for a Team
+## Sizing self-hosted inference for a team
 
 Everything above sizes hardware for one workload on one machine. A different question comes up whenever a company evaluates self-hosting to serve many developers running coding agents concurrently: how many concurrent sessions can a given GPU configuration actually carry, and does the math beat a per-seat subscription at that headcount? For context on the subscription side of that comparison, see [Subscription Strategy at Team Scale](../ops/subscription-strategy.md).
 
@@ -656,7 +685,28 @@ A practitioner experiment shows why the pilot must replay the agent's exact mess
 
 ---
 
-## Switching Providers at the CLI Level
+## One machine for a small team
+
+The section above sizes GPU clusters. Many teams ask a smaller question first: can one desktop serve four or five people? Measured results say it depends on whether the requests overlap and which server software batches them.
+
+| Setup | Concurrency | Result | Source |
+|---|---|---|---|
+| Strix Halo laptop (HP ZBook Ultra G1a), llama.cpp | 1 → 4 requests | 47.1 tok/s **in total** for four simultaneous requests, which the authors describe as less than a single user got alone (the model is not named next to that figure; for scale, gpt-oss-20b ran at 76.1 tok/s for one user on Vulkan RADV) | [Petronella, Sept 27, 2026](https://petronellatech.com/blog/dgx-spark-vs-strix-halo-vs-gorgon-halo-local-llm-benchmarks/) |
+| DGX Spark, SGLang, Qwen3.8-27B NVFP4 | 16 streams | 227.6 tok/s aggregate (≈14 tok/s per stream), community result | Cited in [HAOyezi's benchmark repo](https://github.com/HAOyezi/qwen38-27b-dgx-spark-benchmarks) from MiaAI-Lab |
+| DGX Spark, vLLM FP8 + DSpark, Qwen3.8-27B | 8 streams | 208.7 tok/s aggregate, community result | Same repo, citing 0xBakeer |
+| Mac Studio M5 Max / M5 Ultra | Several users | No independent multi-user measurement found for this revision | Apple publishes bandwidth and an RDMA clustering claim, not per-user throughput |
+
+Three practical consequences:
+
+- **Sequential sharing is the easy case.** If team members take turns, one machine with a 27-35B quantized model can serve several people; each request still gets single-user speed.
+- **Parallel agents are the hard case.** Five agents with their own long contexts share one memory bus and one KV-cache budget. Use a server that batches (vLLM, SGLang, or an MLX server with batching) and measure aggregate and per-user throughput at the real concurrency before promising response times.
+- **One machine is one point of failure.** Plan a fallback (a second box or a hosted API) if the team depends on it, and keep the [benchmark protocol](#benchmark-protocol-before-you-buy) results so the comparison can be rerun.
+
+**Buying vs leasing vs renting, in monthly terms.** Apple Upgrade leases a Mac Studio from $48.99/month (M5 Max) or $110.10/month (M5 Ultra) over 36 months, excluding tax ([Apple, September 22, 2026](https://www.apple.com/newsroom/2026/09/the-new-mac-mini-and-mac-studio-are-available-today/)). A one-H100 rental at the [hourly rates above](#cloud-gpu-rental-pricing) costs roughly $120-180 a month at two hours a day and $1,460-2,200 a month at 24/7. These are not equivalent machines: the H100 serves larger models and more concurrent requests, and the local box adds setup, maintenance and power that the lease price excludes. Compare them only after the same model passes the same task and latency gates on both.
+
+---
+
+## Switching providers at the CLI level
 
 Everything above is about which hardware or API to run inference on. A separate, complementary problem is how to point Claude Code itself at whichever backend you picked without rewriting configuration every time. [cc-copilot-bridge](https://ccbridge.bruniaux.com/) is a routing layer for the Claude Code CLI that toggles between three backends with a three-character command: `ccd` for Anthropic direct (pay-per-token), `ccc` for a GitHub Copilot subscription, and `cco` for fully offline local inference via Ollama. It doesn't change any of the hardware-fit or cost math on this page, it changes which backend Claude Code talks to once you've decided. Current release is v1.5.3, with a v2 in progress. Worth flagging: the Copilot route relies on a reverse-engineered API, which the project's own documentation notes may violate GitHub Copilot's Terms of Service.
 

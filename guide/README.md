@@ -4,13 +4,13 @@ description: "Index of all core documentation files for mastering Claude Code"
 tags: [guide, reference]
 ---
 
-# Guide Documentation
+# Guide documentation
 
 Core documentation for mastering Claude Code, organized by topic.
 
 ---
 
-## Getting Started
+## Getting started
 
 | File | Description | Time |
 |------|-------------|------|
@@ -25,7 +25,7 @@ Core documentation for mastering Claude Code, organized by topic.
 
 ---
 
-## Core Reference
+## Core reference
 
 | File | Description | Time |
 |------|-------------|------|
@@ -55,7 +55,7 @@ Core documentation for mastering Claude Code, organized by topic.
 
 ---
 
-## Visual Diagrams
+## Visual diagrams
 
 **48 interactive Mermaid diagrams** across 12 thematic files, with GitHub-native Mermaid rendering and an ASCII fallback for every diagram. See [diagrams/README.md](./diagrams/README.md) for the full navigation index and use-case guides.
 
@@ -102,7 +102,7 @@ Core documentation for mastering Claude Code, organized by topic.
 | [ecosystem/agent-harness-landscape.md](./ecosystem/agent-harness-landscape.md) | **Agent Harness Map**: strict runtimes, orchestrators, adjacent projects, and a sourced research layer for harness optimizers and meta-harnesses | 10 min |
 | [ecosystem/mcp-servers-ecosystem.md](./ecosystem/mcp-servers-ecosystem.md) | **Community MCP servers**: 8 validated servers (Playwright, Semgrep, Kubernetes, etc.) with production configs | 25 min |
 | [ecosystem/third-party-tools.md](./ecosystem/third-party-tools.md) | **Community tools**: GUIs, TUIs, config managers, token trackers, alternative UIs | 15 min |
-| [ecosystem/context-engineering-tools.md](./ecosystem/context-engineering-tools.md) | **Context & token optimization**: output compression (RTK, Headroom), prompt compression (LLMLingua), AI gateways (Edgee, Portkey), RAG, LLMOps | 20 min |
+| [ecosystem/context-engineering-tools.md](./ecosystem/context-engineering-tools.md) | **Context & token optimization**: output compression (RTK, whose core contributors include the guide author; Headroom), prompt compression (LLMLingua), AI gateways (Edgee, Portkey), RAG, LLMOps | 20 min |
 | [ecosystem/remarkable-ai.md](./ecosystem/remarkable-ai.md) | Remarkable AI usage patterns and power-user techniques | 10 min |
 | [ecosystem/practitioner-insights.md](./ecosystem/practitioner-insights.md) | **Practitioner field reports**: 75 paraphrased insights from IFTTD, Devoxx, Dev With AI Meetup, ByteByteGo, Stanford Online, and Pavan Belagatti's 2026 video corpus, organized by theme (context engineering, agentic patterns, LLM evaluation, agent security, DevX and adoption) | 20 min |
 | [ecosystem/team-knowledge-base.md](./ecosystem/team-knowledge-base.md) | **Team knowledge infrastructure**: 3-tier framework (static Markdown vault, MCP connectors for live systems, RAG at scale), RAG threshold (~100-1000 docs), Atlassian/Notion/GitBook MCP, Onyx/LlamaCloud/Ragie, plugin distribution, Code+Cowork bridge | 18 min |
@@ -111,7 +111,7 @@ Core documentation for mastering Claude Code, organized by topic.
 
 ---
 
-## Roles & Adoption
+## Roles & adoption
 
 | File | Description | Time |
 |------|-------------|------|
@@ -133,6 +133,8 @@ Core documentation for mastering Claude Code, organized by topic.
 | [ops/team-metrics.md](./ops/team-metrics.md) | **Team metrics for AI-augmented engineering**: DORA, SPACE, DX Core 4, AI-specific signals, by team size (5–25 people) | 20 min |
 | [ops/ai-unit-economics.md](./ops/ai-unit-economics.md) | **AI unit economics**: per-task cost decomposition, real cost levers (routing, sub-agent isolation, exit criteria), autonomous agent break-even point, team budget governance | 15 min |
 | [ops/subscription-strategy.md](./ops/subscription-strategy.md) | **Subscription strategy at team scale**: Claude, Codex, Copilot, Gemini, Cursor, and Mistral portfolio exercise; API gateway controls; personal-plan contract gaps; and scenario-based self-hosting economics | 20 min |
+| [ops/ai-finops.md](./ops/ai-finops.md) | **AI FinOps (section entry point)**: three cost regimes (subscription quota, metered tokens, owned capacity), the Inform-Optimize-Operate loop applied to agents, and a map of every cost lever with what it does not solve | 12 min |
+| [ops/llm-market-snapshot.md](./ops/llm-market-snapshot.md) | **LLM market snapshot (2026-09-30)**: source-checked API prices, subscription quotas, data location, the cost of one reference agent workload, and claims that did not survive verification | 20 min |
 
 ---
 
@@ -173,7 +175,7 @@ Hands-on guides for effective development patterns:
 
 ---
 
-## Cowork Documentation
+## Cowork documentation
 
 For knowledge workers using Claude Cowork (agentic desktop):
 
@@ -188,7 +190,7 @@ For knowledge workers using Claude Cowork (agentic desktop):
 
 ---
 
-## Recommended Reading Order
+## Recommended reading order
 
 1. **New users**: Start with Quick Start section in `ultimate-guide.md`
 2. **Daily reference**: Print `cheatsheet.md`
